@@ -1,7 +1,8 @@
-# misinformation
+# Misinformation campaign analysis
+
 Extract data from from social media images and texts in disinformation campaigns.
 
-**This project is currently under development!**
+**_This project is currently under development!_**
 
 Use the pre-processed social media posts (image files) and process to collect information:
 1. Text extraction from the images
@@ -11,5 +12,4 @@ Use the pre-processed social media posts (image files) and process to collect in
 1. 5-Color analysis of the images
   
 This development will serve the fight to combat misinformation, by providing more comprehensive data about its content and techniques. 
-
-The ultimate goal of this project is to develop a computer-assisted toolset to investigate the content of disinformation campaigns worldwide. Extract fact- and emotion-based text content, as well as to extract facial expressions and body posture data from the available posts to conduct research on worldwide disinformation campaigns and their impact.
+The ultimate goal of this project is to develop a computer-assisted toolset to investigate the content of disinformation campaigns worldwide. 
