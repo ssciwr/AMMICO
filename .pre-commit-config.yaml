@@ -5,11 +5,11 @@ repos:
       - id: nbstripout
         files: ".ipynb"
   - repo: https://github.com/psf/black
-    rev: 21.11b0
+    rev: 22.6.0
     hooks:
     - id: black
   - repo: https://github.com/dfm/black_nbconvert
-    rev: v0.3.0
+    rev: v0.4.0
     hooks:
       - id: black_nbconvert
   -   repo: https://github.com/pycqa/flake8
