@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [
     "deepface",
     "ipywidgets ==8.0.0rc1",
+    "retinaface",
 ]
 
 [tool.setuptools]

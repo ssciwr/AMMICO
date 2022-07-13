@@ -4,6 +4,7 @@ import os
 
 from IPython.display import display
 from deepface import DeepFace
+from retinaface import RetinaFace
 
 
 def find_files(path=None, pattern="*.png", recursive=True, limit=20):
@@ -35,9 +36,29 @@ def find_files(path=None, pattern="*.png", recursive=True, limit=20):
 
 
 def facial_expression_analysis(img_path):
-    return DeepFace.analyze(
-        img_path=img_path, actions=["age", "gender", "race", "emotion"], prog_bar=False
+    # Find (multiple) faces in the image and cut them
+    faces = RetinaFace.extract_faces(img_path)
+
+    # If no faces are found, we return an empty dictionary
+    if len(faces) == 0:
+        return {}
+
+    # Find the biggest face image in the detected ones
+    maxface = max(faces, key=lambda f: f.shape[0] * f.shape[1])
+
+    # Run the full DeepFace analysis
+    result = DeepFace.analyze(
+        img_path=maxface,
+        actions=["age", "gender", "race", "emotion"],
+        prog_bar=False,
+        detector_backend="skip",
     )
+
+    # We remove the region, as the data is not correct - after all we are
+    # running the analysis on a subimage.
+    del result["region"]
+
+    return result
 
 
 class JSONContainer:
@@ -68,12 +89,7 @@ def explore_face_recognition(image_paths):
     def _recognition(_):
         data = {}
         data["filename"] = image_paths[image_widget.selected_index]
-
-        try:
-            data["deepface_results"] = facial_expression_analysis(data["filename"])
-            data["deepface_find_face"] = True
-        except ValueError:
-            data["deepface_find_face"] = False
+        data["deepface_results"] = facial_expression_analysis(data["filename"])
 
         output.clear_output()
         with output:
