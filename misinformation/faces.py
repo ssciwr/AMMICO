@@ -36,18 +36,20 @@ def find_files(path=None, pattern="*.png", recursive=True, limit=20):
 
 
 def facial_expression_analysis(img_path):
+    result = {"filename": img_path}
+
     # Find (multiple) faces in the image and cut them
     faces = RetinaFace.extract_faces(img_path)
 
     # If no faces are found, we return an empty dictionary
     if len(faces) == 0:
-        return {}
+        return result
 
     # Find the biggest face image in the detected ones
     maxface = max(faces, key=lambda f: f.shape[0] * f.shape[1])
 
     # Run the full DeepFace analysis
-    result = DeepFace.analyze(
+    result["deepface_results"] = DeepFace.analyze(
         img_path=maxface,
         actions=["age", "gender", "race", "emotion"],
         prog_bar=False,
@@ -56,7 +58,7 @@ def facial_expression_analysis(img_path):
 
     # We remove the region, as the data is not correct - after all we are
     # running the analysis on a subimage.
-    del result["region"]
+    del result["deepface_results"]["region"]
 
     return result
 
@@ -85,21 +87,19 @@ def explore_face_recognition(image_paths):
         layout=ipywidgets.Layout(width="70%"),
     )
 
-    # Register the facial recognition logic
-    def _recognition(_):
-        data = {}
-        data["filename"] = image_paths[image_widget.selected_index]
-        data["deepface_results"] = facial_expression_analysis(data["filename"])
+    # Precompute all the results for a user experience without delay
+    with ipywidgets.Output():
+        results = [facial_expression_analysis(i) for i in image_paths]
 
+    # Register the tab switch logic
+    def tabswitch(_):
         output.clear_output()
         with output:
-            display(JSONContainer(data))
+            display(JSONContainer(results[image_widget.selected_index]))
 
     # Register the handler and trigger it immediately
-    image_widget.observe(_recognition, names=("selected_index",), type="change")
-
-    with ipywidgets.Output():
-        _recognition(None)
+    image_widget.observe(tabswitch, names=("selected_index",), type="change")
+    tabswitch(None)
 
     # Show the combined widget
     return ipywidgets.HBox([image_widget, output])
