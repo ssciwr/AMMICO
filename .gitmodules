@@ -1,0 +1,3 @@
+[submodule "Face-Mask-Detection"]
+	path = Face-Mask-Detection
+	url = https://github.com/chandrikadeb7/Face-Mask-Detection.git

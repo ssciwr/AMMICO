@@ -46,30 +46,39 @@ class JSONContainer:
 
 
 def explore_face_recognition(image_paths):
+    # Create an image selector widget
+    image_select = ipywidgets.Select(
+        options=image_paths, layout=ipywidgets.Layout(width="20%"), rows=20
+    )
+
     # Set up the facial recognition output widget
     output = ipywidgets.Output(layout=ipywidgets.Layout(width="30%"))
 
     # Set up the image selection and display widget
-    images = [ipywidgets.Image.from_file(p) for p in image_paths]
-    image_widget = ipywidgets.Tab(
-        children=images,
-        titles=[f"#{i}" for i in range(len(image_paths))],
-        layout=ipywidgets.Layout(width="70%"),
+    image_widget = ipywidgets.Box(
+        children=[],
+        layout=ipywidgets.Layout(width="50%"),
     )
 
-    # Precompute all the results for a user experience without delay
-    with ipywidgets.Output():
-        results = [facial_expression_analysis(i) for i in image_paths]
-
     # Register the tab switch logic
-    def tabswitch(_):
+    def switch(_):
+        # Clear existing output
+        image_widget.children = ()
         output.clear_output()
+
+        # Create the new content
+        image_widget.children = (ipywidgets.Image.from_file(image_select.value),)
+
+        # This output widget absorbes print statements that are messing with
+        # the widget output and cannot be disabled through the API.
+        with ipywidgets.Output():
+            analysis = facial_expression_analysis(image_select.value)
         with output:
-            display(JSONContainer(results[image_widget.selected_index]))
+            display(JSONContainer(analysis))
 
     # Register the handler and trigger it immediately
-    image_widget.observe(tabswitch, names=("selected_index",), type="change")
-    tabswitch(None)
+    image_select.observe(switch, names=("value",), type="change")
+    switch(None)
 
     # Show the combined widget
-    return ipywidgets.HBox([image_widget, output])
+    return ipywidgets.HBox([image_select, image_widget, output])
