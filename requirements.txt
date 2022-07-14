@@ -1,0 +1,6 @@
+opencv-python
+matplotlib
+numpy
+keras-ocr
+tensorflow
+google-cloud-vision
