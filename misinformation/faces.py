@@ -1,7 +1,7 @@
 import cv2
 import ipywidgets
 import numpy as np
-import os
+import pooch
 
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
@@ -9,10 +9,6 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from IPython.display import display
 from deepface import DeepFace
 from retinaface import RetinaFace
-
-
-# Module-wide storage for lazily loaded mask detection model
-mask_detection_model = None
 
 
 def facial_expression_analysis(img_path):
@@ -64,13 +60,14 @@ def wears_mask(face):
     face = np.expand_dims(face, axis=0)
 
     # Lazily load the model
-    if mask_detection_model is None:
-        mask_detection_model = load_model(
-            os.path.join(os.path.split(__file__)[0], "models", "mask_detector.model")
-        )
+    model_path = pooch.retrieve(
+        url="https://github.com/chandrikadeb7/Face-Mask-Detection/raw/v1.0.0/mask_detector.model",
+        known_hash="sha256:d0b30e2c7f8f187c143d655dee8697fcfbe8678889565670cd7314fb064eadc8",
+    )
+    mask_detection_model = load_model(model_path)
 
     # Run the model (ignoring output)
-    with ipywidgets.Output():
+    with NocatchOutput():
         mask, withoutMask = mask_detection_model.predict(face)[0]
 
     # Convert from np.bool_ to bool to later be able to serialize the result
@@ -87,6 +84,16 @@ class JSONContainer:
 
     def _repr_json_(self):
         return self._data
+
+
+class NocatchOutput(ipywidgets.Output):
+    """An output container that suppresses output, but not exceptions
+
+    Taken from https://github.com/jupyter-widgets/ipywidgets/issues/3208#issuecomment-1070836153
+    """
+
+    def __exit__(self, *args, **kwargs):
+        super().__exit__(*args, **kwargs)
 
 
 def explore_face_recognition(image_paths):
@@ -115,7 +122,7 @@ def explore_face_recognition(image_paths):
 
         # This output widget absorbes print statements that are messing with
         # the widget output and cannot be disabled through the API.
-        with ipywidgets.Output():
+        with NocatchOutput():
             analysis = facial_expression_analysis(image_select.value)
         with output:
             display(JSONContainer(analysis))
