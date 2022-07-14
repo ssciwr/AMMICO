@@ -27,5 +27,8 @@ dependencies = [
     "retina-face",
 ]
 
+[project.scripts]
+misinformation_prefetch_models = "misinformation.utils:misinformation_prefetch_models"
+
 [tool.setuptools]
 packages = ["misinformation"]

@@ -1,5 +1,32 @@
 import glob
 import os
+import pooch
+
+
+class DownloadResource:
+    """A remote resource that needs on demand downloading
+
+    We use this as a wrapper to the pooch library. The wrapper registers
+    each data file and allows prefetching through the CLI entry point
+    misinformation_prefetch_models.
+    """
+
+    # We store a list of defined resouces in a class variable, allowing
+    # us prefetching from a CLI e.g. to bundle into a Docker image
+    resources = []
+
+    def __init__(self, **kwargs):
+        DownloadResource.resources.append(self)
+        self.kwargs = kwargs
+
+    def get(self):
+        return pooch.retrieve(**self.kwargs)
+
+
+def misinformation_prefetch_models():
+    """Prefetch all the download resources"""
+    for res in DownloadResource.resources:
+        res.get()
 
 
 def find_files(path=None, pattern="*.png", recursive=True, limit=20):
