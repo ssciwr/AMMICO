@@ -23,8 +23,12 @@ classifiers = [
 dependencies = [
     "deepface",
     "ipywidgets ==8.0.0rc1",
+    "pooch",
     "retina-face",
 ]
+
+[project.scripts]
+misinformation_prefetch_models = "misinformation.utils:misinformation_prefetch_models"
 
 [tool.setuptools]
 packages = ["misinformation"]
