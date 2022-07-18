@@ -19,7 +19,10 @@ class JSONContainer:
 
 def explore_analysis(image_paths, identify="faces"):
     # dictionary mapping the type of analysis to be explored
-    identify_dict = {"faces": faces.facial_expression_analysis}
+    identify_dict = {
+        "faces": faces.facial_expression_analysis,
+        "text-on-image": text.detect_text,
+    }
     # Create an image selector widget
     image_select = ipywidgets.Select(
         options=image_paths, layout=ipywidgets.Layout(width="20%"), rows=20
