@@ -17,16 +17,6 @@ class JSONContainer:
         return self._data
 
 
-class NocatchOutput(ipywidgets.Output):
-    """An output container that suppresses output, but not exceptions
-
-    Taken from https://github.com/jupyter-widgets/ipywidgets/issues/3208#issuecomment-1070836153
-    """
-
-    def __exit__(self, *args, **kwargs):
-        super().__exit__(*args, **kwargs)
-
-
 def explore_analysis(image_paths, identify="faces"):
     # dictionary mapping the type of analysis to be explored
     identify_dict = {"faces": faces.facial_expression_analysis}
@@ -55,7 +45,7 @@ def explore_analysis(image_paths, identify="faces"):
 
         # This output widget absorbes print statements that are messing with
         # the widget output and cannot be disabled through the API.
-        with NocatchOutput():
+        with faces.NocatchOutput():
             analysis = identify_dict[identify](image_select.value)
         with output:
             display(JSONContainer(analysis))
