@@ -84,35 +84,44 @@ def facial_expression_analysis(img_path):
     if len(faces) == 0:
         return result
 
-    # Find the biggest face image in the detected ones
-    maxface = max(faces, key=lambda f: f.shape[0] * f.shape[1])
+    # Sort the faces by sight to prioritize prominent faces
+    faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
 
-    # Determine whether the face wears a mask
-    result["wears_mask"] = wears_mask(maxface)
+    def analyze_single_face(face):
+        fresult = {}
 
-    # Adapt the features we are looking for depending on whether a mask is
-    # worn. White masks screw race detection, emotion detection is useless.
-    actions = ["age", "gender"]
-    if not result["wears_mask"]:
-        actions = actions + ["race", "emotion"]
+        # Determine whether the face wears a mask
+        fresult["wears_mask"] = wears_mask(face)
 
-    # Ensure that all data has been fetched by pooch
-    deepface_age_model.get()
-    deepface_face_expression_model.get()
-    deepface_gender_model.get()
-    deepface_race_model.get()
+        # Adapt the features we are looking for depending on whether a mask is
+        # worn. White masks screw race detection, emotion detection is useless.
+        actions = ["age", "gender"]
+        if not fresult["wears_mask"]:
+            actions = actions + ["race", "emotion"]
 
-    # Run the full DeepFace analysis
-    result["deepface_results"] = DeepFace.analyze(
-        img_path=maxface,
-        actions=actions,
-        prog_bar=False,
-        detector_backend="skip",
-    )
+        # Ensure that all data has been fetched by pooch
+        deepface_age_model.get()
+        deepface_face_expression_model.get()
+        deepface_gender_model.get()
+        deepface_race_model.get()
 
-    # We remove the region, as the data is not correct - after all we are
-    # running the analysis on a subimage.
-    del result["deepface_results"]["region"]
+        # Run the full DeepFace analysis
+        fresult["deepface_results"] = DeepFace.analyze(
+            img_path=face,
+            actions=actions,
+            prog_bar=False,
+            detector_backend="skip",
+        )
+
+        # We remove the region, as the data is not correct - after all we are
+        # running the analysis on a subimage.
+        del fresult["deepface_results"]["region"]
+
+        return fresult
+
+    # We limit ourselves to three faces
+    for i, face in enumerate(faces[:3]):
+        result[f"person{ i+1 }"] = analyze_single_face(face)
 
     return result
 
@@ -168,7 +177,7 @@ def explore_face_recognition(image_paths):
     )
 
     # Set up the facial recognition output widget
-    output = ipywidgets.Output(layout=ipywidgets.Layout(width="30%"))
+    output = NocatchOutput(layout=ipywidgets.Layout(width="30%"))
 
     # Set up the image selection and display widget
     image_widget = ipywidgets.Box(
