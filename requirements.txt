@@ -1,0 +1,10 @@
+deepface
+ipywidgets==8.0.0rc1
+pooch
+retina-face
+opencv-python
+matplotlib
+numpy
+keras-ocr
+tensorflow
+google-cloud-vision
