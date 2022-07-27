@@ -8,3 +8,4 @@ numpy
 keras-ocr
 tensorflow
 google-cloud-vision
+pytesseract
