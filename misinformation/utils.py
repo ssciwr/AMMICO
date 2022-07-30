@@ -1,5 +1,6 @@
 import glob
 import os
+from pandas import DataFrame
 import pooch
 
 
@@ -55,3 +56,39 @@ def find_files(path=None, pattern="*.png", recursive=True, limit=20):
         result = result[:limit]
 
     return result
+
+
+def initialize_dict(filelist: list) -> dict:
+    mydict = {}
+    for img_path in filelist:
+        id = img_path.split(".")[0].split("/")[-1]
+        mydict[id] = {"filename": img_path}
+    return mydict
+
+
+def append_data_to_dict(mydict: dict, dictlist: list) -> dict:
+    """Append entries from list of dictionaries to keys in global dict."""
+
+    mydict = {key: [mydict[key] for mydict in dictlist] for key in dictlist[0]}
+    print(mydict)
+    return mydict
+
+
+def dump_df(mydict: dict) -> DataFrame:
+    """Utility to dump the dictionary into a dataframe."""
+    return DataFrame.from_dict(mydict)
+
+
+if __name__ == "__main__":
+    testdict = [
+        {
+            "filename": "/home/inga/projects/misinformation-project/misinformation/data/test_no_text/102133S_eng.png"
+        }
+    ]
+    globaldict = {"filename": [], "person1": []}
+    files = find_files(
+        path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
+    )
+    initialize_dict(files)
+    # out = append_data_to_dict(globaldict, testdict)
+    # print(out)
