@@ -66,12 +66,18 @@ def initialize_dict(filelist: list) -> dict:
     return mydict
 
 
-def append_data_to_dict(mydict: dict, dictlist: list) -> dict:
+def append_data_to_dict(mydict: dict) -> dict:
     """Append entries from list of dictionaries to keys in global dict."""
 
-    mydict = {key: [mydict[key] for mydict in dictlist] for key in dictlist[0]}
-    print(mydict)
-    return mydict
+    # first initialize empty list for each key that is present
+    outdict = {key: [] for key in list(mydict.values())[0].keys()}
+    # now append the values to each key in a list
+    for subdict in mydict.values():
+        for key in subdict.keys():
+            outdict[key].append(subdict[key])
+    # mydict = {key: [mydict[key] for mydict in dictlist] for key in dictlist[0]}
+    print(outdict)
+    return outdict
 
 
 def dump_df(mydict: dict) -> DataFrame:
@@ -80,15 +86,11 @@ def dump_df(mydict: dict) -> DataFrame:
 
 
 if __name__ == "__main__":
-    testdict = [
-        {
-            "filename": "/home/inga/projects/misinformation-project/misinformation/data/test_no_text/102133S_eng.png"
-        }
-    ]
-    globaldict = {"filename": [], "person1": []}
     files = find_files(
         path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
     )
-    initialize_dict(files)
-    # out = append_data_to_dict(globaldict, testdict)
-    # print(out)
+    mydict = initialize_dict(files)
+    outdict = {}
+    outdict = append_data_to_dict(mydict)
+    df = dump_df(outdict)
+    print(df.head(10))
