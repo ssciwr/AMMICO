@@ -72,16 +72,21 @@ retinaface_model = DownloadResource(
 )
 
 
-def facial_expression_analysis(img_path):
-    result = {"filename": img_path}
+def facial_expression_analysis(subdict):
 
     # Find (multiple) faces in the image and cut them
     retinaface_model.get()
-    faces = RetinaFace.extract_faces(img_path)
+    faces = RetinaFace.extract_faces(subdict["filename"])
 
-    # If no faces are found, we return an empty dictionary
+    # If no faces are found, we return empty keys
     if len(faces) == 0:
-        return result
+        subdict["face"] = None
+        subdict["wears_mask"] = None
+        subdict["age"] = None
+        subdict["gender"] = None
+        subdict["race"] = None
+        subdict["emotion"] = None
+        return subdict
 
     # Sort the faces by sight to prioritize prominent faces
     faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
@@ -120,9 +125,9 @@ def facial_expression_analysis(img_path):
 
     # We limit ourselves to three faces
     for i, face in enumerate(faces[:3]):
-        result[f"person{ i+1 }"] = analyze_single_face(face)
+        subdict[f"person{ i+1 }"] = analyze_single_face(face)
 
-    return result
+    return subdict
 
 
 def wears_mask(face):
