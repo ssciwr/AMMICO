@@ -30,6 +30,17 @@ def misinformation_prefetch_models():
         res.get()
 
 
+class AnalysisMethod:
+    """Base class to be inherited by all analysis methods."""
+
+    def __init__(self) -> None:
+        # define keys that will be set by the analysis
+        self.mykeys = ["filename"]
+
+    def analyse_image(self):
+        None
+
+
 def find_files(path=None, pattern="*.png", recursive=True, limit=20):
     """Find image files on the file system
 
