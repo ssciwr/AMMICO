@@ -2,9 +2,10 @@ from google.cloud import vision
 import io
 
 
-def detect_text(path):
+def detect_text(subdict):
     """Detects text in the file."""
 
+    path = subdict["filename"]
     client = vision.ImageAnnotatorClient()
 
     with io.open(path, "rb") as image_file:
@@ -14,13 +15,13 @@ def detect_text(path):
 
     response = client.text_detection(image=image)
     texts = response.text_annotations
-    result = {"text": []}
+    subdict = {"text": []}
     for text in texts:
-        result["text"].append(text.description)
+        subdict["text"].append(text.description)
 
     if response.error.message:
         raise Exception(
             "{}\nFor more info on error messages, check: "
             "https://cloud.google.com/apis/design/errors".format(response.error.message)
         )
-    return result
+    return subdict
