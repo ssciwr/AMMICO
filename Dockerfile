@@ -2,7 +2,7 @@ FROM jupyter/base-notebook:2022-06-06
 
 # Install system dependencies for computer vision packages
 USER root
-RUN apt update && apt install -y libgl1 libglib2.0-0 libsm6 libxrender1 libxext6
+RUN apt update && apt install -y build-essential libgl1 libglib2.0-0 libsm6 libxrender1 libxext6 tesseract-ocr
 USER $NB_USER
 
 # Copy the repository into the container
@@ -10,6 +10,9 @@ COPY --chown=${NB_UID} . /opt/misinformation
 
 # Install the Python package
 RUN python -m pip install /opt/misinformation
+
+# Install additional dependencies for running the notebooks
+RUN python -m pip install -r /opt/misinformation/requirements.txt
 
 # Make JupyterLab the default for this application
 ENV JUPYTER_ENABLE_LAB=yes

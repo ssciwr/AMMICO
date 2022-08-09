@@ -1,5 +1,6 @@
 import glob
 import os
+from pandas import DataFrame
 import pooch
 
 
@@ -29,6 +30,17 @@ def misinformation_prefetch_models():
         res.get()
 
 
+class AnalysisMethod:
+    """Base class to be inherited by all analysis methods."""
+
+    def __init__(self) -> None:
+        # define keys that will be set by the analysis
+        self.mykeys = ["filename"]
+
+    def analyse_image(self):
+        None
+
+
 def find_files(path=None, pattern="*.png", recursive=True, limit=20):
     """Find image files on the file system
 
@@ -55,3 +67,41 @@ def find_files(path=None, pattern="*.png", recursive=True, limit=20):
         result = result[:limit]
 
     return result
+
+
+def initialize_dict(filelist: list) -> dict:
+    mydict = {}
+    for img_path in filelist:
+        id = img_path.split(".")[0].split("/")[-1]
+        mydict[id] = {"filename": img_path}
+    return mydict
+
+
+def append_data_to_dict(mydict: dict) -> dict:
+    """Append entries from list of dictionaries to keys in global dict."""
+
+    # first initialize empty list for each key that is present
+    outdict = {key: [] for key in list(mydict.values())[0].keys()}
+    # now append the values to each key in a list
+    for subdict in mydict.values():
+        for key in subdict.keys():
+            outdict[key].append(subdict[key])
+    # mydict = {key: [mydict[key] for mydict in dictlist] for key in dictlist[0]}
+    print(outdict)
+    return outdict
+
+
+def dump_df(mydict: dict) -> DataFrame:
+    """Utility to dump the dictionary into a dataframe."""
+    return DataFrame.from_dict(mydict)
+
+
+if __name__ == "__main__":
+    files = find_files(
+        path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
+    )
+    mydict = initialize_dict(files)
+    outdict = {}
+    outdict = append_data_to_dict(mydict)
+    df = dump_df(outdict)
+    print(df.head(10))
