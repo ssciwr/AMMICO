@@ -3,3 +3,4 @@ ipywidgets==8.0.0rc1
 pooch
 retina-face
 google-cloud-vision
+imageai
