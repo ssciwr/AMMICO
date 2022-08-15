@@ -77,6 +77,11 @@ class EmotionDetector(utils.AnalysisMethod):
     def __init__(self, subdict: dict) -> None:
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
+        self.emotion_threshold = 25.0
+        self.race_threshold = 80.0
+        self.negative_emotion = ["angry", "disgust", "fear", "sad"]
+        self.positive_emotion = ["happy"]
+        self.neutral_emotion = ["surprise", "neutral"]
 
     def set_keys(self) -> dict:
         params = {
@@ -89,6 +94,9 @@ class EmotionDetector(utils.AnalysisMethod):
             "emotion (category)": None,
         }
         return params
+
+    def analyse_image(self):
+        return self.facial_expression_analysis()
 
     def analyze_single_face(self, face: np.ndarray) -> dict:
         fresult = {}
@@ -137,17 +145,45 @@ class EmotionDetector(utils.AnalysisMethod):
         # Sort the faces by sight to prioritize prominent faces
         faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
 
+        self.subdict["face"] = "yes"
+        # note number of faces being identified
+        result = {"number_faces": len(faces) if len(faces) <= 3 else 3}
         # We limit ourselves to three faces
         for i, face in enumerate(faces[:3]):
-            print(type(face), "GGG")
-            self.subdict[f"person{ i+1 }"] = self.analyze_single_face(face)
+            result[f"person{ i+1 }"] = self.analyze_single_face(face)
+
+        self.clean_subdict(result)
 
         return self.subdict
 
-    def clean_subdict(self) -> dict:
-        # each person subdict converted into list
-        pass
-        # return subdict
+    def clean_subdict(self, result: dict) -> dict:
+        # each person subdict converted into list for keys
+        self.subdict["wears_mask"] = []
+        self.subdict["age"] = []
+        self.subdict["gender"] = []
+        self.subdict["race"] = []
+        self.subdict["emotion"] = []
+        self.subdict["emotion (category)"] = []
+        # also assign categories based on threshold
+        cumulative_neg = 0
+        cumulative_pos = 0
+        # cumulative_neutral = 0
+        for i in range(result["number_faces"]):
+            person = "person{}".format(i + 1)
+            for key in result[person]["emotion"].keys():
+                if key in self.negative_emotion:
+                    cumulative_neg += result[person]["emotion"][key]
+            category = "Negative" if cumulative_neg > cumulative_pos else ""
+            category = "Positive" if cumulative_pos > cumulative_neg else ""
+            self.subdict["wears_mask"].append(
+                "Yes" if result[person]["wears_mask"] else "No"
+            )
+            self.subdict["age"].append(result[person]["age"])
+            self.subdict["gender"].append(result[person]["gender"])
+            self.subdict["race"].append(result[person]["dominant_race"])
+            self.subdict["emotion"].append(result[person]["dominant_emotion"])
+            self.subdict["emotion (category)"].append(category)
+        return self.subdict
 
     def wears_mask(self, face: np.ndarray) -> bool:
         global mask_detection_model
@@ -189,7 +225,6 @@ if __name__ == "__main__":
         "/home/inga/projects/misinformation-project/misinformation/data/test_no_text/102141_1_eng.png"
     ]
     mydict = utils.initialize_dict(files)
-    print(mydict)
     image_ids = [key for key in mydict.keys()]
     obj = EmotionDetector(mydict[image_ids[0]])
     mydict = obj.facial_expression_analysis()
