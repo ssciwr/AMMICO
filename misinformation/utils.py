@@ -38,10 +38,10 @@ class AnalysisMethod:
         # define keys that will be set by the analysis
 
     def set_keys(self):
-        None
+        raise NotImplementedError()
 
     def analyse_image(self):
-        None
+        raise NotImplementedError()
 
 
 def find_files(path=None, pattern="*.png", recursive=True, limit=20):
