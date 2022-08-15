@@ -33,9 +33,12 @@ def misinformation_prefetch_models():
 class AnalysisMethod:
     """Base class to be inherited by all analysis methods."""
 
-    def __init__(self) -> None:
+    def __init__(self, subdict) -> None:
+        self.subdict = subdict
         # define keys that will be set by the analysis
-        self.mykeys = ["filename"]
+
+    def set_keys(self):
+        None
 
     def analyse_image(self):
         None

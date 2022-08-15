@@ -73,31 +73,28 @@ retinaface_model = DownloadResource(
 )
 
 
-def facial_expression_analysis(subdict):
+class EmotionDetector(utils.AnalysisMethod):
+    def __init__(self, subdict: dict) -> None:
+        super().__init__(subdict)
+        self.subdict.update(self.set_keys())
 
-    # Find (multiple) faces in the image and cut them
-    retinaface_model.get()
-    faces = RetinaFace.extract_faces(subdict["filename"])
+    def set_keys(self) -> dict:
+        params = {
+            "face": "No",
+            "wears_mask": "No",
+            "age": None,
+            "gender": None,
+            "race": None,
+            "emotion": None,
+            "emotion (category)": None,
+        }
+        return params
 
-    # If no faces are found, we return empty keys
-    if len(faces) == 0:
-        subdict["face"] = "No"
-        subdict["wears_mask"] = "No"
-        subdict["age"] = None
-        subdict["gender"] = None
-        subdict["race"] = None
-        subdict["emotion"] = None
-        subdict["emotion (category)"] = None
-        return subdict
-
-    # Sort the faces by sight to prioritize prominent faces
-    faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
-
-    def analyze_single_face(face):
+    def analyze_single_face(self, face: np.ndarray) -> dict:
         fresult = {}
 
         # Determine whether the face wears a mask
-        fresult["wears_mask"] = wears_mask(face)
+        fresult["wears_mask"] = self.wears_mask(face)
 
         # Adapt the features we are looking for depending on whether a mask is
         # worn. White masks screw race detection, emotion detection is useless.
@@ -127,38 +124,51 @@ def facial_expression_analysis(subdict):
 
         return fresult
 
-    # We limit ourselves to three faces
-    for i, face in enumerate(faces[:3]):
-        subdict[f"person{ i+1 }"] = analyze_single_face(face)
+    def facial_expression_analysis(self) -> dict:
 
-    def clean_subdict(subdict):
+        # Find (multiple) faces in the image and cut them
+        retinaface_model.get()
+        faces = RetinaFace.extract_faces(self.subdict["filename"])
+
+        # If no faces are found, we return empty keys
+        if len(faces) == 0:
+            return self.subdict
+
+        # Sort the faces by sight to prioritize prominent faces
+        faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
+
+        # We limit ourselves to three faces
+        for i, face in enumerate(faces[:3]):
+            print(type(face), "GGG")
+            self.subdict[f"person{ i+1 }"] = self.analyze_single_face(face)
+
+        return self.subdict
+
+    def clean_subdict(self) -> dict:
         # each person subdict converted into list
         pass
         # return subdict
 
-    return subdict
+    def wears_mask(self, face: np.ndarray) -> bool:
+        global mask_detection_model
 
+        # Preprocess the face to match the assumptions of the face mask
+        # detection model
+        face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        face = cv2.resize(face, (224, 224))
+        face = img_to_array(face)
+        face = preprocess_input(face)
+        face = np.expand_dims(face, axis=0)
 
-def wears_mask(face):
-    global mask_detection_model
+        # Lazily load the model
+        mask_detection_model = load_model(face_mask_model.get())
 
-    # Preprocess the face to match the assumptions of the face mask
-    # detection model
-    face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
-    face = cv2.resize(face, (224, 224))
-    face = img_to_array(face)
-    face = preprocess_input(face)
-    face = np.expand_dims(face, axis=0)
+        # Run the model (ignoring output)
+        with NocatchOutput():
+            mask, withoutMask = mask_detection_model.predict(face)[0]
 
-    # Lazily load the model
-    mask_detection_model = load_model(face_mask_model.get())
-
-    # Run the model (ignoring output)
-    with NocatchOutput():
-        mask, withoutMask = mask_detection_model.predict(face)[0]
-
-    # Convert from np.bool_ to bool to later be able to serialize the result
-    return bool(mask > withoutMask)
+        # Convert from np.bool_ to bool to later be able to serialize the result
+        return bool(mask > withoutMask)
 
 
 class NocatchOutput(ipywidgets.Output):
@@ -181,5 +191,6 @@ if __name__ == "__main__":
     mydict = utils.initialize_dict(files)
     print(mydict)
     image_ids = [key for key in mydict.keys()]
-    mydict = facial_expression_analysis(mydict[image_ids[0]])
+    obj = EmotionDetector(mydict[image_ids[0]])
+    mydict = obj.facial_expression_analysis()
     print(mydict)
