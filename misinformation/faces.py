@@ -11,6 +11,7 @@ from deepface import DeepFace
 from retinaface import RetinaFace
 
 from misinformation.utils import DownloadResource
+import misinformation.utils as utils
 
 
 def deepface_symlink_processor(name):
@@ -80,12 +81,13 @@ def facial_expression_analysis(subdict):
 
     # If no faces are found, we return empty keys
     if len(faces) == 0:
-        subdict["face"] = None
-        subdict["wears_mask"] = None
+        subdict["face"] = "No"
+        subdict["wears_mask"] = "No"
         subdict["age"] = None
         subdict["gender"] = None
         subdict["race"] = None
         subdict["emotion"] = None
+        subdict["emotion (category)"] = None
         return subdict
 
     # Sort the faces by sight to prioritize prominent faces
@@ -110,22 +112,29 @@ def facial_expression_analysis(subdict):
         deepface_race_model.get()
 
         # Run the full DeepFace analysis
-        fresult["deepface_results"] = DeepFace.analyze(
-            img_path=face,
-            actions=actions,
-            prog_bar=False,
-            detector_backend="skip",
+        fresult.update(
+            DeepFace.analyze(
+                img_path=face,
+                actions=actions,
+                prog_bar=False,
+                detector_backend="skip",
+            )
         )
 
         # We remove the region, as the data is not correct - after all we are
         # running the analysis on a subimage.
-        del fresult["deepface_results"]["region"]
+        del fresult["region"]
 
         return fresult
 
     # We limit ourselves to three faces
     for i, face in enumerate(faces[:3]):
         subdict[f"person{ i+1 }"] = analyze_single_face(face)
+
+    def clean_subdict(subdict):
+        # each person subdict converted into list
+        pass
+        # return subdict
 
     return subdict
 
@@ -160,3 +169,17 @@ class NocatchOutput(ipywidgets.Output):
 
     def __exit__(self, *args, **kwargs):
         super().__exit__(*args, **kwargs)
+
+
+if __name__ == "__main__":
+    # files = utils.find_files(
+    # path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
+    # )
+    files = [
+        "/home/inga/projects/misinformation-project/misinformation/data/test_no_text/102141_1_eng.png"
+    ]
+    mydict = utils.initialize_dict(files)
+    print(mydict)
+    image_ids = [key for key in mydict.keys()]
+    mydict = facial_expression_analysis(mydict[image_ids[0]])
+    print(mydict)
