@@ -164,17 +164,33 @@ class EmotionDetector(utils.AnalysisMethod):
         self.subdict["race"] = []
         self.subdict["emotion"] = []
         self.subdict["emotion (category)"] = []
-        # also assign categories based on threshold
-        cumulative_neg = 0
-        cumulative_pos = 0
-        # cumulative_neutral = 0
         for i in range(result["number_faces"]):
             person = "person{}".format(i + 1)
-            for key in result[person]["emotion"].keys():
-                if key in self.negative_emotion:
-                    cumulative_neg += result[person]["emotion"][key]
-            category = "Negative" if cumulative_neg > cumulative_pos else ""
-            category = "Positive" if cumulative_pos > cumulative_neg else ""
+            # also assign categories based on threshold
+            cumulative = [
+                sum(
+                    result[person]["emotion"][key]
+                    for key in result[person]["emotion"].keys()
+                    if key in self.negative_emotion
+                )
+            ]
+            cumulative.append(
+                sum(
+                    result[person]["emotion"][key]
+                    for key in result[person]["emotion"].keys()
+                    if key in self.positive_emotion
+                )
+            )
+            cumulative.append(
+                sum(
+                    result[person]["emotion"][key]
+                    for key in result[person]["emotion"].keys()
+                    if key in self.neutral_emotion
+                )
+            )
+            expression = ["Negative", "Positive", "Neutral"]
+            # now zip the two lists and sort according to highest contribution
+            category = sorted(zip(cumulative, expression), reverse=True)[0][1]
             self.subdict["wears_mask"].append(
                 "Yes" if result[person]["wears_mask"] else "No"
             )
