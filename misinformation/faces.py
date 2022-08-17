@@ -166,42 +166,48 @@ class EmotionDetector(utils.AnalysisMethod):
         self.subdict["emotion (category)"] = []
         for i in range(result["number_faces"]):
             person = "person{}".format(i + 1)
-            # also assign categories based on threshold
-            cumulative = [
-                sum(
-                    result[person]["emotion"][key]
-                    for key in result[person]["emotion"].keys()
-                    if key in self.negative_emotion
-                )
-            ]
-            cumulative.append(
-                sum(
-                    result[person]["emotion"][key]
-                    for key in result[person]["emotion"].keys()
-                    if key in self.positive_emotion
-                )
-            )
-            cumulative.append(
-                sum(
-                    result[person]["emotion"][key]
-                    for key in result[person]["emotion"].keys()
-                    if key in self.neutral_emotion
-                )
-            )
-            expression = ["Negative", "Positive", "Neutral"]
-            # now zip the two lists and sort according to highest contribution
-            category = sorted(zip(cumulative, expression), reverse=True)[0][1]
             self.subdict["wears_mask"].append(
                 "Yes" if result[person]["wears_mask"] else "No"
             )
             self.subdict["age"].append(result[person]["age"])
             self.subdict["gender"].append(result[person]["gender"])
-            self.subdict["race"].append(result[person]["dominant_race"])
-            dominant = result[person]["dominant_emotion"]
-            self.subdict["emotion"].append(
-                (dominant, result[person]["emotion"][dominant])
-            )
-            self.subdict["emotion (category)"].append(category)
+            # race, emotion only detected if person does not wear mask
+            if result[person]["wears_mask"]:
+                self.subdict["race"].append(None)
+                self.subdict["emotion"].append(None)
+                self.subdict["emotion (category)"].append(None)
+            elif not result[person]["wears_mask"]:
+                # also assign categories based on threshold
+                cumulative = [
+                    sum(
+                        result[person]["emotion"][key]
+                        for key in result[person]["emotion"].keys()
+                        if key in self.negative_emotion
+                    )
+                ]
+                cumulative.append(
+                    sum(
+                        result[person]["emotion"][key]
+                        for key in result[person]["emotion"].keys()
+                        if key in self.positive_emotion
+                    )
+                )
+                cumulative.append(
+                    sum(
+                        result[person]["emotion"][key]
+                        for key in result[person]["emotion"].keys()
+                        if key in self.neutral_emotion
+                    )
+                )
+                expression = ["Negative", "Positive", "Neutral"]
+                # now zip the two lists and sort according to highest contribution
+                category = sorted(zip(cumulative, expression), reverse=True)[0][1]
+                self.subdict["race"].append(result[person]["dominant_race"])
+                dominant = result[person]["dominant_emotion"]
+                self.subdict["emotion"].append(
+                    (dominant, result[person]["emotion"][dominant])
+                )
+                self.subdict["emotion (category)"].append(category)
         return self.subdict
 
     def wears_mask(self, face: np.ndarray) -> bool:
@@ -237,14 +243,14 @@ class NocatchOutput(ipywidgets.Output):
 
 
 if __name__ == "__main__":
-    # files = utils.find_files(
-    # path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
-    # )
-    files = [
-        "/home/inga/projects/misinformation-project/misinformation/data/test_no_text/102141_1_eng.png"
-    ]
+    files = utils.find_files(
+        path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
+    )
+    # files = [
+    # "/home/inga/projects/misinformation-project/misinformation/data/test_no_text/102141_1_eng.png"
+    # ]
     mydict = utils.initialize_dict(files)
     image_ids = [key for key in mydict.keys()]
-    obj = EmotionDetector(mydict[image_ids[0]])
-    mydict = obj.facial_expression_analysis()
+    for i in image_ids:
+        mydict[i] = EmotionDetector(mydict[i]).analyse_image()
     print(mydict)

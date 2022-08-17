@@ -20,7 +20,7 @@ class JSONContainer:
 def explore_analysis(mydict, identify="faces"):
     # dictionary mapping the type of analysis to be explored
     identify_dict = {
-        "faces": faces.facial_expression_analysis,
+        "faces": faces.EmotionDetector,
         "text-on-image": text.detect_text,
     }
     # create a list containing the image ids for the widget
@@ -56,7 +56,7 @@ def explore_analysis(mydict, identify="faces"):
         with faces.NocatchOutput():
             mydict[image_select.value] = identify_dict[identify](
                 mydict[image_select.value]
-            )
+            ).analyse_image()
         with output:
             display(JSONContainer(mydict[image_select.value]))
 
