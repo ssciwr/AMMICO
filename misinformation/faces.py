@@ -197,7 +197,10 @@ class EmotionDetector(utils.AnalysisMethod):
             self.subdict["age"].append(result[person]["age"])
             self.subdict["gender"].append(result[person]["gender"])
             self.subdict["race"].append(result[person]["dominant_race"])
-            self.subdict["emotion"].append(result[person]["dominant_emotion"])
+            dominant = result[person]["dominant_emotion"]
+            self.subdict["emotion"].append(
+                (dominant, result[person]["emotion"][dominant])
+            )
             self.subdict["emotion (category)"].append(category)
         return self.subdict
 
