@@ -33,12 +33,15 @@ def misinformation_prefetch_models():
 class AnalysisMethod:
     """Base class to be inherited by all analysis methods."""
 
-    def __init__(self) -> None:
+    def __init__(self, subdict) -> None:
+        self.subdict = subdict
         # define keys that will be set by the analysis
-        self.mykeys = ["filename"]
+
+    def set_keys(self):
+        raise NotImplementedError()
 
     def analyse_image(self):
-        None
+        raise NotImplementedError()
 
 
 def find_files(path=None, pattern="*.png", recursive=True, limit=20):
@@ -87,7 +90,6 @@ def append_data_to_dict(mydict: dict) -> dict:
         for key in subdict.keys():
             outdict[key].append(subdict[key])
     # mydict = {key: [mydict[key] for mydict in dictlist] for key in dictlist[0]}
-    print(outdict)
     return outdict
 
 
