@@ -90,7 +90,6 @@ def append_data_to_dict(mydict: dict) -> dict:
         for key in subdict.keys():
             outdict[key].append(subdict[key])
     # mydict = {key: [mydict[key] for mydict in dictlist] for key in dictlist[0]}
-    print(outdict)
     return outdict
 
 

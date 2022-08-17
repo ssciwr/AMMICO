@@ -21,7 +21,7 @@ def explore_analysis(mydict, identify="faces"):
     # dictionary mapping the type of analysis to be explored
     identify_dict = {
         "faces": faces.EmotionDetector,
-        "text-on-image": text.detect_text,
+        "text-on-image": text.TextDetector,
     }
     # create a list containing the image ids for the widget
     # image_paths = [mydict[key]["filename"] for key in mydict.keys()]

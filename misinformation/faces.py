@@ -86,12 +86,12 @@ class EmotionDetector(utils.AnalysisMethod):
     def set_keys(self) -> dict:
         params = {
             "face": "No",
-            "wears_mask": "No",
-            "age": None,
-            "gender": None,
-            "race": None,
-            "emotion": None,
-            "emotion (category)": None,
+            "wears_mask": ["No"],
+            "age": [None],
+            "gender": [None],
+            "race": [None],
+            "emotion": [None],
+            "emotion (category)": [None],
         }
         return params
 
