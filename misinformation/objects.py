@@ -1,9 +1,11 @@
 from misinformation.utils import AnalysisMethod
+from misinformation.utils import DownloadResource
 from google.cloud import vision
 import cv2
 import cvlib as cv
 from imageai.Detection import ObjectDetection
 import os
+import pathlib
 
 
 def init_default_objects():
@@ -39,6 +41,30 @@ def objects_from_imageai(detections: dict) -> dict:
     return objects
 
 
+def objects_symlink_processor(name):
+    def _processor(fname, action, pooch):
+        if not os.path.exists(os.path.dirname(name)):
+            os.makedirs(os.path.dirname(name))
+
+        if not os.path.exists(name):
+            os.symlink(fname, name)
+        return fname
+
+    return _processor
+
+
+pre_model_path = pathlib.Path.home().joinpath(
+    ".misinformation", "objects", "resnet50_coco_best_v2.1.0.h5"
+)
+
+
+retina_objects_model = DownloadResource(
+    url="https://github.com/OlafenwaMoses/ImageAI/releases/download/essentials-v5/resnet50_coco_best_v2.1.0.h5/",
+    known_hash="sha256:6518ad56a0cca4d1bd8cbba268dd4e299c7633efe7d15902d5acbb0ba180027c",
+    processor=objects_symlink_processor(pre_model_path),
+)
+
+
 class ObjectDetector(AnalysisMethod):
     # Using cvlib as client
     CLIENT_CVLIB = 1
@@ -51,14 +77,13 @@ class ObjectDetector(AnalysisMethod):
         self.gv_client = vision.ImageAnnotatorClient()
 
         # init imageai client
-        execution_path = os.getcwd()
+        retina_objects_model.get()
+        if not os.path.exists(pre_model_path):
+            print("Download retina objects model failed.")
+            return
         self.imgai_client = ObjectDetection()
         self.imgai_client.setModelTypeAsRetinaNet()
-        # default model path is ./misinformation/model/resnet50_coco_best_v2.0.1.h5
-        misinformation_path = os.path.join(execution_path, "misinformation")
-        model_path = os.path.join(misinformation_path, "model")
-        model_path = os.path.join(model_path, "resnet50_coco_best_v2.0.1.h5")
-        self.imgai_client.setModelPath(model_path)
+        self.imgai_client.setModelPath(pre_model_path)
         self.imgai_client.loadModel()
         self.custom = self.imgai_client.CustomObjects(
             person=True,
@@ -150,7 +175,7 @@ class ObjectDetector(AnalysisMethod):
         objects = objects_from_imageai(detections)
         return objects
 
-    def analyse_image(self, image_path):
+    def analyse_image_from_file(self, image_path):
         """Localize objects in the local image.
 
         Args:
@@ -163,3 +188,25 @@ class ObjectDetector(AnalysisMethod):
         else:
             objects = init_default_objects()
         return objects
+
+    def analyse_image(self, subdict):
+        """Localize objects in the local image.
+
+        Args:
+        subdict: The dictionary for an image expression instance.
+        """
+        objects = self.analyse_image_from_file(subdict["filename"])
+        for key in objects:
+            subdict[key] = objects[key]
+
+
+od_clinet = ObjectDetector()
+
+
+def objects_expression_analysis(subdict):
+    """Localize objects in the local image.
+
+    Args:
+    subdict: The dictionary for an image expression instance.
+    """
+    od_clinet.analyse_image(subdict)
