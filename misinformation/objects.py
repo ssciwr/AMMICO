@@ -65,7 +65,7 @@ retina_objects_model = DownloadResource(
 )
 
 
-class ObjectDetector(AnalysisMethod):
+class ObjectDetectorClient(AnalysisMethod):
     # Using cvlib as client
     CLIENT_CVLIB = 1
     # Using imageai as client
@@ -99,13 +99,19 @@ class ObjectDetector(AnalysisMethod):
             cell_phone=True,
         )
 
-        support_type = [ObjectDetector.CLIENT_CVLIB, ObjectDetector.CLIENT_IMAGEAI]
+        support_type = [
+            ObjectDetectorClient.CLIENT_CVLIB,
+            ObjectDetectorClient.CLIENT_IMAGEAI,
+        ]
         assert client_type in support_type
 
         self.client_type = client_type
 
     def set_client_type(self, client_type):
-        support_type = [ObjectDetector.CLIENT_CVLIB, ObjectDetector.CLIENT_IMAGEAI]
+        support_type = [
+            ObjectDetectorClient.CLIENT_CVLIB,
+            ObjectDetectorClient.CLIENT_IMAGEAI,
+        ]
         assert client_type in support_type
         self.client_type = client_type
 
@@ -199,14 +205,25 @@ class ObjectDetector(AnalysisMethod):
         for key in objects:
             subdict[key] = objects[key]
 
+        return subdict
 
-od_clinet = ObjectDetector()
 
+class ObjectDetector(AnalysisMethod):
+    od_client = ObjectDetectorClient()
 
-def objects_expression_analysis(subdict):
-    """Localize objects in the local image.
+    def __init__(self, subdict: dict, client_type=1):
+        super().__init__(subdict)
+        self.client_type = client_type
+        self.subdict.update(self.set_keys())
+        ObjectDetector.od_client.set_client_type(client_type)
 
-    Args:
-    subdict: The dictionary for an image expression instance.
-    """
-    od_clinet.analyse_image(subdict)
+    def set_keys(self):
+        return init_default_objects()
+
+    def analyse_image(self):
+        self.subdict = ObjectDetector.od_client.analyse_image(self.subdict)
+        return self.subdict
+
+    def set_client_type(self, client_type):
+        self.client_type = client_type
+        ObjectDetector.od_client.set_client_type(client_type)
