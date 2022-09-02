@@ -1,27 +1,40 @@
 from google.cloud import vision
 import io
+from misinformation import utils
 
 
-def detect_text(subdict):
-    """Detects text in the file."""
+class TextDetector(utils.AnalysisMethod):
+    def __init__(self, subdict: dict) -> None:
+        super().__init__(subdict)
+        self.subdict.update(self.set_keys())
 
-    path = subdict["filename"]
-    client = vision.ImageAnnotatorClient()
+    def set_keys(self) -> dict:
+        params = {"text": None}
+        return params
 
-    with io.open(path, "rb") as image_file:
-        content = image_file.read()
+    def analyse_image(self):
+        """Detects text on the image."""
 
-    image = vision.Image(content=content)
+        path = self.subdict["filename"]
+        client = vision.ImageAnnotatorClient()
 
-    response = client.text_detection(image=image)
-    texts = response.text_annotations
-    subdict = {"text": []}
-    for text in texts:
-        subdict["text"].append(text.description)
+        with io.open(path, "rb") as image_file:
+            content = image_file.read()
 
-    if response.error.message:
-        raise Exception(
-            "{}\nFor more info on error messages, check: "
-            "https://cloud.google.com/apis/design/errors".format(response.error.message)
-        )
-    return subdict
+        image = vision.Image(content=content)
+
+        response = client.text_detection(image=image)
+        texts = response.text_annotations
+        # here check if text was found
+        self.subdict = {"text": []}
+        for text in texts:
+            self.subdict["text"].append(text.description)
+
+        if response.error.message:
+            raise Exception(
+                "{}\nFor more info on error messages, check: "
+                "https://cloud.google.com/apis/design/errors".format(
+                    response.error.message
+                )
+            )
+        return self.subdict
