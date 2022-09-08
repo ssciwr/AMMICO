@@ -1,4 +1,4 @@
-FROM jupyter/base-notebook:2022-06-06
+FROM jupyter/base-notebook:python-3.7.6
 
 # Install system dependencies for computer vision packages
 USER root
