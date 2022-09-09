@@ -24,6 +24,9 @@ ENV XDG_DATA_HOME=/opt/misinformation/data
 RUN rm -rf $HOME/work
 RUN cp /opt/misinformation/notebooks/*.ipynb $HOME
 
+ARG GOOGLE_CREDS
+ENV GOOGLE_APPLICATION_CREDENTIALS=credentials.json
+RUN echo ${GOOGLE_CREDS} > $GOOGLE_APPLICATION_CREDENTIALS
 # Bundle the pre-built models (that are downloaded on demand) into the
 # Docker image.
 RUN misinformation_prefetch_models
