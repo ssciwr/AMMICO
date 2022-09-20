@@ -33,7 +33,7 @@ def objects_from_cvlib(objects_list: list) -> dict:
     return objects
 
 
-def objects_from_imageai(detections: dict) -> dict:
+def objects_from_imageai(detections: list) -> dict:
     objects = init_default_objects()
     for obj in detections:
         obj_name = obj["name"]
@@ -211,11 +211,9 @@ class ObjectDetectorClient(AnalysisMethod):
 class ObjectDetector(AnalysisMethod):
     od_client = ObjectDetectorClient()
 
-    def __init__(self, subdict: dict, client_type=1):
+    def __init__(self, subdict: dict):
         super().__init__(subdict)
-        self.client_type = client_type
         self.subdict.update(self.set_keys())
-        ObjectDetector.od_client.set_client_type(client_type)
 
     def set_keys(self):
         return init_default_objects()
@@ -224,6 +222,6 @@ class ObjectDetector(AnalysisMethod):
         self.subdict = ObjectDetector.od_client.analyse_image(self.subdict)
         return self.subdict
 
-    def set_client_type(self, client_type):
-        self.client_type = client_type
+    @staticmethod
+    def set_client_type(client_type):
         ObjectDetector.od_client.set_client_type(client_type)
