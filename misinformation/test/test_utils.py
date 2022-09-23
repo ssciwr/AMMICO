@@ -6,7 +6,7 @@ import misinformation.utils as ut
 
 def test_find_files():
     result = ut.find_files(
-        path="./misinformation/test/data/", pattern="*.jpg", recursive=True, limit=10
+        path="./misinformation/test/data/", pattern="*.png", recursive=True, limit=10
     )
     assert len(result) > 0
 

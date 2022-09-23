@@ -6,8 +6,8 @@ import misinformation.faces as fc
 
 def test_analyse_faces():
     mydict = {
-        "image_faces": {"filename": "./misinformation/test/data/image_faces.jpg"},
-        "image_objects": {"filename": "./misinformation/test/data/image_objects.jpg"},
+        "image_faces": {"filename": "./misinformation/test/data/IMG_2746.png"},
+        "image_objects": {"filename": "./misinformation/test/data/IMG_2809.png"},
     }
     for key in mydict.keys():
         mydict[key] = fc.EmotionDetector(mydict[key]).analyse_image()

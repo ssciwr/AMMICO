@@ -1,0 +1,1 @@
+{'image_faces': {'filename': '/misinformation/test/data/image_faces.jpg'}, 'image_objects': {'filename': '/misinformation/test/data/image_objects.jpg'}}

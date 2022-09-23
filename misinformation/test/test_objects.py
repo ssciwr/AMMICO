@@ -46,21 +46,19 @@ def test_objects_from_imageai(default_objects):
 
 
 def test_analyse_image_cvlib():
-    mydict = {
-        "image_objects": {"filename": "./misinformation/test/data/image_objects.jpg"}
-    }
+    mydict = {"image_objects": {"filename": "./misinformation/test/data/IMG_2809.png"}}
     misinformation.explore_analysis(mydict, identify="objects")
+
     with open("./misinformation/test/data/example_objects_cvlib.txt", "r") as file:
         out_dict = file.read()
     assert str(mydict) == out_dict
 
 
 def test_analyse_image_imageai(default_objects):
-    mydict = {
-        "image_objects": {"filename": "./misinformation/test/data/image_objects.jpg"}
-    }
+    mydict = {"image_objects": {"filename": "./misinformation/test/data/IMG_2809.png"}}
     ob.ObjectDetector.set_client_type(2)
     misinformation.explore_analysis(mydict, identify="objects")
+
     with open("./misinformation/test/data/example_objects_imageai.txt", "r") as file:
         out_dict = file.read()
     assert str(mydict) == out_dict
