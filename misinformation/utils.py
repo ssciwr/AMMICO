@@ -2,6 +2,7 @@ import glob
 import os
 from pandas import DataFrame
 import pooch
+import pandas as pd
 
 
 class DownloadResource:
@@ -98,6 +99,50 @@ def dump_df(mydict: dict) -> DataFrame:
     return DataFrame.from_dict(mydict)
 
 
+class LabelManager:
+    def __init__(self):
+        self.labels_code = None
+        self.labels = None
+        self.f_labels = None
+        self.f_labels_code = None
+        self.load()
+
+    def load(self):
+        self.labels_code = pd.read_excel(
+            "./test/data/EUROPE_APRMAY20_data_variable_labels_coding.xlsx",
+            sheet_name="variable_labels_codings",
+        )
+        self.labels = pd.read_csv(
+            "./test/data/Europe_APRMAY20data190722.csv", sep=",", decimal="."
+        )
+
+    def filter_from_order(self, orders: list):
+        cols = []
+        for order in orders:
+            col = self.labels_code.iloc[order - 1, 1]
+            cols.append(col.lower())
+
+        self.f_labels_code = self.labels_code.loc[
+            self.labels_code["order"].isin(orders)
+        ]
+        self.f_labels = self.labels[cols]
+
+    def gen_dict(self):
+        labels_dict = {}
+        if self.f_labels is None:
+            print("No filtered labels found")
+            return labels_dict
+
+        cols = self.f_labels.columns.tolist()
+        for index, row in self.f_labels.iterrows():
+            row_dict = {}
+            for col in cols:
+                row_dict[col] = row[col]
+            labels_dict[row["pic_id"]] = row_dict
+
+        return labels_dict
+
+
 if __name__ == "__main__":
     files = find_files(
         path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
@@ -107,3 +152,9 @@ if __name__ == "__main__":
     outdict = append_data_to_dict(mydict)
     df = dump_df(outdict)
     print(df.head(10))
+
+    # example of LabelManager for loading csv data to dict
+    lm = LabelManager()
+    lm.filter_from_order([1, 2, 3, 22, 23, 24])
+    labels = lm.gen_dict()
+    print(labels)
