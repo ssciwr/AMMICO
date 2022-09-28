@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools>=61",
+    "setuptools==61",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -13,7 +13,7 @@ maintainers = [
     { name = "Inga Ulusoy", email = "ssc@iwr.uni-heidelberg.de" },
     { name = "Dominic Kempf", email = "ssc@iwr.uni-heidelberg.de" },
 ]
-requires-python = ">=3.7"
+requires-python = "<=3.8"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -21,11 +21,20 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "deepface",
-    "ipywidgets >=8",
-    "pooch",
-    "retina-face",
     "google-cloud-vision",
+    "cvlib==0.2.7",
+    "deepface==0.0.75",
+    "imageai==2.1.6",
+    "ipywidgets==8.0.0rc1",
+    "numpy==1.19.3",
+    "opencv_python==4.5.5.64",
+    "pandas==1.3.5",
+    "pooch==1.6.0",
+    "protobuf==3.19",
+    "retina_face==0.0.12",
+    "setuptools==60.9.3",
+    "tensorflow==2.4.0; python_version == '3.7.6'",
+    "keras==2.4.3",
     "openpyxl",
 ]
 

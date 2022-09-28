@@ -23,5 +23,6 @@ if __name__ == "__main__":
     orders = lm.get_orders()
     lm.filter_from_order([1, 2, 3] + orders)
     # map the output to our output - or the other way around?
+
     labels = lm.gen_dict()
     print(labels)
