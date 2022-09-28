@@ -3,6 +3,7 @@ import os
 from pandas import DataFrame
 import pooch
 import pandas as pd
+import json
 
 
 class DownloadResource:
@@ -109,12 +110,23 @@ class LabelManager:
 
     def load(self):
         self.labels_code = pd.read_excel(
-            "./test/data/EUROPE_APRMAY20_data_variable_labels_coding.xlsx",
+            "./misinformation/test/data/EUROPE_APRMAY20_data_variable_labels_coding.xlsx",
             sheet_name="variable_labels_codings",
         )
         self.labels = pd.read_csv(
-            "./test/data/Europe_APRMAY20data190722.csv", sep=",", decimal="."
+            "./misinformation/test/data/Europe_APRMAY20data190722.csv",
+            sep=",",
+            decimal=".",
         )
+        self.map = self.read_json("./misinformation/data/map_test_set.json")
+
+    def read_json(self, name):
+        with open("{}".format(name)) as f:
+            mydict = json.load(f)
+        return mydict
+
+    def get_orders(self):
+        return [i["order"] for i in self.map.values()]
 
     def filter_from_order(self, orders: list):
         cols = []
@@ -155,6 +167,7 @@ if __name__ == "__main__":
 
     # example of LabelManager for loading csv data to dict
     lm = LabelManager()
-    lm.filter_from_order([1, 2, 3, 22, 23, 24])
+    orders = lm.get_orders()
+    lm.filter_from_order([1, 2, 3] + orders)
     labels = lm.gen_dict()
     print(labels)

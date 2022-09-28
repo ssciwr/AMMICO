@@ -1,82 +1,96 @@
 {
     "V9_4": {
+        "order": 169,
         "variable_label": "4=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Person visible",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if there's someone shown"
     },
     "V9_5a": {
+        "order": 170,
         "variable_label": "5a=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "More than one person shown",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if there are several individuals who appear in the post (do not count profile pictures)"
     },
     "V9_5b": {
+        "order": 171,
         "variable_label": "5b=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "How many people shown?",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "If more than 15, put 99"
     },
     "V9_6": {
+        "order": 172,
         "variable_label": "6=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Face fully visible",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if you can see all their face (no mask on)"
     },
     "V9_7": {
+        "order": 173,
         "variable_label": "7=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Face ONLY partially visible",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if you can only see part of their face, including when they are wearing a mask"
     },
     "V9_8": {
+        "order": 174,
         "variable_label": "8=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Facial positive expression",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if they display some kind of positive facial expression (smiling, happy, relieved, hopeful etc.)"
     },
     "V9_8a": {
+        "order": 175,
         "variable_label": "8a=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Positive expression: happiness",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if they display happiness"
     },
     "V9_9": {
+        "order": 176,
         "variable_label": "9=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Facial negative expression",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if they display some kind of negative facial expression (crying, showing ager, fear, disgust etc.)"
     },
     "V9_10": {
+        "order": 177,
         "variable_label": "10=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: anxiety",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if they show fear or anxiety. If you can't tell, choose No=0"
     },
     "V9_11": {
+        "order": 178,
         "variable_label": "11=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: anger",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if they show anger or outrage. If you can't tell, choose No=0"
     },
     "V9_12": {
+        "order": 179,
         "variable_label": "12=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: disgust",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if they show disgust. If you can't tell, choose No=0"
     },
     "V9_13": {
+        "order": 180,
         "variable_label": "13=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: other, specify",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
         "variable_comment": "Yes if they show any other negative emotion, please specify. If you can't tell, choose No=0"
     },
     "V9_13_text": {
+        "order": 181,
         "variable_label": "13=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: other, specify",
         "variable_coding": "String"
     },
     "V11_3": {
+        "order": 189,
         "variable_label": "111_3=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Respect of the rules",
         "variable_coding": "Dichotomous (1=Yes/0=No)",

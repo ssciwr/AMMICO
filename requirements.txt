@@ -12,3 +12,4 @@ retina_face==0.0.12
 setuptools==60.9.3
 tensorflow==2.4.0
 keras==2.4.3
+openpyxl

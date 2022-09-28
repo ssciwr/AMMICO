@@ -26,6 +26,7 @@ dependencies = [
     "pooch",
     "retina-face",
     "google-cloud-vision",
+    "openpyxl",
 ]
 
 [project.scripts]
