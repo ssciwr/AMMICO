@@ -1,8 +1,8 @@
-FROM jupyter/base-notebook:python-3.7.6
+FROM jupyter/base-notebook
 
 # Install system dependencies for computer vision packages
 USER root
-RUN apt update && apt install -y build-essential libgl1 libglib2.0-0 libsm6 libxrender1 libxext6 tesseract-ocr
+RUN apt update && apt install -y build-essential libgl1 libglib2.0-0 libsm6 libxrender1 libxext6
 USER $NB_USER
 
 # Copy the repository into the container
