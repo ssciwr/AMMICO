@@ -17,6 +17,6 @@ repos:
       hooks:
       -   id: flake8
   -   repo: https://github.com/s-weigand/flake8-nb
-      rev: v0.5.2 
+      rev: v0.5.0
       hooks:
       -   id: flake8-nb
