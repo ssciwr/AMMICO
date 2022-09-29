@@ -4,21 +4,24 @@
         "variable_label": "4=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Person visible",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
-        "variable_comment": "Yes if there's someone shown"
+        "variable_comment": "Yes if there's someone shown",
+        "variable_mydict": "face"
     },
     "V9_5a": {
         "order": 170,
         "variable_label": "5a=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "More than one person shown",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
-        "variable_comment": "Yes if there are several individuals who appear in the post (do not count profile pictures)"
+        "variable_comment": "Yes if there are several individuals who appear in the post (do not count profile pictures)",
+        "variable_mydict": "multiple_faces"
     },
     "V9_5b": {
         "order": 171,
         "variable_label": "5b=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "How many people shown?",
         "variable_coding": "Dichotomous (1=Yes/0=No)",
-        "variable_comment": "If more than 15, put 99"
+        "variable_comment": "If more than 15, put 99",
+        "variable_mydict": "no_faces"
     },
     "V9_6": {
         "order": 172,

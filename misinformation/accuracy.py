@@ -59,26 +59,31 @@ class LabelManager:
 
         return labels_dict
 
+    def map_dict(self, mydict):
+        return mydict
+
 
 if __name__ == "__main__":
     files = utils.find_files(
         path="/home/inga/projects/misinformation-project/misinformation/misinformation/test/data/Europe APRMAY20 visual data/cropped images"
     )
     mydict = utils.initialize_dict(files)
-    outdict = {}
-    outdict = utils.append_data_to_dict(mydict)
     # analyze faces
     image_ids = [key for key in mydict.keys()]
     for i in image_ids:
         mydict[i] = faces.EmotionDetector(mydict[i]).analyse_image()
 
+    outdict = utils.append_data_to_dict(mydict)
     df = utils.dump_df(outdict)
-    print(df.head(10))
+    # print(df.head(10))
+    df.to_csv("mydict_out.csv")
 
     # example of LabelManager for loading csv data to dict
     lm = LabelManager()
     # get the desired label numbers automatically
     orders = lm.get_orders()
+    # map mydict to the specified variable names and values
+    mydict_map = lm.map_dict(mydict)
     lm.filter_from_order([1, 2, 3] + orders)
     # map the output to our output - or the other way around?
 
