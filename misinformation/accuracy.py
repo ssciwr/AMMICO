@@ -60,7 +60,30 @@ class LabelManager:
         return labels_dict
 
     def map_dict(self, mydict):
-        return mydict
+        mapped_dict = {}
+        for id, subdict in mydict.items():
+            mapped_subdict = {}
+            mapped_subdict["id"] = id[0:-2]
+            mapped_subdict["pic_order"] = id[-1] if id[-2] == "0" else id[-2::]
+            mapped_subdict["pic_id"] = id
+            for key in self.map.keys():
+                # get the key name
+                mydict_name = self.map[key]["variable_mydict"]
+                mydict_value = self.map[key]["value_mydict"]
+                # find out which value was set
+                mydict_current = subdict[mydict_name]
+                # now map to new key-value pair
+                mapped_subdict[key] = 1 if mydict_current == mydict_value else 0
+                # substitute the values that are not boolean
+                if self.map[key]["variable_coding"] != "Bool":
+                    mapped_subdict[key] = mydict_current
+            mapped_dict[id] = mapped_subdict
+        return mapped_dict
+
+
+# 10056701: {'id': 100567, 'pic_order': 1, 'pic_id': 10056701, 'v9_4': 1, 'v9_5a': 0.0, 'v9_5b': 1, 'v9_6': 1, 'v9_7': 0, 'v9_8': 0, 'v9_8a': 0, 'v9_9': 1, 'v9_10': 0, 'v9_11': 1, 'v9_12': 0, 'v9_13': 0, 'v9_13_text': nan, 'v11_3': 0}
+# Yes,No,1,['No'],[32],['Woman'],['white'],"[('neutral', 91.75465703010559)]",['Neutral']
+# 1, 0, 1,
 
 
 if __name__ == "__main__":
@@ -84,8 +107,8 @@ if __name__ == "__main__":
     orders = lm.get_orders()
     # map mydict to the specified variable names and values
     mydict_map = lm.map_dict(mydict)
+    print(mydict_map)
     lm.filter_from_order([1, 2, 3] + orders)
-    # map the output to our output - or the other way around?
 
     labels = lm.gen_dict()
-    # print(labels)
+    print(labels)
