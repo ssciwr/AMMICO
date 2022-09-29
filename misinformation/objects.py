@@ -34,11 +34,11 @@ def objects_from_cvlib(objects_list: list) -> dict:
 
 def objects_from_imageai(detections: list) -> dict:
     return print("Imageai is currently disabled")
-    objects = init_default_objects()
-    for obj in detections:
-        obj_name = obj["name"]
-        objects[obj_name] = "yes"
-    return objects
+    # objects = init_default_objects()
+    # for obj in detections:
+    #     obj_name = obj["name"]
+    #     objects[obj_name] = "yes"
+    # return objects
 
 
 def objects_symlink_processor(name):
@@ -163,24 +163,24 @@ class ObjectDetectorClient(AnalysisMethod):
         min_prob: Minimum probability that we trust as objects.
         """
         return print("Imageai is currently disabled due to old dependencies.")
-        img = cv2.imread(image_path)
-        if custom:
-            box_img, detections = self.imgai_client.detectCustomObjectsFromImage(
-                custom_objects=self.custom,
-                input_type="array",
-                input_image=img,
-                output_type="array",
-                minimum_percentage_probability=min_prob,
-            )
-        else:
-            box_img, detections = self.imgai_client.detectObjectsFromImage(
-                input_type="array",
-                input_image=img,
-                output_type="array",
-                minimum_percentage_probability=min_prob,
-            )
-        objects = objects_from_imageai(detections)
-        return objects
+        # img = cv2.imread(image_path)
+        # if custom:
+        #     box_img, detections = self.imgai_client.detectCustomObjectsFromImage(
+        #         custom_objects=self.custom,
+        #         input_type="array",
+        #         input_image=img,
+        #         output_type="array",
+        #         minimum_percentage_probability=min_prob,
+        #     )
+        # else:
+        #     box_img, detections = self.imgai_client.detectObjectsFromImage(
+        #         input_type="array",
+        #         input_image=img,
+        #         output_type="array",
+        #         minimum_percentage_probability=min_prob,
+        #     )
+        # objects = objects_from_imageai(detections)
+        # return objects
 
     def analyse_image_from_file(self, image_path):
         """Localize objects in the local image.
