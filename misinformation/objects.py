@@ -85,19 +85,19 @@ class ObjectDetectorClient(AnalysisMethod):
         # self.imgai_client.setModelTypeAsRetinaNet()
         # self.imgai_client.setModelPath(pre_model_path)
         # self.imgai_client.loadModel()
-        self.custom = self.imgai_client.CustomObjects(
-            person=True,
-            bicycle=True,
-            car=True,
-            motorcycle=True,
-            airplane=True,
-            bus=True,
-            train=True,
-            truck=True,
-            boat=True,
-            traffic_light=True,
-            cell_phone=True,
-        )
+        # self.custom = self.imgai_client.CustomObjects(
+        #     person=True,
+        #     bicycle=True,
+        #     car=True,
+        #     motorcycle=True,
+        #     airplane=True,
+        #     bus=True,
+        #     train=True,
+        #     truck=True,
+        #     boat=True,
+        #     traffic_light=True,
+        #     cell_phone=True,
+        # )
 
         support_type = [
             ObjectDetectorClient.CLIENT_CVLIB,
