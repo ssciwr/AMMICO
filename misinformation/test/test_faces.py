@@ -2,6 +2,7 @@ import misinformation.faces as fc
 import json
 from pytest import approx
 
+
 def test_analyse_faces():
     mydict = {
         "filename": "./test/data/IMG_2746.png",
