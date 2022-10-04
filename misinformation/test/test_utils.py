@@ -6,18 +6,18 @@ import misinformation.utils as ut
 
 def test_find_files():
     result = ut.find_files(
-        path="./misinformation/test/data/", pattern="*.png", recursive=True, limit=10
+        path="./test/data/", pattern="*.png", recursive=True, limit=10
     )
     assert len(result) > 0
 
 
 def test_initialize_dict():
     result = [
-        "/misinformation/test/data/image_faces.jpg",
-        "/misinformation/test/data/image_objects.jpg",
+        "/test/data/image_faces.jpg",
+        "/test/data/image_objects.jpg",
     ]
     mydict = ut.initialize_dict(result)
-    with open("./misinformation/test/data/example_utils_init_dict.txt", "r") as file:
+    with open("./test/data/example_utils_init_dict.txt", "r") as file:
         out_dict = file.read()
     assert str(mydict) == str(out_dict)
 

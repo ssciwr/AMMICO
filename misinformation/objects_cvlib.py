@@ -31,7 +31,8 @@ class ObjectsMethod:
     """Base class to be inherited by all objects methods."""
 
     def __init__(self):
-        None
+        # initialize in child class
+        pass
 
     def analyse_image(self, subdict):
         raise NotImplementedError()
@@ -39,7 +40,8 @@ class ObjectsMethod:
 
 class ObjectCVLib(ObjectsMethod):
     def __init__(self, client_type=1):
-        None
+        # as long as imageai is not activated this remains empty
+        pass
 
     def detect_objects_cvlib(self, image_path):
         """Localize objects in the local image.
