@@ -1,5 +1,12 @@
 # Misinformation campaign analysis
 
+[![GitHub tag](https://img.shields.io/github/tag/ssciwr/misinformation?include_prereleases=&sort=semver&color=blue)](https://github.com/ssciwr/misinformation/releases/)
+![License: MIT](https://img.shields.io/github/license/ssciwr/misinformation)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ssciwr/misinformation/CI)
+![codecov](https://img.shields.io/codecov/c/github/ssciwr/misinformation)
+![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ssciwr_misinformation&metric=alert_status)
+![Language](https://img.shields.io/github/languages/top/ssciwr/misinformation)
+
 Extract data from from social media images and texts in disinformation campaigns.
 
 **_This project is currently under development!_**
