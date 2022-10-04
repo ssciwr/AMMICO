@@ -1,0 +1,17 @@
+{
+    "filename": ["./data/image01.jpg", "./data/image02.jpg"], 
+    "person": ["yes", "no"], 
+    "bicycle": ["no", "no"], 
+    "car": ["no", "yes"], 
+    "motorcycle": ["no", "no"], 
+    "airplane": ["no", "no"], 
+    "bus": ["no", "yes"], 
+    "train": ["no", "no"], 
+    "truck": ["no", "yes"], 
+    "boat": ["no", "no"], 
+    "traffic light": ["no", "yes"], 
+    "cell phone": ["yes", "no"], 
+    "gender": ["male", "male"], 
+    "wears_mask": ["no", "no"], 
+    "race": ["asian", "asian"]
+}

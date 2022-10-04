@@ -1,0 +1,3 @@
+,filename,person,bicycle,car,motorcycle,airplane,bus,train,truck,boat,traffic light,cell phone,gender,wears_mask,race
+0,./data/image01.jpg,yes,no,no,no,no,no,no,no,no,no,yes,male,no,asian
+1,./data/image02.jpg,no,no,yes,no,no,yes,no,yes,no,yes,no,male,no,asian
