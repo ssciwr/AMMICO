@@ -1,5 +1,0 @@
-             filename person bicycle  car  ... cell phone gender wears_mask   race
-0  ./data/image01.jpg    yes      no   no  ...        yes   male         no  asian
-1  ./data/image02.jpg     no      no  yes  ...         no   male         no  asian
-
-[2 rows x 15 columns]

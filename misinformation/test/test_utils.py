@@ -1,6 +1,5 @@
-import os
-import pytest
-import misinformation
+import json
+import pandas as pd
 import misinformation.utils as ut
 
 
@@ -17,34 +16,25 @@ def test_initialize_dict():
         "/test/data/image_objects.jpg",
     ]
     mydict = ut.initialize_dict(result)
-    with open("./test/data/example_utils_init_dict.txt", "r") as file:
-        out_dict = file.read()
-    assert str(mydict) == str(out_dict)
+    with open("./test/data/example_utils_init_dict.json", "r") as file:
+        out_dict = json.load(file)
+    assert mydict == out_dict
 
 
 def test_append_data_to_dict():
-    with open(
-        "./misinformation/test/data/example_append_data_to_dict_in.txt", "r"
-    ) as file:
-        mydict = file.read()
-    mydict = eval(mydict)
+    with open("./test/data/example_append_data_to_dict_in.json", "r") as file:
+        mydict = json.load(file)
     outdict = ut.append_data_to_dict(mydict)
     print(outdict)
-    with open(
-        "./misinformation/test/data/example_append_data_to_dict_out.txt", "r"
-    ) as file:
-        example_outdict = file.read()
+    with open("./test/data/example_append_data_to_dict_out.json", "r") as file:
+        example_outdict = json.load(file)
 
-    assert str(outdict) == example_outdict
+    assert outdict == example_outdict
 
 
 def test_dump_df():
-    with open(
-        "./misinformation/test/data/example_append_data_to_dict_out.txt", "r"
-    ) as file:
-        outdict = file.read()
-    outdict = eval(outdict)
+    with open("./test/data/example_append_data_to_dict_out.json", "r") as file:
+        outdict = json.load(file)
     df = ut.dump_df(outdict)
-    with open("./misinformation/test/data/example_dump_df.txt", "r") as file:
-        out_df = file.read()
-    assert str(df.head()) == out_df
+    out_df = pd.read_csv("./test/data/example_dump_df.csv", index_col=[0])
+    pd.testing.assert_frame_equal(df, out_df)
