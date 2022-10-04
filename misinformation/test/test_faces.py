@@ -1,19 +1,25 @@
-import os
-import pytest
-import misinformation
 import misinformation.faces as fc
+import json
 
 
 def test_analyse_faces():
     mydict = {
-        "image_faces": {"filename": "./misinformation/test/data/IMG_2746.png"},
-        "image_objects": {"filename": "./misinformation/test/data/IMG_2809.png"},
+        "filename": "./test/data/IMG_2746.png",
     }
-    for key in mydict.keys():
-        mydict[key] = fc.EmotionDetector(mydict[key]).analyse_image()
+    mydict = fc.EmotionDetector(mydict).analyse_image()
     print(mydict)
 
-    with open("./misinformation/test/data/example_faces.txt", "r") as file:
-        out_dict = file.read()
+    with open("./test/data/example_faces.json", "r") as file:
+        out_dict = json.load(file)
 
-    assert str(mydict) == out_dict
+    for key in mydict.keys():
+        if key != "emotion":
+            assert mydict[key] == out_dict[key]
+    # json can't handle tuples natively
+    for i in range(0, len(mydict["emotion"])):
+        temp = (
+            list(mydict["emotion"][i])
+            if type(mydict["emotion"][i]) == tuple
+            else mydict["emotion"][i]
+        )
+        assert temp == out_dict["emotion"][i]
