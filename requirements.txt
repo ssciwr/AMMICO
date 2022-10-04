@@ -12,3 +12,4 @@ setuptools
 tensorflow
 keras
 openpyxl
+pytest
