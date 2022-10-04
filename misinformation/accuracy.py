@@ -81,11 +81,6 @@ class LabelManager:
         return mapped_dict
 
 
-# 10056701: {'id': 100567, 'pic_order': 1, 'pic_id': 10056701, 'v9_4': 1, 'v9_5a': 0.0, 'v9_5b': 1, 'v9_6': 1, 'v9_7': 0, 'v9_8': 0, 'v9_8a': 0, 'v9_9': 1, 'v9_10': 0, 'v9_11': 1, 'v9_12': 0, 'v9_13': 0, 'v9_13_text': nan, 'v11_3': 0}
-# Yes,No,1,['No'],[32],['Woman'],['white'],"[('neutral', 91.75465703010559)]",['Neutral']
-# 1, 0, 1,
-
-
 if __name__ == "__main__":
     files = utils.find_files(
         path="/home/inga/projects/misinformation-project/misinformation/misinformation/test/data/Europe APRMAY20 visual data/cropped images"

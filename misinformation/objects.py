@@ -19,15 +19,14 @@ class ObjectDetectorClient(AnalysisMethod):
     def set_client_to_cvlib(self):
         self.detector = ObjectCVLib()
 
-    def analyse_image(self, subdict):
+    def analyse_image(self, subdict=None):
         """Localize objects in the local image.
 
         Args:
         subdict: The dictionary for an image expression instance.
         """
-        subdict = self.detector.analyse_image(subdict)
 
-        return subdict
+        return self.detector.analyse_image(subdict)
 
 
 class ObjectDetector(AnalysisMethod):
