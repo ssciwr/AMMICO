@@ -22,4 +22,4 @@ def test_analyse_faces():
             if type(mydict["emotion"][i]) == tuple
             else mydict["emotion"][i]
         )
-        assert temp == out_dict["emotion"][i]
+        assert temp.approx == out_dict["emotion"][i]
