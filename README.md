@@ -13,3 +13,19 @@ Use the pre-processed social media posts (image files) and process to collect in
   
 This development will serve the fight to combat misinformation, by providing more comprehensive data about its content and techniques. 
 The ultimate goal of this project is to develop a computer-assisted toolset to investigate the content of disinformation campaigns worldwide. 
+
+# Installation
+
+The `misinformation` package can be installed using pip: Navigate into your package folder `misinformation/` and execute
+```
+pip install .
+```
+This will install the package and its dependencies locally.
+
+# Usage
+
+There are sample notebooks in the `misinformation/notebooks` folder for you to explore the package usage:
+1. Facial analysis: Use the notebook `facial_expressions.ipynb` to identify if there are faces on the image, if they are wearing masks, and if they are not wearing masks also the race, gender and dominant emotion.
+1. Object analysis: Use the notebook `ojects_expression.ipynb` to identify certain objects in the image. Currently, the following objects are being identified: person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
+
+There are further notebooks that are currently of exploratory nature (`colors_expression` to identify certain colors on the image, `get-text-from-image` to extract text that is contained in an image.)

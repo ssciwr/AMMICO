@@ -86,6 +86,8 @@ class EmotionDetector(utils.AnalysisMethod):
     def set_keys(self) -> dict:
         params = {
             "face": "No",
+            "multiple_faces": "No",
+            "no_faces": 0,
             "wears_mask": ["No"],
             "age": [None],
             "gender": [None],
@@ -145,7 +147,9 @@ class EmotionDetector(utils.AnalysisMethod):
         # Sort the faces by sight to prioritize prominent faces
         faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
 
-        self.subdict["face"] = "yes"
+        self.subdict["face"] = "Yes"
+        self.subdict["multiple_faces"] = "Yes" if len(faces) > 1 else "No"
+        self.subdict["no_faces"] = len(faces) if len(faces) <= 15 else 99
         # note number of faces being identified
         result = {"number_faces": len(faces) if len(faces) <= 3 else 3}
         # We limit ourselves to three faces
