@@ -13,7 +13,8 @@ class ObjectDetectorClient(AnalysisMethod):
     def set_client_to_imageai(self):
         # disable imageai temporarily
         # self.detector = ObjectImageAI()
-        None
+        # maybe reactivate if new imageai release comes out
+        pass
 
     def set_client_to_cvlib(self):
         self.detector = ObjectCVLib()
