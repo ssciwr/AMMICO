@@ -35,6 +35,8 @@ dependencies = [
     "tensorflow",
     "keras",
     "openpyxl",
+    "pytest",
+    "pytest-cov",
 ]
 
 [project.scripts]

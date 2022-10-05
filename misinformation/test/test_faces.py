@@ -1,5 +1,6 @@
 import misinformation.faces as fc
 import json
+from pytest import approx
 
 
 def test_analyse_faces():
@@ -22,4 +23,4 @@ def test_analyse_faces():
             if type(mydict["emotion"][i]) == tuple
             else mydict["emotion"][i]
         )
-        assert temp == out_dict["emotion"][i]
+        assert approx(temp) == out_dict["emotion"][i]

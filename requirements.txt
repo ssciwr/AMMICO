@@ -12,3 +12,5 @@ setuptools
 tensorflow
 keras
 openpyxl
+pytest
+pytest-cov
