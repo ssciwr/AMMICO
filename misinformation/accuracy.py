@@ -102,8 +102,28 @@ if __name__ == "__main__":
     orders = lm.get_orders()
     # map mydict to the specified variable names and values
     mydict_map = lm.map_dict(mydict)
-    print(mydict_map)
+    # print(mydict_map)
     lm.filter_from_order([1, 2, 3] + orders)
 
     labels = lm.gen_dict()
-    print(labels)
+    comp = {}
+    for key in labels.keys():
+        if str(key) not in mydict_map:
+            print("Key {} not found.".format(key))
+            continue
+        print("ref: {}".format(labels[key]))
+        print("com: {}".format(mydict_map[str(key)]))
+        for subkey in labels[key]:
+            if type(labels[key][subkey]) != int:
+                continue
+            if type(mydict_map[str(key)][subkey]) != int:
+                continue
+            comp[subkey] = (
+                comp.get(subkey, 0) + labels[key][subkey] - mydict_map[str(key)][subkey]
+            )
+    print("summary: ")
+    # why only 20
+    # why v59_5a not there
+    # {'v9_4': 0, 'v9_5b': 11, 'v9_6': 107, 'v9_7': 3, 'v9_8': 5, 'v9_8a': 5, 'v9_9': 5, 'v9_10': 2, 'v9_11': 2, 'v9_12': 0, 'v9_13': 0, 'v11_3': 3}
+    print(comp)
+    # print(labels)
