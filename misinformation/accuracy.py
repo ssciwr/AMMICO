@@ -77,13 +77,24 @@ class LabelManager:
                 # substitute the values that are not boolean
                 if self.map[key]["variable_coding"] != "Bool":
                     mapped_subdict[key] = mydict_current
+                # take only first value in lists - this applies to faces,
+                # reported are up to three in a list, we compare only the
+                # largest one here
+                if isinstance(mydict_current, list):
+                    mapped_subdict[key] = 1 if mydict_current[0] == mydict_value else 0
+                    # also cut out the likelihood for detected emotion
+                    if isinstance(mydict_current[0], tuple):
+                        mapped_subdict[key] = (
+                            1 if mydict_current[0][0] == mydict_value else 0
+                        )
             mapped_dict[id] = mapped_subdict
         return mapped_dict
 
 
 if __name__ == "__main__":
     files = utils.find_files(
-        path="/home/inga/projects/misinformation-project/misinformation/misinformation/test/data/Europe APRMAY20 visual data/cropped images"
+        path="/home/inga/projects/misinformation-project/misinformation/misinformation/test/data/Europe APRMAY20 visual data/cropped images",
+        limit=500,
     )
     mydict = utils.initialize_dict(files)
     # analyze faces
@@ -102,7 +113,6 @@ if __name__ == "__main__":
     orders = lm.get_orders()
     # map mydict to the specified variable names and values
     mydict_map = lm.map_dict(mydict)
-    # print(mydict_map)
     lm.filter_from_order([1, 2, 3] + orders)
 
     labels = lm.gen_dict()
@@ -118,12 +128,20 @@ if __name__ == "__main__":
                 continue
             if type(mydict_map[str(key)][subkey]) != int:
                 continue
-            comp[subkey] = (
-                comp.get(subkey, 0) + labels[key][subkey] - mydict_map[str(key)][subkey]
+            comp[subkey] = comp.get(subkey, 0) + abs(
+                labels[key][subkey] - mydict_map[str(key)][subkey]
             )
     print("summary: ")
-    # why only 20
-    # why v59_5a not there
-    # {'v9_4': 0, 'v9_5b': 11, 'v9_6': 107, 'v9_7': 3, 'v9_8': 5, 'v9_8a': 5, 'v9_9': 5, 'v9_10': 2, 'v9_11': 2, 'v9_12': 0, 'v9_13': 0, 'v11_3': 3}
+    # why v9_5a not there - bec reads in as float from the csv
     print(comp)
-    # print(labels)
+    # summary:
+    # {'v9_4': 42, 'v9_5b': 1579, 'v9_6': 229, 'v9_7': 45, 'v9_8': 39, 'v9_8a': 31, 'v9_9': 58, 'v9_10': 33, 'v9_11': 22, 'v9_12': 2, 'v9_13': 24, 'v11_3': 39}
+    # Important here is:
+    # Overall positive - 'v9_8': 39 deviations
+    # Overall negative - 'v9_9': 58
+    # happy - 'v9_8a': 31
+    # fear - 'v9_10': 33
+    # angry - 'v9_11': 22
+    # disgust - 'v9_12': 2
+    # sad - 'v9_13': 24
+    # respect of rules = wears mask - 'v11_3': 39
