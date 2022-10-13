@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+import shutil
 import pathlib
 import ipywidgets
 
@@ -17,7 +18,12 @@ import misinformation.utils as utils
 def deepface_symlink_processor(name):
     def _processor(fname, action, pooch):
         if not os.path.exists(name):
-            os.symlink(fname, name)
+            # symlink does not work on windows
+            # use copy if running on windows
+            if not os.name == "nt":
+                os.symlink(fname, name)
+            else:
+                shutil.copy(fname, name)
         return fname
 
     return _processor

@@ -1,5 +1,5 @@
 {
-    "V9_4": {
+    "v9_4": {
         "order": 169,
         "variable_label": "4=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Person visible",
@@ -8,7 +8,7 @@
         "variable_mydict": "face",
         "value_mydict": "Yes"
     },
-    "V9_5a": {
+    "v9_5a": {
         "order": 170,
         "variable_label": "5a=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "More than one person shown",
@@ -17,7 +17,7 @@
         "variable_mydict": "multiple_faces",
         "value_mydict": "Yes"
     },
-    "V9_5b": {
+    "v9_5b": {
         "order": 171,
         "variable_label": "5b=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "How many people shown?",
@@ -26,7 +26,7 @@
         "variable_mydict": "no_faces",
         "value_mydict": "0"
     },
-    "V9_6": {
+    "v9_6": {
         "order": 172,
         "variable_label": "6=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Face fully visible",
@@ -35,7 +35,7 @@
         "variable_mydict": "wears_mask",
         "value_mydict": "No"
     },
-    "V9_7": {
+    "v9_7": {
         "order": 173,
         "variable_label": "7=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Face ONLY partially visible",
@@ -44,7 +44,7 @@
         "variable_mydict": "wears_mask",
         "value_mydict": "Yes"
     },
-    "V9_8": {
+    "v9_8": {
         "order": 174,
         "variable_label": "8=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Facial positive expression",
@@ -53,7 +53,7 @@
         "variable_mydict": "emotion (category)",
         "value_mydict": "Positive"
     },
-    "V9_8a": {
+    "v9_8a": {
         "order": 175,
         "variable_label": "8a=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Positive expression: happiness",
@@ -62,7 +62,7 @@
         "variable_mydict": "emotion",
         "value_mydict": "happy"
     },
-    "V9_9": {
+    "v9_9": {
         "order": 176,
         "variable_label": "9=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Facial negative expression",
@@ -71,7 +71,7 @@
         "variable_mydict": "emotion (category)",
         "value_mydict": "Negative"
     },
-    "V9_10": {
+    "v9_10": {
         "order": 177,
         "variable_label": "10=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: anxiety",
@@ -80,7 +80,7 @@
         "variable_mydict": "emotion",
         "value_mydict": "fear"
     },
-    "V9_11": {
+    "v9_11": {
         "order": 178,
         "variable_label": "11=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: anger",
@@ -89,7 +89,7 @@
         "variable_mydict": "emotion",
         "value_mydict": "angry"
     },
-    "V9_12": {
+    "v9_12": {
         "order": 179,
         "variable_label": "12=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: disgust",
@@ -98,7 +98,7 @@
         "variable_mydict": "emotion",
         "value_mydict": "disgust"
     },
-    "V9_13": {
+    "v9_13": {
         "order": 180,
         "variable_label": "13=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: other, specify",
@@ -107,7 +107,7 @@
         "variable_mydict": "emotion",
         "value_mydict": "sad"
     },
-    "V9_13_text": {
+    "v9_13_text": {
         "order": 181,
         "variable_label": "13=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Negative expression: other, specify",
@@ -115,7 +115,7 @@
         "variable_mydict": "emotion",
         "value_mydict": ""
     },
-    "V11_3": {
+    "v11_3": {
         "order": 189,
         "variable_label": "111_3=PICTURE_SPECIFIC_VisualONLY",
         "variable_explanation": "Respect of the rules",
