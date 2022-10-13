@@ -5,7 +5,7 @@ repos:
       - id: nbstripout
         files: ".ipynb"
   - repo: https://github.com/psf/black
-    rev: 22.8.0
+    rev: 22.10.0
     hooks:
     - id: black
   - repo: https://github.com/dfm/black_nbconvert
@@ -17,6 +17,6 @@ repos:
       hooks:
       -   id: flake8
   -   repo: https://github.com/s-weigand/flake8-nb
-      rev: v0.5.0 
+      rev: v0.5.0
       hooks:
       -   id: flake8-nb
