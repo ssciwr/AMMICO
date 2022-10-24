@@ -12,8 +12,8 @@ def test_find_files():
 
 def test_initialize_dict():
     result = [
-        "/test/data/image_faces.jpg",
-        "/test/data/image_objects.jpg",
+        "./test/data/image_faces.jpg",
+        "./test/data/image_objects.jpg",
     ]
     mydict = ut.initialize_dict(result)
     with open("./test/data/example_utils_init_dict.json", "r") as file:
