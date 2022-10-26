@@ -2,6 +2,7 @@ import json
 import pytest
 import misinformation.objects as ob
 import misinformation.objects_cvlib as ob_cvlib
+
 # import misinformation.objects_imageai as ob_iai
 
 
@@ -77,7 +78,7 @@ def test_objects_from_imageai(default_objects):
         {"name": "motorcycle"},
         {"name": "traffic light"},
     ]
-    objects = ob_iai.objects_from_imageai(objs_input)
+    objects = ob_iai.objects_from_imageai(objs_input)  # noqa: F821
     out_objects = default_objects
     for obj in objects_list:
         out_objects[obj] = "yes"
@@ -88,7 +89,7 @@ def test_objects_from_imageai(default_objects):
 @pytest.mark.imageai
 def test_analyse_image_from_file_imageai():
     file_path = "./test/data/IMG_2809.png"
-    objs = ob_iai.ObjectImageAI().analyse_image_from_file(file_path)
+    objs = ob_iai.ObjectImageAI().analyse_image_from_file(file_path)  # noqa: F821
 
     with open("./test/data/example_objects_imageai.json", "r") as file:
         out_dict = json.load(file)
@@ -99,7 +100,7 @@ def test_analyse_image_from_file_imageai():
 @pytest.mark.imageai
 def test_detect_objects_imageai():
     file_path = "./test/data/IMG_2809.png"
-    objs = ob_iai.ObjectImageAI().detect_objects_imageai(file_path)
+    objs = ob_iai.ObjectImageAI().detect_objects_imageai(file_path)  # noqa: F821
 
     with open("./test/data/example_objects_imageai.json", "r") as file:
         out_dict = json.load(file)
@@ -110,7 +111,7 @@ def test_detect_objects_imageai():
 @pytest.mark.imageai
 def test_analyse_image_imageai():
     mydict = {"filename": "./test/data/IMG_2809.png"}
-    ob_iai.ObjectImageAI().analyse_image(mydict)
+    ob_iai.ObjectImageAI().analyse_image(mydict)  # noqa: F821
     with open("./test/data/example_objects_imageai.json", "r") as file:
         out_dict = json.load(file)
     for key in mydict.keys():
