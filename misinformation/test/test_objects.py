@@ -1,9 +1,8 @@
 import json
 import pytest
-import misinformation
 import misinformation.objects as ob
 import misinformation.objects_cvlib as ob_cvlib
-import misinformation.objects_imageai as ob_iai
+# import misinformation.objects_imageai as ob_iai
 
 
 @pytest.fixture()
@@ -70,6 +69,7 @@ def test_detect_objects_cvlib():
         assert objs[key] == out_dict[key]
 
 
+@pytest.mark.imageai
 def test_objects_from_imageai(default_objects):
     objects_list = ["cell phone", "motorcycle", "traffic light"]
     objs_input = [
@@ -85,6 +85,7 @@ def test_objects_from_imageai(default_objects):
     assert str(objects) == str(out_objects)
 
 
+@pytest.mark.imageai
 def test_analyse_image_from_file_imageai():
     file_path = "./test/data/IMG_2809.png"
     objs = ob_iai.ObjectImageAI().analyse_image_from_file(file_path)
@@ -95,6 +96,7 @@ def test_analyse_image_from_file_imageai():
         assert objs[key] == out_dict[key]
 
 
+@pytest.mark.imageai
 def test_detect_objects_imageai():
     file_path = "./test/data/IMG_2809.png"
     objs = ob_iai.ObjectImageAI().detect_objects_imageai(file_path)
@@ -105,6 +107,7 @@ def test_detect_objects_imageai():
         assert objs[key] == out_dict[key]
 
 
+@pytest.mark.imageai
 def test_analyse_image_imageai():
     mydict = {"filename": "./test/data/IMG_2809.png"}
     ob_iai.ObjectImageAI().analyse_image(mydict)
