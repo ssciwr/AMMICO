@@ -8,6 +8,9 @@ import misinformation.objects_cvlib as ob_cvlib
 OBJECT_1 = "cell phone"
 OBJECT_2 = "motorcycle"
 OBJECT_3 = "traffic light"
+TEST_IMAGE_1 = "./test/data/IMG_2809.png"
+JSON_1 = "./test/data/example_objects_cvlib.json"
+JSON_2 = "./test/data/example_objects_imageai.json"
 
 
 @pytest.fixture()
@@ -26,10 +29,10 @@ def test_objects_from_cvlib(default_objects):
 
 
 def test_analyse_image_cvlib():
-    mydict = {"filename": "./test/data/IMG_2809.png"}
+    mydict = {"filename": TEST_IMAGE_1}
     ob_cvlib.ObjectCVLib().analyse_image(mydict)
 
-    with open("./test/data/example_objects_cvlib.json", "r") as file:
+    with open(JSON_1, "r") as file:
         out_dict = json.load(file)
     for key in mydict.keys():
         assert mydict[key] == out_dict[key]
@@ -55,20 +58,20 @@ def test_init_default_objects():
 
 
 def test_analyse_image_from_file_cvlib():
-    file_path = "./test/data/IMG_2809.png"
+    file_path = TEST_IMAGE_1
     objs = ob_cvlib.ObjectCVLib().analyse_image_from_file(file_path)
 
-    with open("./test/data/example_objects_cvlib.json", "r") as file:
+    with open(JSON_1, "r") as file:
         out_dict = json.load(file)
     for key in objs.keys():
         assert objs[key] == out_dict[key]
 
 
 def test_detect_objects_cvlib():
-    file_path = "./test/data/IMG_2809.png"
+    file_path = TEST_IMAGE_1
     objs = ob_cvlib.ObjectCVLib().detect_objects_cvlib(file_path)
 
-    with open("./test/data/example_objects_cvlib.json", "r") as file:
+    with open(JSON_1, "r") as file:
         out_dict = json.load(file)
     for key in objs.keys():
         assert objs[key] == out_dict[key]
@@ -92,10 +95,10 @@ def test_objects_from_imageai(default_objects):
 
 @pytest.mark.imageai
 def test_analyse_image_from_file_imageai():
-    file_path = "./test/data/IMG_2809.png"
+    file_path = TEST_IMAGE_1
     objs = ob_iai.ObjectImageAI().analyse_image_from_file(file_path)  # noqa: F821
 
-    with open("./test/data/example_objects_imageai.json", "r") as file:
+    with open(JSON_2, "r") as file:
         out_dict = json.load(file)
     for key in objs.keys():
         assert objs[key] == out_dict[key]
@@ -103,10 +106,10 @@ def test_analyse_image_from_file_imageai():
 
 @pytest.mark.imageai
 def test_detect_objects_imageai():
-    file_path = "./test/data/IMG_2809.png"
+    file_path = TEST_IMAGE_1
     objs = ob_iai.ObjectImageAI().detect_objects_imageai(file_path)  # noqa: F821
 
-    with open("./test/data/example_objects_imageai.json", "r") as file:
+    with open(JSON_2, "r") as file:
         out_dict = json.load(file)
     for key in objs.keys():
         assert objs[key] == out_dict[key]
@@ -114,25 +117,25 @@ def test_detect_objects_imageai():
 
 @pytest.mark.imageai
 def test_analyse_image_imageai():
-    mydict = {"filename": "./test/data/IMG_2809.png"}
+    mydict = {"filename": TEST_IMAGE_1}
     ob_iai.ObjectImageAI().analyse_image(mydict)  # noqa: F821
-    with open("./test/data/example_objects_imageai.json", "r") as file:
+    with open(JSON_2, "r") as file:
         out_dict = json.load(file)
     for key in mydict.keys():
         assert mydict[key] == out_dict[key]
 
 
 def test_set_keys(default_objects):
-    mydict = {"filename": "./test/data/IMG_2809.png"}
+    mydict = {"filename": TEST_IMAGE_1}
     key_objs = ob.ObjectDetector(mydict).set_keys()
     assert str(default_objects) == str(key_objs)
 
 
 def test_analyse_image():
-    mydict = {"filename": "./test/data/IMG_2809.png"}
+    mydict = {"filename": TEST_IMAGE_1}
     ob.ObjectDetector.set_client_to_cvlib()
     ob.ObjectDetector(mydict).analyse_image()
-    with open("./test/data/example_objects_cvlib.json", "r") as file:
+    with open(JSON_1, "r") as file:
         out_dict = json.load(file)
 
     assert str(mydict) == str(out_dict)
