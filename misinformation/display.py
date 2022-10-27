@@ -11,7 +11,9 @@ class JSONContainer:
     rich display rendering.
     """
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
+        if data is None:
+            data = {}
         self._data = data
 
     def _repr_json_(self):

@@ -75,8 +75,8 @@ def find_files(path=None, pattern="*.png", recursive=True, limit=20):
 def initialize_dict(filelist: list) -> dict:
     mydict = {}
     for img_path in filelist:
-        id = img_path.split(".")[0].split("/")[-1]
-        mydict[id] = {"filename": img_path}
+        id_ = img_path.split(".")[0].split("/")[-1]
+        mydict[id_] = {"filename": img_path}
     return mydict
 
 
