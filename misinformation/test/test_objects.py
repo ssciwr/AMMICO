@@ -5,6 +5,10 @@ import misinformation.objects_cvlib as ob_cvlib
 
 # import misinformation.objects_imageai as ob_iai
 
+OBJECT_1 = "cell phone"
+OBJECT_2 = "motorcycle"
+OBJECT_3 = "traffic light"
+
 
 @pytest.fixture()
 def default_objects():
@@ -12,7 +16,7 @@ def default_objects():
 
 
 def test_objects_from_cvlib(default_objects):
-    objects_list = ["cell phone", "motorcycle", "traffic light"]
+    objects_list = [OBJECT_1, OBJECT_2, OBJECT_3]
     objects = ob_cvlib.objects_from_cvlib(objects_list)
     out_objects = default_objects
     for obj in objects_list:
@@ -36,14 +40,14 @@ def test_init_default_objects():
         "person",
         "bicycle",
         "car",
-        "motorcycle",
+        OBJECT_2,
         "airplane",
         "bus",
         "train",
         "truck",
         "boat",
-        "traffic light",
-        "cell phone",
+        OBJECT_3,
+        OBJECT_1,
     ]
     init_objects = ob_cvlib.init_default_objects()
     for obj in default_obj_list:
@@ -72,11 +76,11 @@ def test_detect_objects_cvlib():
 
 @pytest.mark.imageai
 def test_objects_from_imageai(default_objects):
-    objects_list = ["cell phone", "motorcycle", "traffic light"]
+    objects_list = [OBJECT_1, OBJECT_2, OBJECT_3]
     objs_input = [
-        {"name": "cell phone"},
-        {"name": "motorcycle"},
-        {"name": "traffic light"},
+        {"name": OBJECT_1},
+        {"name": OBJECT_2},
+        {"name": OBJECT_3},
     ]
     objects = ob_iai.objects_from_imageai(objs_input)  # noqa: F821
     out_objects = default_objects
