@@ -60,10 +60,10 @@ def draw_matches(matches, img1, img2, kp1, kp2):
         h2 = img2.shape[0]
         w1 = img1.shape[1]
         w2 = img2.shape[1]
-        nWidth = w1 + w2
-        nHeight = max(h1, h2)
+        nwidth = w1 + w2
+        nheight = max(h1, h2)
         hdif = int((h2 - h1) / 2)
-        newimg = np.zeros((nHeight, nWidth, 3), np.uint8)
+        newimg = np.zeros((nheight, nwidth, 3), np.uint8)
 
         for i in range(3):
             newimg[hdif : hdif + h1, :w1, i] = img1
@@ -202,14 +202,14 @@ def get_file_list(dir, filelist, ext=None, convert_unix=True):
 
     elif os.path.isdir(dir):
         for s in os.listdir(dir):
-            newDir = os.path.join(dir, s)
-            get_file_list(newDir, filelist, ext)
+            new_dir = os.path.join(dir, s)
+            get_file_list(new_dir, filelist, ext)
 
     if convert_unix:
         new_filelist = []
-        for file in filelist:
-            file = file.replace("\\", "/")
-            new_filelist.append(file)
+        for file_ in filelist:
+            file_ = file_.replace("\\", "/")
+            new_filelist.append(file_)
         return new_filelist
     else:
         return filelist
