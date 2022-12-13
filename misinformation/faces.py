@@ -84,14 +84,22 @@ retinaface_model = DownloadResource(
 
 
 class EmotionDetector(utils.AnalysisMethod):
-    def __init__(self, subdict: dict) -> None:
+    def __init__(
+        self, subdict: dict, emotion_threshold=50.0, race_threshold=50.0
+    ) -> None:
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
-        self.emotion_threshold = 25.0
-        self.race_threshold = 80.0
-        self.negative_emotion = ["angry", "disgust", "fear", "sad"]
-        self.positive_emotion = ["happy"]
-        self.neutral_emotion = ["surprise", "neutral"]
+        self.emotion_threshold = emotion_threshold
+        self.race_threshold = race_threshold
+        self.emotion_categories = {
+            "angry": "Negative",
+            "disgust": "Negative",
+            "fear": "Negative",
+            "sad": "Negative",
+            "happy": "Positive",
+            "surprise": "Neutral",
+            "neutral": "Neutral",
+        }
 
     def set_keys(self) -> dict:
         params = {
@@ -191,37 +199,28 @@ class EmotionDetector(utils.AnalysisMethod):
                 self.subdict["emotion"].append(None)
                 self.subdict["emotion (category)"].append(None)
             elif not result[person]["wears_mask"]:
-                # also assign categories based on threshold
-                cumulative = [
-                    sum(
-                        result[person]["emotion"][key]
-                        for key in result[person]["emotion"].keys()
-                        if key in self.negative_emotion
+                # Check whether the race threshold was exceeded
+                if (
+                    result[person]["race"][result[person]["dominant_race"]]
+                    > self.race_threshold
+                ):
+                    self.subdict["race"].append(result[person]["dominant_race"])
+                else:
+                    self.subdict["race"].append(None)
+
+                # Check whether the emotion threshold was exceeded
+                if (
+                    result[person]["emotion"][result[person]["dominant_emotion"]]
+                    > self.emotion_threshold
+                ):
+                    self.subdict["emotion"].append(result[person]["dominant_emotion"])
+                    self.subdict["emotion (category)"].append(
+                        self.emotion_categories[result[person]["dominant_emotion"]]
                     )
-                ]
-                cumulative.append(
-                    sum(
-                        result[person]["emotion"][key]
-                        for key in result[person]["emotion"].keys()
-                        if key in self.positive_emotion
-                    )
-                )
-                cumulative.append(
-                    sum(
-                        result[person]["emotion"][key]
-                        for key in result[person]["emotion"].keys()
-                        if key in self.neutral_emotion
-                    )
-                )
-                expression = ["Negative", "Positive", "Neutral"]
-                # now zip the two lists and sort according to highest contribution
-                category = sorted(zip(cumulative, expression), reverse=True)[0][1]
-                self.subdict["race"].append(result[person]["dominant_race"])
-                dominant = result[person]["dominant_emotion"]
-                self.subdict["emotion"].append(
-                    (dominant, result[person]["emotion"][dominant])
-                )
-                self.subdict["emotion (category)"].append(category)
+                else:
+                    self.subdict["emotion"].append(None)
+                    self.subdict["emotion (category)"].append(None)
+
         return self.subdict
 
     def wears_mask(self, face: np.ndarray) -> bool:

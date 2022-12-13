@@ -7,6 +7,6 @@
         "age": [36, 35, 33], 
         "gender": ["Man", "Man", "Man"], 
         "race": ["white", "white", null], 
-        "emotion": [["sad", 73.24264486090212], ["fear", 84.20093247879356], null], 
+        "emotion": ["sad", "fear", null], 
         "emotion (category)": ["Negative", "Negative", null]
 }    
