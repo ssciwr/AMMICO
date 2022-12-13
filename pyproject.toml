@@ -37,6 +37,9 @@ dependencies = [
     "openpyxl",
     "pytest",
     "pytest-cov",
+    "matplotlib",
+    "pytest",
+    "opencv-contrib-python",
 ]
 
 [project.scripts]

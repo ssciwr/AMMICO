@@ -14,13 +14,15 @@ from retinaface import RetinaFace
 from misinformation.utils import DownloadResource
 import misinformation.utils as utils
 
+DEEPFACE_PATH = ".deepface"
+
 
 def deepface_symlink_processor(name):
     def _processor(fname, action, pooch):
         if not os.path.exists(name):
             # symlink does not work on windows
             # use copy if running on windows
-            if not os.name == "nt":
+            if os.name != "nt":
                 os.symlink(fname, name)
             else:
                 shutil.copy(fname, name)
@@ -38,7 +40,7 @@ deepface_age_model = DownloadResource(
     url="https://github.com/serengil/deepface_models/releases/download/v1.0/age_model_weights.h5",
     known_hash="sha256:0aeff75734bfe794113756d2bfd0ac823d51e9422c8961125b570871d3c2b114",
     processor=deepface_symlink_processor(
-        pathlib.Path.home().joinpath(".deepface", "weights", "age_model_weights.h5")
+        pathlib.Path.home().joinpath(DEEPFACE_PATH, "weights", "age_model_weights.h5")
     ),
 )
 
@@ -56,7 +58,9 @@ deepface_gender_model = DownloadResource(
     url="https://github.com/serengil/deepface_models/releases/download/v1.0/gender_model_weights.h5",
     known_hash="sha256:45513ce5678549112d25ab85b1926fb65986507d49c674a3d04b2ba70dba2eb5",
     processor=deepface_symlink_processor(
-        pathlib.Path.home().joinpath(".deepface", "weights", "gender_model_weights.h5")
+        pathlib.Path.home().joinpath(
+            DEEPFACE_PATH, "weights", "gender_model_weights.h5"
+        )
     ),
 )
 
@@ -65,7 +69,7 @@ deepface_race_model = DownloadResource(
     known_hash="sha256:eb22b28b1f6dfce65b64040af4e86003a5edccb169a1a338470dde270b6f5e54",
     processor=deepface_symlink_processor(
         pathlib.Path.home().joinpath(
-            ".deepface", "weights", "race_model_single_batch.h5"
+            DEEPFACE_PATH, "weights", "race_model_single_batch.h5"
         )
     ),
 )
@@ -74,7 +78,7 @@ retinaface_model = DownloadResource(
     url="https://github.com/serengil/deepface_models/releases/download/v1.0/retinaface.h5",
     known_hash="sha256:ecb2393a89da3dd3d6796ad86660e298f62a0c8ae7578d92eb6af14e0bb93adf",
     processor=deepface_symlink_processor(
-        pathlib.Path.home().joinpath(".deepface", "weights", "retinaface.h5")
+        pathlib.Path.home().joinpath(DEEPFACE_PATH, "weights", "retinaface.h5")
     ),
 )
 
@@ -236,10 +240,10 @@ class EmotionDetector(utils.AnalysisMethod):
 
         # Run the model (ignoring output)
         with NocatchOutput():
-            mask, withoutMask = mask_detection_model.predict(face)[0]
+            mask, without_mask = mask_detection_model.predict(face)[0]
 
         # Convert from np.bool_ to bool to later be able to serialize the result
-        return bool(mask > withoutMask)
+        return bool(mask > without_mask)
 
 
 class NocatchOutput(ipywidgets.Output):
