@@ -1,4 +1,5 @@
 from google.cloud import vision
+from googletrans import Translator
 import io
 from misinformation import utils
 
@@ -7,6 +8,7 @@ class TextDetector(utils.AnalysisMethod):
     def __init__(self, subdict: dict) -> None:
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
+        self.translator = Translator()
 
     def set_keys(self) -> dict:
         params = {
@@ -18,21 +20,22 @@ class TextDetector(utils.AnalysisMethod):
         return params
 
     def analyse_image(self):
-        """Detects text on the image."""
+        self.get_text_from_image()
+        self.translate_text()
+        self.clean_text()
+        return self.subdict
 
+    def get_text_from_image(self):
+        """Detects text on the image."""
         path = self.subdict["filename"]
         client = vision.ImageAnnotatorClient()
-
         with io.open(path, "rb") as image_file:
             content = image_file.read()
-
         image = vision.Image(content=content)
-
         response = client.text_detection(image=image)
         texts = response.text_annotations[0].description
         # here check if text was found
         self.subdict = {"text": texts}
-
         if response.error.message:
             raise Exception(
                 "{}\nFor more info on error messages, check: "
@@ -40,4 +43,11 @@ class TextDetector(utils.AnalysisMethod):
                     response.error.message
                 )
             )
-        return self.subdict
+
+    def translate_text(self):
+        translated = self.translator.translate(self.subdict["text"])
+        self.subdict["text_language"] = translated.src
+        self.subdict["text_english"] = translated.text
+
+    def clean_text(self):
+        pass

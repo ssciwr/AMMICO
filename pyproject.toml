@@ -40,7 +40,7 @@ dependencies = [
     "matplotlib",
     "pytest",
     "opencv-contrib-python",
-    "googletrans-3.1.0a0",
+    "googletrans==3.1.0a0",
 ]
 
 [project.scripts]
