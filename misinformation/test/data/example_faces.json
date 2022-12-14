@@ -4,7 +4,7 @@
         "multiple_faces": "Yes", 
         "no_faces": 11, 
         "wears_mask": ["No", "No", "Yes"], 
-        "age": [36, 35, 33], 
+        "age": [35, 35, 33], 
         "gender": ["Man", "Man", "Man"], 
         "race": ["white", "white", null], 
         "emotion": ["sad", "fear", null], 
