@@ -9,7 +9,12 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict.update(self.set_keys())
 
     def set_keys(self) -> dict:
-        params = {"text": None}
+        params = {
+            "text": None,
+            "text_language": None,
+            "text_english": None,
+            "text_cleaned": None,
+        }
         return params
 
     def analyse_image(self):
@@ -24,11 +29,9 @@ class TextDetector(utils.AnalysisMethod):
         image = vision.Image(content=content)
 
         response = client.text_detection(image=image)
-        texts = response.text_annotations
+        texts = response.text_annotations[0].description
         # here check if text was found
-        self.subdict = {"text": []}
-        for text in texts:
-            self.subdict["text"].append(text.description)
+        self.subdict = {"text": texts}
 
         if response.error.message:
             raise Exception(
