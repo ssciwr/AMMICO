@@ -1,5 +1,6 @@
 from google.cloud import vision
 from googletrans import Translator
+import spacy
 import io
 from misinformation import utils
 
@@ -9,6 +10,7 @@ class TextDetector(utils.AnalysisMethod):
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
+        self.nlp = spacy.load("en_core_web_md")
 
     def set_keys(self) -> dict:
         params = {
@@ -22,6 +24,7 @@ class TextDetector(utils.AnalysisMethod):
     def analyse_image(self):
         self.get_text_from_image()
         self.translate_text()
+        self._init_spacy()
         self.clean_text()
         return self.subdict
 
@@ -49,5 +52,15 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict["text_language"] = translated.src
         self.subdict["text_english"] = translated.text
 
+    def _init_spacy(self):
+        """Generate spacy doc object."""
+        self.doc = self.nlp(self.subdict["text_english"])
+
     def clean_text(self):
-        pass
+        """Clean the text from unrecognized words and any numbers."""
+        templist = []
+        for token in self.doc:
+            templist.append(
+                token.text
+            ) if token.pos_ != "NUM" and token.has_vector else None
+        self.subdict["text_clean"] = "".join(templist)
