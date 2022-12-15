@@ -1,5 +1,6 @@
 import os
 import pytest
+import spacy
 import misinformation.text as tt
 
 TESTDICT = {
@@ -37,3 +38,14 @@ def test_get_text_from_image():
         with open(ref_file, "r") as file:
             reference_text = file.read()
         assert test_obj.subdict["text"] == reference_text
+
+
+def test_init_spacy():
+    test_obj = tt.TextDetector(TESTDICT["IMG_3755"])
+    ref_file = "./test/data/text_IMG_3755.txt"
+    with open(ref_file, "r") as file:
+        reference_text = file.read()
+    test_obj.subdict["text_english"] = reference_text
+    test_obj._init_spacy()
+    print(type(test_obj.doc))
+    assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
