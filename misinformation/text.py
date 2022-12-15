@@ -10,6 +10,7 @@ class TextDetector(utils.AnalysisMethod):
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
+        # spacy load should be separaate method with error if model not found / dynamic download
         self.nlp = spacy.load("en_core_web_md")
 
     def set_keys(self) -> dict:
