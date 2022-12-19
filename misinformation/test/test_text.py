@@ -37,7 +37,7 @@ def test_get_text_from_image():
         test_obj = tt.TextDetector(TESTDICT[item])
         test_obj.get_text_from_image()
         ref_file = "./test/data/text_" + item + ".txt"
-        with open(ref_file, "r") as file:
+        with open(ref_file, "r", encoding="utf8") as file:
             reference_text = file.read()
         assert test_obj.subdict["text"] == reference_text
 
@@ -47,9 +47,9 @@ def test_translate_text():
         test_obj = tt.TextDetector(TESTDICT[item])
         ref_file = "./test/data/text_" + item + ".txt"
         trans_file = "./test/data/text_translated_" + item + ".txt"
-        with open(ref_file, "r") as file:
+        with open(ref_file, "r", encoding="utf8") as file:
             reference_text = file.read()
-        with open(trans_file, "r") as file:
+        with open(trans_file, "r", encoding="utf8") as file:
             translated_text = file.read()
         test_obj.subdict["text"] = reference_text
         test_obj.translate_text()
