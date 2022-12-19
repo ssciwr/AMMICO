@@ -1,5 +1,6 @@
 import os
 import pytest
+import spacy
 import misinformation.text as tt
 
 TESTDICT = {
@@ -52,3 +53,23 @@ def test_translate_text():
         print("-----")
         print(test_obj.subdict["text_english"])
         print("-----")
+
+
+def test_init_spacy():
+    test_obj = tt.TextDetector(TESTDICT["IMG_3755"])
+    ref_file = "./test/data/text_IMG_3755.txt"
+    with open(ref_file, "r") as file:
+        reference_text = file.read()
+    test_obj.subdict["text_english"] = reference_text
+    test_obj._init_spacy()
+    assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
+
+
+def test_clean_text():
+    nlp = spacy.load("en_core_web_md")
+    doc = nlp("I like cats and fjejg")
+    test_obj = tt.TextDetector(TESTDICT["IMG_3755"])
+    test_obj.doc = doc
+    test_obj.clean_text()
+    result = "I like cats and"
+    assert test_obj.subdict["text_clean"] == result
