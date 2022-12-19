@@ -15,6 +15,8 @@ TESTDICT = {
     },
 }
 
+LANGUAGES = ["de", "om", "en"]
+
 os.environ[
     "GOOGLE_APPLICATION_CREDENTIALS"
 ] = "../data/seismic-bonfire-329406-412821a70264.json"
@@ -41,18 +43,18 @@ def test_get_text_from_image():
 
 
 def test_translate_text():
-    for item in TESTDICT:
+    for item, lang in zip(TESTDICT, LANGUAGES):
         test_obj = tt.TextDetector(TESTDICT[item])
         ref_file = "./test/data/text_" + item + ".txt"
+        trans_file = "./test/data/text_translated_" + item + ".txt"
         with open(ref_file, "r") as file:
             reference_text = file.read()
+        with open(trans_file, "r") as file:
+            translated_text = file.read()
         test_obj.subdict["text"] = reference_text
         test_obj.translate_text()
-        print("-----")
-        print(test_obj.subdict["text_language"])
-        print("-----")
-        print(test_obj.subdict["text_english"])
-        print("-----")
+        assert test_obj.subdict["text_language"] == lang
+        assert test_obj.subdict["text_english"] == translated_text
 
 
 def test_init_spacy():
