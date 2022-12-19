@@ -2,7 +2,7 @@ google-cloud-vision
 cvlib
 deepface
 ipywidgets
-numpy
+numpy<=1.23.4
 opencv_python
 pandas
 pooch
@@ -16,3 +16,6 @@ pytest
 pytest-cov
 matplotlib
 opencv-contrib-python
+googletrans==3.1.0a0
+spacy
+https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.4.1/en_core_web_md-3.4.1.tar.gz

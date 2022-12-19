@@ -25,7 +25,7 @@ dependencies = [
     "cvlib",
     "deepface",
     "ipywidgets",
-    "numpy",
+    "numpy<=1.23.4",
     "opencv_python",
     "pandas",
     "pooch",
@@ -40,6 +40,8 @@ dependencies = [
     "matplotlib",
     "pytest",
     "opencv-contrib-python",
+    "googletrans==3.1.0a0",
+    "spacy",
 ]
 
 [project.scripts]
