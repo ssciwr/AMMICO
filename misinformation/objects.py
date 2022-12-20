@@ -2,19 +2,11 @@ from misinformation.utils import AnalysisMethod
 from misinformation.objects_cvlib import ObjectCVLib
 from misinformation.objects_cvlib import init_default_objects
 
-# from misinformation.objects_imageai import ObjectImageAI
-
 
 class ObjectDetectorClient(AnalysisMethod):
     def __init__(self):
         # The detector is default to CVLib
         self.detector = ObjectCVLib()
-
-    def set_client_to_imageai(self):
-        # disable imageai temporarily
-        # self.detector = ObjectImageAI()
-        # maybe reactivate if new imageai release comes out
-        pass
 
     def set_client_to_cvlib(self):
         self.detector = ObjectCVLib()
@@ -46,7 +38,3 @@ class ObjectDetector(AnalysisMethod):
     @staticmethod
     def set_client_to_cvlib():
         ObjectDetector.od_client.set_client_to_cvlib()
-
-    @staticmethod
-    def set_client_to_imageai():
-        ObjectDetector.od_client.set_client_to_imageai()

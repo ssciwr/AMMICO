@@ -253,17 +253,3 @@ class NocatchOutput(ipywidgets.Output):
 
     def __exit__(self, *args, **kwargs):
         super().__exit__(*args, **kwargs)
-
-
-if __name__ == "__main__":
-    files = utils.find_files(
-        path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
-    )
-    # files = [
-    # "/home/inga/projects/misinformation-project/misinformation/data/test_no_text/102141_1_eng.png"
-    # ]
-    mydict = utils.initialize_dict(files)
-    image_ids = [key for key in mydict.keys()]
-    for i in image_ids:
-        mydict[i] = EmotionDetector(mydict[i]).analyse_image()
-    print(mydict)

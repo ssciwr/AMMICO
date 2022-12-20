@@ -3,8 +3,6 @@ import pytest
 import misinformation.objects as ob
 import misinformation.objects_cvlib as ob_cvlib
 
-# import misinformation.objects_imageai as ob_iai
-
 OBJECT_1 = "cell phone"
 OBJECT_2 = "motorcycle"
 OBJECT_3 = "traffic light"

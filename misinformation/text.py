@@ -41,7 +41,7 @@ class TextDetector(utils.AnalysisMethod):
         # here check if text was found
         self.subdict = {"text": texts}
         if response.error.message:
-            raise Exception(
+            raise ValueError(
                 "{}\nFor more info on error messages, check: "
                 "https://cloud.google.com/apis/design/errors".format(
                     response.error.message

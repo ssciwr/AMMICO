@@ -53,6 +53,10 @@ def test_translate_text():
             translated_text = file.read()
         test_obj.subdict["text"] = reference_text
         test_obj.translate_text()
+        print("original")
+        print(test_obj.subdict["text_english"])
+        print("reference")
+        print(translated_text)
         assert test_obj.subdict["text_language"] == lang
         assert test_obj.subdict["text_english"] == translated_text
 
