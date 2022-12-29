@@ -6,6 +6,7 @@ from misinformation.objects_cvlib import init_default_objects
 class ObjectDetectorClient(AnalysisMethod):
     def __init__(self):
         # The detector is default to CVLib
+        # Here other libraries can be added
         self.detector = ObjectCVLib()
 
     def set_client_to_cvlib(self):

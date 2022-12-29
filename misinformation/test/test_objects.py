@@ -8,7 +8,6 @@ OBJECT_2 = "motorcycle"
 OBJECT_3 = "traffic light"
 TEST_IMAGE_1 = "./test/data/IMG_2809.png"
 JSON_1 = "./test/data/example_objects_cvlib.json"
-JSON_2 = "./test/data/example_objects_imageai.json"
 
 
 @pytest.fixture()
@@ -73,54 +72,6 @@ def test_detect_objects_cvlib():
         out_dict = json.load(file)
     for key in objs.keys():
         assert objs[key] == out_dict[key]
-
-
-@pytest.mark.imageai
-def test_objects_from_imageai(default_objects):
-    objects_list = [OBJECT_1, OBJECT_2, OBJECT_3]
-    objs_input = [
-        {"name": OBJECT_1},
-        {"name": OBJECT_2},
-        {"name": OBJECT_3},
-    ]
-    objects = ob_iai.objects_from_imageai(objs_input)  # noqa: F821
-    out_objects = default_objects
-    for obj in objects_list:
-        out_objects[obj] = "yes"
-
-    assert str(objects) == str(out_objects)
-
-
-@pytest.mark.imageai
-def test_analyse_image_from_file_imageai():
-    file_path = TEST_IMAGE_1
-    objs = ob_iai.ObjectImageAI().analyse_image_from_file(file_path)  # noqa: F821
-
-    with open(JSON_2, "r") as file:
-        out_dict = json.load(file)
-    for key in objs.keys():
-        assert objs[key] == out_dict[key]
-
-
-@pytest.mark.imageai
-def test_detect_objects_imageai():
-    file_path = TEST_IMAGE_1
-    objs = ob_iai.ObjectImageAI().detect_objects_imageai(file_path)  # noqa: F821
-
-    with open(JSON_2, "r") as file:
-        out_dict = json.load(file)
-    for key in objs.keys():
-        assert objs[key] == out_dict[key]
-
-
-@pytest.mark.imageai
-def test_analyse_image_imageai():
-    mydict = {"filename": TEST_IMAGE_1}
-    ob_iai.ObjectImageAI().analyse_image(mydict)  # noqa: F821
-    with open(JSON_2, "r") as file:
-        out_dict = json.load(file)
-    for key in mydict.keys():
-        assert mydict[key] == out_dict[key]
 
 
 def test_set_keys(default_objects):
