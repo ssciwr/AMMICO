@@ -44,7 +44,6 @@ def draw_matches(matches, img1, img2, kp1, kp2):
         M = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)[0]
 
         # Draw detected template in scene image
-        # h, w = img1.shape
         h = img1.shape[0]
         w = img1.shape[1]
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(
@@ -54,8 +53,6 @@ def draw_matches(matches, img1, img2, kp1, kp2):
 
         img2 = cv2.polylines(img2, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
 
-        # h1, w1 = img1.shape
-        # h2, w2 = img2.shape
         h1 = img1.shape[0]
         h2 = img2.shape[0]
         w1 = img1.shape[1]
@@ -85,7 +82,6 @@ def draw_matches(matches, img1, img2, kp1, kp2):
 def matching_points(img1, img2):
     img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-    # sift = cv2.SIFT_create()
     sift = cv2.xfeatures2d.SIFT_create()
     kp1, des1 = sift.detectAndCompute(img1, None)
     kp2, des2 = sift.detectAndCompute(img2, None)

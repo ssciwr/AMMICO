@@ -75,8 +75,8 @@ def find_files(path=None, pattern="*.png", recursive=True, limit=20):
 def initialize_dict(filelist: list) -> dict:
     mydict = {}
     for img_path in filelist:
-        id = os.path.splitext(os.path.basename(img_path))[0]
-        mydict[id] = {"filename": img_path}
+        id_ = os.path.splitext(os.path.basename(img_path))[0]
+        mydict[id_] = {"filename": img_path}
     return mydict
 
 
@@ -89,7 +89,6 @@ def append_data_to_dict(mydict: dict) -> dict:
     for subdict in mydict.values():
         for key in subdict.keys():
             outdict[key].append(subdict[key])
-    # mydict = {key: [mydict[key] for mydict in dictlist] for key in dictlist[0]}
     return outdict
 
 
