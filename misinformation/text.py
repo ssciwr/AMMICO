@@ -4,6 +4,10 @@ import spacy
 import io
 from misinformation import utils
 
+# make widgets work again
+# clean text has weird spaces and separation of "do n't"
+# increase coverage for text
+
 
 class TextDetector(utils.AnalysisMethod):
     def __init__(self, subdict: dict) -> None:
