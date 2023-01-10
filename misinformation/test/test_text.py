@@ -29,6 +29,8 @@ def test_TextDetector():
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
         assert test_obj.subdict["text_cleaned"] is None
+        assert not test_obj.analyse_text
+        assert not test_obj.analyse_topic
 
 
 @pytest.mark.gcv
@@ -58,7 +60,7 @@ def test_translate_text():
 
 
 def test_init_spacy():
-    test_obj = tt.TextDetector(TESTDICT["IMG_3755"])
+    test_obj = tt.TextDetector(TESTDICT["IMG_3755"], analyse_text=True)
     ref_file = "./test/data/text_IMG_3755.txt"
     with open(ref_file, "r") as file:
         reference_text = file.read()
