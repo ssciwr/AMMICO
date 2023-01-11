@@ -77,3 +77,12 @@ def test_clean_text():
     test_obj.clean_text()
     result = "I like cats and"
     assert test_obj.subdict["text_clean"] == result
+
+
+def test_correct_spelling():
+    mydict = {}
+    test_obj = tt.TextDetector(mydict, analyse_text=True)
+    test_obj.subdict["text_english"] = "I lik cats ad dogs."
+    test_obj.correct_spelling()
+    result = "I like cats ad dogs."
+    assert test_obj.subdict["text_english_correct"] == result
