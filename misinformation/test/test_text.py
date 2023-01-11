@@ -89,7 +89,11 @@ def test_correct_spelling():
 
 
 def test_sentiment_analysis():
-    test_obj = tt.TextDetector(TESTDICT["IMG_3755"], analyse_text=True)
-    test_obj.analyse_image()
-    assert test_obj.subdict["polarity"] == 0.1
-    assert test_obj.subdict["subjectivity"] == 0.3125
+    mydict = {}
+    test_obj = tt.TextDetector(mydict, analyse_text=True)
+    test_obj.subdict["text_english"] = "I love cats and dogs."
+    test_obj._init_spacy()
+    test_obj.correct_spelling()
+    test_obj.sentiment_analysis()
+    assert test_obj.subdict["polarity"] == 0.5
+    assert test_obj.subdict["subjectivity"] == 0.6
