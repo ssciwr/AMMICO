@@ -34,6 +34,16 @@ def test_TextDetector():
 
 
 @pytest.mark.gcv
+def test_analyse_image():
+    for item in TESTDICT:
+        test_obj = tt.TextDetector(TESTDICT[item])
+        test_obj.analyse_image()
+        test_obj = tt.TextDetector(TESTDICT[item], analyse_text=True)
+        test_obj.analyse_image()
+        test_obj = tt.TextDetector(TESTDICT[item], analyse_topic=True)
+
+
+@pytest.mark.gcv
 def test_get_text_from_image():
     for item in TESTDICT:
         test_obj = tt.TextDetector(TESTDICT[item])
