@@ -86,3 +86,10 @@ def test_correct_spelling():
     test_obj.correct_spelling()
     result = "I like cats ad dogs."
     assert test_obj.subdict["text_english_correct"] == result
+
+
+def test_sentiment_analysis():
+    test_obj = tt.TextDetector(TESTDICT["IMG_3755"], analyse_text=True)
+    test_obj.analyse_image()
+    assert test_obj.subdict["polarity"] == 0.1
+    assert test_obj.subdict["subjectivity"] == 0.3125
