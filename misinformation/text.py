@@ -1,17 +1,29 @@
 from google.cloud import vision
 from googletrans import Translator
 import spacy
+from spacytextblob.spacytextblob import SpacyTextBlob
+from textblob import TextBlob
 import io
 from misinformation import utils
 
+# make widgets work again
+# clean text has weird spaces and separation of "do n't"
+# increase coverage for text
+
 
 class TextDetector(utils.AnalysisMethod):
-    def __init__(self, subdict: dict) -> None:
+    def __init__(
+        self, subdict: dict, analyse_text: bool = False, analyse_topic: bool = False
+    ) -> None:
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
-        # spacy load should be separaate method with error if model not found / dynamic download
-        self.nlp = spacy.load("en_core_web_md")
+        self.analyse_text = analyse_text
+        self.analyse_topic = analyse_topic
+        if self.analyse_text:
+            # spacy load should be separate method with error if model not found / dynamic download
+            self.nlp = spacy.load("en_core_web_md")
+            self.nlp.add_pipe("spacytextblob")
 
     def set_keys(self) -> dict:
         params = {
@@ -25,8 +37,13 @@ class TextDetector(utils.AnalysisMethod):
     def analyse_image(self):
         self.get_text_from_image()
         self.translate_text()
-        self._init_spacy()
-        self.clean_text()
+        if self.analyse_text:
+            self._init_spacy()
+            self.clean_text()
+            self.correct_spelling()
+            self.sentiment_analysis()
+        if self.analyse_topic:
+            self.analyse_topic()
         return self.subdict
 
     def get_text_from_image(self):
@@ -65,3 +82,18 @@ class TextDetector(utils.AnalysisMethod):
                 token.text
             ) if token.pos_ != "NUM" and token.has_vector else None
         self.subdict["text_clean"] = " ".join(templist).rstrip().lstrip()
+
+    def correct_spelling(self):
+        self.textblob = TextBlob(self.subdict["text_english"])
+        self.subdict["text_english_correct"] = str(self.textblob.correct())
+
+    def sentiment_analysis(self):
+        # self.subdict["sentiment"] = self.doc._.blob.sentiment_assessments.assessments
+        # polarity is between [-1.0, 1.0]
+        self.subdict["polarity"] = self.doc._.blob.polarity
+        # subjectivity is a float within the range [0.0, 1.0]
+        # where 0.0 is very objective and 1.0 is very subjective
+        self.subdict["subjectivity"] = self.doc._.blob.subjectivity
+
+    def analyse_topic(self):
+        pass

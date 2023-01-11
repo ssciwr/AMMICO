@@ -28,6 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -e .
         python -m spacy download en_core_web_md
+        python -m textblob.download_corpora
     - name: Run pytest
       run: |
         cd misinformation
