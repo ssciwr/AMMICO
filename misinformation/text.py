@@ -3,6 +3,7 @@ from googletrans import Translator
 import spacy
 from spacytextblob.spacytextblob import SpacyTextBlob
 from textblob import TextBlob
+from textblob import download_corpora
 import io
 from misinformation import utils
 
@@ -21,24 +22,32 @@ class TextDetector(utils.AnalysisMethod):
         self.analyse_text = analyse_text
         self.analyse_topic = analyse_topic
         if self.analyse_text:
-            # spacy load should be separate method with error if model not found / dynamic download
-            self.nlp = spacy.load("en_core_web_md")
-            self.nlp.add_pipe("spacytextblob")
+            self._initialize_spacy()
+            self._initialize_textblob()
 
     def set_keys(self) -> dict:
-        params = {
-            "text": None,
-            "text_language": None,
-            "text_english": None,
-            "text_cleaned": None,
-        }
+        params = {"text": None, "text_language": None, "text_english": None}
         return params
+
+    def _initialize_spacy(self):
+        try:
+            self.nlp = spacy.load("en_core_web_md")
+        except Exception:
+            spacy.cli.download("en_core_web_md")
+            self.nlp = spacy.load("en_core_web_md")
+        self.nlp.add_pipe("spacytextblob")
+
+    def _initialize_textblob(self):
+        try:
+            TextBlob("Here")
+        except Exception:
+            download_corpora.main()
 
     def analyse_image(self):
         self.get_text_from_image()
         self.translate_text()
         if self.analyse_text:
-            self._init_spacy()
+            self._run_spacy()
             self.clean_text()
             self.correct_spelling()
             self.sentiment_analysis()
@@ -56,7 +65,8 @@ class TextDetector(utils.AnalysisMethod):
         response = client.text_detection(image=image)
         texts = response.text_annotations[0].description
         # here check if text was found
-        self.subdict = {"text": texts}
+        if texts:
+            self.subdict["text"] = texts
         if response.error.message:
             raise ValueError(
                 "{}\nFor more info on error messages, check: "
@@ -70,7 +80,7 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict["text_language"] = translated.src
         self.subdict["text_english"] = translated.text
 
-    def _init_spacy(self):
+    def _run_spacy(self):
         """Generate spacy doc object."""
         self.doc = self.nlp(self.subdict["text_english"])
 
