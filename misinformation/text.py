@@ -23,15 +23,10 @@ class TextDetector(utils.AnalysisMethod):
         self.analyse_topic = analyse_topic
         if self.analyse_text:
             self._initialize_spacy()
-            self._initalize_textblob()
+            self._initialize_textblob()
 
     def set_keys(self) -> dict:
-        params = {
-            "text": None,
-            "text_language": None,
-            "text_english": None,
-            "text_cleaned": None,
-        }
+        params = {"text": None, "text_language": None, "text_english": None}
         return params
 
     def _initialize_spacy(self):
