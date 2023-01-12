@@ -56,7 +56,8 @@ class TextDetector(utils.AnalysisMethod):
         response = client.text_detection(image=image)
         texts = response.text_annotations[0].description
         # here check if text was found
-        self.subdict = {"text": texts}
+        if texts:
+            self.subdict["text"] = texts
         if response.error.message:
             raise ValueError(
                 "{}\nFor more info on error messages, check: "
