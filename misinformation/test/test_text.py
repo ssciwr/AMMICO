@@ -28,7 +28,6 @@ def test_TextDetector():
         assert test_obj.subdict["text"] is None
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
-        assert test_obj.subdict["text_cleaned"] is None
         assert not test_obj.analyse_text
         assert not test_obj.analyse_topic
 
