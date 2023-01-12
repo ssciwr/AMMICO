@@ -36,7 +36,7 @@ There are sample notebooks in the `misinformation/notebooks` folder for you to e
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.
 1. Facial analysis: Use the notebook `facial_expressions.ipynb` to identify if there are faces on the image, if they are wearing masks, and if they are not wearing masks also the race, gender and dominant emotion.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/facial_expressions.)**   
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/facial_expressions.ipynb)**   
 Place the data files in your google drive to access the data.**
 1. Object analysis: Use the notebook `ojects_expression.ipynb` to identify certain objects in the image. Currently, the following objects are being identified: person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
 
