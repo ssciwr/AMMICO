@@ -22,3 +22,4 @@ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.4.1
 jupyterlab
 spacytextblob
 textblob
+git+https://github.com/sloria/TextBlob.git@dev
