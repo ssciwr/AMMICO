@@ -6,6 +6,7 @@ from textblob import TextBlob
 from textblob import download_corpora
 import io
 from misinformation import utils
+import grpc
 
 # make widgets work again
 # clean text has weird spaces and separation of "do n't"
@@ -62,12 +63,19 @@ class TextDetector(utils.AnalysisMethod):
         with io.open(path, "rb") as image_file:
             content = image_file.read()
         image = vision.Image(content=content)
-        response = client.text_detection(image=image)
-        # here check if text was found
+        # check for usual connection errors and retry if necessary
+        try:
+            response = client.text_detection(image=image)
+        except grpc.RpcError as exc:
+            print("Cloud vision API connection failed")
+            print("Skipping this image ..{}".format(path))
+            print("Connection failed with code {}: {}".format(exc.code(), exc))
+        # here check if text was found on image
         if response:
             texts = response.text_annotations[0].description
             self.subdict["text"] = texts
         if response.error.message:
+            print("Google Cloud Vision Error")
             raise ValueError(
                 "{}\nFor more info on error messages, check: "
                 "https://cloud.google.com/apis/design/errors".format(

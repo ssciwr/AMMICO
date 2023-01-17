@@ -24,3 +24,4 @@ spacytextblob
 textblob
 git+https://github.com/sloria/TextBlob.git@dev
 bertopic
+grpcio
