@@ -63,9 +63,9 @@ class TextDetector(utils.AnalysisMethod):
             content = image_file.read()
         image = vision.Image(content=content)
         response = client.text_detection(image=image)
-        texts = response.text_annotations[0].description
         # here check if text was found
-        if texts:
+        if response:
+            texts = response.text_annotations[0].description
             self.subdict["text"] = texts
         if response.error.message:
             raise ValueError(
