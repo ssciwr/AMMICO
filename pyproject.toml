@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "google-cloud-vision",
     "cvlib",
-    "deepface",
+    "deepface<=0.0.75",
     "ipywidgets",
     "numpy<=1.23.4",
     "opencv_python",
