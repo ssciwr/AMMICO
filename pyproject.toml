@@ -12,6 +12,7 @@ readme = "README.md"
 maintainers = [
     { name = "Inga Ulusoy", email = "ssc@iwr.uni-heidelberg.de" },
     { name = "Dominic Kempf", email = "ssc@iwr.uni-heidelberg.de" },
+    { name = "Petr Andriushchenko", email = "ssc@iwr.uni-heidelberg.de" },
 ]
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -45,6 +46,8 @@ dependencies = [
     "jupyterlab",
     "spacytextblob",
     "textblob",
+    "torch",
+    "salesforce-lavis @ git+https://github.com/salesforce/LAVIS.git@main"
 ]
 
 [project.scripts]
