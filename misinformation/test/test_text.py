@@ -28,7 +28,6 @@ def test_TextDetector():
         assert test_obj.subdict["text"] is None
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
-        assert test_obj.subdict["text_cleaned"] is None
         assert not test_obj.analyse_text
         assert not test_obj.analyse_topic
 
@@ -69,13 +68,13 @@ def test_translate_text():
         assert test_obj.subdict["text_english"] == translated_text
 
 
-def test_init_spacy():
+def test_run_spacy():
     test_obj = tt.TextDetector(TESTDICT["IMG_3755"], analyse_text=True)
     ref_file = "./test/data/text_IMG_3755.txt"
     with open(ref_file, "r") as file:
         reference_text = file.read()
     test_obj.subdict["text_english"] = reference_text
-    test_obj._init_spacy()
+    test_obj._run_spacy()
     assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
 
 
@@ -102,7 +101,7 @@ def test_sentiment_analysis():
     mydict = {}
     test_obj = tt.TextDetector(mydict, analyse_text=True)
     test_obj.subdict["text_english"] = "I love cats and dogs."
-    test_obj._init_spacy()
+    test_obj._run_spacy()
     test_obj.correct_spelling()
     test_obj.sentiment_analysis()
     assert test_obj.subdict["polarity"] == 0.5
