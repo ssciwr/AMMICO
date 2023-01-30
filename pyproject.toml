@@ -47,7 +47,6 @@ dependencies = [
     "spacytextblob",
     "textblob",
     "torch",
-    "salesforce-lavis @ git+https://github.com/salesforce/LAVIS.git@main"
 ]
 
 [project.scripts]
