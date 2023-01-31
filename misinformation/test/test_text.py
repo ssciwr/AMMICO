@@ -68,6 +68,15 @@ def test_translate_text():
         assert test_obj.subdict["text_english"] == translated_text
 
 
+def test_remove_linebreaks():
+    test_obj = tt.TextDetector({})
+    test_obj.subdict["text"] = "This is \n a test."
+    test_obj.subdict["text_english"] = "This is \n another\n test."
+    test_obj.remove_linebreaks()
+    assert test_obj.subdict["text"] == "This is   a test."
+    assert test_obj.subdict["text_english"] == "This is   another  test."
+
+
 def test_run_spacy():
     test_obj = tt.TextDetector(TESTDICT["IMG_3755"], analyse_text=True)
     ref_file = "./test/data/text_IMG_3755.txt"
