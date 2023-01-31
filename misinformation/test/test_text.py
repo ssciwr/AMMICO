@@ -124,12 +124,20 @@ def test_PostprocessText():
     for key in TESTDICT.keys():
         TESTDICT[key].pop("text_english")
     with pytest.raises(ValueError):
-        obj = tt.PostprocessText(mydict=TESTDICT)
+        tt.PostprocessText(mydict=TESTDICT)
     obj = tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out.csv")
     assert obj.list_text_english == testlist_df
     with pytest.raises(ValueError):
-        obj = tt.PostprocessText(
-            use_csv=True, csv_path="./test/data/test_data_out_nokey.csv"
-        )
+        tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out_nokey.csv")
     with pytest.raises(ValueError):
         tt.PostprocessText()
+
+
+def test_analyse_topic():
+    _, topic_df, most_frequent_topics = tt.PostprocessText(
+        use_csv=True, csv_path="./test/data/topic_analysis_test.csv"
+    ).analyse_topic()
+    # since this is not deterministic we cannot be sure we get the same result twice
+    assert len(topic_df) == 2
+    assert topic_df["Name"].iloc[0] == "0_the_feat_of_is"
+    assert most_frequent_topics[0][0][0] == "the"
