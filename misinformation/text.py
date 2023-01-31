@@ -152,7 +152,6 @@ class PostprocessText:
             self.topic_model = BERTopic(embedding_model=nlp)
         except TypeError:
             print("BERTopic excited with an error - maybe your dataset is too small?")
-        # topic_model = BERTopic()
         self.topics, self.probs = self.topic_model.fit_transform(self.list_text_english)
         # return the topic list
         topic_df = self.topic_model.get_topic_info()
