@@ -47,6 +47,7 @@ class TextDetector(utils.AnalysisMethod):
     def analyse_image(self):
         self.get_text_from_image()
         self.translate_text()
+        self.remove_linebreaks()
         if self.analyse_text:
             self._run_spacy()
             self.clean_text()
@@ -87,6 +88,14 @@ class TextDetector(utils.AnalysisMethod):
         translated = self.translator.translate(self.subdict["text"])
         self.subdict["text_language"] = translated.src
         self.subdict["text_english"] = translated.text
+
+    def remove_linebreaks(self):
+        """Remove linebreaks from original and translated text."""
+        if self.subdict["text"]:
+            self.subdict["text"] = self.subdict["text"].replace("\n", " ")
+            self.subdict["text_english"] = self.subdict["text_english"].replace(
+                "\n", " "
+            )
 
     def _run_spacy(self):
         """Generate spacy doc object."""
