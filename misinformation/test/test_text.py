@@ -29,7 +29,6 @@ def test_TextDetector():
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
-        assert not test_obj.analyse_topic
 
 
 @pytest.mark.gcv
@@ -39,7 +38,6 @@ def test_analyse_image():
         test_obj.analyse_image()
         test_obj = tt.TextDetector(TESTDICT[item], analyse_text=True)
         test_obj.analyse_image()
-        test_obj = tt.TextDetector(TESTDICT[item], analyse_topic=True)
 
 
 @pytest.mark.gcv

@@ -8,6 +8,7 @@ import io
 from misinformation import utils
 import grpc
 import pandas as pd
+from bertopic import BERTopic
 
 # make widgets work again
 # clean text has weird spaces and separation of "do n't"
@@ -125,9 +126,13 @@ class PostprocessText:
     ) -> None:
         self.use_csv = use_csv
         if mydict:
+            print("Reading data from dict.")
             self.mydict = mydict
+            self.list_text_english = self.get_text_dict()
         elif self.use_csv:
+            print("Reading data from df.")
             self.df = pd.read_csv(csv_path)
+            self.list_text_english = self.get_text_df()
         else:
             raise ValueError(
                 "Please provide either dictionary with textual data or \
@@ -135,25 +140,53 @@ class PostprocessText:
                              `csv_path`."
             )
 
-    def analyse_topic(self):
+    def analyse_topic(self, return_topics: int = 3):
         """Topic analysis using BERTopic."""
-        if self.use_csv:
-            # use csv file to obtain dataframe and put text_english in list
-            # check that "text_english" is there
-            if "text_english" not in self.df:
-                raise ValueError(
-                    "Please check your provided dataframe - \
-                                 no english text data found."
+        # load spacy pipeline
+        nlp = spacy.load(
+            "en_core_web_md",
+            exclude=["tagger", "parser", "ner", "attribute_ruler", "lemmatizer"],
+        )
+        try:
+            # unfortunately catching exceptions does not work here - need to figure out why
+            self.topic_modelBERTopic(embedding_model=nlp)
+        except TypeError:
+            print("BERTopic excited with an error - maybe your dataset is too small?")
+        # topic_model = BERTopic()
+        self.topics, self.probs = self.topic_model.fit_transform(self.list_text_english)
+        # return the topic list
+        topic_df = self.topic_model.get_topic_info()
+        # return the most frequent return_topics
+        most_frequent_topics = []
+        if len(topic_df) < return_topics:
+            print("You requested more topics than are identified in your dataset -")
+            print(
+                "Returning only {} topics as these are all that have been found.".format(
+                    len(topic_df)
                 )
-            list_text_english = self.df["text_english"].tolist()
-        else:
-            # use dict to put text_english in list
-            list_text_english = []
-            for key in self.mydict.keys():
-                if "text_english" not in self.mydict[key]:
-                    raise ValueError(
-                        "Please check your provided dictionary - \
-                    no english text data found."
-                    )
-                list_text_english.append(self.mydict[key]["text_english"])
+            )
+        for i in range(min(return_topics, len(topic_df))):
+            most_frequent_topics.append(self.topic_model.get_topic(i))
+        return topic_df, most_frequent_topics
+
+    def get_text_dict(self):
+        # use dict to put text_english in list
+        list_text_english = []
+        for key in self.mydict.keys():
+            if "text_english" not in self.mydict[key]:
+                raise ValueError(
+                    "Please check your provided dictionary - \
+                no english text data found."
+                )
+            list_text_english.append(self.mydict[key]["text_english"])
         return list_text_english
+
+    def get_text_df(self):
+        # use csv file to obtain dataframe and put text_english in list
+        # check that "text_english" is there
+        if "text_english" not in self.df:
+            raise ValueError(
+                "Please check your provided dataframe - \
+                                no english text data found."
+            )
+        return self.df["text_english"].tolist()
