@@ -149,7 +149,7 @@ class PostprocessText:
         )
         try:
             # unfortunately catching exceptions does not work here - need to figure out why
-            self.topic_modelBERTopic(embedding_model=nlp)
+            self.topic_model = BERTopic(embedding_model=nlp)
         except TypeError:
             print("BERTopic excited with an error - maybe your dataset is too small?")
         # topic_model = BERTopic()
@@ -167,7 +167,7 @@ class PostprocessText:
             )
         for i in range(min(return_topics, len(topic_df))):
             most_frequent_topics.append(self.topic_model.get_topic(i))
-        return topic_df, most_frequent_topics
+        return self.topic_model, topic_df, most_frequent_topics
 
     def get_text_dict(self):
         # use dict to put text_english in list
