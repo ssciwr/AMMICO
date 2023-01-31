@@ -7,6 +7,7 @@ from textblob import download_corpora
 import io
 from misinformation import utils
 import grpc
+import pandas as pd
 
 # make widgets work again
 # clean text has weird spaces and separation of "do n't"
@@ -14,14 +15,11 @@ import grpc
 
 
 class TextDetector(utils.AnalysisMethod):
-    def __init__(
-        self, subdict: dict, analyse_text: bool = False, analyse_topic: bool = False
-    ) -> None:
+    def __init__(self, subdict: dict, analyse_text: bool = False) -> None:
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
         self.analyse_text = analyse_text
-        self.analyse_topic = analyse_topic
         if self.analyse_text:
             self._initialize_spacy()
             self._initialize_textblob()
@@ -53,8 +51,6 @@ class TextDetector(utils.AnalysisMethod):
             self.clean_text()
             self.correct_spelling()
             self.sentiment_analysis()
-        if self.analyse_topic:
-            self.analyse_topic()
         return self.subdict
 
     def get_text_from_image(self):
@@ -122,5 +118,42 @@ class TextDetector(utils.AnalysisMethod):
         # where 0.0 is very objective and 1.0 is very subjective
         self.subdict["subjectivity"] = self.doc._.blob.subjectivity
 
+
+class PostprocessText:
+    def __init__(
+        self, mydict: dict = None, use_csv: bool = False, csv_path: str = None
+    ) -> None:
+        self.use_csv = use_csv
+        if mydict:
+            self.mydict = mydict
+        elif self.use_csv:
+            self.df = pd.read_csv(csv_path)
+        else:
+            raise ValueError(
+                "Please provide either dictionary with textual data or \
+                              a csv file by setting `use_csv` to True and providing a \
+                             `csv_path`."
+            )
+
     def analyse_topic(self):
-        pass
+        """Topic analysis using BERTopic."""
+        if self.use_csv:
+            # use csv file to obtain dataframe and put text_english in list
+            # check that "text_english" is there
+            if "text_english" not in self.df:
+                raise ValueError(
+                    "Please check your provided dataframe - \
+                                 no english text data found."
+                )
+            list_text_english = self.df["text_english"].tolist()
+        else:
+            # use dict to put text_english in list
+            list_text_english = []
+            for key in self.mydict.keys():
+                if "text_english" not in self.mydict[key]:
+                    raise ValueError(
+                        "Please check your provided dictionary - \
+                    no english text data found."
+                    )
+                list_text_english.append(self.mydict[key]["text_english"])
+        return list_text_english

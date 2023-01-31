@@ -47,6 +47,7 @@ dependencies = [
     "textblob",
     "bertopic",
     "grpcio",
+    "pandas",
 ]
 
 [project.scripts]
