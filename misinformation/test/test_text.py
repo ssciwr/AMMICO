@@ -134,7 +134,7 @@ def test_PostprocessText():
     for i in test_dict:
         i.replace("\r", "") if i else None
     print("******")
-    print(test_dict)
+    print(TESTDICT)
     print("******")
     print(reference_dict)
     print("******")
