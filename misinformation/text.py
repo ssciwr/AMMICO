@@ -131,7 +131,7 @@ class PostprocessText:
             self.list_text_english = self.get_text_dict()
         elif self.use_csv:
             print("Reading data from df.")
-            self.df = pd.read_csv(csv_path)
+            self.df = pd.read_csv(csv_path, encoding="utf8")
             self.list_text_english = self.get_text_df()
         else:
             raise ValueError(
