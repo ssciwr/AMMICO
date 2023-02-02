@@ -47,7 +47,7 @@ dependencies = [
     "spacytextblob",
     "textblob",
     "torch",
-    "cocoapi-windows; platform_system=='Windows'",
+    "pycocotools @ git+https://github.com/philferriere/cocoapi.git#subdirectory=PythonAPI; platform_system=='Windows'",
     "salesforce-lavis @ git+https://github.com/salesforce/LAVIS.git@main"
 ]
 
