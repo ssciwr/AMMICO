@@ -131,8 +131,9 @@ def test_PostprocessText():
     obj = tt.PostprocessText(mydict=TESTDICT)
     # make sure test works on windows where end-of-line character is \r\n
     test_dict = obj.list_text_english
+    print(test_dict)
     for i in test_dict:
-        i.replace("\r", "")
+        i.replace("\r", "") if i else None
     assert test_dict == reference_dict
     for key in TESTDICT.keys():
         TESTDICT[key].pop("text_english")
@@ -142,7 +143,7 @@ def test_PostprocessText():
     # make sure test works on windows where end-of-line character is \r\n
     test_df = obj.list_text_english
     for i in test_df:
-        i.replace("\r", "")
+        i.replace("\r", "") if i else None
     assert test_df == reference_df
     with pytest.raises(ValueError):
         tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out_nokey.csv")
