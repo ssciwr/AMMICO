@@ -129,13 +129,15 @@ def test_PostprocessText():
         "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON",
     ]
     obj = tt.PostprocessText(mydict=TESTDICT)
-    assert obj.list_text_english == testlist_dict
+    # make sure test works on windows where end-of-line character is \r\n
+    assert obj.list_text_english.replace("\r", "") == testlist_dict
     for key in TESTDICT.keys():
         TESTDICT[key].pop("text_english")
     with pytest.raises(ValueError):
         tt.PostprocessText(mydict=TESTDICT)
     obj = tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out.csv")
-    assert obj.list_text_english == testlist_df
+    # make sure test works on windows where end-of-line character is \r\n
+    assert obj.list_text_english.replace("\r", "") == testlist_df
     with pytest.raises(ValueError):
         tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out_nokey.csv")
     with pytest.raises(ValueError):
