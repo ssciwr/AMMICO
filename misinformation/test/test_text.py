@@ -118,26 +118,32 @@ def test_sentiment_analysis():
 
 
 def test_PostprocessText():
-    testlist_dict = [
+    reference_dict = [
         None,
         "SCATTERING THEORY\nThe Quantum Theory of\nNonrelativistic Collisions\nJOHN R. TAYLOR\nUniversity of Colorado\nostaliga Lanbidean\n1 ilde\nballoons big goin\ngdĐOL, SIVI 23 TL\nthere in obl\noch yd change\na\nBer\nook Sy-RW isn't going anywhere",
         "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON",
     ]
-    testlist_df = [
+    reference_df = [
         "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage",
         "SCATTERING THEORY\nThe Quantum Theory of\nNonrelativistic Collisions\nJOHN R. TAYLOR\nUniversity of Colorado\nostaliga Lanbidean\n1 ilde\nballoons big goin\ngdĐOL, SIVI 23 TL\nthere in obl\noch yd change\na\nBer\nook Sy-RW isn't going anywhere",
         "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON",
     ]
     obj = tt.PostprocessText(mydict=TESTDICT)
     # make sure test works on windows where end-of-line character is \r\n
-    assert obj.list_text_english.replace("\r", "") == testlist_dict
+    test_dict = obj.list_text_english
+    for i in test_dict:
+        i.replace("\r", "")
+    assert test_dict == reference_dict
     for key in TESTDICT.keys():
         TESTDICT[key].pop("text_english")
     with pytest.raises(ValueError):
         tt.PostprocessText(mydict=TESTDICT)
     obj = tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out.csv")
     # make sure test works on windows where end-of-line character is \r\n
-    assert obj.list_text_english.replace("\r", "") == testlist_df
+    test_df = obj.list_text_english
+    for i in test_df:
+        i.replace("\r", "")
+    assert test_df == reference_df
     with pytest.raises(ValueError):
         tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out_nokey.csv")
     with pytest.raises(ValueError):
