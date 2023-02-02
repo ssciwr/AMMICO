@@ -131,9 +131,13 @@ def test_PostprocessText():
     obj = tt.PostprocessText(mydict=TESTDICT)
     # make sure test works on windows where end-of-line character is \r\n
     test_dict = obj.list_text_english
-    print(test_dict)
     for i in test_dict:
         i.replace("\r", "") if i else None
+    print("******")
+    print(test_dict)
+    print("******")
+    print(reference_dict)
+    print("******")
     assert test_dict == reference_dict
     for key in TESTDICT.keys():
         TESTDICT[key].pop("text_english")
