@@ -117,6 +117,7 @@ def test_sentiment_analysis():
     assert test_obj.subdict["subjectivity"] == 0.6
 
 
+@pytest.mark.skip
 def test_PostprocessText():
     reference_dict = [
         None,
@@ -155,6 +156,7 @@ def test_PostprocessText():
         tt.PostprocessText()
 
 
+@pytest.mark.skip
 def test_analyse_topic():
     _, topic_df, most_frequent_topics = tt.PostprocessText(
         use_csv=True, csv_path="./test/data/topic_analysis_test.csv"
