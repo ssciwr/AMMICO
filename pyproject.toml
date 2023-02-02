@@ -48,7 +48,7 @@ dependencies = [
     "textblob",
     "torch",
     "cocoapi-windows; platform_system=='Windows'",
-    "lavis @ git+https://github.com/salesforce/LAVIS.git@main"
+    "salesforce-lavis @ git+https://github.com/salesforce/LAVIS.git@main"
 ]
 
 [project.scripts]
