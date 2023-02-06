@@ -153,7 +153,6 @@ class EmotionDetector(utils.AnalysisMethod):
         return fresult
 
     def facial_expression_analysis(self) -> dict:
-
         # Find (multiple) faces in the image and cut them
         retinaface_model.get()
         faces = RetinaFace.extract_faces(self.subdict["filename"])
