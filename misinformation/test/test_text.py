@@ -117,28 +117,12 @@ def test_sentiment_analysis():
     assert test_obj.subdict["subjectivity"] == 0.6
 
 
-@pytest.mark.skip
 def test_PostprocessText():
-    reference_dict = [
-        None,
-        "SCATTERING THEORY\nThe Quantum Theory of\nNonrelativistic Collisions\nJOHN R. TAYLOR\nUniversity of Colorado\nostaliga Lanbidean\n1 ilde\nballoons big goin\ngdĐOL, SIVI 23 TL\nthere in obl\noch yd change\na\nBer\nook Sy-RW isn't going anywhere",
-        "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON",
-    ]
-    reference_df = [
-        "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage",
-        "SCATTERING THEORY\nThe Quantum Theory of\nNonrelativistic Collisions\nJOHN R. TAYLOR\nUniversity of Colorado\nostaliga Lanbidean\n1 ilde\nballoons big goin\ngdĐOL, SIVI 23 TL\nthere in obl\noch yd change\na\nBer\nook Sy-RW isn't going anywhere",
-        "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON",
-    ]
+    reference_dict = "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON"
+    reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"
     obj = tt.PostprocessText(mydict=TESTDICT)
     # make sure test works on windows where end-of-line character is \r\n
-    test_dict = obj.list_text_english
-    for i in test_dict:
-        i.replace("\r", "") if i else None
-    print("******")
-    print(TESTDICT)
-    print("******")
-    print(reference_dict)
-    print("******")
+    test_dict = obj.list_text_english[2].replace("\r", "")
     assert test_dict == reference_dict
     for key in TESTDICT.keys():
         TESTDICT[key].pop("text_english")
@@ -146,9 +130,7 @@ def test_PostprocessText():
         tt.PostprocessText(mydict=TESTDICT)
     obj = tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out.csv")
     # make sure test works on windows where end-of-line character is \r\n
-    test_df = obj.list_text_english
-    for i in test_df:
-        i.replace("\r", "") if i else None
+    test_df = obj.list_text_english[0].replace("\r", "")
     assert test_df == reference_df
     with pytest.raises(ValueError):
         tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out_nokey.csv")
@@ -156,7 +138,6 @@ def test_PostprocessText():
         tt.PostprocessText()
 
 
-@pytest.mark.skip
 def test_analyse_topic():
     _, topic_df, most_frequent_topics = tt.PostprocessText(
         use_csv=True, csv_path="./test/data/topic_analysis_test.csv"
