@@ -45,6 +45,9 @@ dependencies = [
     "jupyterlab",
     "spacytextblob",
     "textblob",
+    "bertopic",
+    "grpcio",
+    "pandas",
 ]
 
 [project.scripts]

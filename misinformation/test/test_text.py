@@ -2,6 +2,8 @@ import os
 import pytest
 import spacy
 import misinformation.text as tt
+import misinformation
+import pandas as pd
 
 TESTDICT = {
     "IMG_3755": {
@@ -29,7 +31,6 @@ def test_TextDetector():
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
-        assert not test_obj.analyse_topic
 
 
 @pytest.mark.gcv
@@ -39,7 +40,6 @@ def test_analyse_image():
         test_obj.analyse_image()
         test_obj = tt.TextDetector(TESTDICT[item], analyse_text=True)
         test_obj.analyse_image()
-        test_obj = tt.TextDetector(TESTDICT[item], analyse_topic=True)
 
 
 @pytest.mark.gcv
@@ -66,6 +66,15 @@ def test_translate_text():
         test_obj.translate_text()
         assert test_obj.subdict["text_language"] == lang
         assert test_obj.subdict["text_english"] == translated_text
+
+
+def test_remove_linebreaks():
+    test_obj = tt.TextDetector({})
+    test_obj.subdict["text"] = "This is \n a test."
+    test_obj.subdict["text_english"] = "This is \n another\n test."
+    test_obj.remove_linebreaks()
+    assert test_obj.subdict["text"] == "This is   a test."
+    assert test_obj.subdict["text_english"] == "This is   another  test."
 
 
 def test_run_spacy():
@@ -106,3 +115,34 @@ def test_sentiment_analysis():
     test_obj.sentiment_analysis()
     assert test_obj.subdict["polarity"] == 0.5
     assert test_obj.subdict["subjectivity"] == 0.6
+
+
+def test_PostprocessText():
+    reference_dict = "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON"
+    reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"
+    obj = tt.PostprocessText(mydict=TESTDICT)
+    # make sure test works on windows where end-of-line character is \r\n
+    test_dict = obj.list_text_english[2].replace("\r", "")
+    assert test_dict == reference_dict
+    for key in TESTDICT.keys():
+        TESTDICT[key].pop("text_english")
+    with pytest.raises(ValueError):
+        tt.PostprocessText(mydict=TESTDICT)
+    obj = tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out.csv")
+    # make sure test works on windows where end-of-line character is \r\n
+    test_df = obj.list_text_english[0].replace("\r", "")
+    assert test_df == reference_df
+    with pytest.raises(ValueError):
+        tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out_nokey.csv")
+    with pytest.raises(ValueError):
+        tt.PostprocessText()
+
+
+def test_analyse_topic():
+    _, topic_df, most_frequent_topics = tt.PostprocessText(
+        use_csv=True, csv_path="./test/data/topic_analysis_test.csv"
+    ).analyse_topic()
+    # since this is not deterministic we cannot be sure we get the same result twice
+    assert len(topic_df) == 2
+    assert topic_df["Name"].iloc[0] == "0_the_feat_of_is"
+    assert most_frequent_topics[0][0][0] == "the"
