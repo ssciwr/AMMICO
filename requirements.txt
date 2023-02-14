@@ -24,3 +24,5 @@ spacytextblob
 textblob
 git+https://github.com/sloria/TextBlob.git@dev
 git+https://github.com/salesforce/LAVIS.git@main
+bertopic
+grpcio

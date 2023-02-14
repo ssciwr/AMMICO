@@ -48,6 +48,8 @@ dependencies = [
     "textblob",
     "torch",
     "salesforce-lavis @ git+https://github.com/salesforce/LAVIS.git@main"
+    "bertopic",
+    "grpcio",
 ]
 
 [project.scripts]
