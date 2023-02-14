@@ -29,6 +29,20 @@ pip install .
 ```
 This will install the package and its dependencies locally.
 
+## Installation on Windows
+
+Some modules use [lavis]() to anaylse image content. To enable this functionality on Windows OS, you need to install some dependencies that are not available by default or can be obtained from the command line:
+1. Download [Visual C++](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) and install (see also [here](https://github.com/philferriere/cocoapi)).
+1. Then install the coco API from Github
+```
+pip install "git+https://github.com/philferriere/cocoapi.git#egg=pycocotools&subdirectory=PythonAPI"
+```
+1. Now you can install the package by navigating to the misinformation directory and typing
+```
+pip install .
+```
+in the command prompt.
+
 # Usage
 
 There are sample notebooks in the `misinformation/notebooks` folder for you to explore the package:
