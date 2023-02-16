@@ -47,7 +47,7 @@ dependencies = [
     "spacytextblob",
     "textblob",
     "torch",
-    "salesforce-lavis",
+    "salesforce-lavis; platform_system!='Windows'",
     "bertopic",
     "grpcio",
 ]
