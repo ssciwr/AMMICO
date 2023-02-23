@@ -58,9 +58,7 @@ class SummaryDetector(AnalysisMethod):
             self.image_summary["const_image_summary"] = summary_model.generate(
                 {"image": image}
             )[0]
-            self.image_summary[
-                "3_non-deterministic summary"
-            ] = summary_model.generate(
+            self.image_summary["3_non-deterministic summary"] = summary_model.generate(
                 {"image": image}, use_nucleus_sampling=True, num_captions=3
             )
         for key in self.image_summary:
