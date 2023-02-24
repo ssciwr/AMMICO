@@ -2,7 +2,7 @@ import glob
 import os
 from pandas import DataFrame
 import pooch
-import torch
+from torch import device, cuda
 from lavis.models import load_model_and_preprocess
 
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
 
 def load_model_base():
-    summary_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    summary_device = device("cuda" if cuda.is_available() else "cpu")
     summary_model, summary_vis_processors, _ = load_model_and_preprocess(
         name="blip_caption",
         model_type="base_coco",
@@ -122,7 +122,7 @@ def load_model_base():
 
 
 def load_model_large():
-    summary_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    summary_device = device("cuda" if cuda.is_available() else "cpu")
     summary_model, summary_vis_processors, _ = load_model_and_preprocess(
         name="blip_caption",
         model_type="large_coco",
