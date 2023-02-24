@@ -2,6 +2,8 @@ import glob
 import os
 from pandas import DataFrame
 import pooch
+import torch
+from lavis.models import load_model_and_preprocess
 
 
 class DownloadResource:
@@ -106,3 +108,34 @@ if __name__ == "__main__":
     outdict = append_data_to_dict(mydict)
     df = dump_df(outdict)
     print(df.head(10))
+
+
+def load_model_base():
+    summary_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
+        name="blip_caption",
+        model_type="base_coco",
+        is_eval=True,
+        device=summary_device,
+    )
+    return summary_model, summary_vis_processors
+
+
+def load_model_large():
+    summary_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
+        name="blip_caption",
+        model_type="large_coco",
+        is_eval=True,
+        device=summary_device,
+    )
+    return summary_model, summary_vis_processors
+
+
+def load_model(model_type):
+    select_model = {
+        "base": load_model_base,
+        "large": load_model_large,
+    }
+    summary_model, summary_vis_processors = select_model[model_type]()
+    return summary_model, summary_vis_processors

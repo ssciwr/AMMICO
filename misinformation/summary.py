@@ -16,32 +16,6 @@ class SummaryDetector(AnalysisMethod):
         device=summary_device,
     )
 
-    def load_model_base():
-        summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-            name="blip_caption",
-            model_type="base_coco",
-            is_eval=True,
-            device=SummaryDetector.summary_device,
-        )
-        return summary_model, summary_vis_processors
-
-    def load_model_large():
-        summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-            name="blip_caption",
-            model_type="large_coco",
-            is_eval=True,
-            device=SummaryDetector.summary_device,
-        )
-        return summary_model, summary_vis_processors
-
-    def load_model(model_type):
-        select_model = {
-            "base": SummaryDetector.load_model_base,
-            "large": SummaryDetector.load_model_large,
-        }
-        summary_model, summary_vis_processors = select_model[model_type]()
-        return summary_model, summary_vis_processors
-
     def analyse_image(self, summary_model=None, summary_vis_processors=None):
 
         if summary_model is None and summary_vis_processors is None:
