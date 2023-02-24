@@ -68,7 +68,7 @@ class SummaryDetector(AnalysisMethod):
                     inference_method="generate",
                 )
 
-            for q, a in zip(question_batch, answers_batch):
+            for q, a in zip(list_of_questions, answers_batch):
                 self.subdict[q] = a
 
         else:
