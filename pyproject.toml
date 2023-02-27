@@ -40,7 +40,7 @@ dependencies = [
     "pytest-cov",
     "matplotlib",
     "pytest",
-    "opencv-contrib-python",
+    "opencv-contrib-python <= 4.6",
     "googletrans==3.1.0a0",
     "spacy",
     "jupyterlab",

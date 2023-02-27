@@ -38,14 +38,6 @@ def test_analyse_image():
         id_ = os.path.splitext(os.path.basename(img_path))[0]
         mydict[id_] = {"filename": img_path}
 
-    summary_device = device("cuda" if cuda.is_available() else "cpu")
-    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-        name="blip_caption",
-        model_type="base_coco",
-        is_eval=True,
-        device=summary_device,
-    )
-
     for key in mydict:
         mydict[key] = sm.SummaryDetector(mydict[key]).analyse_image()
     keys = list(mydict.keys())
@@ -88,6 +80,17 @@ def test_analyse_image():
     )
     assert mydict[keys[11]]["const_image_summary"] == str(
         "a person running on a beach near a rock formation"
+    )
+
+    del sm.SummaryDetector.summary_model, sm.SummaryDetector.summary_vis_processors
+    cuda.empty_cache()
+
+    summary_device = device("cuda" if cuda.is_available() else "cpu")
+    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
+        name="blip_caption",
+        model_type="base_coco",
+        is_eval=True,
+        device=summary_device,
     )
 
     for key in mydict:
@@ -135,6 +138,9 @@ def test_analyse_image():
     assert mydict[keys[11]]["const_image_summary"] == str(
         "a person running on a beach near a rock formation"
     )
+
+    del summary_model, summary_vis_processors
+    cuda.empty_cache()
 
     summary_model, summary_vis_processors, _ = load_model_and_preprocess(
         name="blip_caption",
@@ -210,14 +216,6 @@ def test_analyse_questions():
         id_ = os.path.splitext(os.path.basename(img_path))[0]
         mydict[id_] = {"filename": img_path}
 
-    summary_device = device("cuda" if cuda.is_available() else "cpu")
-    (
-        summary_VQA_model,
-        summary_VQA_vis_processors,
-        summary_VQA_txt_processors,
-    ) = load_model_and_preprocess(
-        name="blip_vqa", model_type="vqav2", is_eval=True, device=summary_device
-    )
     list_of_questions = [
         "How many persons on the picture?",
         "What happends on the picture?",
