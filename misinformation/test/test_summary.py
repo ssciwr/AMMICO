@@ -1,5 +1,4 @@
 import os
-import pytest
 from torch import device, cuda
 from lavis.models import load_model_and_preprocess
 import misinformation.summary as sm
