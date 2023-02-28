@@ -22,27 +22,9 @@ def test_read_img():
     test_img = ms.read_img(TEST_IMAGE_2)
     assert numpy.array(test_img)[257][34] == [70, 66, 63]
 
-
-
-#def test_load_feature_extractor_model_blip2():
-#    multimodal_device = device("cuda" if cuda.is_available() else "cpu")
-#    (model, vis_processors, txt_processors,) = ms.load_feature_extractor_model_blip2(multimodal_device)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # def test_load_feature_extractor_model_blip2():
+    #    multimodal_device = device("cuda" if cuda.is_available() else "cpu")
+    #    (model, vis_processors, txt_processors,) = ms.load_feature_extractor_model_blip2(multimodal_device)
 
     mydict = {}
     for img_path in images:
