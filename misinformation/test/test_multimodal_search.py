@@ -24,6 +24,7 @@ def test_read_img():
     test_img = ms.MultimodalSearch.read_img(my_dict, TEST_IMAGE_2)
     assert list(numpy.array(test_img)[257][34]) == [70, 66, 63]
 
+
 @pytest.mark.skipif(not cuda.is_available(), reason="model for gpu only")
 def test_load_feature_extractor_model_blip2():
     my_dict = {}
