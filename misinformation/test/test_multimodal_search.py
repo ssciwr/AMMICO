@@ -129,6 +129,19 @@ pre_extracted_feature_img_clip = [
     0.020485712215304375,
 ]
 
+pre_extracted_feature_img_parsing_clip = [
+    0.01621132344007492,
+    -0.004035486374050379,
+    -0.04304071143269539,
+    -0.03459808602929115,
+    0.016922621056437492,
+    -0.025056276470422745,
+    -0.04178355261683464,
+    0.02165347896516323,
+    -0.003224249929189682,
+    0.020485712215304375,
+]
+
 pre_extracted_feature_img_clip_vitl14 = [
     -0.023943455889821053,
     -0.021703708916902542,
@@ -256,7 +269,7 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             ),
         ),
         (
-            device("cuda"),
+            device("cpu"),
             "blip",
             pre_proc_pic_blip2_blip_albef,
             pre_proc_text_blip2_blip_albef,
