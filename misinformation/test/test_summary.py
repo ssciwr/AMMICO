@@ -3,35 +3,23 @@ from torch import device, cuda
 from lavis.models import load_model_and_preprocess
 import misinformation.summary as sm
 
-TEST_IMAGE_1 = "./test/data/d755771b-225e-432f-802e-fb8dc850fff7.png"
-TEST_IMAGE_2 = "./test/data/IMG_2746.png"
-TEST_IMAGE_3 = "./test/data/IMG_2750.png"
-TEST_IMAGE_4 = "./test/data/IMG_2805.png"
-TEST_IMAGE_5 = "./test/data/IMG_2806.png"
-TEST_IMAGE_6 = "./test/data/IMG_2807.png"
-TEST_IMAGE_7 = "./test/data/IMG_2808.png"
-TEST_IMAGE_8 = "./test/data/IMG_2809.png"
-TEST_IMAGE_9 = "./test/data/IMG_3755.jpg"
-TEST_IMAGE_10 = "./test/data/IMG_3756.jpg"
-TEST_IMAGE_11 = "./test/data/IMG_3757.jpg"
-TEST_IMAGE_12 = "./test/data/pic1.png"
+images = [
+    "./test/data/d755771b-225e-432f-802e-fb8dc850fff7.png",
+    "./test/data/IMG_2746.png",
+    "./test/data/IMG_2750.png",
+    "./test/data/IMG_2805.png",
+    "./test/data/IMG_2806.png",
+    "./test/data/IMG_2807.png",
+    "./test/data/IMG_2808.png",
+    "./test/data/IMG_2809.png",
+    "./test/data/IMG_3755.jpg",
+    "./test/data/IMG_3756.jpg",
+    "./test/data/IMG_3757.jpg",
+    "./test/data/pic1.png",
+]
 
 
 def test_analyse_image():
-    images = [
-        TEST_IMAGE_1,
-        TEST_IMAGE_2,
-        TEST_IMAGE_3,
-        TEST_IMAGE_4,
-        TEST_IMAGE_5,
-        TEST_IMAGE_6,
-        TEST_IMAGE_7,
-        TEST_IMAGE_8,
-        TEST_IMAGE_9,
-        TEST_IMAGE_10,
-        TEST_IMAGE_11,
-        TEST_IMAGE_12,
-    ]
     mydict = {}
     for img_path in images:
         id_ = os.path.splitext(os.path.basename(img_path))[0]
@@ -44,42 +32,23 @@ def test_analyse_image():
     for key in keys:
         assert len(mydict[key]["3_non-deterministic summary"]) == 3
 
-    assert mydict[keys[0]]["const_image_summary"] == str(
-        "a river running through a city next to tall buildings"
-    )
-    assert mydict[keys[1]]["const_image_summary"] == str(
-        "a crowd of people standing on top of a tennis court"
-    )
-    assert mydict[keys[2]]["const_image_summary"] == str(
-        "a crowd of people standing on top of a field"
-    )
-    assert mydict[keys[3]]["const_image_summary"] == str(
-        "a room with a desk and a chair"
-    )
-    assert mydict[keys[4]]["const_image_summary"] == str(
-        "a table with plastic containers on top of it"
-    )
-    assert mydict[keys[5]]["const_image_summary"] == str(
-        "a view of a city with mountains in the background"
-    )
-    assert mydict[keys[6]]["const_image_summary"] == str(
-        "a view of a city street from a window"
-    )
-    assert mydict[keys[7]]["const_image_summary"] == str(
-        "a busy city street with cars and pedestrians"
-    )
-    assert mydict[keys[8]]["const_image_summary"] == str(
-        "a close up of an open book with writing on it"
-    )
-    assert mydict[keys[9]]["const_image_summary"] == str(
-        "a book that is open on a table"
-    )
-    assert mydict[keys[10]]["const_image_summary"] == str(
-        "a yellow book with green lettering on it"
-    )
-    assert mydict[keys[11]]["const_image_summary"] == str(
-        "a person running on a beach near a rock formation"
-    )
+    const_image_summary_list = [
+        "a river running through a city next to tall buildings",
+        "a crowd of people standing on top of a tennis court",
+        "a crowd of people standing on top of a field",
+        "a room with a desk and a chair",
+        "a table with plastic containers on top of it",
+        "a view of a city with mountains in the background",
+        "a view of a city street from a window",
+        "a busy city street with cars and pedestrians",
+        "a close up of an open book with writing on it",
+        "a book that is open on a table",
+        "a yellow book with green lettering on it",
+        "a person running on a beach near a rock formation",
+    ]
+
+    for i in range(len(const_image_summary_list)):
+        assert mydict[keys[i]]["const_image_summary"] == const_image_summary_list[i]
 
     del sm.SummaryDetector.summary_model, sm.SummaryDetector.summary_vis_processors
     cuda.empty_cache()
@@ -97,46 +66,28 @@ def test_analyse_image():
             summary_model, summary_vis_processors
         )
     keys = list(mydict.keys())
+
     assert len(mydict) == 12
     for key in keys:
         assert len(mydict[key]["3_non-deterministic summary"]) == 3
 
-    assert mydict[keys[0]]["const_image_summary"] == str(
-        "a river running through a city next to tall buildings"
-    )
-    assert mydict[keys[1]]["const_image_summary"] == str(
-        "a crowd of people standing on top of a tennis court"
-    )
-    assert mydict[keys[2]]["const_image_summary"] == str(
-        "a crowd of people standing on top of a field"
-    )
-    assert mydict[keys[3]]["const_image_summary"] == str(
-        "a room with a desk and a chair"
-    )
-    assert mydict[keys[4]]["const_image_summary"] == str(
-        "a table with plastic containers on top of it"
-    )
-    assert mydict[keys[5]]["const_image_summary"] == str(
-        "a view of a city with mountains in the background"
-    )
-    assert mydict[keys[6]]["const_image_summary"] == str(
-        "a view of a city street from a window"
-    )
-    assert mydict[keys[7]]["const_image_summary"] == str(
-        "a busy city street with cars and pedestrians"
-    )
-    assert mydict[keys[8]]["const_image_summary"] == str(
-        "a close up of an open book with writing on it"
-    )
-    assert mydict[keys[9]]["const_image_summary"] == str(
-        "a book that is open on a table"
-    )
-    assert mydict[keys[10]]["const_image_summary"] == str(
-        "a yellow book with green lettering on it"
-    )
-    assert mydict[keys[11]]["const_image_summary"] == str(
-        "a person running on a beach near a rock formation"
-    )
+    const_image_summary_list2 = [
+        "a river running through a city next to tall buildings",
+        "a crowd of people standing on top of a tennis court",
+        "a crowd of people standing on top of a field",
+        "a room with a desk and a chair",
+        "a table with plastic containers on top of it",
+        "a view of a city with mountains in the background",
+        "a view of a city street from a window",
+        "a busy city street with cars and pedestrians",
+        "a close up of an open book with writing on it",
+        "a book that is open on a table",
+        "a yellow book with green lettering on it",
+        "a person running on a beach near a rock formation",
+    ]
+
+    for i in range(len(const_image_summary_list2)):
+        assert mydict[keys[i]]["const_image_summary"] == const_image_summary_list2[i]
 
     del summary_model, summary_vis_processors
     cuda.empty_cache()
@@ -157,59 +108,26 @@ def test_analyse_image():
     for key in keys:
         assert len(mydict[key]["3_non-deterministic summary"]) == 3
 
-    assert mydict[keys[0]]["const_image_summary"] == str(
-        "a river running through a town next to tall buildings"
-    )
-    assert mydict[keys[1]]["const_image_summary"] == str(
-        "a crowd of people standing on top of a track"
-    )
-    assert mydict[keys[2]]["const_image_summary"] == str(
-        "a group of people standing on top of a track"
-    )
-    assert mydict[keys[3]]["const_image_summary"] == str(
-        "a desk and chair in a small room"
-    )
-    assert mydict[keys[4]]["const_image_summary"] == str(
-        "a table that has some chairs on top of it"
-    )
-    assert mydict[keys[5]]["const_image_summary"] == str(
-        "a view of a city from a window of a building"
-    )
-    assert mydict[keys[6]]["const_image_summary"] == str(
-        "a view of a city from a window"
-    )
-    assert mydict[keys[7]]["const_image_summary"] == str(
-        "a city street filled with lots of traffic"
-    )
-    assert mydict[keys[8]]["const_image_summary"] == str(
-        "an open book with german text on it"
-    )
-    assert mydict[keys[9]]["const_image_summary"] == str(
-        "a close up of a book on a table"
-    )
-    assert mydict[keys[10]]["const_image_summary"] == str(
-        "a book with a green cover on a table"
-    )
-    assert mydict[keys[11]]["const_image_summary"] == str(
-        "a person running on a beach near the ocean"
-    )
+    const_image_summary_list3 = [
+        "a river running through a town next to tall buildings",
+        "a crowd of people standing on top of a track",
+        "a group of people standing on top of a track",
+        "a desk and chair in a small room",
+        "a table that has some chairs on top of it",
+        "a view of a city from a window of a building",
+        "a view of a city from a window",
+        "a city street filled with lots of traffic",
+        "an open book with german text on it",
+        "a close up of a book on a table",
+        "a book with a green cover on a table",
+        "a person running on a beach near the ocean",
+    ]
+
+    for i in range(len(const_image_summary_list2)):
+        assert mydict[keys[i]]["const_image_summary"] == const_image_summary_list3[i]
 
 
 def test_analyse_questions():
-    images = [
-        TEST_IMAGE_1,
-        TEST_IMAGE_2,
-        TEST_IMAGE_3,
-        TEST_IMAGE_4,
-        TEST_IMAGE_5,
-        TEST_IMAGE_6,
-        TEST_IMAGE_7,
-        TEST_IMAGE_8,
-        TEST_IMAGE_9,
-        TEST_IMAGE_10,
-        TEST_IMAGE_11,
-        TEST_IMAGE_12,
-    ]
     mydict = {}
     for img_path in images:
         id_ = os.path.splitext(os.path.basename(img_path))[0]
@@ -227,28 +145,22 @@ def test_analyse_questions():
     keys = list(mydict.keys())
     assert len(mydict) == 12
 
-    assert mydict[keys[0]][list_of_questions[0]] == str(2)
-    assert mydict[keys[1]][list_of_questions[0]] == str(100)
-    assert mydict[keys[2]][list_of_questions[0]] == str("many")
-    assert mydict[keys[3]][list_of_questions[0]] == str(0)
-    assert mydict[keys[4]][list_of_questions[0]] == str(0)
-    assert mydict[keys[5]][list_of_questions[0]] == str("none")
-    assert mydict[keys[6]][list_of_questions[0]] == str("two")
-    assert mydict[keys[7]][list_of_questions[0]] == str(5)
-    assert mydict[keys[8]][list_of_questions[0]] == str(0)
-    assert mydict[keys[9]][list_of_questions[0]] == str(0)
-    assert mydict[keys[10]][list_of_questions[0]] == str(0)
-    assert mydict[keys[11]][list_of_questions[0]] == str(1)
+    list_of_questions_ans = [2, 100, "many", 0, 0, "none", "two", 5, 0, 0, 0, 1]
 
-    assert mydict[keys[0]][list_of_questions[1]] == str("flood")
-    assert mydict[keys[1]][list_of_questions[1]] == str("festival")
-    assert mydict[keys[2]][list_of_questions[1]] == str("people are flying kites")
-    assert mydict[keys[3]][list_of_questions[1]] == str("no one's home")
-    assert mydict[keys[4]][list_of_questions[1]] == str("chair is being moved")
-    assert mydict[keys[5]][list_of_questions[1]] == str("traffic jam")
-    assert mydict[keys[6]][list_of_questions[1]] == str("day time")
-    assert mydict[keys[7]][list_of_questions[1]] == str("traffic jam")
-    assert mydict[keys[8]][list_of_questions[1]] == str("nothing")
-    assert mydict[keys[9]][list_of_questions[1]] == str("nothing")
-    assert mydict[keys[10]][list_of_questions[1]] == str("nothing")
-    assert mydict[keys[11]][list_of_questions[1]] == str("running")
+    list_of_questions_ans2 = [
+        "flood",
+        "festival",
+        "people are flying kites",
+        "no one's home",
+        "chair is being moved",
+        "traffic jam",
+        "day time",
+        "traffic jam",
+        "nothing",
+        "nothing",
+        "nothing",
+        "running",
+    ]
+
+    for i in range(len(list_of_questions_ans)):
+        assert mydict[keys[i]][list_of_questions[1]] == str(list_of_questions_ans2[i])
