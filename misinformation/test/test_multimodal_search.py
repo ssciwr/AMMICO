@@ -22,6 +22,9 @@ related_error = 1e-3
 gpu_is_not_available = not cuda.is_available()
 
 
+cuda.empty_cache()
+
+
 def test_read_img():
     my_dict = {}
     test_img = ms.MultimodalSearch.read_img(my_dict, TEST_IMAGE_2)
@@ -114,19 +117,6 @@ pre_extracted_feature_img_albef = [
 ]
 
 pre_extracted_feature_img_clip = [
-    0.01621132344007492,
-    -0.004035486374050379,
-    -0.04304071143269539,
-    -0.03459808602929115,
-    0.016922621056437492,
-    -0.025056276470422745,
-    -0.04178355261683464,
-    0.02165347896516323,
-    -0.003224249929189682,
-    0.020485712215304375,
-]
-
-pre_extracted_feature_img_parsing_clip = [
     0.01621132344007492,
     -0.004035486374050379,
     -0.04304071143269539,
@@ -252,7 +242,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
         "pre_proc_text",
         "pre_extracted_feature_img",
         "pre_extracted_feature_text",
-        "pre_extracted_feature_img2",
     ),
     [
         pytest.param(
@@ -262,7 +251,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_blip2,
             pre_extracted_feature_text_blip2,
-            pre_extracted_feature_img_blip2,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -274,7 +262,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_blip,
             pre_extracted_feature_text_blip,
-            pre_extracted_feature_img_blip,
         ),
         pytest.param(
             device("cuda"),
@@ -283,7 +270,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_blip,
             pre_extracted_feature_text_blip,
-            pre_extracted_feature_img_blip,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -295,7 +281,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_albef,
             pre_extracted_feature_text_albef,
-            pre_extracted_feature_img_albef,
         ),
         pytest.param(
             device("cuda"),
@@ -304,7 +289,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_albef,
             pre_extracted_feature_text_albef,
-            pre_extracted_feature_img_albef,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -314,18 +298,16 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             "clip_base",
             pre_proc_pic_clip_vitl14,
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
-            pre_extracted_feature_img_parsing_clip,
-            pre_extracted_feature_text_clip,
             pre_extracted_feature_img_clip,
+            pre_extracted_feature_text_clip,
         ),
         pytest.param(
             device("cuda"),
             "clip_base",
             pre_proc_pic_clip_vitl14,
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
-            pre_extracted_feature_img_parsing_clip,
-            pre_extracted_feature_text_clip,
             pre_extracted_feature_img_clip,
+            pre_extracted_feature_text_clip,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -337,7 +319,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14,
             pre_extracted_feature_text_clip_vitl14,
-            pre_extracted_feature_img_clip_vitl14,
         ),
         pytest.param(
             device("cuda"),
@@ -346,7 +327,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14,
             pre_extracted_feature_text_clip_vitl14,
-            pre_extracted_feature_img_clip_vitl14,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -358,7 +338,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14_336,
             pre_extracted_feature_text_clip_vitl14_336,
-            pre_extracted_feature_img_clip_vitl14_336,
         ),
         pytest.param(
             device("cuda"),
@@ -367,7 +346,6 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14_336,
             pre_extracted_feature_text_clip_vitl14_336,
-            pre_extracted_feature_img_clip_vitl14_336,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -381,7 +359,6 @@ def test_parsing_images(
     pre_proc_text,
     pre_extracted_feature_img,
     pre_extracted_feature_text,
-    pre_extracted_feature_img2,
 ):
     mydict = {
         "IMG_2746": {"filename": "./test/data/IMG_2746.png"},
@@ -433,7 +410,7 @@ def test_parsing_images(
 
     for i, num in zip(range(10), multi_features_stacked[1, 10:20].tolist()):
         assert (
-            math.isclose(num, pre_extracted_feature_img2[i], rel_tol=related_error)
+            math.isclose(num, pre_extracted_feature_img[i], rel_tol=related_error)
             is True
         )
 
