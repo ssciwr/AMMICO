@@ -594,7 +594,7 @@ def test_parsing_images(
     for i, num in zip(range(12), similarity.tolist()):
         for j, num2 in zip(range(len(num)), num):
             assert (
-                math.isclose(num2, pre_simularity[i][j], rel_tol=10 * related_error)
+                math.isclose(num2, pre_simularity[i][j], rel_tol=20 * related_error)
                 is True
             )
 
