@@ -6,18 +6,23 @@ from torch import device, cuda, no_grad
 from lavis.models import load_model_and_preprocess
 import misinformation.multimodal_search as ms
 
-TEST_IMAGE_1 = "./test/data/d755771b-225e-432f-802e-fb8dc850fff7.png"
-TEST_IMAGE_2 = "./test/data/IMG_2746.png"
-TEST_IMAGE_3 = "./test/data/IMG_2750.png"
-TEST_IMAGE_4 = "./test/data/IMG_2805.png"
-TEST_IMAGE_5 = "./test/data/IMG_2806.png"
-TEST_IMAGE_6 = "./test/data/IMG_2807.png"
-TEST_IMAGE_7 = "./test/data/IMG_2808.png"
-TEST_IMAGE_8 = "./test/data/IMG_2809.png"
-TEST_IMAGE_9 = "./test/data/IMG_3755.jpg"
-TEST_IMAGE_10 = "./test/data/IMG_3756.jpg"
-TEST_IMAGE_11 = "./test/data/IMG_3757.jpg"
-TEST_IMAGE_12 = "./test/data/pic1.png"
+testdict = {
+    "d755771b-225e-432f-802e-fb8dc850fff7": {
+        "filename": "./test/data/d755771b-225e-432f-802e-fb8dc850fff7.png"
+    },
+    "IMG_2746": {"filename": "./test/data/IMG_2746.png"},
+    "IMG_2750": {"filename": "./test/data/IMG_2750.png"},
+    "IMG_2805": {"filename": "./test/data/IMG_2805.png"},
+    "IMG_2806": {"filename": "./test/data/IMG_2806.png"},
+    "IMG_2807": {"filename": "./test/data/IMG_2807.png"},
+    "IMG_2808": {"filename": "./test/data/IMG_2808.png"},
+    "IMG_2809": {"filename": "./test/data/IMG_2809.png"},
+    "IMG_3755": {"filename": "./test/data/IMG_3755.jpg"},
+    "IMG_3756": {"filename": "./test/data/IMG_3756.jpg"},
+    "IMG_3757": {"filename": "./test/data/IMG_3757.jpg"},
+    "pic1": {"filename": "./test/data/pic1.png"},
+}
+
 related_error = 1e-3
 gpu_is_not_available = not cuda.is_available()
 
@@ -27,7 +32,7 @@ cuda.empty_cache()
 
 def test_read_img():
     my_dict = {}
-    test_img = ms.MultimodalSearch.read_img(my_dict, TEST_IMAGE_2)
+    test_img = ms.MultimodalSearch.read_img(my_dict, testdict["IMG_2746"]["filename"])
     assert list(numpy.array(test_img)[257][34]) == [70, 66, 63]
 
 
@@ -246,6 +251,126 @@ pre_extracted_feature_text_clip_vitl14_336 = [
     -0.023832324892282486,
 ]
 
+simularity_blip2 = [
+    [0.05826476216316223, -0.03215287625789642],
+    [0.12869958579540253, 0.005234059877693653],
+    [0.11073512583971024, 0.12327003479003906],
+    [0.08743024617433548, 0.05598106235265732],
+    [0.04591086134314537, 0.48981112241744995],
+    [0.06297147274017334, 0.4728018641471863],
+    [0.18486255407333374, 0.635167121887207],
+    [0.015356295742094517, 0.015282897278666496],
+    [-0.008485622704029083, 0.010882291942834854],
+    [-0.04328630864620209, -0.13117870688438416],
+    [-0.025470387190580368, 0.13175423443317413],
+    [-0.05090826004743576, 0.05902523919939995],
+]
+
+sorted_blip2 = [
+    [6, 1, 2, 3, 5, 0, 4, 7, 8, 10, 9, 11],
+    [6, 4, 5, 10, 2, 11, 3, 7, 8, 1, 0, 9],
+]
+
+simularity_blip = [
+    [0.15640679001808167, 0.752173662185669],
+    [0.15139800310134888, 0.7804810404777527],
+    [0.13010388612747192, 0.755257248878479],
+    [0.13746635615825653, 0.7618774175643921],
+    [0.1756758838891983, 0.8531903624534607],
+    [0.17233705520629883, 0.8448910117149353],
+    [0.1970970332622528, 0.8916105628013611],
+    [0.11693969368934631, 0.5833531618118286],
+    [0.12386563420295715, 0.5981853604316711],
+    [0.08427951484918594, 0.4962371587753296],
+    [0.14193706214427948, 0.7613846659660339],
+    [0.12051936239004135, 0.6492202281951904],
+]
+
+sorted_blip = [
+    [6, 4, 5, 0, 1, 10, 3, 2, 8, 11, 7, 9],
+    [6, 4, 5, 1, 3, 10, 2, 0, 11, 8, 7, 9],
+]
+
+simularity_albef = [
+    [0.12321824580430984, 0.35511350631713867],
+    [0.09512615948915482, 0.27168408036231995],
+    [0.09053325653076172, 0.20215675234794617],
+    [0.06335515528917313, 0.15055638551712036],
+    [0.09604836255311966, 0.4658776521682739],
+    [0.10870333760976791, 0.5143978595733643],
+    [0.11748822033405304, 0.6542638540267944],
+    [0.05688793584704399, 0.22170542180538177],
+    [0.05597608536481857, 0.11963296681642532],
+    [0.059643782675266266, 0.14969395101070404],
+    [0.06690303236246109, 0.3149859607219696],
+    [0.07909377664327621, 0.11911341547966003],
+]
+
+sorted_albef = [
+    [0, 6, 5, 4, 1, 2, 11, 10, 3, 9, 7, 8],
+    [6, 5, 4, 0, 10, 1, 7, 2, 3, 9, 8, 11],
+]
+
+simularity_clip = [
+    [0.23923014104366302, 0.5325412750244141],
+    [0.20101115107536316, 0.5112978219985962],
+    [0.17522737383842468, 0.49811851978302],
+    [0.20062290132045746, 0.5415266156196594],
+    [0.22865726053714752, 0.5762109756469727],
+    [0.2310466319322586, 0.5910375714302063],
+    [0.2644523084163666, 0.7851459383964539],
+    [0.21474510431289673, 0.4135811924934387],
+    [0.16407863795757294, 0.1474374681711197],
+    [0.19819433987140656, 0.26493316888809204],
+    [0.19545596837997437, 0.5007457137107849],
+    [0.1647854745388031, 0.45705708861351013],
+]
+
+sorted_clip = [
+    [6, 0, 5, 4, 7, 1, 3, 9, 10, 2, 11, 8],
+    [6, 5, 4, 3, 0, 1, 10, 2, 11, 7, 9, 8],
+]
+
+simularity_clip_vitl14 = [
+    [0.1051270067691803, 0.5184808373451233],
+    [0.09705893695354462, 0.49574509263038635],
+    [0.11964304000139236, 0.5424358248710632],
+    [0.13881900906562805, 0.5909714698791504],
+    [0.12728188931941986, 0.6758255362510681],
+    [0.1277746558189392, 0.6841973662376404],
+    [0.18026694655418396, 0.803142786026001],
+    [0.13977059721946716, 0.45957139134407043],
+    [0.11180847883224487, 0.24822194874286652],
+    [0.12296056002378464, 0.35143694281578064],
+    [0.11596094071865082, 0.5704031586647034],
+    [0.10174489766359329, 0.44422751665115356],
+]
+
+sorted_clip_vitl14 = [
+    [6, 7, 3, 5, 4, 9, 2, 10, 8, 0, 11, 1],
+    [6, 5, 4, 3, 10, 2, 0, 1, 7, 11, 9, 8],
+]
+
+simularity_clip_vitl14_336 = [
+    [0.09391091763973236, 0.49337542057037354],
+    [0.11103834211826324, 0.4881117343902588],
+    [0.12891019880771637, 0.5501476526260376],
+    [0.13288410007953644, 0.5498673915863037],
+    [0.12357455492019653, 0.6749162077903748],
+    [0.13700757920742035, 0.7003108263015747],
+    [0.1788637489080429, 0.7713702321052551],
+    [0.13260436058044434, 0.4300197660923004],
+    [0.11666625738143921, 0.2334875613451004],
+    [0.1316065937280655, 0.3291645646095276],
+    [0.12374477833509445, 0.5632147192955017],
+    [0.10333051532506943, 0.43023794889450073],
+]
+
+sorted_clip_vitl14_336 = [
+    [6, 5, 3, 7, 9, 2, 10, 4, 8, 1, 11, 0],
+    [6, 5, 4, 10, 2, 3, 0, 1, 11, 7, 9, 8],
+]
+
 
 @pytest.mark.parametrize(
     (
@@ -255,6 +380,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
         "pre_proc_text",
         "pre_extracted_feature_img",
         "pre_extracted_feature_text",
+        "pre_simularity",
+        "pre_sorted",
     ),
     [
         pytest.param(
@@ -264,6 +391,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_blip2,
             pre_extracted_feature_text_blip2,
+            simularity_blip2,
+            sorted_blip2,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -275,6 +404,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_blip,
             pre_extracted_feature_text_blip,
+            simularity_blip,
+            sorted_blip,
         ),
         pytest.param(
             device("cuda"),
@@ -283,6 +414,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_blip,
             pre_extracted_feature_text_blip,
+            simularity_blip,
+            sorted_blip,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -294,6 +427,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_albef,
             pre_extracted_feature_text_albef,
+            simularity_albef,
+            sorted_albef,
         ),
         pytest.param(
             device("cuda"),
@@ -302,6 +437,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_blip2_blip_albef,
             pre_extracted_feature_img_albef,
             pre_extracted_feature_text_albef,
+            simularity_albef,
+            sorted_albef,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -313,6 +450,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip,
             pre_extracted_feature_text_clip,
+            simularity_clip,
+            sorted_clip,
         ),
         pytest.param(
             device("cuda"),
@@ -321,6 +460,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip,
             pre_extracted_feature_text_clip,
+            simularity_clip,
+            sorted_clip,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -332,6 +473,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14,
             pre_extracted_feature_text_clip_vitl14,
+            simularity_clip_vitl14,
+            sorted_clip_vitl14,
         ),
         pytest.param(
             device("cuda"),
@@ -340,6 +483,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14,
             pre_extracted_feature_text_clip_vitl14,
+            simularity_clip_vitl14,
+            sorted_clip_vitl14,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -351,6 +496,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14_336,
             pre_extracted_feature_text_clip_vitl14_336,
+            simularity_clip_vitl14_336,
+            sorted_clip_vitl14_336,
         ),
         pytest.param(
             device("cuda"),
@@ -359,6 +506,8 @@ pre_extracted_feature_text_clip_vitl14_336 = [
             pre_proc_text_clip_clip_vitl14_clip_vitl14_336,
             pre_extracted_feature_img_clip_vitl14_336,
             pre_extracted_feature_text_clip_vitl14_336,
+            simularity_clip_vitl14_336,
+            sorted_clip_vitl14_336,
             marks=pytest.mark.skipif(
                 gpu_is_not_available, reason="gpu_is_not_availible"
             ),
@@ -372,11 +521,10 @@ def test_parsing_images(
     pre_proc_text,
     pre_extracted_feature_img,
     pre_extracted_feature_text,
+    pre_simularity,
+    pre_sorted,
 ):
-    mydict = {
-        "IMG_2746": {"filename": "./test/data/IMG_2746.png"},
-        "IMG_2750": {"filename": "./test/data/IMG_2750.png"},
-    }
+
     ms.MultimodalSearch.multimodal_device = pre_multimodal_device
     (
         model,
@@ -385,7 +533,7 @@ def test_parsing_images(
         image_keys,
         image_names,
         features_image_stacked,
-    ) = ms.MultimodalSearch.parsing_images(mydict, pre_model)
+    ) = ms.MultimodalSearch.parsing_images(testdict, pre_model)
 
     for i, num in zip(range(10), features_image_stacked[0, 10:20].tolist()):
         assert (
@@ -393,7 +541,7 @@ def test_parsing_images(
             is True
         )
 
-    test_pic = Image.open(TEST_IMAGE_2).convert("RGB")
+    test_pic = Image.open(testdict["IMG_2746"]["filename"]).convert("RGB")
     test_querry = (
         "The bird sat on a tree located at the intersection of 23rd and 43rd streets."
     )
@@ -409,10 +557,10 @@ def test_parsing_images(
 
     search_query = [
         {"text_input": test_querry},
-        {"image": TEST_IMAGE_2},
+        {"image": testdict["IMG_2746"]["filename"]},
     ]
     multi_features_stacked = ms.MultimodalSearch.querys_processing(
-        mydict, search_query, model, txt_processor, vis_processor, pre_model
+        testdict, search_query, model, txt_processor, vis_processor, pre_model
     )
 
     for i, num in zip(range(10), multi_features_stacked[0, 10:20].tolist()):
@@ -426,6 +574,32 @@ def test_parsing_images(
             math.isclose(num, pre_extracted_feature_img[i], rel_tol=related_error)
             is True
         )
+
+    search_query2 = [
+        {"text_input": "A bus"},
+        {"image": "../misinformation/test/data/IMG_3758.png"},
+    ]
+
+    similarity, sorted_list = ms.MultimodalSearch.multimodal_search(
+        testdict,
+        model,
+        vis_processor,
+        txt_processor,
+        pre_model,
+        image_keys,
+        features_image_stacked,
+        search_query2,
+    )
+
+    for i, num in zip(range(12), similarity.tolist()):
+        for j, num2 in zip(range(len(num)), num):
+            assert (
+                math.isclose(num2, pre_simularity[i][j], rel_tol=related_error) is True
+            )
+
+    for i, num in zip(range(2), sorted_list):
+        for j, num2 in zip(range(len(num)), num):
+            assert num2 == pre_sorted[i][j]
 
     del model, vis_processor, txt_processor
     cuda.empty_cache()
