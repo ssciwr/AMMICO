@@ -273,7 +273,17 @@ class MultimodalSearch(AnalysisMethod):
         image_keys,
         features_image_stacked,
         search_query,
+        filter_number_of_images=None,
+        filter_val_limit=None,
+        filter_rel_error=None,
     ):
+        if filter_number_of_images is None:
+            filter_number_of_images = len(self)
+        if filter_val_limit is None:
+            filter_val_limit = 0
+        if filter_rel_error is None:
+            filter_rel_error = 1e10
+
         features_image_stacked.to(MultimodalSearch.multimodal_device)
 
         with torch.no_grad():
@@ -290,10 +300,26 @@ class MultimodalSearch(AnalysisMethod):
         places = [[item.index(i) for i in range(len(item))] for item in sorted_lists]
 
         for q in range(len(search_query)):
-            for i, key in zip(range(len(image_keys)), image_keys):
-                self[key]["rank " + list(search_query[q].values())[0]] = places[q][i]
-                self[key][list(search_query[q].values())[0]] = similarity[i][q].item()
-
+            max_val = similarity[sorted_lists[q][0]][q].item()
+            print(max_val)
+            for i, key in zip(range(len(image_keys)), sorted_lists[q]):
+                if (
+                    i < filter_number_of_images
+                    and similarity[key][q].item() > filter_val_limit
+                    and 100 * abs(max_val - similarity[key][q].item()) / max_val
+                    < filter_rel_error
+                ):
+                    self[image_keys[key]][
+                        "rank " + list(search_query[q].values())[0]
+                    ] = places[q][key]
+                    self[image_keys[key]][
+                        list(search_query[q].values())[0]
+                    ] = similarity[key][q].item()
+                else:
+                    self[image_keys[key]][
+                        "rank " + list(search_query[q].values())[0]
+                    ] = None
+                    self[image_keys[key]][list(search_query[q].values())[0]] = 0
         return similarity, sorted_lists
 
     def show_results(self, query):
@@ -315,12 +341,18 @@ class MultimodalSearch(AnalysisMethod):
         for s in sorted(
             self.items(), key=lambda t: t[1][list(query.values())[0]], reverse=True
         ):
+            if s[1]["rank " + list(query.values())[0]] is None:
+                break
             p1 = Image.open(s[1]["filename"]).convert("RGB")
             p1.thumbnail((400, 400))
             display(
-                p1,
                 "Rank: "
                 + str(s[1]["rank " + list(query.values())[0]])
                 + " Val: "
                 + str(s[1][list(query.values())[0]]),
+                s[0],
+                p1,
+            )
+            display(
+                "--------------------------------------------------",
             )

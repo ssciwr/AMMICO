@@ -2,8 +2,7 @@ import pytest
 import math
 from PIL import Image
 import numpy
-from torch import device, cuda, no_grad
-from lavis.models import load_model_and_preprocess
+from torch import device, cuda
 import misinformation.multimodal_search as ms
 
 testdict = {
