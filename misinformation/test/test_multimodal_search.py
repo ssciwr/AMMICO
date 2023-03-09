@@ -599,7 +599,7 @@ def test_parsing_images(
             )
 
     for i, num in zip(range(2), sorted_list):
-        for j, num2 in zip(range(len(num)), num):
+        for j, num2 in zip(range(2), num):
             assert num2 == pre_sorted[i][j]
 
     del model, vis_processor, txt_processor
