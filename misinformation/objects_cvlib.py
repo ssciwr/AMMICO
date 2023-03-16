@@ -51,7 +51,7 @@ class ObjectCVLib(ObjectsMethod):
         Args:
         image_path: The path to the local file.
         """
-        #img = cv2.imread(image_path)
+        # img = cv2.imread(image_path)
         preimg = Image.open(image_path).convert("RGB")
         preimg2 = np.asarray(preimg)
         img = cv2.cvtColor(preimg2, cv2.COLOR_BGR2RGB)
