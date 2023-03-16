@@ -32,8 +32,6 @@ dependencies = [
     "ipywidgets",
     "matplotlib",
     "numpy<=1.23.4",
-    "opencv-python",
-    "opencv-contrib-python",
     "pandas",
     "Pillow",
     "pooch",
