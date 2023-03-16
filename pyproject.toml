@@ -49,6 +49,7 @@ dependencies = [
     "google-cloud-vision",
     "setuptools",
     "jupyterlab",
+    "opencv-contrib-python"
 ]
 
 [project.scripts]
