@@ -32,14 +32,14 @@ jobs:
     - name: Run pytest
       run: |
         cd misinformation
-        python -m pytest -vv test/test_cropposts.py --cov=. --cov-report=test_cropposts.xml
-        python -m pytest -vv test/test_display.py --cov=. --cov-report=test_display.xml
-        python -m pytest -vv test/test_faces.py --cov=. --cov-report=test_faces.xml
-        python -m pytest -vv test/test_multimodal_search.py --cov=. --cov-report=test_multimodal_search.xml
-        python -m pytest -vv test/test_objects.py --cov=. --cov-report=test_objects.xml
-        python -m pytest -vv test/test_summary.py --cov=. --cov-report=test_summary.xml
-        python -m pytest -vv test/test_text.py -m "not gcv" --cov=. --cov-report=test_text.xml
-        python -m pytest -vv test/test_utils.py --cov=. --cov-report=test_utils.xml
+        python -m pytest -vv test/test_cropposts.py --cov=. --cov-report=xml:test_cropposts.xml
+        python -m pytest -vv test/test_display.py --cov=. --cov-report=xml:test_display.xml
+        python -m pytest -vv test/test_faces.py --cov=. --cov-report=xml:test_faces.xml
+        python -m pytest -vv test/test_multimodal_search.py --cov=. --cov-report=xml:test_multimodal_search.xml
+        python -m pytest -vv test/test_objects.py --cov=. --cov-report=xml:test_objects.xml
+        python -m pytest -vv test/test_summary.py --cov=. --cov-report=xml:test_summary.xml
+        python -m pytest -vv test/test_text.py -m "not gcv" --cov=. --cov-report=xml:test_text.xml
+        python -m pytest -vv test/test_utils.py --cov=. --cov-report=xml:test_utils.xml
     - name: Upload coverage
       if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.9'
       uses: codecov/codecov-action@v3
