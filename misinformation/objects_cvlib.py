@@ -50,7 +50,7 @@ class ObjectCVLib(ObjectsMethod):
         image_path: The path to the local file.
         """
         img = cv2.imread(image_path)
-        bbox, label, conf = cv.detect_common_objects(img)
+        _, label, _ = cv.detect_common_objects(img)
         # output_image = draw_bbox(im, bbox, label, conf)
         objects = objects_from_cvlib(label)
         return objects
