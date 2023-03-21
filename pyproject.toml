@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "bertopic",
     "cvlib",
-    "deepface<=0.0.75",
+    "deepface @ git+https://github.com/iulusoy/deepface.git",
     "googletrans==3.1.0a0",
     "grpcio",
     "importlib_metadata",
@@ -39,8 +39,8 @@ dependencies = [
     "pytest",
     "pytest-cov",
     "requests",
-    "retina_face",
-    "salesforce-lavis",
+    "retina_face @ git+https://github.com/iulusoy/retinaface.git",
+    "salesforce-lavis @ git+https://github.com/iulusoy/LAVIS.git",
     "spacy",
     "spacytextblob",
     "tensorflow",
@@ -48,7 +48,6 @@ dependencies = [
     "torch",
     "google-cloud-vision",
     "setuptools",
-    "jupyterlab",
     "opencv-contrib-python-headless",
 ]
 

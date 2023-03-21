@@ -141,7 +141,7 @@ class EmotionDetector(utils.AnalysisMethod):
             DeepFace.analyze(
                 img_path=face,
                 actions=actions,
-                prog_bar=False,
+                silent=True,
                 detector_backend="skip",
             )
         )
