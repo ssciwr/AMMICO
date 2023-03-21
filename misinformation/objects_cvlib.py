@@ -51,12 +51,12 @@ class ObjectCVLib(ObjectsMethod):
         Args:
         image_path: The path to the local file.
         """
-        # img = cv2.imread(image_path)
-        preimg = Image.open(image_path).convert("RGB")
-        preimg2 = np.asarray(preimg)
-        img = cv2.cvtColor(preimg2, cv2.COLOR_BGR2RGB)
+        img = cv2.imread(image_path)
+        # preimg = Image.open(image_path).convert("RGB")
+        # preimg2 = np.asarray(preimg)
+        # img = cv2.cvtColor(preimg2, cv2.COLOR_BGR2RGB)
 
-        bbox, label, conf = cv.detect_common_objects(img)
+        _, label, _ = cv.detect_common_objects(img)
         # output_image = draw_bbox(im, bbox, label, conf)
         objects = objects_from_cvlib(label)
         return objects
