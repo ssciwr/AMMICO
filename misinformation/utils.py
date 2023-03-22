@@ -3,6 +3,7 @@ import os
 from pandas import DataFrame
 import pooch
 
+
 class DownloadResource:
     """A remote resource that needs on demand downloading
 
@@ -105,4 +106,3 @@ if __name__ == "__main__":
     outdict = append_data_to_dict(mydict)
     df = dump_df(outdict)
     print(df.head(10))
-
