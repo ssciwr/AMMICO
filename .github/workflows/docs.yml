@@ -24,12 +24,10 @@ jobs:
     - name: set google auth
       uses: 'google-github-actions/auth@v0.4.0'
       with:
-        credentials_json: ${{ secrets.APPLICATION_CREDENTIALS }}
+        credentials_json: '${{ secrets.APPLICATION_CREDENTIALS }}'
     - name: Build documentation
       run: |
         cd docs
-        echo "$APPLICATION_CREDENTIALS" > temp
-        export GOOGLE_
         make html
     - name: Push changes to gh-pages
       uses: JamesIves/github-pages-deploy-action@v4
