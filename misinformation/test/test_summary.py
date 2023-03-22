@@ -116,7 +116,7 @@ def test_analyse_image():
         "a table that has some chairs on top of it",
         "a view of a city from a window of a building",
         "a view of a city from a window",
-        "a city street filled with lots of traffic",
+        "a city street with cars and people on it",
         "an open book with german text on it",
         "a close up of a book on a table",
         "a book with a green cover on a table",
