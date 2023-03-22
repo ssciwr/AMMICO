@@ -5,6 +5,8 @@ import misinformation.faces as faces
 import misinformation.text as text
 import misinformation.objects as objects
 
+import misinformation.summary as summary
+
 
 class JSONContainer:
     """Expose a Python dictionary as a JSON document in JupyterLab
@@ -26,6 +28,7 @@ def explore_analysis(mydict, identify="faces"):
         "faces": faces.EmotionDetector,
         "text-on-image": text.TextDetector,
         "objects": objects.ObjectDetector,
+        "summary": summary.SummaryDetector,
     }
     # create a list containing the image ids for the widget
     # image_paths = [mydict[key]["filename"] for key in mydict.keys()]

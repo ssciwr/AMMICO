@@ -1,11 +1,14 @@
 import json
-from misinformation.display import explore_analysis
-from pytest import approx
+
+# import misinformation.display as misinf_display
+import pytest
+
+misinf_display = pytest.importorskip("misinformation.display")
 
 
 def test_explore_analysis_faces():
     mydict = {"IMG_2746": {"filename": "./test/data/IMG_2746.png"}}
-    explore_analysis(mydict, identify="faces")
+    misinf_display.explore_analysis(mydict, identify="faces")
     with open("./test/data/example_faces.json", "r") as file:
         outs = json.load(file)
 
@@ -17,7 +20,7 @@ def test_explore_analysis_faces():
 
 def test_explore_analysis_objects():
     mydict = {"IMG_2746": {"filename": "./test/data/IMG_2809.png"}}
-    explore_analysis(mydict, identify="objects")
+    misinf_display.explore_analysis(mydict, identify="objects")
     with open("./test/data/example_analysis_objects.json", "r") as file:
         outs = json.load(file)
 

@@ -12,6 +12,7 @@ readme = "README.md"
 maintainers = [
     { name = "Inga Ulusoy", email = "ssc@iwr.uni-heidelberg.de" },
     { name = "Dominic Kempf", email = "ssc@iwr.uni-heidelberg.de" },
+    { name = "Petr Andriushchenko", email = "ssc@iwr.uni-heidelberg.de" },
 ]
 requires-python = ">=3.8"
 license = { text = "MIT" }
@@ -21,33 +22,34 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "google-cloud-vision",
+    "bertopic",
     "cvlib",
-    "deepface <= 0.0.75",
+    "deepface @ git+https://github.com/iulusoy/deepface.git",
+    "googletrans==3.1.0a0",
+    "grpcio",
+    "importlib_metadata",
+    "ipython",
     "ipywidgets",
+    "jupyterlab",
+    "matplotlib",
     "numpy<=1.23.4",
-    "opencv_python",
     "pandas",
+    "Pillow",
     "pooch",
     "protobuf",
-    "retina_face",
-    "setuptools",
-    "tensorflow",
-    "keras",
-    "openpyxl",
     "pytest",
     "pytest-cov",
-    "matplotlib",
-    "pytest",
-    "opencv-contrib-python",
-    "googletrans==3.1.0a0",
+    "requests",
+    "retina_face @ git+https://github.com/iulusoy/retinaface.git",
+    "salesforce-lavis @ git+https://github.com/iulusoy/LAVIS.git",
     "spacy",
-    "jupyterlab",
     "spacytextblob",
+    "tensorflow",
     "textblob",
-    "bertopic",
-    "grpcio",
-    "pandas",
+    "torch",
+    "google-cloud-vision",
+    "setuptools",
+    "opencv-contrib-python",
 ]
 
 [project.scripts]

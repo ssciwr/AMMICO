@@ -23,6 +23,6 @@ jupyterlab
 spacytextblob
 textblob
 git+https://github.com/sloria/TextBlob.git@dev
+salesforce-lavis
 bertopic
 grpcio
-pandas
