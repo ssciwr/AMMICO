@@ -2,9 +2,6 @@ import glob
 import os
 from pandas import DataFrame
 import pooch
-from torch import device, cuda
-from lavis.models import load_model_and_preprocess
-
 
 class DownloadResource:
     """A remote resource that needs on demand downloading
@@ -109,33 +106,3 @@ if __name__ == "__main__":
     df = dump_df(outdict)
     print(df.head(10))
 
-
-def load_model_base():
-    summary_device = device("cuda" if cuda.is_available() else "cpu")
-    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-        name="blip_caption",
-        model_type="base_coco",
-        is_eval=True,
-        device=summary_device,
-    )
-    return summary_model, summary_vis_processors
-
-
-def load_model_large():
-    summary_device = device("cuda" if cuda.is_available() else "cpu")
-    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-        name="blip_caption",
-        model_type="large_coco",
-        is_eval=True,
-        device=summary_device,
-    )
-    return summary_model, summary_vis_processors
-
-
-def load_model(model_type):
-    select_model = {
-        "base": load_model_base,
-        "large": load_model_large,
-    }
-    summary_model, summary_vis_processors = select_model[model_type]()
-    return summary_model, summary_vis_processors
