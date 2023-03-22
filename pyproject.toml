@@ -48,7 +48,7 @@ dependencies = [
     "torch",
     "google-cloud-vision",
     "setuptools",
-    "opencv-contrib-python-headless",
+    "opencv-contrib-python",
 ]
 
 [project.scripts]
