@@ -11,6 +11,7 @@ Welcome to misinformation's documentation!
    :caption: Contents:
 
    readme_link
+   notebooks/Example faces
    modules
    license_link
 
