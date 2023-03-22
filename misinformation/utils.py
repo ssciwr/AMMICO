@@ -2,7 +2,6 @@ import glob
 import os
 from pandas import DataFrame
 import pooch
-from lavis.models import load_model_and_preprocess
 
 
 class DownloadResource:
