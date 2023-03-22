@@ -3,6 +3,7 @@ import os
 from pandas import DataFrame
 import pooch
 
+
 class DownloadResource:
     """A remote resource that needs on demand downloading
 
