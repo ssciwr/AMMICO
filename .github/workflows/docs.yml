@@ -26,6 +26,7 @@ jobs:
       with:
         credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
     - name: Build documentation
+      uses: docker://pandoc/core:2.9
       run: |
         cd docs
         make html
