@@ -494,7 +494,7 @@ class MultimodalSearch(AnalysisMethod):
         need_grad_cam=False,
     ):
         choose_model = {
-            "   ": MultimodalSearch.upload_model_blip_base,
+            "blip_base": MultimodalSearch.upload_model_blip_base,
             "blip_large": MultimodalSearch.upload_model_blip_large,
             "blip2_coco": MultimodalSearch.upload_model_blip2_coco,
         }
@@ -544,7 +544,7 @@ class MultimodalSearch(AnalysisMethod):
 
                     for norm_img, grad_cam in zip(norm_imgs, gradcam):
                         avg_gradcam = MultimodalSearch.getAttMap(
-                            self, norm_img, grad_cam[0], blur=True
+                            self, norm_img, np.float32(grad_cam[0]), blur=True
                         )
                         local_avg_gradcams.append(avg_gradcam)
 
