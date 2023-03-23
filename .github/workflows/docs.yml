@@ -27,7 +27,7 @@ jobs:
         credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
     - name: get pandoc
       run: |
-      sudo apt-get install -y pandoc
+        sudo apt-get install -y pandoc
     - name: Build documentation
       run: |
         cd docs
