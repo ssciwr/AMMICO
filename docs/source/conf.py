@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath("../../misinformation/"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "misinformation"
+project = "AMMICO"
 copyright = "2022, Scientific Software Center, Heidelberg University"
 author = "Scientific Software Center, Heidelberg University"
 release = "0.0.1"
@@ -20,7 +20,8 @@ release = "0.0.1"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "myst_parser"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "myst_parser", "nbsphinx"]
+nbsphinx_allow_errors = True
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

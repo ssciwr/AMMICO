@@ -2,31 +2,30 @@ import os
 import pytest
 import spacy
 import misinformation.text as tt
-import misinformation
-import pandas as pd
-
-TESTDICT = {
-    "IMG_3755": {
-        "filename": "./test/data/IMG_3755.jpg",
-    },
-    "IMG_3756": {
-        "filename": "./test/data/IMG_3756.jpg",
-    },
-    "IMG_3757": {
-        "filename": "./test/data/IMG_3757.jpg",
-    },
-}
-
-LANGUAGES = ["de", "om", "en"]
-
-os.environ[
-    "GOOGLE_APPLICATION_CREDENTIALS"
-] = "../data/seismic-bonfire-329406-412821a70264.json"
 
 
-def test_TextDetector():
-    for item in TESTDICT:
-        test_obj = tt.TextDetector(TESTDICT[item])
+@pytest.fixture
+def set_testdict(get_path):
+    testdict = {
+        "IMG_3755": {
+            "filename": get_path + "IMG_3755.jpg",
+        },
+        "IMG_3756": {
+            "filename": get_path + "IMG_3756.jpg",
+        },
+        "IMG_3757": {
+            "filename": get_path + "IMG_3757.jpg",
+        },
+    }
+    return testdict
+
+
+LANGUAGES = ["de", "en", "en"]
+
+
+def test_TextDetector(set_testdict):
+    for item in set_testdict:
+        test_obj = tt.TextDetector(set_testdict[item])
         assert test_obj.subdict["text"] is None
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
@@ -34,30 +33,30 @@ def test_TextDetector():
 
 
 @pytest.mark.gcv
-def test_analyse_image():
-    for item in TESTDICT:
-        test_obj = tt.TextDetector(TESTDICT[item])
+def test_analyse_image(set_testdict, set_environ):
+    for item in set_testdict:
+        test_obj = tt.TextDetector(set_testdict[item])
         test_obj.analyse_image()
-        test_obj = tt.TextDetector(TESTDICT[item], analyse_text=True)
+        test_obj = tt.TextDetector(set_testdict[item], analyse_text=True)
         test_obj.analyse_image()
 
 
 @pytest.mark.gcv
-def test_get_text_from_image():
-    for item in TESTDICT:
-        test_obj = tt.TextDetector(TESTDICT[item])
+def test_get_text_from_image(set_testdict, get_path, set_environ):
+    for item in set_testdict:
+        test_obj = tt.TextDetector(set_testdict[item])
         test_obj.get_text_from_image()
-        ref_file = "./test/data/text_" + item + ".txt"
+        ref_file = get_path + "text_" + item + ".txt"
         with open(ref_file, "r", encoding="utf8") as file:
             reference_text = file.read()
         assert test_obj.subdict["text"] == reference_text
 
 
-def test_translate_text():
-    for item, lang in zip(TESTDICT, LANGUAGES):
-        test_obj = tt.TextDetector(TESTDICT[item])
-        ref_file = "./test/data/text_" + item + ".txt"
-        trans_file = "./test/data/text_translated_" + item + ".txt"
+def test_translate_text(set_testdict, get_path):
+    for item, lang in zip(set_testdict, LANGUAGES):
+        test_obj = tt.TextDetector(set_testdict[item])
+        ref_file = get_path + "text_" + item + ".txt"
+        trans_file = get_path + "text_translated_" + item + ".txt"
         with open(ref_file, "r", encoding="utf8") as file:
             reference_text = file.read()
         with open(trans_file, "r", encoding="utf8") as file:
@@ -77,9 +76,9 @@ def test_remove_linebreaks():
     assert test_obj.subdict["text_english"] == "This is   another  test."
 
 
-def test_run_spacy():
-    test_obj = tt.TextDetector(TESTDICT["IMG_3755"], analyse_text=True)
-    ref_file = "./test/data/text_IMG_3755.txt"
+def test_run_spacy(set_testdict, get_path):
+    test_obj = tt.TextDetector(set_testdict["IMG_3755"], analyse_text=True)
+    ref_file = get_path + "text_IMG_3755.txt"
     with open(ref_file, "r") as file:
         reference_text = file.read()
     test_obj.subdict["text_english"] = reference_text
@@ -87,10 +86,10 @@ def test_run_spacy():
     assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
 
 
-def test_clean_text():
+def test_clean_text(set_testdict):
     nlp = spacy.load("en_core_web_md")
     doc = nlp("I like cats and fjejg")
-    test_obj = tt.TextDetector(TESTDICT["IMG_3755"])
+    test_obj = tt.TextDetector(set_testdict["IMG_3755"])
     test_obj.doc = doc
     test_obj.clean_text()
     result = "I like cats and"
@@ -117,30 +116,35 @@ def test_sentiment_analysis():
     assert test_obj.subdict["subjectivity"] == 0.6
 
 
-def test_PostprocessText():
+def test_PostprocessText(set_testdict, get_path):
     reference_dict = "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON"
     reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"
-    obj = tt.PostprocessText(mydict=TESTDICT)
-    # make sure test works on windows where end-of-line character is \r\n
+    img_numbers = ["IMG_3755", "IMG_3756", "IMG_3757"]
+    for image_ref in img_numbers:
+        ref_file = get_path + "text_" + image_ref + ".txt"
+        with open(ref_file, "r") as file:
+            reference_text = file.read()
+        set_testdict[image_ref]["text_english"] = reference_text
+    obj = tt.PostprocessText(mydict=set_testdict)
     test_dict = obj.list_text_english[2].replace("\r", "")
     assert test_dict == reference_dict
-    for key in TESTDICT.keys():
-        TESTDICT[key].pop("text_english")
+    for key in set_testdict.keys():
+        set_testdict[key].pop("text_english")
     with pytest.raises(ValueError):
-        tt.PostprocessText(mydict=TESTDICT)
-    obj = tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out.csv")
+        tt.PostprocessText(mydict=set_testdict)
+    obj = tt.PostprocessText(use_csv=True, csv_path=get_path + "test_data_out.csv")
     # make sure test works on windows where end-of-line character is \r\n
     test_df = obj.list_text_english[0].replace("\r", "")
     assert test_df == reference_df
     with pytest.raises(ValueError):
-        tt.PostprocessText(use_csv=True, csv_path="./test/data/test_data_out_nokey.csv")
+        tt.PostprocessText(use_csv=True, csv_path=get_path + "test_data_out_nokey.csv")
     with pytest.raises(ValueError):
         tt.PostprocessText()
 
 
-def test_analyse_topic():
+def test_analyse_topic(get_path):
     _, topic_df, most_frequent_topics = tt.PostprocessText(
-        use_csv=True, csv_path="./test/data/topic_analysis_test.csv"
+        use_csv=True, csv_path=get_path + "topic_analysis_test.csv"
     ).analyse_topic()
     # since this is not deterministic we cannot be sure we get the same result twice
     assert len(topic_df) == 2
