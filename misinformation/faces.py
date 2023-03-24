@@ -192,6 +192,10 @@ class EmotionDetector(utils.AnalysisMethod):
                 "Yes" if result[person]["wears_mask"] else "No"
             )
             self.subdict["age"].append(result[person]["age"])
+            # gender is now reported as a list of dictionaries
+            # each dict represents one face
+            # each dict contains probability for Woman and Man
+            # take only the higher prob result for each dict
             self.subdict["gender"].append(result[person]["gender"])
             # race, emotion only detected if person does not wear mask
             if result[person]["wears_mask"]:

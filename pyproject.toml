@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "bertopic",
     "cvlib",
-    "deepface @ git+https://github.com/iulusoy/deepface.git",
+    "deepface<=0.0.75",
     "googletrans==3.1.0a0",
     "grpcio",
     "importlib_metadata",
