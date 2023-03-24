@@ -383,7 +383,7 @@ sorted_clip_vitl14_336 = [
         "pre_sorted",
     ),
     [
-         (
+        (
             device("cpu"),
             "blip2",
             pre_proc_pic_blip2_blip_albef,
