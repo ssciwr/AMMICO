@@ -56,10 +56,11 @@ def test_init_default_objects():
 
 def test_analyse_image_from_file_cvlib(get_path):
     file_path = get_path + TEST_IMAGE_1
-    objs = ob_cvlib.ObjectCVLib().analyse_image_from_file(get_path + file_path)
+    objs = ob_cvlib.ObjectCVLib().analyse_image_from_file(file_path)
 
     with open(get_path + JSON_1, "r") as file:
         out_dict = json.load(file)
+    out_dict["filename"] = get_path + out_dict["filename"]
     for key in objs.keys():
         assert objs[key] == out_dict[key]
 
@@ -86,5 +87,6 @@ def test_analyse_image(get_path):
     ob.ObjectDetector(mydict).analyse_image()
     with open(get_path + JSON_1, "r") as file:
         out_dict = json.load(file)
+    out_dict["filename"] = get_path + out_dict["filename"]
 
     assert str(mydict) == str(out_dict)
