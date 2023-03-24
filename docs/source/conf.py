@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath("../../misinformation/"))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "misinformation"
+project = "AMMICO"
 copyright = "2022, Scientific Software Center, Heidelberg University"
 author = "Scientific Software Center, Heidelberg University"
 release = "0.0.1"

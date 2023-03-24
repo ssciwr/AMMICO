@@ -1,5 +1,5 @@
-misinformation package modules
-==============================
+AMMICO package modules
+======================
 
 .. toctree::
    :maxdepth: 4

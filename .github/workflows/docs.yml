@@ -19,6 +19,13 @@ jobs:
       run: |
         pip install -e .
         python -m pip install -r requirements-dev.txt
+    - name: set google auth
+      uses: 'google-github-actions/auth@v0.4.0'
+      with:
+        credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+    - name: get pandoc
+      run: |
+        sudo apt-get install -y pandoc
     - name: Build documentation
       run: |
         cd docs
