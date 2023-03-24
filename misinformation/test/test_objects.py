@@ -31,6 +31,7 @@ def test_analyse_image_cvlib(get_path):
 
     with open(get_path + JSON_1, "r") as file:
         out_dict = json.load(file)
+    out_dict["filename"] = get_path + out_dict["filename"]
     for key in mydict.keys():
         assert mydict[key] == out_dict[key]
 
