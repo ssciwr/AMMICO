@@ -20,7 +20,7 @@ def set_testdict(get_path):
     return testdict
 
 
-LANGUAGES = ["de", "en", "en"]
+LANGUAGES = ["de", "om", "en"]
 
 
 def test_TextDetector(set_testdict):
