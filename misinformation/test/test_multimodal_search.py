@@ -370,18 +370,20 @@ sorted_clip_vitl14_336 = [
     [6, 5, 4, 10, 2, 3, 0, 1, 11, 7, 9, 8],
 ]
 
-itm_scores_for_blib_base = [0.09277121722698212,
- 0.020782141014933586,
- 0.020832309499382973,
- 0.004225197248160839,
- 0.00020702541223727167,
- 0.00410003075376153,
- 0.0009893759852275252,
- 0.00015318581426981837,
- 1.9936736862291582e-05,
- 4.0083985368255526e-05,
- 0.0006117734010331333,
- 4.1486648115096614e-05]
+itm_scores_for_blib_base = [
+    0.09277121722698212,
+    0.020782141014933586,
+    0.020832309499382973,
+    0.004225197248160839,
+    0.00020702541223727167,
+    0.00410003075376153,
+    0.0009893759852275252,
+    0.00015318581426981837,
+    1.9936736862291582e-05,
+    4.0083985368255526e-05,
+    0.0006117734010331333,
+    4.1486648115096614e-05,
+]
 
 
 @pytest.mark.parametrize(
@@ -627,26 +629,26 @@ def test_parsing_images(
     del model, vis_processor, txt_processor
     cuda.empty_cache()
 
-    if (pre_model == "blip"):
+    if pre_model == "blip":
         for itm_model in ["blip_base", "blip_large", "blip2_coco"]:
-            itm_scores, image_gradcam_with_itm = ms.MultimodalSearch.image_text_match_reordering(
-            testdict,
-            search_query2,
-            itm_model,
-            image_keys,
-            sorted_list,
-            batch_size=1,
-            need_grad_cam=True,
+            (
+                itm_scores,
+                image_gradcam_with_itm,
+            ) = ms.MultimodalSearch.image_text_match_reordering(
+                testdict,
+                search_query2,
+                itm_model,
+                image_keys,
+                sorted_list,
+                batch_size=1,
+                need_grad_cam=True,
             )
-            for i,itm in zip(range(len(itm_scores_for_blib_base)), itm_scores_for_blib_base):
+            for i, itm in zip(
+                range(len(itm_scores_for_blib_base)), itm_scores_for_blib_base
+            ):
                 assert (
-                    math.isclose(itm_scores[0].tolist()[i], itm, rel_tol = 100*related_error) is True
+                    math.isclose(
+                        itm_scores[0].tolist()[i], itm, rel_tol=100 * related_error
+                    )
+                    is True
                 )
-            
-
-            
-
-
-
-
-    
