@@ -39,6 +39,7 @@ dependencies = [
     "protobuf",
     "pytest",
     "pytest-cov",
+    "pytest-xdist",
     "requests",
     "retina_face",
     "salesforce-lavis",
