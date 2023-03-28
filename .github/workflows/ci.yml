@@ -39,3 +39,4 @@ jobs:
       with:
         fail_ci_if_error: true
         files: misinformation/coverage.xml
+        verbose: true
