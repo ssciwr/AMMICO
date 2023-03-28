@@ -374,10 +374,9 @@ class MultimodalSearch(AnalysisMethod):
         tokenized_text,
         block_num=6,
     ):
-        if itm_model_type != "blip2_coco":
-            model.text_encoder.base_model.base_model.encoder.layer[
-                block_num
-            ].crossattention.self.save_attention = True
+        model.text_encoder.base_model.base_model.encoder.layer[
+            block_num
+        ].crossattention.self.save_attention = True
 
         output = model(
             {"image": visual_input, "text_input": text_input}, match_head="itm"
@@ -493,14 +492,22 @@ class MultimodalSearch(AnalysisMethod):
         batch_size=1,
         need_grad_cam=False,
     ):
+        if itm_model_type == "blip2_coco" and need_grad_cam is True:
+            raise SyntaxError(
+                "The blip2_coco model does not yet work with gradcam. Please set need_grad_cam to False"
+            )
+
         choose_model = {
             "blip_base": MultimodalSearch.upload_model_blip_base,
             "blip_large": MultimodalSearch.upload_model_blip_large,
             "blip2_coco": MultimodalSearch.upload_model_blip2_coco,
         }
-        itm_model, vis_processor = choose_model[itm_model_type](self)
+        itm_model, vis_processor_itm = choose_model[itm_model_type](self)
         text_processor = load_processor("blip_caption")
         tokenizer = BlipBase.init_tokenizer()
+
+        if itm_model_type == "blip2_coco":
+            need_grad_cam = False
 
         text_query_index = MultimodalSearch.itm_text_precessing(self, search_query)
 
@@ -524,7 +531,7 @@ class MultimodalSearch(AnalysisMethod):
                 filenames_in_batch = pathes[i * batch_size : (i + 1) * batch_size]
                 current_len = len(filenames_in_batch)
                 raw_images, images = MultimodalSearch.read_and_process_images_itm(
-                    self, filenames_in_batch, vis_processor
+                    self, filenames_in_batch, vis_processor_itm
                 )
                 queries_batch = [text_processor(query["text_input"])] * current_len
                 queries_tok_batch = tokenizer(queries_batch, return_tensors="pt").to(
