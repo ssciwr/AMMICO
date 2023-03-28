@@ -9,7 +9,12 @@ IMAGES = ["d755771b-225e-432f-802e-fb8dc850fff7.png", "IMG_2746.png"]
 SUMMARY_DEVICE = device("cuda" if cuda.is_available() else "cpu")
 
 TEST_KWARGS = {
-    "run1": {},
+    "run1": {
+        "name": "blip_caption",
+        "model_type": "base_coco",
+        "is_eval": True,
+        "device": SUMMARY_DEVICE,
+    },
     "run2": {
         "name": "blip_caption",
         "model_type": "base_coco",
@@ -34,74 +39,40 @@ def get_dict(get_path):
     return mydict
 
 
-@pytest.mark.long
 def test_analyse_image(get_dict):
-    for key in get_dict:
-        get_dict[key] = sm.SummaryDetector(get_dict[key]).analyse_image()
-    keys = list(get_dict.keys())
-    assert len(get_dict) == 2
-    for key in keys:
-        assert len(get_dict[key]["3_non-deterministic summary"]) == 3
-
-    const_image_summary_list = [
-        "a river running through a city next to tall buildings",
-        "a crowd of people standing on top of a tennis court",
-    ]
-
-    for i in range(len(const_image_summary_list)):
-        assert get_dict[keys[i]]["const_image_summary"] == const_image_summary_list[i]
-
-    del sm.SummaryDetector.summary_model, sm.SummaryDetector.summary_vis_processors
-    cuda.empty_cache()
-
-    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-        **TEST_KWARGS["run2"]
-    )
-
-    for key in get_dict:
-        get_dict[key] = sm.SummaryDetector(get_dict[key]).analyse_image(
-            summary_model, summary_vis_processors
+    reference_results = {
+        "run1": {
+            "d755771b-225e-432f-802e-fb8dc850fff7": "a river running through a city next to tall buildings",
+            "IMG_2746": "a crowd of people standing on top of a tennis court",
+        },
+        "run2": {
+            "d755771b-225e-432f-802e-fb8dc850fff7": "a river running through a city next to tall buildings",
+            "IMG_2746": "a crowd of people standing on top of a tennis court",
+        },
+        "run3": {
+            "d755771b-225e-432f-802e-fb8dc850fff7": "a river running through a town next to tall buildings",
+            "IMG_2746": "a crowd of people standing on top of a track",
+        },
+    }
+    # test three different models
+    for test_run in TEST_KWARGS.keys():
+        summary_model, summary_vis_processors, _ = load_model_and_preprocess(
+            **TEST_KWARGS[test_run]
         )
-    keys = list(get_dict.keys())
-
-    assert len(get_dict) == 2
-    for key in keys:
-        assert len(get_dict[key]["3_non-deterministic summary"]) == 3
-
-    const_image_summary_list2 = [
-        "a river running through a city next to tall buildings",
-        "a crowd of people standing on top of a tennis court",
-    ]
-
-    for i in range(len(const_image_summary_list2)):
-        assert get_dict[keys[i]]["const_image_summary"] == const_image_summary_list2[i]
-
-    del summary_model, summary_vis_processors
-    cuda.empty_cache()
-
-    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-        **TEST_KWARGS["run3"]
-    )
-
-    for key in get_dict:
-        get_dict[key] = sm.SummaryDetector(get_dict[key]).analyse_image(
-            summary_model, summary_vis_processors
-        )
-    keys = list(get_dict.keys())
-    assert len(get_dict) == 2
-    for key in keys:
-        assert len(get_dict[key]["3_non-deterministic summary"]) == 3
-
-    const_image_summary_list3 = [
-        "a river running through a town next to tall buildings",
-        "a crowd of people standing on top of a track",
-    ]
-
-    for i in range(len(const_image_summary_list2)):
-        assert get_dict[keys[i]]["const_image_summary"] == const_image_summary_list3[i]
+        # run two different images
+        for key in get_dict.keys():
+            get_dict[key] = sm.SummaryDetector(get_dict[key]).analyse_image(
+                summary_model, summary_vis_processors
+            )
+        assert len(get_dict) == 2
+        for key in get_dict.keys():
+            assert len(get_dict[key]["3_non-deterministic summary"]) == 3
+            assert (
+                get_dict[key]["const_image_summary"] == reference_results[test_run][key]
+            )
+        cuda.empty_cache()
 
 
-@pytest.mark.long
 def test_analyse_questions(get_dict):
     list_of_questions = [
         "How many persons on the picture?",
