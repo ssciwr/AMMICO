@@ -29,6 +29,7 @@ gpu_is_not_available = not cuda.is_available()
 cuda.empty_cache()
 
 
+@pytest.mark.long
 def test_read_img():
     my_dict = {}
     test_img = ms.MultimodalSearch.read_img(my_dict, testdict["IMG_2746"]["filename"])
@@ -523,6 +524,7 @@ sorted_clip_vitl14_336 = [
         ),
     ],
 )
+@pytest.mark.long
 def test_parsing_images(
     pre_multimodal_device,
     pre_model,

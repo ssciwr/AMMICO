@@ -1,4 +1,5 @@
 import os
+import pytest
 from torch import device, cuda
 from lavis.models import load_model_and_preprocess
 import misinformation.summary as sm
@@ -19,6 +20,7 @@ images = [
 ]
 
 
+@pytest.mark.long
 def test_analyse_image():
     mydict = {}
     for img_path in images:
@@ -127,6 +129,7 @@ def test_analyse_image():
         assert mydict[keys[i]]["const_image_summary"] == const_image_summary_list3[i]
 
 
+@pytest.mark.long
 def test_analyse_questions():
     mydict = {}
     for img_path in images:
