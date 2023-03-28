@@ -665,7 +665,7 @@ def test_parsing_images(
     cuda.empty_cache()
 
     if pre_model == "blip":
-        for itm_model in ["blip_base","blip_large","blip2_coco"]:
+        for itm_model in ["blip_base", "blip_large", "blip2_coco"]:
             (
                 itm_scores,
                 image_gradcam_with_itm,
