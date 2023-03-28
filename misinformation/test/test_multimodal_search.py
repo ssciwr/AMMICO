@@ -372,6 +372,7 @@ sorted_clip_vitl14_336 = [
 ]
 
 
+@pytest.mark.long
 @pytest.mark.parametrize(
     (
         "pre_multimodal_device",
@@ -524,7 +525,6 @@ sorted_clip_vitl14_336 = [
         ),
     ],
 )
-@pytest.mark.long
 def test_parsing_images(
     pre_multimodal_device,
     pre_model,
