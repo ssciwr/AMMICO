@@ -3,7 +3,6 @@ import pytest
 from torch import device, cuda
 from lavis.models import load_model_and_preprocess
 import misinformation.summary as sm
-from memory_profiler import profile
 
 
 IMAGES = ["d755771b-225e-432f-802e-fb8dc850fff7.png", "IMG_2746.png"]
@@ -41,7 +40,6 @@ def get_dict(get_path):
     return mydict
 
 
-@profile
 @pytest.mark.long
 def test_analyse_image(get_dict):
     reference_results = {
@@ -75,9 +73,10 @@ def test_analyse_image(get_dict):
                 get_dict[key]["const_image_summary"] == reference_results[test_run][key]
             )
         cuda.empty_cache()
+        summary_model = None
+        summary_vis_processors = None
 
 
-@profile
 def test_analyse_questions(get_dict):
     list_of_questions = [
         "How many persons on the picture?",
