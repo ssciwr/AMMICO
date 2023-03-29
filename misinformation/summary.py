@@ -28,6 +28,7 @@ class SummaryDetector(AnalysisMethod):
         return summary_model, summary_vis_processors
 
     def load_model(self, model_type):
+        # self.summary_device = device("cuda" if cuda.is_available() else "cpu")
         select_model = {
             "base": SummaryDetector.load_model_base,
             "large": SummaryDetector.load_model_large,

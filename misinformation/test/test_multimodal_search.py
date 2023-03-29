@@ -4,6 +4,7 @@ from PIL import Image
 import numpy
 from torch import device, cuda
 import misinformation.multimodal_search as ms
+from memory_profiler import profile
 
 testdict = {
     "d755771b-225e-432f-802e-fb8dc850fff7": {
@@ -29,6 +30,7 @@ gpu_is_not_available = not cuda.is_available()
 cuda.empty_cache()
 
 
+@profile
 @pytest.mark.long
 def test_read_img():
     my_dict = {}
@@ -372,6 +374,7 @@ sorted_clip_vitl14_336 = [
 ]
 
 
+@profile
 @pytest.mark.long
 @pytest.mark.parametrize(
     (
