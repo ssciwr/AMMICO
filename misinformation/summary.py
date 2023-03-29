@@ -9,12 +9,12 @@ class SummaryDetector(AnalysisMethod):
         super().__init__(subdict)
 
     summary_device = device("cuda" if cuda.is_available() else "cpu")
-    summary_model, summary_vis_processors, _ = load_model_and_preprocess(
-        name="blip_caption",
-        model_type="base_coco",
-        is_eval=True,
-        device=summary_device,
-    )
+    # summary_model, summary_vis_processors, _ = load_model_and_preprocess(
+    #     name="blip_caption",
+    #     model_type="base_coco",
+    #     is_eval=True,
+    #     device=summary_device,
+    # )
 
     def load_model_base(self):
         summary_device = device("cuda" if cuda.is_available() else "cpu")
@@ -47,8 +47,7 @@ class SummaryDetector(AnalysisMethod):
     def analyse_image(self, summary_model=None, summary_vis_processors=None):
 
         if summary_model is None and summary_vis_processors is None:
-            summary_model = SummaryDetector.summary_model
-            summary_vis_processors = SummaryDetector.summary_vis_processors
+            summary_model, summary_vis_processors = self.load_model_base()
 
         path = self.subdict["filename"]
         raw_image = Image.open(path).convert("RGB")
@@ -66,13 +65,13 @@ class SummaryDetector(AnalysisMethod):
             )
         return self.subdict
 
-    (
-        summary_VQA_model,
-        summary_VQA_vis_processors,
-        summary_VQA_txt_processors,
-    ) = load_model_and_preprocess(
-        name="blip_vqa", model_type="vqav2", is_eval=True, device=summary_device
-    )
+    # (
+    #     summary_VQA_model,
+    #     summary_VQA_vis_processors,
+    #     summary_VQA_txt_processors,
+    # ) = load_model_and_preprocess(
+    #     name="blip_vqa", model_type="vqav2", is_eval=True, device=summary_device
+    # )
 
     def analyse_questions(self, list_of_questions):
 
