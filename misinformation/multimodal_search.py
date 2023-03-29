@@ -12,6 +12,8 @@ from IPython.display import display
 from lavis.models import load_model_and_preprocess, load_model, BlipBase
 from lavis.processors import load_processor
 
+# from memory_profiler import profile
+
 
 class MultimodalSearch(AnalysisMethod):
     def __init__(self, subdict: dict) -> None:
@@ -339,13 +341,6 @@ class MultimodalSearch(AnalysisMethod):
 
         return text_query_index
 
-    def itm_images_processing(self, image_paths, vis_processor):
-        raw_images = [MultimodalSearch.read_img(self, path) for path in image_paths]
-        images = [vis_processor(r_img) for r_img in raw_images]
-        images_tensors = torch.stack(images).to(MultimodalSearch.multimodal_device)
-
-        return raw_images, images_tensors
-
     def get_pathes_from_query(self, query):
         paths = []
         image_names = []
@@ -483,6 +478,7 @@ class MultimodalSearch(AnalysisMethod):
         vis_processor = load_processor("blip_image_eval").build(image_size=384)
         return itm_model, vis_processor
 
+    #    @profile
     def image_text_match_reordering(
         self,
         search_query,
@@ -602,6 +598,20 @@ class MultimodalSearch(AnalysisMethod):
             image_gradcam_with_itm[
                 list(search_query[index_text_query].values())[0]
             ] = localimage_gradcam_with_itm
+            del (
+                itm_model,
+                vis_processor_itm,
+                text_processor,
+                raw_images,
+                images,
+                tokenizer,
+                queries_batch,
+                queries_tok_batch,
+                itm_score,
+            )
+            if need_grad_cam:
+                del itm_output, gradcam, norm_img, grad_cam, avg_gradcam
+            torch.cuda.empty_cache()
         return itm_scores2, image_gradcam_with_itm
 
     def show_results(self, query, itm=False, image_gradcam_with_itm=False):
