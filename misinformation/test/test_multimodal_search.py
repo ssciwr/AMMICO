@@ -5,6 +5,7 @@ import numpy
 from torch import device, cuda
 import misinformation.multimodal_search as ms
 
+
 testdict = {
     "IMG_2746": {"filename": "./test/data/IMG_2746.png"},
     "IMG_2809": {"filename": "./test/data/IMG_2809.png"},
@@ -17,7 +18,6 @@ gpu_is_not_available = not cuda.is_available()
 cuda.empty_cache()
 
 
-@pytest.mark.long
 def test_read_img():
     my_dict = {}
     test_img = ms.MultimodalSearch.read_img(my_dict, testdict["IMG_2746"]["filename"])
@@ -362,7 +362,7 @@ def test_parsing_images(
         vis_processor,
         txt_processor,
         image_keys,
-        image_names,
+        _,
         features_image_stacked,
     ) = ms.MultimodalSearch.parsing_images(testdict, pre_model)
 
