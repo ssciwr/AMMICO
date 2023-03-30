@@ -1,16 +1,17 @@
 import misinformation.faces as fc
 import json
-from pytest import approx
+import pytest
 
 
-def test_analyse_faces():
+def test_analyse_faces(get_path):
     mydict = {
-        "filename": "./test/data/IMG_2746.png",
+        "filename": get_path + "IMG_2746.png",
     }
-    mydict = fc.EmotionDetector(mydict).analyse_image()
+    mydict.update(fc.EmotionDetector(mydict).analyse_image())
 
-    with open("./test/data/example_faces.json", "r") as file:
+    with open(get_path + "example_faces.json", "r") as file:
         out_dict = json.load(file)
-
+    # delete the filename key
+    mydict.pop("filename", None)
     for key in mydict.keys():
         assert mydict[key] == out_dict[key]
