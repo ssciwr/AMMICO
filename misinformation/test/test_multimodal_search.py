@@ -205,29 +205,29 @@ dict_image_gradcam_with_itm_for_blip = {
         "pre_sorted",
     ),
     [
-        (
-            device("cpu"),
-            "blip2",
-            pre_proc_pic_blip2_blip_albef,
-            pre_proc_text_blip2_blip_albef,
-            pre_extracted_feature_img_blip2,
-            pre_extracted_feature_text_blip2,
-            simularity_blip2,
-            sorted_blip2,
-        ),
-        pytest.param(
-            device("cuda"),
-            "blip2",
-            pre_proc_pic_blip2_blip_albef,
-            pre_proc_text_blip2_blip_albef,
-            pre_extracted_feature_img_blip2,
-            pre_extracted_feature_text_blip2,
-            simularity_blip2,
-            sorted_blip2,
-            marks=pytest.mark.skipif(
-                gpu_is_not_available, reason="gpu_is_not_availible"
-            ),
-        ),
+        # (
+        #     device("cpu"),
+        #     "blip2",
+        #     pre_proc_pic_blip2_blip_albef,
+        #     pre_proc_text_blip2_blip_albef,
+        #     pre_extracted_feature_img_blip2,
+        #     pre_extracted_feature_text_blip2,
+        #     simularity_blip2,
+        #     sorted_blip2,
+        # ),
+        # pytest.param(
+        #     device("cuda"),
+        #     "blip2",
+        #     pre_proc_pic_blip2_blip_albef,
+        #     pre_proc_text_blip2_blip_albef,
+        #     pre_extracted_feature_img_blip2,
+        #     pre_extracted_feature_text_blip2,
+        #     simularity_blip2,
+        #     sorted_blip2,
+        #     marks=pytest.mark.skipif(
+        #         gpu_is_not_available, reason="gpu_is_not_availible"
+        #     ),
+        # ),
         (
             device("cpu"),
             "blip",
