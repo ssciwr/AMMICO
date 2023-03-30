@@ -128,6 +128,15 @@ def test_text_summary(get_path):
     assert mydict["summary_text"] == reference_summary
 
 
+def test_text_sentiment_transformers():
+    mydict = {}
+    test_obj = tt.TextDetector(mydict, analyse_text=True)
+    test_obj.subdict["text_english"] = "I am happy that the CI is working again."
+    test_obj.text_sentiment_transformers()
+    assert mydict["sentiment"] == "POSITIVE"
+    assert mydict["sentiment_score"] == pytest.approx(0.99, 0.01)
+
+
 def test_PostprocessText(set_testdict, get_path):
     reference_dict = "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON"
     reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"

@@ -125,8 +125,12 @@ class TextDetector(utils.AnalysisMethod):
         pipe = pipeline("summarization")
         self.subdict.update(pipe(self.subdict["text_english"])[0])
 
-    # def text_sentiment_transformers(self):
-    # pipe = pipeline("text-classification")
+    def text_sentiment_transformers(self):
+        # use the transformers pipeline for text classification
+        pipe = pipeline("text-classification")
+        result = pipe(self.subdict["text_english"])
+        self.subdict["sentiment"] = result[0]["label"]
+        self.subdict["sentiment_score"] = result[0]["score"]
 
 
 class PostprocessText:
