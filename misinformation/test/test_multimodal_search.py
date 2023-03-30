@@ -523,7 +523,6 @@ def test_parsing_images(
     pre_simularity,
     pre_sorted,
 ):
-
     ms.MultimodalSearch.multimodal_device = pre_multimodal_device
     (
         model,

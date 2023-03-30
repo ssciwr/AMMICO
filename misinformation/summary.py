@@ -45,7 +45,6 @@ class SummaryDetector(AnalysisMethod):
         return summary_model, summary_vis_processors
 
     def analyse_image(self, summary_model=None, summary_vis_processors=None):
-
         if summary_model is None and summary_vis_processors is None:
             summary_model = SummaryDetector.summary_model
             summary_vis_processors = SummaryDetector.summary_vis_processors
@@ -75,7 +74,6 @@ class SummaryDetector(AnalysisMethod):
     )
 
     def analyse_questions(self, list_of_questions):
-
         if len(list_of_questions) > 0:
             path = self.subdict["filename"]
             raw_image = Image.open(path).convert("RGB")
