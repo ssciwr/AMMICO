@@ -132,6 +132,16 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict["sentiment"] = result[0]["label"]
         self.subdict["sentiment_score"] = result[0]["score"]
 
+    def text_ner(self):
+        # use the transformers pipeline for named entity recognition
+        pipe = pipeline("token-classification")
+        result = pipe(self.subdict["text_english"])
+        self.subdict["entity"] = []
+        self.subdict["entity_type"] = []
+        for entity in result:
+            self.subdict["entity"].append(entity["word"])
+            self.subdict["entity_type"].append(entity["entity"])
+
 
 class PostprocessText:
     def __init__(
