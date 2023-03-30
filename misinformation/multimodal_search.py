@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as Func
 import requests
 import lavis
+import os
 from PIL import Image
 from IPython.display import display
 from lavis.models import load_model_and_preprocess
@@ -118,15 +119,27 @@ class MultimodalSearch(AnalysisMethod):
         return features_image_stacked
 
     def save_tensors(
-        self, model_type, features_image_stacked, name="saved_features_image.pt"
+        self,
+        model_type,
+        features_image_stacked,
+        name="saved_features_image.pt",
+        path="./saved_tensors/",
     ):
+        if not os.path.exists(path):
+            os.makedirs(path)
         with open(
-            str(len(features_image_stacked)) + "_" + model_type + "_" + name, "wb"
+            str(path)
+            + str(len(features_image_stacked))
+            + "_"
+            + model_type
+            + "_"
+            + name,
+            "wb",
         ) as f:
             torch.save(features_image_stacked, f)
         return name
 
-    def load_tensors(self, name="saved_features_image.pt"):
+    def load_tensors(self, name):
         features_image_stacked = torch.load(name)
         return features_image_stacked
 
@@ -136,7 +149,12 @@ class MultimodalSearch(AnalysisMethod):
 
         return features_text
 
-    def parsing_images(self, model_type, path_to_saved_tensors=None):
+    def parsing_images(
+        self,
+        model_type,
+        path_to_saved_tensors="./saved_tensors/",
+        path_to_load_tensors=None,
+    ):
 
         if model_type in ("clip_base", "clip_vitl14_336", "clip_vitl14"):
             path_to_lib = lavis.__file__[:-11] + "models/clip_models/"
@@ -177,15 +195,17 @@ class MultimodalSearch(AnalysisMethod):
         _, images_tensors = MultimodalSearch.read_and_process_images(
             self, image_names, vis_processors
         )
-        if path_to_saved_tensors is None:
+        if path_to_load_tensors is None:
             with torch.no_grad():
                 features_image_stacked = select_extract_image_features[model_type](
                     self, model, images_tensors
                 )
-            MultimodalSearch.save_tensors(self, model_type, features_image_stacked)
+            MultimodalSearch.save_tensors(
+                self, model_type, features_image_stacked, path=path_to_saved_tensors
+            )
         else:
             features_image_stacked = MultimodalSearch.load_tensors(
-                self, str(path_to_saved_tensors)
+                self, str(path_to_load_tensors)
             )
 
         return (
@@ -301,7 +321,6 @@ class MultimodalSearch(AnalysisMethod):
 
         for q in range(len(search_query)):
             max_val = similarity[sorted_lists[q][0]][q].item()
-            print(max_val)
             for i, key in zip(range(len(image_keys)), sorted_lists[q]):
                 if (
                     i < filter_number_of_images
