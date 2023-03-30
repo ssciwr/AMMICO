@@ -20,7 +20,7 @@ def set_testdict(get_path):
     return testdict
 
 
-LANGUAGES = ["de", "en", "en"]
+LANGUAGES = ["de", "om", "en"]
 
 
 def test_TextDetector(set_testdict):
@@ -114,6 +114,18 @@ def test_sentiment_analysis():
     test_obj.sentiment_analysis()
     assert test_obj.subdict["polarity"] == 0.5
     assert test_obj.subdict["subjectivity"] == 0.6
+
+
+def test_text_summary(get_path):
+    mydict = {}
+    test_obj = tt.TextDetector(mydict, analyse_text=True)
+    ref_file = get_path + "example_summary.txt"
+    with open(ref_file, "r", encoding="utf8") as file:
+        reference_text = file.read()
+    test_obj.subdict["text_english"] = reference_text
+    test_obj.text_summary()
+    reference_summary = " I’m sorry, but I don’t want to be an emperor. That’s not my business. I should like to help everyone - if possible - Jew, Gentile - black man - white . We all want to help one another. In this world there is room for everyone. The way of life can be free and beautiful, but we have lost the way ."
+    assert mydict["summary_text"] == reference_summary
 
 
 def test_PostprocessText(set_testdict, get_path):

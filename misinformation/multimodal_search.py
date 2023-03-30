@@ -181,7 +181,7 @@ class MultimodalSearch(AnalysisMethod):
                 "Please, use one of the following models: blip2, blip, albef, clip_base, clip_vitl14, clip_vitl14_336"
             )
 
-        raw_images, images_tensors = MultimodalSearch.read_and_process_images(
+        _, images_tensors = MultimodalSearch.read_and_process_images(
             self, image_names, vis_processors
         )
         if path_to_saved_tensors is None:
@@ -220,7 +220,7 @@ class MultimodalSearch(AnalysisMethod):
         for query in search_query:
             if not (len(query) == 1) and (query in ("image", "text_input")):
                 raise SyntaxError(
-                    'Each querry must contain either an "image" or a "text_input"'
+                    'Each query must contain either an "image" or a "text_input"'
                 )
         multi_sample = []
         for query in search_query:

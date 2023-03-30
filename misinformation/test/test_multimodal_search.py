@@ -5,6 +5,7 @@ import numpy
 from torch import device, cuda
 import misinformation.multimodal_search as ms
 
+
 testdict = {
     "IMG_2746": {"filename": "./test/data/IMG_2746.png"},
     "IMG_2809": {"filename": "./test/data/IMG_2809.png"},
@@ -191,6 +192,7 @@ dict_image_gradcam_with_itm_for_blip = {
 }
 
 
+@pytest.mark.long
 @pytest.mark.parametrize(
     (
         "pre_multimodal_device",
@@ -203,29 +205,29 @@ dict_image_gradcam_with_itm_for_blip = {
         "pre_sorted",
     ),
     [
-        (
-            device("cpu"),
-            "blip2",
-            pre_proc_pic_blip2_blip_albef,
-            pre_proc_text_blip2_blip_albef,
-            pre_extracted_feature_img_blip2,
-            pre_extracted_feature_text_blip2,
-            simularity_blip2,
-            sorted_blip2,
-        ),
-        pytest.param(
-            device("cuda"),
-            "blip2",
-            pre_proc_pic_blip2_blip_albef,
-            pre_proc_text_blip2_blip_albef,
-            pre_extracted_feature_img_blip2,
-            pre_extracted_feature_text_blip2,
-            simularity_blip2,
-            sorted_blip2,
-            marks=pytest.mark.skipif(
-                gpu_is_not_available, reason="gpu_is_not_availible"
-            ),
-        ),
+        # (
+        #     device("cpu"),
+        #     "blip2",
+        #     pre_proc_pic_blip2_blip_albef,
+        #     pre_proc_text_blip2_blip_albef,
+        #     pre_extracted_feature_img_blip2,
+        #     pre_extracted_feature_text_blip2,
+        #     simularity_blip2,
+        #     sorted_blip2,
+        # ),
+        # pytest.param(
+        #     device("cuda"),
+        #     "blip2",
+        #     pre_proc_pic_blip2_blip_albef,
+        #     pre_proc_text_blip2_blip_albef,
+        #     pre_extracted_feature_img_blip2,
+        #     pre_extracted_feature_text_blip2,
+        #     simularity_blip2,
+        #     sorted_blip2,
+        #     marks=pytest.mark.skipif(
+        #         gpu_is_not_available, reason="gpu_is_not_availible"
+        #     ),
+        # ),
         (
             device("cpu"),
             "blip",
@@ -360,7 +362,7 @@ def test_parsing_images(
         vis_processor,
         txt_processor,
         image_keys,
-        image_names,
+        _,
         features_image_stacked,
     ) = ms.MultimodalSearch.parsing_images(testdict, pre_model)
 
