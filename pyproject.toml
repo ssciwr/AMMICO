@@ -48,6 +48,7 @@ dependencies = [
     "tensorflow",
     "textblob",
     "torch",
+    "transformers",
     "google-cloud-vision",
     "setuptools",
     "opencv-contrib-python",
