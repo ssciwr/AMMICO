@@ -37,7 +37,6 @@ class SummaryDetector(AnalysisMethod):
         return summary_model, summary_vis_processors
 
     def analyse_image(self, summary_model=None, summary_vis_processors=None):
-
         if summary_model is None and summary_vis_processors is None:
             summary_model, summary_vis_processors = self.load_model_base()
 
