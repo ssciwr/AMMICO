@@ -354,8 +354,8 @@ def test_parsing_images(
     pre_extracted_feature_text,
     pre_simularity,
     pre_sorted,
+    tmp_path,
 ):
-
     ms.MultimodalSearch.multimodal_device = pre_multimodal_device
     (
         model,
@@ -364,7 +364,9 @@ def test_parsing_images(
         image_keys,
         _,
         features_image_stacked,
-    ) = ms.MultimodalSearch.parsing_images(testdict, pre_model)
+    ) = ms.MultimodalSearch.parsing_images(
+        testdict, pre_model, path_to_saved_tensors=tmp_path
+    )
 
     for i, num in zip(range(10), features_image_stacked[0, 10:12].tolist()):
         assert (
