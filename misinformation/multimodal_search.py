@@ -184,7 +184,11 @@ class MultimodalSearch(AnalysisMethod):
         }
 
         if model_type in select_model.keys():
-            (model, vis_processors, txt_processors,) = select_model[
+            (
+                model,
+                vis_processors,
+                txt_processors,
+            ) = select_model[
                 model_type
             ](self, MultimodalSearch.multimodal_device)
         else:
@@ -220,7 +224,6 @@ class MultimodalSearch(AnalysisMethod):
     def querys_processing(
         self, search_query, model, txt_processors, vis_processors, model_type
     ):
-
         select_extract_image_features = {
             "blip2": MultimodalSearch.extract_image_features_blip2,
             "blip": MultimodalSearch.extract_image_features_basic,

@@ -9,6 +9,7 @@ from misinformation import utils
 import grpc
 import pandas as pd
 from bertopic import BERTopic
+from transformers import pipeline
 
 # make widgets work again
 # clean text has weird spaces and separation of "do n't"
@@ -118,6 +119,14 @@ class TextDetector(utils.AnalysisMethod):
         # subjectivity is a float within the range [0.0, 1.0]
         # where 0.0 is very objective and 1.0 is very subjective
         self.subdict["subjectivity"] = self.doc._.blob.subjectivity
+
+    def text_summary(self):
+        # use the transformers pipeline to summarize the text
+        pipe = pipeline("summarization")
+        self.subdict.update(pipe(self.subdict["text_english"])[0])
+
+    # def text_sentiment_transformers(self):
+    # pipe = pipeline("text-classification")
 
 
 class PostprocessText:
