@@ -155,7 +155,6 @@ class MultimodalSearch(AnalysisMethod):
         path_to_saved_tensors="./saved_tensors/",
         path_to_load_tensors=None,
     ):
-
         if model_type in ("clip_base", "clip_vitl14_336", "clip_vitl14"):
             path_to_lib = lavis.__file__[:-11] + "models/clip_models/"
             url = "https://raw.githubusercontent.com/salesforce/LAVIS/main/lavis/models/clip_models/bpe_simple_vocab_16e6.txt.gz"
