@@ -238,7 +238,7 @@ class MultimodalSearch(AnalysisMethod):
         }
 
         for query in search_query:
-            if not (len(query) == 1) and (query in ("image", "text_input")):
+            if len(query) != 1 and (query in ("image", "text_input")):
                 raise SyntaxError(
                     'Each query must contain either an "image" or a "text_input"'
                 )
@@ -444,26 +444,26 @@ class MultimodalSearch(AnalysisMethod):
         )
         return resized_image
 
-    def getAttMap(self, img, attMap, blur=True, overlap=True):
-        attMap -= attMap.min()
-        if attMap.max() > 0:
-            attMap /= attMap.max()
-        attMap = skimage_transform.resize(
-            attMap, (img.shape[:2]), order=3, mode="constant"
+    def get_att_map(self, img, att_map, blur=True, overlap=True):
+        att_map -= att_map.min()
+        if att_map.max() > 0:
+            att_map /= att_map.max()
+        att_map = skimage_transform.resize(
+            att_map, (img.shape[:2]), order=3, mode="constant"
         )
         if blur:
-            attMap = filters.gaussian_filter(attMap, 0.02 * max(img.shape[:2]))
-            attMap -= attMap.min()
-            attMap /= attMap.max()
+            att_map = filters.gaussian_filter(att_map, 0.02 * max(img.shape[:2]))
+            att_map -= att_map.min()
+            att_map /= att_map.max()
         cmap = plt.get_cmap("jet")
-        attMapV = cmap(attMap)
-        attMapV = np.delete(attMapV, 3, 2)
+        att_mapV = cmap(att_map)
+        att_mapV = np.delete(att_mapV, 3, 2)
         if overlap:
-            attMap = (
-                1 * (1 - attMap**0.7).reshape(attMap.shape + (1,)) * img
-                + (attMap**0.7).reshape(attMap.shape + (1,)) * attMapV
+            att_map = (
+                1 * (1 - att_map**0.7).reshape(att_map.shape + (1,)) * img
+                + (att_map**0.7).reshape(att_map.shape + (1,)) * att_mapV
             )
-        return attMap
+        return att_map
 
     def upload_model_blip2_coco(self):
 
@@ -566,7 +566,7 @@ class MultimodalSearch(AnalysisMethod):
                     norm_imgs = [np.float32(r_img) / 255 for r_img in raw_images]
 
                     for norm_img, grad_cam in zip(norm_imgs, gradcam):
-                        avg_gradcam = MultimodalSearch.getAttMap(
+                        avg_gradcam = MultimodalSearch.get_att_map(
                             self, norm_img, np.float32(grad_cam[0]), blur=True
                         )
                         local_avg_gradcams.append(avg_gradcam)
