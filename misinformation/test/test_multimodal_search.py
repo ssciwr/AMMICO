@@ -447,109 +447,111 @@ def test_parsing_images(
     cuda.empty_cache()
 
 
-# def test_itm():
-#     test_my_dict = {
-#         "IMG_2746": {
-#             "filename": "../misinformation/test/data/IMG_2746.png",
-#             "rank A bus": 1,
-#             "A bus": 0.15640679001808167,
-#             "rank ../misinformation/test/data/IMG_3758.png": 1,
-#             "../misinformation/test/data/IMG_3758.png": 0.7533495426177979,
-#         },
-#         "IMG_2809": {
-#             "filename": "../misinformation/test/data/IMG_2809.png",
-#             "rank A bus": 0,
-#             "A bus": 0.1970970332622528,
-#             "rank ../misinformation/test/data/IMG_3758.png": 0,
-#             "../misinformation/test/data/IMG_3758.png": 0.8907483816146851,
-#         },
-#     }
-#     search_query3 = [
-#         {"text_input": "A bus"},
-#         {"image": "../misinformation/test/data/IMG_3758.png"},
-#     ]
-#     image_keys = ["IMG_2746", "IMG_2809"]
-#     sorted_list = [[1, 0], [1, 0]]
-#     for itm_model in ["blip_base", "blip_large"]:
-#         (
-#             itm_scores,
-#             image_gradcam_with_itm,
-#         ) = ms.MultimodalSearch.image_text_match_reordering(
-#             test_my_dict,
-#             search_query3,
-#             itm_model,
-#             image_keys,
-#             sorted_list,
-#             batch_size=1,
-#             need_grad_cam=True,
-#         )
-#         for i, itm in zip(
-#             range(len(dict_itm_scores_for_blib[itm_model])),
-#             dict_itm_scores_for_blib[itm_model],
-#         ):
-#             assert (
-#                 math.isclose(itm_scores[0].tolist()[i], itm, rel_tol=10 * related_error)
-#                 is True
-#             )
-#         for i, grad_cam in zip(
-#             range(len(dict_image_gradcam_with_itm_for_blip[itm_model])),
-#             dict_image_gradcam_with_itm_for_blip[itm_model],
-#         ):
-#             assert (
-#                 math.isclose(
-#                     image_gradcam_with_itm["A bus"]["IMG_2809"][0][0].tolist()[i],
-#                     grad_cam,
-#                     rel_tol=10 * related_error,
-#                 )
-#                 is True
-#             )
-#         del itm_scores, image_gradcam_with_itm
-#         cuda.empty_cache()
+@pytest.mark.long
+def test_itm():
+    test_my_dict = {
+        "IMG_2746": {
+            "filename": "../misinformation/test/data/IMG_2746.png",
+            "rank A bus": 1,
+            "A bus": 0.15640679001808167,
+            "rank ../misinformation/test/data/IMG_3758.png": 1,
+            "../misinformation/test/data/IMG_3758.png": 0.7533495426177979,
+        },
+        "IMG_2809": {
+            "filename": "../misinformation/test/data/IMG_2809.png",
+            "rank A bus": 0,
+            "A bus": 0.1970970332622528,
+            "rank ../misinformation/test/data/IMG_3758.png": 0,
+            "../misinformation/test/data/IMG_3758.png": 0.8907483816146851,
+        },
+    }
+    search_query3 = [
+        {"text_input": "A bus"},
+        {"image": "../misinformation/test/data/IMG_3758.png"},
+    ]
+    image_keys = ["IMG_2746", "IMG_2809"]
+    sorted_list = [[1, 0], [1, 0]]
+    for itm_model in ["blip_base", "blip_large"]:
+        (
+            itm_scores,
+            image_gradcam_with_itm,
+        ) = ms.MultimodalSearch.image_text_match_reordering(
+            test_my_dict,
+            search_query3,
+            itm_model,
+            image_keys,
+            sorted_list,
+            batch_size=1,
+            need_grad_cam=True,
+        )
+        for i, itm in zip(
+            range(len(dict_itm_scores_for_blib[itm_model])),
+            dict_itm_scores_for_blib[itm_model],
+        ):
+            assert (
+                math.isclose(itm_scores[0].tolist()[i], itm, rel_tol=10 * related_error)
+                is True
+            )
+        for i, grad_cam in zip(
+            range(len(dict_image_gradcam_with_itm_for_blip[itm_model])),
+            dict_image_gradcam_with_itm_for_blip[itm_model],
+        ):
+            assert (
+                math.isclose(
+                    image_gradcam_with_itm["A bus"]["IMG_2809"][0][0].tolist()[i],
+                    grad_cam,
+                    rel_tol=10 * related_error,
+                )
+                is True
+            )
+        del itm_scores, image_gradcam_with_itm
+        cuda.empty_cache()
 
 
-# def test_itm_blip2_coco():
-#     test_my_dict = {
-#         "IMG_2746": {
-#             "filename": "../misinformation/test/data/IMG_2746.png",
-#             "rank A bus": 1,
-#             "A bus": 0.15640679001808167,
-#             "rank ../misinformation/test/data/IMG_3758.png": 1,
-#             "../misinformation/test/data/IMG_3758.png": 0.7533495426177979,
-#         },
-#         "IMG_2809": {
-#             "filename": "../misinformation/test/data/IMG_2809.png",
-#             "rank A bus": 0,
-#             "A bus": 0.1970970332622528,
-#             "rank ../misinformation/test/data/IMG_3758.png": 0,
-#             "../misinformation/test/data/IMG_3758.png": 0.8907483816146851,
-#         },
-#     }
-#     search_query3 = [
-#         {"text_input": "A bus"},
-#         {"image": "../misinformation/test/data/IMG_3758.png"},
-#     ]
-#     image_keys = ["IMG_2746", "IMG_2809"]
-#     sorted_list = [[1, 0], [1, 0]]
+@pytest.mark.long
+def test_itm_blip2_coco():
+    test_my_dict = {
+        "IMG_2746": {
+            "filename": "../misinformation/test/data/IMG_2746.png",
+            "rank A bus": 1,
+            "A bus": 0.15640679001808167,
+            "rank ../misinformation/test/data/IMG_3758.png": 1,
+            "../misinformation/test/data/IMG_3758.png": 0.7533495426177979,
+        },
+        "IMG_2809": {
+            "filename": "../misinformation/test/data/IMG_2809.png",
+            "rank A bus": 0,
+            "A bus": 0.1970970332622528,
+            "rank ../misinformation/test/data/IMG_3758.png": 0,
+            "../misinformation/test/data/IMG_3758.png": 0.8907483816146851,
+        },
+    }
+    search_query3 = [
+        {"text_input": "A bus"},
+        {"image": "../misinformation/test/data/IMG_3758.png"},
+    ]
+    image_keys = ["IMG_2746", "IMG_2809"]
+    sorted_list = [[1, 0], [1, 0]]
 
-#     (
-#         itm_scores,
-#         image_gradcam_with_itm,
-#     ) = ms.MultimodalSearch.image_text_match_reordering(
-#         test_my_dict,
-#         search_query3,
-#         "blip2_coco",
-#         image_keys,
-#         sorted_list,
-#         batch_size=1,
-#         need_grad_cam=False,
-#     )
-#     for i, itm in zip(
-#         range(len(dict_itm_scores_for_blib["blip2_coco"])),
-#         dict_itm_scores_for_blib["blip2_coco"],
-#     ):
-#         assert (
-#             math.isclose(itm_scores[0].tolist()[i], itm, rel_tol=10 * related_error)
-#             is True
-#         )
-#     del itm_scores, image_gradcam_with_itm
-#     cuda.empty_cache()
+    (
+        itm_scores,
+        image_gradcam_with_itm,
+    ) = ms.MultimodalSearch.image_text_match_reordering(
+        test_my_dict,
+        search_query3,
+        "blip2_coco",
+        image_keys,
+        sorted_list,
+        batch_size=1,
+        need_grad_cam=False,
+    )
+    for i, itm in zip(
+        range(len(dict_itm_scores_for_blib["blip2_coco"])),
+        dict_itm_scores_for_blib["blip2_coco"],
+    ):
+        assert (
+            math.isclose(itm_scores[0].tolist()[i], itm, rel_tol=10 * related_error)
+            is True
+        )
+    del itm_scores, image_gradcam_with_itm
+    cuda.empty_cache()

@@ -13,8 +13,6 @@ from IPython.display import display
 from lavis.models import load_model_and_preprocess, load_model, BlipBase
 from lavis.processors import load_processor
 
-# from memory_profiler import profile
-
 
 class MultimodalSearch(AnalysisMethod):
     def __init__(self, subdict: dict) -> None:
@@ -382,7 +380,6 @@ class MultimodalSearch(AnalysisMethod):
 
     def compute_gradcam_batch(
         self,
-        itm_model_type,
         model,
         visual_input,
         text_input,
@@ -456,12 +453,12 @@ class MultimodalSearch(AnalysisMethod):
             att_map -= att_map.min()
             att_map /= att_map.max()
         cmap = plt.get_cmap("jet")
-        att_mapV = cmap(att_map)
-        att_mapV = np.delete(att_mapV, 3, 2)
+        att_mapv = cmap(att_map)
+        att_mapv = np.delete(att_mapv, 3, 2)
         if overlap:
             att_map = (
                 1 * (1 - att_map**0.7).reshape(att_map.shape + (1,)) * img
-                + (att_map**0.7).reshape(att_map.shape + (1,)) * att_mapV
+                + (att_map**0.7).reshape(att_map.shape + (1,)) * att_mapv
             )
         return att_map
 
@@ -498,7 +495,6 @@ class MultimodalSearch(AnalysisMethod):
         vis_processor = load_processor("blip_image_eval").build(image_size=384)
         return itm_model, vis_processor
 
-    #    @profile
     def image_text_match_reordering(
         self,
         search_query,
@@ -518,6 +514,7 @@ class MultimodalSearch(AnalysisMethod):
             "blip_large": MultimodalSearch.upload_model_blip_large,
             "blip2_coco": MultimodalSearch.upload_model_blip2_coco,
         }
+
         itm_model, vis_processor_itm = choose_model[itm_model_type](self)
         text_processor = load_processor("blip_caption")
         tokenizer = BlipBase.init_tokenizer()
@@ -557,7 +554,6 @@ class MultimodalSearch(AnalysisMethod):
                 if need_grad_cam:
                     gradcam, itm_output = MultimodalSearch.compute_gradcam_batch(
                         self,
-                        itm_model_type,
                         itm_model,
                         images,
                         queries_batch,
@@ -618,20 +614,20 @@ class MultimodalSearch(AnalysisMethod):
             image_gradcam_with_itm[
                 list(search_query[index_text_query].values())[0]
             ] = localimage_gradcam_with_itm
-            del (
-                itm_model,
-                vis_processor_itm,
-                text_processor,
-                raw_images,
-                images,
-                tokenizer,
-                queries_batch,
-                queries_tok_batch,
-                itm_score,
-            )
-            if need_grad_cam:
-                del itm_output, gradcam, norm_img, grad_cam, avg_gradcam
-            torch.cuda.empty_cache()
+        del (
+            itm_model,
+            vis_processor_itm,
+            text_processor,
+            raw_images,
+            images,
+            tokenizer,
+            queries_batch,
+            queries_tok_batch,
+            itm_score,
+        )
+        if need_grad_cam:
+            del itm_output, gradcam, norm_img, grad_cam, avg_gradcam
+        torch.cuda.empty_cache()
         return itm_scores2, image_gradcam_with_itm
 
     def show_results(self, query, itm=False, image_gradcam_with_itm=False):
