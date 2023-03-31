@@ -122,19 +122,32 @@ class TextDetector(utils.AnalysisMethod):
 
     def text_summary(self):
         # use the transformers pipeline to summarize the text
-        pipe = pipeline("summarization")
+        # use the current default model - 03/2023
+        model_name = "sshleifer/distilbart-cnn-12-6"
+        model_revision = "a4f8f3e"
+        pipe = pipeline("summarization", model=model_name, revision=model_revision)
         self.subdict.update(pipe(self.subdict["text_english"])[0])
 
     def text_sentiment_transformers(self):
         # use the transformers pipeline for text classification
-        pipe = pipeline("text-classification")
+        # use the current default model - 03/2023
+        model_name = "distilbert-base-uncased-finetuned-sst-2-english"
+        model_revision = "af0f99b"
+        pipe = pipeline(
+            "text-classification", model=model_name, revision=model_revision
+        )
         result = pipe(self.subdict["text_english"])
         self.subdict["sentiment"] = result[0]["label"]
         self.subdict["sentiment_score"] = result[0]["score"]
 
     def text_ner(self):
         # use the transformers pipeline for named entity recognition
-        pipe = pipeline("token-classification")
+        # use the current default model - 03/2023
+        model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"
+        model_revision = "f2482bf"
+        pipe = pipeline(
+            "token-classification", model=model_name, revision=model_revision
+        )
         result = pipe(self.subdict["text_english"])
         self.subdict["entity"] = []
         self.subdict["entity_type"] = []
@@ -145,17 +158,21 @@ class TextDetector(utils.AnalysisMethod):
 
 class PostprocessText:
     def __init__(
-        self, mydict: dict = None, use_csv: bool = False, csv_path: str = None
+        self,
+        mydict: dict = None,
+        use_csv: bool = False,
+        csv_path: str = None,
+        analyze_text: str = "text_english",
     ) -> None:
         self.use_csv = use_csv
         if mydict:
             print("Reading data from dict.")
             self.mydict = mydict
-            self.list_text_english = self.get_text_dict()
+            self.list_text_english = self.get_text_dict(analyze_text)
         elif self.use_csv:
             print("Reading data from df.")
             self.df = pd.read_csv(csv_path, encoding="utf8")
-            self.list_text_english = self.get_text_df()
+            self.list_text_english = self.get_text_df(analyze_text)
         else:
             raise ValueError(
                 "Please provide either dictionary with textual data or \
@@ -191,24 +208,28 @@ class PostprocessText:
             most_frequent_topics.append(self.topic_model.get_topic(i))
         return self.topic_model, topic_df, most_frequent_topics
 
-    def get_text_dict(self):
-        # use dict to put text_english in list
+    def get_text_dict(self, analyze_text):
+        # use dict to put text_english or text_summary in list
         list_text_english = []
         for key in self.mydict.keys():
-            if "text_english" not in self.mydict[key]:
+            if analyze_text not in self.mydict[key]:
                 raise ValueError(
                     "Please check your provided dictionary - \
-                no english text data found."
+                no {} text data found.".format(
+                        analyze_text
+                    )
                 )
-            list_text_english.append(self.mydict[key]["text_english"])
+            list_text_english.append(self.mydict[key][analyze_text])
         return list_text_english
 
-    def get_text_df(self):
-        # use csv file to obtain dataframe and put text_english in list
-        # check that "text_english" is there
-        if "text_english" not in self.df:
+    def get_text_df(self, analyze_text):
+        # use csv file to obtain dataframe and put text_english or text_summary in list
+        # check that "text_english" or "text_summary" is there
+        if analyze_text not in self.df:
             raise ValueError(
                 "Please check your provided dataframe - \
-                                no english text data found."
+                                no {} text data found.".format(
+                    analyze_text
+                )
             )
-        return self.df["text_english"].tolist()
+        return self.df[analyze_text].tolist()
