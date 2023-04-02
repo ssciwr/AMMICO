@@ -11,9 +11,6 @@ COPY --chown=${NB_UID} . /opt/misinformation
 # Install the Python package
 RUN python -m pip install /opt/misinformation
 
-# Install additional dependencies for running the notebooks
-RUN python -m pip install -r /opt/misinformation/requirements.txt
-
 # Make JupyterLab the default for this application
 ENV JUPYTER_ENABLE_LAB=yes
 

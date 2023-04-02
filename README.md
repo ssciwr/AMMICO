@@ -44,15 +44,20 @@ This will install the package and its dependencies locally.
 ## Usage
 
 There are sample notebooks in the `misinformation/notebooks` folder for you to explore the package:
-1. Text analysis: Use the notebook `get-text-from-image.ipynb` to extract any text from the images. The text is directly translated into English. If the text should be further analysed, set the keyword `analyse_text` to `True` as demonstrated in the notebook.\
+1. Text extraction: Use the notebook `get-text-from-image.ipynb` to extract any text from the images. The text is directly translated into English. If the text should be further analysed, set the keyword `analyse_text` to `True` as demonstrated in the notebook.\
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.
-1. Facial analysis: Use the notebook `facial_expressions.ipynb` to identify if there are faces on the image, if they are wearing masks, and if they are not wearing masks also the race, gender and dominant emotion.
+1. Emotion recognition: Use the notebook `facial_expressions.ipynb` to identify if there are faces on the image, if they are wearing masks, and if they are not wearing masks also the race, gender and dominant emotion.
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/facial_expressions.ipynb)**   
-Place the data files in your google drive to access the data.**
+Place the data files in your google drive to access the data.
+1. Content extraction: Use the notebook `image_summary.ipynb` to create captions for the images and ask questions about the image content.
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/image_summary.ipynb)**
+1. Multimodal content: Use the notebook `multimodal_search.ipynb` to find the best fitting images to an image or text query.
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/multimodal_search.ipynb)**
 1. Object analysis: Use the notebook `ojects_expression.ipynb` to identify certain objects in the image. Currently, the following objects are being identified: person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/objects_expression.ipynb)**
 
-There are further notebooks that are currently of exploratory nature (`colors_expression.ipynb` to identify certain colors on the image).
+There are further notebooks that are currently of exploratory nature (`colors_expression.ipynb` to identify certain colors on the image). To crop social media posts use the `cropposts.ipynb` notebook.
 
 ## Features
 ### Text extraction
