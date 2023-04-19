@@ -445,23 +445,8 @@ def test_parsing_images(
 
 
 @pytest.mark.long
-def test_itm(get_path):
-    test_my_dict = {
-        "IMG_2746": {
-            "filename": get_path + "IMG_2746.png",
-            "rank A bus": 1,
-            "A bus": 0.15640679001808167,
-            "rank " + get_path + "IMG_3758.png": 1,
-            get_path + "IMG_3758.png": 0.7533495426177979,
-        },
-        "IMG_2809": {
-            "filename": get_path + "IMG_2809.png",
-            "rank A bus": 0,
-            "A bus": 0.1970970332622528,
-            "rank " + get_path + "IMG_3758.png": 0,
-            get_path + "IMG_3758.png": 0.8907483816146851,
-        },
-    }
+def test_itm(get_test_my_dict ,get_path):
+    
     search_query3 = [
         {"text_input": "A bus"},
         {"image": get_path + "IMG_3758.png"},
@@ -473,7 +458,7 @@ def test_itm(get_path):
             itm_scores,
             image_gradcam_with_itm,
         ) = ms.MultimodalSearch.image_text_match_reordering(
-            test_my_dict,
+            get_test_my_dict,
             search_query3,
             itm_model,
             image_keys,
@@ -506,23 +491,8 @@ def test_itm(get_path):
 
 
 @pytest.mark.long
-def test_itm_blip2_coco(get_path):
-    test_my_dict = {
-        "IMG_2746": {
-            "filename": get_path + "IMG_2746.png",
-            "rank A bus": 1,
-            "A bus": 0.15640679001808167,
-            "rank " + get_path + "IMG_3758.png": 1,
-            get_path + "IMG_3758.png": 0.7533495426177979,
-        },
-        "IMG_2809": {
-            "filename": get_path + "IMG_2809.png",
-            "rank A bus": 0,
-            "A bus": 0.1970970332622528,
-            "rank " + get_path + "IMG_3758.png": 0,
-            get_path + "IMG_3758.png": 0.8907483816146851,
-        },
-    }
+def test_itm_blip2_coco(get_test_my_dict, get_path):
+
     search_query3 = [
         {"text_input": "A bus"},
         {"image": get_path + "IMG_3758.png"},
@@ -534,7 +504,7 @@ def test_itm_blip2_coco(get_path):
         itm_scores,
         image_gradcam_with_itm,
     ) = ms.MultimodalSearch.image_text_match_reordering(
-        test_my_dict,
+        get_test_my_dict,
         search_query3,
         "blip2_coco",
         image_keys,
