@@ -25,6 +25,8 @@ def get_testdict(get_path):
         "IMG_2809": {"filename": get_path + "IMG_2809.png"},
     }
     return testdict
+
+
 @pytest.fixture
 def get_test_my_dict(get_path):
     test_my_dict = {

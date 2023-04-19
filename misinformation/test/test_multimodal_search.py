@@ -445,8 +445,7 @@ def test_parsing_images(
 
 
 @pytest.mark.long
-def test_itm(get_test_my_dict ,get_path):
-    
+def test_itm(get_test_my_dict, get_path):
     search_query3 = [
         {"text_input": "A bus"},
         {"image": get_path + "IMG_3758.png"},
@@ -492,7 +491,6 @@ def test_itm(get_test_my_dict ,get_path):
 
 @pytest.mark.long
 def test_itm_blip2_coco(get_test_my_dict, get_path):
-
     search_query3 = [
         {"text_input": "A bus"},
         {"image": get_path + "IMG_3758.png"},
