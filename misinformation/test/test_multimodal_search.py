@@ -5,22 +5,17 @@ import numpy
 from torch import device, cuda
 import misinformation.multimodal_search as ms
 
-
-testdict = {
-    "IMG_2746": {"filename": "./test/data/IMG_2746.png"},
-    "IMG_2809": {"filename": "./test/data/IMG_2809.png"},
-}
-
 related_error = 1e-2
 gpu_is_not_available = not cuda.is_available()
-
 
 cuda.empty_cache()
 
 
-def test_read_img():
+def test_read_img(get_testdict):
     my_dict = {}
-    test_img = ms.MultimodalSearch.read_img(my_dict, testdict["IMG_2746"]["filename"])
+    test_img = ms.MultimodalSearch.read_img(
+        my_dict, get_testdict["IMG_2746"]["filename"]
+    )
     assert list(numpy.array(test_img)[257][34]) == [70, 66, 63]
 
 
@@ -205,29 +200,29 @@ dict_image_gradcam_with_itm_for_blip = {
         "pre_sorted",
     ),
     [
-        # (
-        #     device("cpu"),
-        #     "blip2",
-        #     pre_proc_pic_blip2_blip_albef,
-        #     pre_proc_text_blip2_blip_albef,
-        #     pre_extracted_feature_img_blip2,
-        #     pre_extracted_feature_text_blip2,
-        #     simularity_blip2,
-        #     sorted_blip2,
-        # ),
-        # pytest.param(
-        #     device("cuda"),
-        #     "blip2",
-        #     pre_proc_pic_blip2_blip_albef,
-        #     pre_proc_text_blip2_blip_albef,
-        #     pre_extracted_feature_img_blip2,
-        #     pre_extracted_feature_text_blip2,
-        #     simularity_blip2,
-        #     sorted_blip2,
-        #     marks=pytest.mark.skipif(
-        #         gpu_is_not_available, reason="gpu_is_not_availible"
-        #     ),
-        # ),
+        (
+            device("cpu"),
+            "blip2",
+            pre_proc_pic_blip2_blip_albef,
+            pre_proc_text_blip2_blip_albef,
+            pre_extracted_feature_img_blip2,
+            pre_extracted_feature_text_blip2,
+            simularity_blip2,
+            sorted_blip2,
+        ),
+        pytest.param(
+            device("cuda"),
+            "blip2",
+            pre_proc_pic_blip2_blip_albef,
+            pre_proc_text_blip2_blip_albef,
+            pre_extracted_feature_img_blip2,
+            pre_extracted_feature_text_blip2,
+            simularity_blip2,
+            sorted_blip2,
+            marks=pytest.mark.skipif(
+                gpu_is_not_available, reason="gpu_is_not_availible"
+            ),
+        ),
         (
             device("cpu"),
             "blip",
@@ -354,6 +349,8 @@ def test_parsing_images(
     pre_extracted_feature_text,
     pre_simularity,
     pre_sorted,
+    get_path,
+    get_testdict,
     tmp_path,
 ):
     ms.MultimodalSearch.multimodal_device = pre_multimodal_device
@@ -365,7 +362,7 @@ def test_parsing_images(
         _,
         features_image_stacked,
     ) = ms.MultimodalSearch.parsing_images(
-        testdict, pre_model, path_to_saved_tensors=tmp_path
+        get_testdict, pre_model, path_to_saved_tensors=tmp_path
     )
 
     for i, num in zip(range(10), features_image_stacked[0, 10:12].tolist()):
@@ -374,7 +371,7 @@ def test_parsing_images(
             is True
         )
 
-    test_pic = Image.open(testdict["IMG_2746"]["filename"]).convert("RGB")
+    test_pic = Image.open(get_testdict["IMG_2746"]["filename"]).convert("RGB")
     test_querry = (
         "The bird sat on a tree located at the intersection of 23rd and 43rd streets."
     )
@@ -390,10 +387,10 @@ def test_parsing_images(
 
     search_query = [
         {"text_input": test_querry},
-        {"image": testdict["IMG_2746"]["filename"]},
+        {"image": get_testdict["IMG_2746"]["filename"]},
     ]
     multi_features_stacked = ms.MultimodalSearch.querys_processing(
-        testdict, search_query, model, txt_processor, vis_processor, pre_model
+        get_testdict, search_query, model, txt_processor, vis_processor, pre_model
     )
 
     for i, num in zip(range(10), multi_features_stacked[0, 10:12].tolist()):
@@ -410,11 +407,11 @@ def test_parsing_images(
 
     search_query2 = [
         {"text_input": "A bus"},
-        {"image": "../misinformation/test/data/IMG_3758.png"},
+        {"image": get_path + "IMG_3758.png"},
     ]
 
     similarity, sorted_list = ms.MultimodalSearch.multimodal_search(
-        testdict,
+        get_testdict,
         model,
         vis_processor,
         txt_processor,
@@ -444,4 +441,82 @@ def test_parsing_images(
         processed_pic,
         multi_features_stacked,
     )
+    cuda.empty_cache()
+
+
+@pytest.mark.long
+def test_itm(get_test_my_dict, get_path):
+    search_query3 = [
+        {"text_input": "A bus"},
+        {"image": get_path + "IMG_3758.png"},
+    ]
+    image_keys = ["IMG_2746", "IMG_2809"]
+    sorted_list = [[1, 0], [1, 0]]
+    for itm_model in ["blip_base", "blip_large"]:
+        (
+            itm_scores,
+            image_gradcam_with_itm,
+        ) = ms.MultimodalSearch.image_text_match_reordering(
+            get_test_my_dict,
+            search_query3,
+            itm_model,
+            image_keys,
+            sorted_list,
+            batch_size=1,
+            need_grad_cam=True,
+        )
+        for i, itm in zip(
+            range(len(dict_itm_scores_for_blib[itm_model])),
+            dict_itm_scores_for_blib[itm_model],
+        ):
+            assert (
+                math.isclose(itm_scores[0].tolist()[i], itm, rel_tol=10 * related_error)
+                is True
+            )
+        for i, grad_cam in zip(
+            range(len(dict_image_gradcam_with_itm_for_blip[itm_model])),
+            dict_image_gradcam_with_itm_for_blip[itm_model],
+        ):
+            assert (
+                math.isclose(
+                    image_gradcam_with_itm["A bus"]["IMG_2809"][0][0].tolist()[i],
+                    grad_cam,
+                    rel_tol=10 * related_error,
+                )
+                is True
+            )
+        del itm_scores, image_gradcam_with_itm
+        cuda.empty_cache()
+
+
+@pytest.mark.long
+def test_itm_blip2_coco(get_test_my_dict, get_path):
+    search_query3 = [
+        {"text_input": "A bus"},
+        {"image": get_path + "IMG_3758.png"},
+    ]
+    image_keys = ["IMG_2746", "IMG_2809"]
+    sorted_list = [[1, 0], [1, 0]]
+
+    (
+        itm_scores,
+        image_gradcam_with_itm,
+    ) = ms.MultimodalSearch.image_text_match_reordering(
+        get_test_my_dict,
+        search_query3,
+        "blip2_coco",
+        image_keys,
+        sorted_list,
+        batch_size=1,
+        need_grad_cam=False,
+    )
+    for i, itm in zip(
+        range(len(dict_itm_scores_for_blib["blip2_coco"])),
+        dict_itm_scores_for_blib["blip2_coco"],
+    ):
+        assert (
+            math.isclose(itm_scores[0].tolist()[i], itm, rel_tol=10 * related_error)
+            is True
+        )
+    del itm_scores, image_gradcam_with_itm
     cuda.empty_cache()

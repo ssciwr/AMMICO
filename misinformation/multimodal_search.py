@@ -4,9 +4,14 @@ import torch.nn.functional as Func
 import requests
 import lavis
 import os
+import numpy as np
 from PIL import Image
+from skimage import transform as skimage_transform
+from scipy.ndimage import filters
+from matplotlib import pyplot as plt
 from IPython.display import display
-from lavis.models import load_model_and_preprocess
+from lavis.models import load_model_and_preprocess, load_model, BlipBase
+from lavis.processors import load_processor
 
 
 class MultimodalSearch(AnalysisMethod):
@@ -233,7 +238,7 @@ class MultimodalSearch(AnalysisMethod):
         }
 
         for query in search_query:
-            if not (len(query) == 1) and (query in ("image", "text_input")):
+            if len(query) != 1 and (query in ("image", "text_input")):
                 raise SyntaxError(
                     'Each query must contain either an "image" or a "text_input"'
                 )
@@ -343,7 +348,288 @@ class MultimodalSearch(AnalysisMethod):
                     self[image_keys[key]][list(search_query[q].values())[0]] = 0
         return similarity, sorted_lists
 
-    def show_results(self, query):
+    def itm_text_precessing(self, search_query):
+        for query in search_query:
+            if not (len(query) == 1) and (query in ("image", "text_input")):
+                raise SyntaxError(
+                    'Each querry must contain either an "image" or a "text_input"'
+                )
+        text_query_index = []
+        for i, query in zip(range(len(search_query)), search_query):
+            if "text_input" in query.keys():
+                text_query_index.append(i)
+
+        return text_query_index
+
+    def get_pathes_from_query(self, query):
+        paths = []
+        image_names = []
+        for s in sorted(
+            self.items(), key=lambda t: t[1][list(query.values())[0]], reverse=True
+        ):
+            if s[1]["rank " + list(query.values())[0]] is None:
+                break
+            paths.append(s[1]["filename"])
+            image_names.append(s[0])
+        return paths, image_names
+
+    def read_and_process_images_itm(self, image_paths, vis_processor):
+        raw_images = [MultimodalSearch.read_img(self, path) for path in image_paths]
+        images = [vis_processor(r_img) for r_img in raw_images]
+        images_tensors = torch.stack(images).to(MultimodalSearch.multimodal_device)
+
+        return raw_images, images_tensors
+
+    def compute_gradcam_batch(
+        self,
+        model,
+        visual_input,
+        text_input,
+        tokenized_text,
+        block_num=6,
+    ):
+        model.text_encoder.base_model.base_model.encoder.layer[
+            block_num
+        ].crossattention.self.save_attention = True
+
+        output = model(
+            {"image": visual_input, "text_input": text_input}, match_head="itm"
+        )
+        loss = output[:, 1].sum()
+
+        model.zero_grad()
+        loss.backward()
+        with torch.no_grad():
+            mask = tokenized_text.attention_mask.view(
+                tokenized_text.attention_mask.size(0), 1, -1, 1, 1
+            )  # (bsz,1,token_len, 1,1)
+            token_length = mask.sum() - 2
+            token_length = token_length.cpu()
+            # grads and cams [bsz, num_head, seq_len, image_patch]
+            grads = model.text_encoder.base_model.base_model.encoder.layer[
+                block_num
+            ].crossattention.self.get_attn_gradients()
+            cams = model.text_encoder.base_model.base_model.encoder.layer[
+                block_num
+            ].crossattention.self.get_attention_map()
+
+            # assume using vit large with 576 num image patch
+            cams = (
+                cams[:, :, :, 1:].reshape(visual_input.size(0), 12, -1, 24, 24) * mask
+            )
+            grads = (
+                grads[:, :, :, 1:]
+                .clamp(0)
+                .reshape(visual_input.size(0), 12, -1, 24, 24)
+                * mask
+            )
+
+            gradcam = cams * grads
+            # [enc token gradcam, average gradcam across token, gradcam for individual token]
+            # gradcam = torch.cat((gradcam[0:1,:], gradcam[1:token_length+1, :].sum(dim=0, keepdim=True)/token_length, gradcam[1:, :]))
+            gradcam = gradcam.mean(1).cpu().detach()
+            gradcam = (
+                gradcam[:, 1 : token_length + 1, :].sum(dim=1, keepdim=True)
+                / token_length
+            )
+
+        return gradcam, output
+
+    def resize_img(self, raw_img):
+        w, h = raw_img.size
+        scaling_factor = 240 / w
+        resized_image = raw_img.resize(
+            (int(w * scaling_factor), int(h * scaling_factor))
+        )
+        return resized_image
+
+    def get_att_map(self, img, att_map, blur=True, overlap=True):
+        att_map -= att_map.min()
+        if att_map.max() > 0:
+            att_map /= att_map.max()
+        att_map = skimage_transform.resize(
+            att_map, (img.shape[:2]), order=3, mode="constant"
+        )
+        if blur:
+            att_map = filters.gaussian_filter(att_map, 0.02 * max(img.shape[:2]))
+            att_map -= att_map.min()
+            att_map /= att_map.max()
+        cmap = plt.get_cmap("jet")
+        att_mapv = cmap(att_map)
+        att_mapv = np.delete(att_mapv, 3, 2)
+        if overlap:
+            att_map = (
+                1 * (1 - att_map**0.7).reshape(att_map.shape + (1,)) * img
+                + (att_map**0.7).reshape(att_map.shape + (1,)) * att_mapv
+            )
+        return att_map
+
+    def upload_model_blip2_coco(self):
+        itm_model = load_model(
+            "blip2_image_text_matching",
+            "coco",
+            is_eval=True,
+            device=MultimodalSearch.multimodal_device,
+        )
+        vis_processor = load_processor("blip_image_eval").build(image_size=364)
+        return itm_model, vis_processor
+
+    def upload_model_blip_base(self):
+        itm_model = load_model(
+            "blip_image_text_matching",
+            "base",
+            is_eval=True,
+            device=MultimodalSearch.multimodal_device,
+        )
+        vis_processor = load_processor("blip_image_eval").build(image_size=384)
+        return itm_model, vis_processor
+
+    def upload_model_blip_large(self):
+        itm_model = load_model(
+            "blip_image_text_matching",
+            "large",
+            is_eval=True,
+            device=MultimodalSearch.multimodal_device,
+        )
+        vis_processor = load_processor("blip_image_eval").build(image_size=384)
+        return itm_model, vis_processor
+
+    def image_text_match_reordering(
+        self,
+        search_query,
+        itm_model_type,
+        image_keys,
+        sorted_lists,
+        batch_size=1,
+        need_grad_cam=False,
+    ):
+        if itm_model_type == "blip2_coco" and need_grad_cam is True:
+            raise SyntaxError(
+                "The blip2_coco model does not yet work with gradcam. Please set need_grad_cam to False"
+            )
+
+        choose_model = {
+            "blip_base": MultimodalSearch.upload_model_blip_base,
+            "blip_large": MultimodalSearch.upload_model_blip_large,
+            "blip2_coco": MultimodalSearch.upload_model_blip2_coco,
+        }
+
+        itm_model, vis_processor_itm = choose_model[itm_model_type](self)
+        text_processor = load_processor("blip_caption")
+        tokenizer = BlipBase.init_tokenizer()
+
+        if itm_model_type == "blip2_coco":
+            need_grad_cam = False
+
+        text_query_index = MultimodalSearch.itm_text_precessing(self, search_query)
+
+        avg_gradcams = []
+        itm_scores = []
+        itm_scores2 = []
+        image_gradcam_with_itm = {}
+
+        for index_text_query in text_query_index:
+            query = search_query[index_text_query]
+            pathes, image_names = MultimodalSearch.get_pathes_from_query(self, query)
+            num_batches = int(len(pathes) / batch_size)
+            num_batches_residue = len(pathes) % batch_size
+
+            local_itm_scores = []
+            local_avg_gradcams = []
+
+            if num_batches_residue != 0:
+                num_batches = num_batches + 1
+            for i in range(num_batches):
+                filenames_in_batch = pathes[i * batch_size : (i + 1) * batch_size]
+                current_len = len(filenames_in_batch)
+                raw_images, images = MultimodalSearch.read_and_process_images_itm(
+                    self, filenames_in_batch, vis_processor_itm
+                )
+                queries_batch = [text_processor(query["text_input"])] * current_len
+                queries_tok_batch = tokenizer(queries_batch, return_tensors="pt").to(
+                    MultimodalSearch.multimodal_device
+                )
+
+                if need_grad_cam:
+                    gradcam, itm_output = MultimodalSearch.compute_gradcam_batch(
+                        self,
+                        itm_model,
+                        images,
+                        queries_batch,
+                        queries_tok_batch,
+                    )
+                    norm_imgs = [np.float32(r_img) / 255 for r_img in raw_images]
+
+                    for norm_img, grad_cam in zip(norm_imgs, gradcam):
+                        avg_gradcam = MultimodalSearch.get_att_map(
+                            self, norm_img, np.float32(grad_cam[0]), blur=True
+                        )
+                        local_avg_gradcams.append(avg_gradcam)
+
+                else:
+                    itm_output = itm_model(
+                        {"image": images, "text_input": queries_batch}, match_head="itm"
+                    )
+
+                with torch.no_grad():
+                    itm_score = torch.nn.functional.softmax(itm_output, dim=1)
+
+                local_itm_scores.append(itm_score)
+
+            local_itm_scores2 = torch.cat(local_itm_scores)[:, 1]
+            if need_grad_cam:
+                localimage_gradcam_with_itm = {
+                    n: i * 255 for n, i in zip(image_names, local_avg_gradcams)
+                }
+            else:
+                localimage_gradcam_with_itm = ""
+            image_names_with_itm = {
+                n: i.item() for n, i in zip(image_names, local_itm_scores2)
+            }
+            itm_rank = torch.argsort(local_itm_scores2, descending=True)
+            image_names_with_new_rank = {
+                image_names[i.item()]: rank
+                for i, rank in zip(itm_rank, range(len(itm_rank)))
+            }
+            for i, key in zip(range(len(image_keys)), sorted_lists[index_text_query]):
+                if image_keys[key] in image_names:
+                    self[image_keys[key]][
+                        "itm " + list(search_query[index_text_query].values())[0]
+                    ] = image_names_with_itm[image_keys[key]]
+                    self[image_keys[key]][
+                        "itm_rank " + list(search_query[index_text_query].values())[0]
+                    ] = image_names_with_new_rank[image_keys[key]]
+                else:
+                    self[image_keys[key]][
+                        "itm " + list(search_query[index_text_query].values())[0]
+                    ] = 0
+                    self[image_keys[key]][
+                        "itm_rank " + list(search_query[index_text_query].values())[0]
+                    ] = None
+
+            avg_gradcams.append(local_avg_gradcams)
+            itm_scores.append(local_itm_scores)
+            itm_scores2.append(local_itm_scores2)
+            image_gradcam_with_itm[
+                list(search_query[index_text_query].values())[0]
+            ] = localimage_gradcam_with_itm
+        del (
+            itm_model,
+            vis_processor_itm,
+            text_processor,
+            raw_images,
+            images,
+            tokenizer,
+            queries_batch,
+            queries_tok_batch,
+            itm_score,
+        )
+        if need_grad_cam:
+            del itm_output, gradcam, norm_img, grad_cam, avg_gradcam
+        torch.cuda.empty_cache()
+        return itm_scores2, image_gradcam_with_itm
+
+    def show_results(self, query, itm=False, image_gradcam_with_itm=False):
         if "image" in query.keys():
             pic = Image.open(query["image"]).convert("RGB")
             pic.thumbnail((400, 400))
@@ -359,18 +645,29 @@ class MultimodalSearch(AnalysisMethod):
                 "--------------------------------------------------",
                 "Results:",
             )
+        if itm:
+            current_querry_val = "itm " + list(query.values())[0]
+            current_querry_rank = "itm_rank " + list(query.values())[0]
+        else:
+            current_querry_val = list(query.values())[0]
+            current_querry_rank = "rank " + list(query.values())[0]
+
         for s in sorted(
-            self.items(), key=lambda t: t[1][list(query.values())[0]], reverse=True
+            self.items(), key=lambda t: t[1][current_querry_val], reverse=True
         ):
-            if s[1]["rank " + list(query.values())[0]] is None:
+            if s[1][current_querry_rank] is None:
                 break
-            p1 = Image.open(s[1]["filename"]).convert("RGB")
+            if image_gradcam_with_itm is False:
+                p1 = Image.open(s[1]["filename"]).convert("RGB")
+            else:
+                image = image_gradcam_with_itm[list(query.values())[0]][s[0]]
+                p1 = Image.fromarray(image.astype("uint8"), "RGB")
             p1.thumbnail((400, 400))
             display(
                 "Rank: "
-                + str(s[1]["rank " + list(query.values())[0]])
+                + str(s[1][current_querry_rank])
                 + " Val: "
-                + str(s[1][list(query.values())[0]]),
+                + str(s[1][current_querry_val]),
                 s[0],
                 p1,
             )
