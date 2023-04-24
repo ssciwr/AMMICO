@@ -5,7 +5,7 @@ from spacytextblob.spacytextblob import SpacyTextBlob
 from textblob import TextBlob
 from textblob import download_corpora
 import io
-from misinformation import utils
+from ammico import utils
 import grpc
 import pandas as pd
 from bertopic import BERTopic

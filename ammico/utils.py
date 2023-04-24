@@ -9,7 +9,7 @@ class DownloadResource:
 
     We use this as a wrapper to the pooch library. The wrapper registers
     each data file and allows prefetching through the CLI entry point
-    misinformation_prefetch_models.
+    ammico_prefetch_models.
     """
 
     # We store a list of defined resouces in a class variable, allowing
@@ -24,7 +24,7 @@ class DownloadResource:
         return pooch.retrieve(**self.kwargs)
 
 
-def misinformation_prefetch_models():
+def ammico_prefetch_models():
     """Prefetch all the download resources"""
     for res in DownloadResource.resources:
         res.get()

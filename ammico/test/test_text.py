@@ -1,7 +1,7 @@
 import os
 import pytest
 import spacy
-import misinformation.text as tt
+import ammico.text as tt
 
 
 @pytest.fixture

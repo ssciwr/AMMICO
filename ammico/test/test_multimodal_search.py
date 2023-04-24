@@ -3,7 +3,7 @@ import math
 from PIL import Image
 import numpy
 from torch import device, cuda
-import misinformation.multimodal_search as ms
+import ammico.multimodal_search as ms
 
 related_error = 1e-2
 gpu_is_not_available = not cuda.is_available()

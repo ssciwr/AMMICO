@@ -1,6 +1,6 @@
-from misinformation.utils import AnalysisMethod
-from misinformation.objects_cvlib import ObjectCVLib
-from misinformation.objects_cvlib import init_default_objects
+from ammico.utils import AnalysisMethod
+from ammico.objects_cvlib import ObjectCVLib
+from ammico.objects_cvlib import init_default_objects
 
 
 class ObjectDetectorClient(AnalysisMethod):

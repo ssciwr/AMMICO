@@ -1,7 +1,7 @@
 import json
 import pytest
-import misinformation.objects as ob
-import misinformation.objects_cvlib as ob_cvlib
+import ammico.objects as ob
+import ammico.objects_cvlib as ob_cvlib
 
 OBJECT_1 = "cell phone"
 OBJECT_2 = "motorcycle"

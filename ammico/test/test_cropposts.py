@@ -1,4 +1,4 @@
-import misinformation.cropposts as crpo
+import ammico.cropposts as crpo
 import numpy as np
 from PIL import Image
 

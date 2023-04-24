@@ -1,4 +1,4 @@
-from misinformation.utils import AnalysisMethod
+from ammico.utils import AnalysisMethod
 import torch
 import torch.nn.functional as Func
 import requests

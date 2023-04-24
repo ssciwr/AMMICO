@@ -2,7 +2,7 @@ import os
 import pytest
 from torch import device, cuda
 from lavis.models import load_model_and_preprocess
-import misinformation.summary as sm
+import ammico.summary as sm
 
 
 IMAGES = ["d755771b-225e-432f-802e-fb8dc850fff7.png", "IMG_2746.png"]

@@ -1,10 +1,10 @@
 # AMMICO - AI Media and Misinformation Content Analysis Tool
 
-![License: MIT](https://img.shields.io/github/license/ssciwr/misinformation)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ssciwr/misinformation/ci.yml?branch=main)
-![codecov](https://img.shields.io/codecov/c/github/ssciwr/misinformation)
-![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ssciwr_misinformation&metric=alert_status)
-![Language](https://img.shields.io/github/languages/top/ssciwr/misinformation)
+![License: MIT](https://img.shields.io/github/license/ssciwr/AMMICO)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ssciwr/AMMICO/ci.yml?branch=main)
+![codecov](https://img.shields.io/codecov/c/github/ssciwr/AMMICO)
+![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ssciwr_ammico&metric=alert_status)
+![Language](https://img.shields.io/github/languages/top/ssciwr/AMMICO)
 
 This package extracts data from images such as social media images, and the accompanying text/text that is included in the image. The analysis can extract a very large number of features, depending on the user input.
 
@@ -34,7 +34,7 @@ Use pre-processed image files such as social media posts with comments and proce
 
 ## Installation
 
-The `AMMICO` package can be installed using pip: Navigate into your package folder `misinformation/` and execute
+The `AMMICO` package can be installed using pip: Navigate into your package folder `ammico/` and execute
 ```
 pip install .
 ```
@@ -43,7 +43,7 @@ This will install the package and its dependencies locally.
 
 ## Usage
 
-There are sample notebooks in the `misinformation/notebooks` folder for you to explore the package:
+There are sample notebooks in the `notebooks` folder for you to explore the package:
 1. Text extraction: Use the notebook `get-text-from-image.ipynb` to extract any text from the images. The text is directly translated into English. If the text should be further analysed, set the keyword `analyse_text` to `True` as demonstrated in the notebook.\
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/misinformation/blob/main/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.

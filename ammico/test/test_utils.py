@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-import misinformation.utils as ut
+import ammico.utils as ut
 
 
 def test_find_files(get_path):

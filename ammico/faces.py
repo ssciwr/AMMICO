@@ -11,8 +11,8 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from deepface import DeepFace
 from retinaface import RetinaFace
 
-from misinformation.utils import DownloadResource
-import misinformation.utils as utils
+from ammico.utils import DownloadResource
+import ammico.utils as utils
 
 DEEPFACE_PATH = ".deepface"
 

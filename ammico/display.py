@@ -1,11 +1,11 @@
 import ipywidgets
 from IPython.display import display
 
-import misinformation.faces as faces
-import misinformation.text as text
-import misinformation.objects as objects
+import ammico.faces as faces
+import ammico.text as text
+import ammico.objects as objects
 
-import misinformation.summary as summary
+import ammico.summary as summary
 
 
 class JSONContainer:

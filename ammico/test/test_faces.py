@@ -1,4 +1,4 @@
-import misinformation.faces as fc
+import ammico.faces as fc
 import json
 import pytest
 

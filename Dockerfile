@@ -26,4 +26,4 @@ ENV GOOGLE_APPLICATION_CREDENTIALS=credentials.json
 RUN echo ${GOOGLE_CREDS} > $GOOGLE_APPLICATION_CREDENTIALS
 # Bundle the pre-built models (that are downloaded on demand) into the
 # Docker image.
-RUN misinformation_prefetch_models
+RUN ammico_prefetch_models
