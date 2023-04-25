@@ -95,14 +95,3 @@ def append_data_to_dict(mydict: dict) -> dict:
 def dump_df(mydict: dict) -> DataFrame:
     """Utility to dump the dictionary into a dataframe."""
     return DataFrame.from_dict(mydict)
-
-
-if __name__ == "__main__":
-    files = find_files(
-        path="/home/inga/projects/misinformation-project/misinformation/data/test_no_text/"
-    )
-    mydict = initialize_dict(files)
-    outdict = {}
-    outdict = append_data_to_dict(mydict)
-    df = dump_df(outdict)
-    print(df.head(10))
