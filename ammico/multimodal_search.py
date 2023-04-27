@@ -318,14 +318,8 @@ class MultimodalSearch(AnalysisMethod):
             )
 
         similarity = features_image_stacked @ multi_features_stacked.t()
-        sorted_lists = [
-            sorted(
-                range(len(similarity)),
-                key=lambda k, value=i: similarity[k, value],
-                reverse=True,
-            )
-            for i in range(len(similarity[0]))
-        ]
+        # similarity_soft_max = torch.nn.Softmax(dim=0)(similarity / 0.01)
+        sorted_lists = torch.argsort(similarity, dim=0, descending=True).T.tolist()
         places = [[item.index(i) for i in range(len(item))] for item in sorted_lists]
 
         for q in range(len(search_query)):
