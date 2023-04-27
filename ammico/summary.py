@@ -58,9 +58,9 @@ class SummaryDetector(AnalysisMethod):
 
     def analyse_questions(self, list_of_questions):
         (
-            summary_VQA_model,
-            summary_VQA_vis_processors,
-            summary_VQA_txt_processors,
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
         ) = load_model_and_preprocess(
             name="blip_vqa",
             model_type="vqav2",
@@ -71,18 +71,18 @@ class SummaryDetector(AnalysisMethod):
             path = self.subdict["filename"]
             raw_image = Image.open(path).convert("RGB")
             image = (
-                summary_VQA_vis_processors["eval"](raw_image)
+                summary_vqa_vis_processors["eval"](raw_image)
                 .unsqueeze(0)
                 .to(self.summary_device)
             )
             question_batch = []
             for quest in list_of_questions:
-                question_batch.append(summary_VQA_txt_processors["eval"](quest))
+                question_batch.append(summary_vqa_txt_processors["eval"](quest))
             batch_size = len(list_of_questions)
             image_batch = image.repeat(batch_size, 1, 1, 1)
 
             with no_grad():
-                answers_batch = summary_VQA_model.predict_answers(
+                answers_batch = summary_vqa_model.predict_answers(
                     samples={"image": image_batch, "text_input": question_batch},
                     inference_method="generate",
                 )

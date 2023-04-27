@@ -350,7 +350,7 @@ class MultimodalSearch(AnalysisMethod):
 
     def itm_text_precessing(self, search_query):
         for query in search_query:
-            if not (len(query) == 1) and (query in ("image", "text_input")):
+            if (len(query) != 1) and (query in ("image", "text_input")):
                 raise SyntaxError(
                     'Each querry must contain either an "image" or a "text_input"'
                 )
