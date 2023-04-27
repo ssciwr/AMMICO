@@ -29,11 +29,8 @@ class JSONContainer:
 
 
 def explore_analysis_dash(mydict, identify="faces"):
-    
-    
-    
     app = jupyter_dash.JupyterDash(__name__)
-    
+
     theme = {
         "scheme": "monokai",
         "author": "wimer hazenberg (http://www.monokai.nl)",
@@ -67,8 +64,16 @@ def explore_analysis_dash(mydict, identify="faces"):
         return left_layout
 
     def _middle_picture_frame():
-        middle_layout = html.Div([html.Img(id="img_middle_picture_id", style={
-                    "width": "80%",})])
+        middle_layout = html.Div(
+            [
+                html.Img(
+                    id="img_middle_picture_id",
+                    style={
+                        "width": "80%",
+                    },
+                )
+            ]
+        )
         return middle_layout
 
     def _right_output_json():
@@ -76,9 +81,19 @@ def explore_analysis_dash(mydict, identify="faces"):
             [
                 dcc.Loading(
                     id="loading-2",
-                    children=[html.Div([
-                        dash_renderjson.DashRenderjson(id="right_json_viewer", data={"a":"1"}, max_depth=-1, theme=theme, invert_theme=True)
-                    ])],
+                    children=[
+                        html.Div(
+                            [
+                                dash_renderjson.DashRenderjson(
+                                    id="right_json_viewer",
+                                    data={"a": "1"},
+                                    max_depth=-1,
+                                    theme=theme,
+                                    invert_theme=True,
+                                )
+                            ]
+                        )
+                    ],
                     type="circle",
                 )
             ]
@@ -98,13 +113,13 @@ def explore_analysis_dash(mydict, identify="faces"):
             return None
 
     @app.callback(
-            Output("right_json_viewer", "data"),
-            Input("img_middle_picture_id", "src"),
-            State("Div_top", "children"),
-            State("left_select_id","options"),
-            State("left_select_id","value"),
-            prevent_initial_call=True,
-              )
+        Output("right_json_viewer", "data"),
+        Input("img_middle_picture_id", "src"),
+        State("Div_top", "children"),
+        State("left_select_id", "options"),
+        State("left_select_id", "value"),
+        prevent_initial_call=True,
+    )
     def _right_output_analysis(image, div_top, all_options, current_value):
         identify_dict = {
             "faces": faces.EmotionDetector,
@@ -115,9 +130,7 @@ def explore_analysis_dash(mydict, identify="faces"):
         image_id = all_options[current_value]
         identify_function = identify_dict[div_top[1]]
 
-        mydict[image_id] = identify_function(
-                mydict[image_id]
-            ).analyse_image()
+        mydict[image_id] = identify_function(mydict[image_id]).analyse_image()
         return mydict[image_id]
 
     app_layout = html.Div(
@@ -135,13 +148,21 @@ def explore_analysis_dash(mydict, identify="faces"):
             html.Div(
                 ["middle", _middle_picture_frame()],
                 id="Div_middle",
-                style={"width": "40%", "display": "inline-block",'verticalAlign': 'top'},
+                style={
+                    "width": "40%",
+                    "display": "inline-block",
+                    "verticalAlign": "top",
+                },
             ),
             # right
             html.Div(
-                ["right",_right_output_json()],
+                ["right", _right_output_json()],
                 id="Div_right",
-                style={"width": "30%", "display": "inline-block",'verticalAlign': 'top'},
+                style={
+                    "width": "30%",
+                    "display": "inline-block",
+                    "verticalAlign": "top",
+                },
             ),
         ],
         style={"width": "80%", "display": "inline-block"},
