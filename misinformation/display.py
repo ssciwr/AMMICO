@@ -1,4 +1,3 @@
-import ipywidgets
 from IPython.display import display
 
 import misinformation.faces as faces
@@ -8,7 +7,6 @@ import misinformation.objects as objects
 import misinformation.summary as summary
 
 import dash_renderjson
-import dash
 from dash import html, Input, Output, dcc, State
 import jupyter_dash
 from PIL import Image
@@ -28,7 +26,8 @@ class JSONContainer:
         return self._data
 
 
-def explore_analysis_dash(mydict, identify="faces"):
+def explore_analysis(mydict, identify="faces", port=8050):
+    # this function is used to get a broad overview before commiting to a full analysis.
     app = jupyter_dash.JupyterDash(__name__)
 
     theme = {
@@ -52,7 +51,9 @@ def explore_analysis_dash(mydict, identify="faces"):
         "base0F": "#cc6633",
     }
 
+    # I split the different sections into subfunctions for better clarity
     def _top_file_explorer(mydict):
+        # initilizes the dropdown that selects which file is to be analyzed.
         left_layout = html.Div(
             [
                 dcc.Dropdown(
@@ -64,6 +65,7 @@ def explore_analysis_dash(mydict, identify="faces"):
         return left_layout
 
     def _middle_picture_frame():
+        # This just holds the image
         middle_layout = html.Div(
             [
                 html.Img(
@@ -77,6 +79,7 @@ def explore_analysis_dash(mydict, identify="faces"):
         return middle_layout
 
     def _right_output_json():
+        # provides the json viewer for the analysis output.
         right_layout = html.Div(
             [
                 dcc.Loading(
@@ -86,7 +89,7 @@ def explore_analysis_dash(mydict, identify="faces"):
                             [
                                 dash_renderjson.DashRenderjson(
                                     id="right_json_viewer",
-                                    data={"a": "1"},
+                                    data={},
                                     max_depth=-1,
                                     theme=theme,
                                     invert_theme=True,
@@ -121,13 +124,16 @@ def explore_analysis_dash(mydict, identify="faces"):
         prevent_initial_call=True,
     )
     def _right_output_analysis(image, div_top, all_options, current_value):
+        # calls the analysis function and returns the output
         identify_dict = {
             "faces": faces.EmotionDetector,
             "text-on-image": text.TextDetector,
             "objects": objects.ObjectDetector,
             "summary": summary.SummaryDetector,
         }
+        # get image ID from dropdown value, which is the filepath.
         image_id = all_options[current_value]
+
         identify_function = identify_dict[div_top[1]]
 
         mydict[image_id] = identify_function(mydict[image_id]).analyse_image()
@@ -140,23 +146,23 @@ def explore_analysis_dash(mydict, identify="faces"):
                 ["Identify: ", identify, _top_file_explorer(mydict)],
                 id="Div_top",
                 style={
-                    "width": "20%",
+                    "width": "30%",
                     # "display": "inline-block",
                 },
             ),
             # middle
             html.Div(
-                ["middle", _middle_picture_frame()],
+                [_middle_picture_frame()],
                 id="Div_middle",
                 style={
-                    "width": "40%",
+                    "width": "60%",
                     "display": "inline-block",
                     "verticalAlign": "top",
                 },
             ),
             # right
             html.Div(
-                ["right", _right_output_json()],
+                [_right_output_json()],
                 id="Div_right",
                 style={
                     "width": "30%",
@@ -169,58 +175,5 @@ def explore_analysis_dash(mydict, identify="faces"):
     )
     app.layout = app_layout
     # app.layout = html.Div([dash_renderjson.DashRenderjson(id="input", data=data, max_depth=-1, theme=theme, invert_theme=True)])
-
-    return app
-
-
-def explore_analysis(mydict, identify="faces"):
-    # dictionary mapping the type of analysis to be explored
-    identify_dict = {
-        "faces": faces.EmotionDetector,
-        "text-on-image": text.TextDetector,
-        "objects": objects.ObjectDetector,
-        "summary": summary.SummaryDetector,
-    }
-    # create a list containing the image ids for the widget
-    # image_paths = [mydict[key]["filename"] for key in mydict.keys()]
-    image_ids = [key for key in mydict.keys()]
-    # Create an image selector widget
-    image_select = ipywidgets.Select(
-        options=image_ids, layout=ipywidgets.Layout(width="20%"), rows=20
-    )
-
-    # Set up the facial recognition output widget
-    output = ipywidgets.Output(layout=ipywidgets.Layout(width="30%"))
-
-    # Set up the image selection and display widget
-    image_widget = ipywidgets.Box(
-        children=[],
-        layout=ipywidgets.Layout(width="50%"),
-    )
-
-    # Register the tab switch logic
-    def switch(_):
-        # Clear existing output
-        image_widget.children = ()
-        output.clear_output()
-
-        # Create the new content
-        image_widget.children = (
-            ipywidgets.Image.from_file(mydict[image_select.value]["filename"]),
-        )
-
-        # This output widget absorbes print statements that are messing with
-        # the widget output and cannot be disabled through the API.
-        with faces.NocatchOutput():
-            mydict[image_select.value] = identify_dict[identify](
-                mydict[image_select.value]
-            ).analyse_image()
-        with output:
-            display(JSONContainer(mydict[image_select.value]))
-
-    # Register the handler and trigger it immediately
-    image_select.observe(switch, names=("value",), type="change")
-    switch(None)
-
-    # Show the combined widget
-    return ipywidgets.HBox([image_select, image_widget, output])
+    app.run_server(debug=True, mode="inline", port=port)
+    # return app
