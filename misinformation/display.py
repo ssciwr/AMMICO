@@ -31,6 +31,7 @@ class AnalysisExplorer:
     def __init__(self, mydict, identify="faces") -> None:
         self.app = jupyter_dash.JupyterDash(__name__)
         self.mydict = mydict
+        self.identify = identify
         self.theme = {
             "scheme": "monokai",
             "author": "wimer hazenberg (http://www.monokai.nl)",
@@ -98,7 +99,6 @@ class AnalysisExplorer:
         self.app.callback(
             Output("right_json_viewer", "data"),
             Input("img_middle_picture_id", "src"),
-            State("Div_top", "children"),
             State("left_select_id", "options"),
             State("left_select_id", "value"),
             prevent_initial_call=True,
@@ -172,7 +172,7 @@ class AnalysisExplorer:
         else:
             return None
 
-    def _right_output_analysis(self, image, div_top, all_options, current_value):
+    def _right_output_analysis(self, image, all_options, current_value):
         # calls the analysis function and returns the output
         identify_dict = {
             "faces": faces.EmotionDetector,
@@ -183,7 +183,7 @@ class AnalysisExplorer:
         # get image ID from dropdown value, which is the filepath.
         image_id = all_options[current_value]
 
-        identify_function = identify_dict[div_top[1]]
+        identify_function = identify_dict[self.identify]
 
         self.mydict[image_id] = identify_function(self.mydict[image_id]).analyse_image()
         return self.mydict[image_id]
