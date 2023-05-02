@@ -5,9 +5,9 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "misinformation"
+name = "ammico"
 version = "0.0.1"
-description = "Misinformation campaign analysis"
+description = "AI Media and Misinformation Content Analysis Tool"
 readme = "README.md"
 maintainers = [
     { name = "Inga Ulusoy", email = "ssc@iwr.uni-heidelberg.de" },
@@ -58,7 +58,7 @@ dependencies = [
 ]
 
 [project.scripts]
-misinformation_prefetch_models = "misinformation.utils:misinformation_prefetch_models"
+ammico_prefetch_models = "ammico.utils:ammico_prefetch_models"
 
 [tool.setuptools]
-packages = ["misinformation"]
+packages = ["ammico"]
