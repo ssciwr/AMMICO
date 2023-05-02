@@ -113,7 +113,6 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict["text_english_correct"] = str(self.textblob.correct())
 
     def sentiment_analysis(self):
-        # self.subdict["sentiment"] = self.doc._.blob.sentiment_assessments.assessments
         # polarity is between [-1.0, 1.0]
         self.subdict["polarity"] = self.doc._.blob.polarity
         # subjectivity is a float within the range [0.0, 1.0]

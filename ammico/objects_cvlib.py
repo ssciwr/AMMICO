@@ -1,7 +1,5 @@
 import cv2
 import cvlib as cv
-import numpy as np
-from PIL import Image
 
 
 def objects_from_cvlib(objects_list: list) -> dict:

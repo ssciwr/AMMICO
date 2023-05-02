@@ -1,6 +1,5 @@
 import ammico.faces as fc
 import json
-import pytest
 
 
 def test_analyse_faces(get_path):

@@ -146,7 +146,9 @@ def crop_posts_image(
 ):
     """
     get file lists from dir and sub dirs
-    ref_view：ref_view for crop the posts images
+
+
+    ref_view： ref_view for crop the posts images
     view: posts image that need cropping
     rte： None - not cropped, or (crop_view, number of matches)
     """
@@ -185,7 +187,7 @@ def crop_posts_image(
 def get_file_list(dir, filelist, ext=None, convert_unix=True):
     """
     get file lists from dir and sub dirs
-    dir：root dir for file lists
+    dir： root dir for file lists
     ext: file extension
     rte： File list
     """
@@ -252,11 +254,9 @@ def crop_posts_from_files(
 
 def test_crop_from_file():
     # Load images
-    # view1 = np.array(Image.open("data/ref/ref-00.png")) / 255
-    # view2 = np.array(Image.open("data/napsa/100539_ben.png")) / 255
     view1 = np.array(Image.open("data/ref/ref-06.png"))
     view2 = np.array(Image.open("data/napsa/102956_eng.png"))
-    crop_view, match_num = crop_posts_image(view1, view2, plt_match=True, plt_crop=True)
+    crop_view, _ = crop_posts_image(view1, view2, plt_match=True, plt_crop=True)
     cv2.imwrite("data/crop_100489_ind.png", crop_view)
 
 
@@ -267,10 +267,3 @@ def test_crop_from_folder():
     crop_posts_from_files(
         ref_dir, crop_dir, save_crop_dir, plt_match=False, plt_crop=False
     )
-
-
-# do tests:
-
-# test_crop_from_file()
-
-# test_crop_from_folder()
