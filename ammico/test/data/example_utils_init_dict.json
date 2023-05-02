@@ -1,0 +1,6 @@
+{
+    "image_faces": {
+        "filename": "./test/data/image_faces.jpg"},
+    "image_objects":
+        {"filename": "./test/data/image_objects.jpg"}
+}

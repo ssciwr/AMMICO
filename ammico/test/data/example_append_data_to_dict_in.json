@@ -1,0 +1,37 @@
+{"image01": 
+    {
+        "filename": "./data/image01.jpg", 
+        "person": "yes", 
+        "bicycle": "no",
+        "car": "no", 
+        "motorcycle": "no", 
+        "airplane": "no", 
+        "bus": "no", 
+        "train": "no", 
+        "truck": "no", 
+        "boat": "no", 
+        "traffic light": "no", 
+        "cell phone": "yes", 
+        "gender": "male", 
+        "wears_mask": "no", 
+        "race": "asian"
+    }, 
+"image02": 
+    {
+        "filename": "./data/image02.jpg", 
+        "person": "no", 
+        "bicycle": "no", 
+        "car": "yes", 
+        "motorcycle": "no", 
+        "airplane": "no", 
+        "bus": "yes", 
+        "train": "no", 
+        "truck": "yes", 
+        "boat": "no", 
+        "traffic light": "yes", 
+        "cell phone": "no", 
+        "gender": "male", 
+        "wears_mask": "no", 
+        "race": "asian"
+    }
+}
