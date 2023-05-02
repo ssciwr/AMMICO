@@ -106,3 +106,9 @@ if __name__ == "__main__":
     outdict = append_data_to_dict(mydict)
     df = dump_df(outdict)
     print(df.head(10))
+
+
+def is_interactive():
+    import __main__ as main
+
+    return not hasattr(main, "__file__")

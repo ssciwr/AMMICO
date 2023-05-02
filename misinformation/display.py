@@ -3,6 +3,7 @@ from IPython.display import display
 import misinformation.faces as faces
 import misinformation.text as text
 import misinformation.objects as objects
+from misinformation.utils import is_interactive
 
 import misinformation.summary as summary
 
@@ -139,6 +140,7 @@ def explore_analysis(mydict, identify="faces", port=8050):
         mydict[image_id] = identify_function(mydict[image_id]).analyse_image()
         return mydict[image_id]
 
+    # setup the layout
     app_layout = html.Div(
         [
             # top
@@ -174,6 +176,11 @@ def explore_analysis(mydict, identify="faces", port=8050):
         style={"width": "80%", "display": "inline-block"},
     )
     app.layout = app_layout
-    # app.layout = html.Div([dash_renderjson.DashRenderjson(id="input", data=data, max_depth=-1, theme=theme, invert_theme=True)])
+
+    if not is_interactive():
+        raise EnvironmentError(
+            "Dash server should only be called in interactive an interactive environment like jupyter notebooks."
+        )
+
     app.run_server(debug=True, mode="inline", port=port)
     # return app

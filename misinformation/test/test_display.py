@@ -1,10 +1,13 @@
 import json
 import misinformation.display as misinf_display
+import pytest
 
 
 def test_explore_analysis_faces(get_path):
     mydict = {"IMG_2746": {"filename": get_path + "IMG_2746.png"}}
-    temp = misinf_display.explore_analysis(mydict, identify="faces")  # noqa
+    with pytest.raises(EnvironmentError):
+        temp = misinf_display.explore_analysis(mydict, identify="faces")  # noqa
+
     temp = None  # noqa
     with open(get_path + "example_faces.json", "r") as file:
         outs = json.load(file)
@@ -17,7 +20,9 @@ def test_explore_analysis_faces(get_path):
 
 def test_explore_analysis_objects(get_path):
     mydict = {"IMG_2809": {"filename": get_path + "IMG_2809.png"}}
-    temp = misinf_display.explore_analysis(mydict, identify="objects")  # noqa
+    with pytest.raises(EnvironmentError):
+        temp = misinf_display.explore_analysis(mydict, identify="objects")  # noqa
+
     temp = None  # noqa
     with open(get_path + "example_analysis_objects.json", "r") as file:
         outs = json.load(file)
