@@ -124,8 +124,8 @@ def test_text_summary(get_path):
         reference_text = file.read()
     mydict["text_english"] = reference_text
     test_obj.text_summary()
-    reference_summary = " I’m sorry, but I don’t want to be an emperor. That’s not my business. I should like to help everyone - if possible - Jew, Gentile - black man - white . We all want to help one another. In this world there is room for everyone. The way of life can be free and beautiful, but we have lost the way ."
-    assert mydict["summary_text"] == reference_summary
+    reference_summary = " I’m sorry, but I don’t want to be an emperor"
+    assert mydict["text_summary"] == reference_summary
 
 
 def test_text_sentiment_transformers():
