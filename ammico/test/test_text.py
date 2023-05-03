@@ -142,8 +142,8 @@ def test_text_ner():
     test_obj = tt.TextDetector(mydict, analyse_text=True)
     mydict["text_english"] = "Bill Gates was born in Seattle."
     test_obj.text_ner()
-    assert mydict["entity"] == ["Bill", "Gates", "Seattle"]
-    assert mydict["entity_type"] == ["I-PER", "I-PER", "I-LOC"]
+    assert mydict["entity"] == ["Bill Gates", "Seattle"]
+    assert mydict["entity_type"] == ["PER", "LOC"]
 
 
 def test_PostprocessText(set_testdict, get_path):
