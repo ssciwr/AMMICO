@@ -1,5 +1,0 @@
-[flake8]
-ignore = E203, F401, E402, E501, W503
-exclude = .git,__pycache__,.ipynb_checkpoints
-max-line-length = 90
-max-complexity = 18
