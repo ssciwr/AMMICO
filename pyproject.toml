@@ -23,6 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "bertopic",
+    "opencv-contrib-python",
     "cvlib",
     "deepface<=0.0.75",
     "googletrans==3.1.0a0",
@@ -51,7 +52,6 @@ dependencies = [
     "transformers",
     "google-cloud-vision",
     "setuptools",
-    "opencv-contrib-python",
 ]
 
 [project.scripts]
