@@ -1,0 +1,36 @@
+name: Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: install ammico
+      run: |
+        pip install -e .
+        python -m pip install -r requirements-dev.txt
+    - name: set google auth
+      uses: 'google-github-actions/auth@v0.4.0'
+      with:
+        credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+    - name: get pandoc
+      run: |
+        sudo apt-get install -y pandoc
+    - name: Build documentation
+      run: |
+        cd docs
+        make html
+    - name: Push changes to gh-pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: docs # The folder the action should deploy.

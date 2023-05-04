@@ -1,0 +1,5 @@
+sphinx
+myst-parser
+sphinx_rtd_theme
+sphinxcontrib-napoleon
+nbsphinx
