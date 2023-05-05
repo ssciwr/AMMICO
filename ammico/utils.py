@@ -95,3 +95,9 @@ def append_data_to_dict(mydict: dict) -> dict:
 def dump_df(mydict: dict) -> DataFrame:
     """Utility to dump the dictionary into a dataframe."""
     return DataFrame.from_dict(mydict)
+
+
+def is_interactive():
+    import __main__ as main
+
+    return not hasattr(main, "__file__")

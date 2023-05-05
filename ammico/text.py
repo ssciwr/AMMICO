@@ -53,6 +53,9 @@ class TextDetector(utils.AnalysisMethod):
             self.clean_text()
             self.correct_spelling()
             self.sentiment_analysis()
+            self.text_summary()
+            self.text_sentiment_transformers()
+            self.text_ner()
         return self.subdict
 
     def get_text_from_image(self):
@@ -124,8 +127,15 @@ class TextDetector(utils.AnalysisMethod):
         # use the current default model - 03/2023
         model_name = "sshleifer/distilbart-cnn-12-6"
         model_revision = "a4f8f3e"
-        pipe = pipeline("summarization", model=model_name, revision=model_revision)
-        self.subdict.update(pipe(self.subdict["text_english"])[0])
+        pipe = pipeline(
+            "summarization",
+            model=model_name,
+            revision=model_revision,
+            min_length=5,
+            max_length=20,
+        )
+        summary = pipe(self.subdict["text_english"])
+        self.subdict["text_summary"] = summary[0]["summary_text"]
 
     def text_sentiment_transformers(self):
         # use the transformers pipeline for text classification
@@ -145,14 +155,18 @@ class TextDetector(utils.AnalysisMethod):
         model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"
         model_revision = "f2482bf"
         pipe = pipeline(
-            "token-classification", model=model_name, revision=model_revision
+            "token-classification",
+            model=model_name,
+            revision=model_revision,
+            aggregation_strategy="simple",
         )
         result = pipe(self.subdict["text_english"])
+        # self.subdict["entity"] = result
         self.subdict["entity"] = []
         self.subdict["entity_type"] = []
         for entity in result:
             self.subdict["entity"].append(entity["word"])
-            self.subdict["entity_type"].append(entity["entity"])
+            self.subdict["entity_type"].append(entity["entity_group"])
 
 
 class PostprocessText:
