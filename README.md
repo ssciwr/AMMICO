@@ -34,9 +34,9 @@ Use pre-processed image files such as social media posts with comments and proce
 
 ## Installation
 
-The `AMMICO` package can be installed using pip: Navigate into your package folder `ammico/` and execute
+The `AMMICO` package can be installed using pip: 
 ```
-pip install .
+pip install git+https://github.com/ssciwr/ammico.git
 ```
 This will install the package and its dependencies locally.
 
