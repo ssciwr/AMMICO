@@ -55,6 +55,7 @@ dependencies = [
     "dash",
     "jupyter_dash",
     "dash_renderjson",
+    "colorgram.py",
 ]
 
 [project.scripts]
