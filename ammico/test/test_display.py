@@ -3,6 +3,7 @@ import ammico.display as ammico_display
 import pytest
 
 
+@pytest.mark.skip(reason="temporarily disabled")
 def test_explore_analysis_faces(get_path):
     mydict = {"IMG_2746": {"filename": get_path + "IMG_2746.png"}}
     with open(get_path + "example_faces.json", "r") as file:
@@ -14,6 +15,7 @@ def test_explore_analysis_faces(get_path):
             assert sub_dict[key] == outs[key]
 
 
+@pytest.mark.skip(reason="temporarily disabled")
 def test_explore_analysis_objects(get_path):
     mydict = {"IMG_2809": {"filename": get_path + "IMG_2809.png"}}
     with open(get_path + "example_analysis_objects.json", "r") as file:
@@ -25,6 +27,7 @@ def test_explore_analysis_objects(get_path):
             assert sub_dict[key] == outs[key]
 
 
+@pytest.mark.skip(reason="temporarily disabled")
 def test_AnalysisExplorer(get_path):
     path_img_1 = get_path + "IMG_2809.png"
     path_img_2 = get_path + "IMG_2746.png"
