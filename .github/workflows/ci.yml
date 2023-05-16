@@ -40,3 +40,4 @@ jobs:
         fail_ci_if_error: true
         files: ammico/coverage.xml
         verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }}
