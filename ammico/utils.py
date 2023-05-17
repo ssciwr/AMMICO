@@ -1,6 +1,6 @@
 import glob
 import os
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 import pooch
 
 
@@ -101,3 +101,17 @@ def is_interactive():
     import __main__ as main
 
     return not hasattr(main, "__file__")
+
+
+def get_color_table():
+    df_colors = read_csv(
+        os.path.join(os.path.dirname(__file__), "..", "notebooks", "Color_tables.csv"),
+        delimiter=";",
+        dtype=str,
+        encoding="UTF-8",
+        header=[0, 1],
+    )
+    return {
+        col_key: df_colors[col_key].dropna().to_dict("list")
+        for col_key in df_colors.columns.levels[0]
+    }
