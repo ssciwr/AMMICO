@@ -11,7 +11,6 @@ import pandas as pd
 from bertopic import BERTopic
 from transformers import pipeline
 
-# make widgets work again
 # clean text has weird spaces and separation of "do n't"
 # increase coverage for text
 
@@ -127,6 +126,7 @@ class TextDetector(utils.AnalysisMethod):
         # use the current default model - 03/2023
         model_name = "sshleifer/distilbart-cnn-12-6"
         model_revision = "a4f8f3e"
+        max_number_of_characters = 3000
         pipe = pipeline(
             "summarization",
             model=model_name,
@@ -134,7 +134,8 @@ class TextDetector(utils.AnalysisMethod):
             min_length=5,
             max_length=20,
         )
-        summary = pipe(self.subdict["text_english"])
+        print(self.subdict["text_english"])
+        summary = pipe(self.subdict["text_english"][0:max_number_of_characters])
         self.subdict["text_summary"] = summary[0]["summary_text"]
 
     def text_sentiment_transformers(self):
@@ -143,7 +144,10 @@ class TextDetector(utils.AnalysisMethod):
         model_name = "distilbert-base-uncased-finetuned-sst-2-english"
         model_revision = "af0f99b"
         pipe = pipeline(
-            "text-classification", model=model_name, revision=model_revision
+            "text-classification",
+            model=model_name,
+            revision=model_revision,
+            truncation=True,
         )
         result = pipe(self.subdict["text_english"])
         self.subdict["sentiment"] = result[0]["label"]
@@ -161,7 +165,6 @@ class TextDetector(utils.AnalysisMethod):
             aggregation_strategy="simple",
         )
         result = pipe(self.subdict["text_english"])
-        # self.subdict["entity"] = result
         self.subdict["entity"] = []
         self.subdict["entity_type"] = []
         for entity in result:
