@@ -6,6 +6,7 @@ import cv2
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from ammico import utils
 
 
 # use this function to visualize the matches
@@ -113,7 +114,14 @@ def kp_from_matches(matches, kp1, kp2):
 
 # estimate a crop corner for posts image via matches
 def compute_crop_corner(
-    matches, kp1, kp2, region=30, h_margin=28, v_margin=5, min_match=6
+    # matches, kp1, kp2, region=30, h_margin=28, v_margin=5, min_match=6
+    matches,
+    kp1,
+    kp2,
+    region=30,
+    h_margin=28,
+    v_margin=5,
+    min_match=6,
 ):
     kp1, kp2 = kp_from_matches(matches, kp1, kp2)
     ys = kp2[:, 1]
@@ -142,7 +150,11 @@ def compute_crop_corner(
 
 # crop the posts image
 def crop_posts_image(
-    ref_view, view, plt_match=False, plt_crop=False, correct_margin=700
+    # ref_view, view, plt_match=False, plt_crop=False, correct_margin=700
+    ref_view,
+    view,
+    plt_match=False,
+    plt_crop=False,
 ):
     """
     get file lists from dir and sub dirs
@@ -166,19 +178,20 @@ def crop_posts_image(
     if corner is None:
         return None
     v, h = corner
-    if view.shape[1] - h > correct_margin:
-        h = view.shape[1] - ref_view.shape[1]
-    if view.shape[1] - h < ref_view.shape[1]:
-        h = view.shape[1] - ref_view.shape[1]
+
+    # if view.shape[1] - h > correct_margin:
+    # h = view.shape[1] - ref_view.shape[1]
+    # if view.shape[1] - h < ref_view.shape[1]:
+    # h = view.shape[1] - ref_view.shape[1]
 
     crop_view = view[0:v, h:, :]
     if plt_crop:
         view[v, :, 0:3] = [255, 0, 0]
         view[:, h, 0:3] = [255, 0, 0]
-        plt.imshow(view)
+        plt.imshow(cv2.cvtColor(view, cv2.COLOR_BGR2RGB))
         plt.show()
 
-        plt.imshow(crop_view)
+        plt.imshow(cv2.cvtColor(crop_view, cv2.COLOR_BGR2RGB))
         plt.show()
 
     return crop_view, len(filtered_matches)
@@ -223,7 +236,7 @@ def crop_posts_from_refs(ref_views, view, plt_match=False, plt_crop=False):
             if match_num > max_matchs:
                 crop_view = crop_img
                 max_matchs = match_num
-                # print("match_num = ", match_num)
+                print("match_num = ", match_num)
 
     return crop_view
 
@@ -235,13 +248,45 @@ def crop_posts_from_files(
     ref_list = get_file_list(ref_dir, ref_list, ext="png")
     ref_views = []
     for ref_file in ref_list:
-        ref_view = np.array(Image.open(ref_file))
+        ref_view = cv2.imread(ref_file)
         ref_views.append(ref_view)
     crop_list = []
     crop_list = get_file_list(crop_dir, crop_list, ext="png")
 
     for crop_file in crop_list:
-        view = np.array(Image.open(crop_file))
+        view = cv2.imread(crop_file)
+        crop_view = crop_posts_from_refs(
+            ref_views, view, plt_match=plt_match, plt_crop=plt_crop
+        )
+        if crop_view is not None:
+            filename = ntpath.basename(crop_file)
+            save_path = os.path.join(save_crop_dir, filename)
+            save_path = save_path.replace("\\", "/")
+            cv2.imwrite(save_path, crop_view)
+
+
+def crop_media_posts(files, ref_files, save_crop_dir, plt_match=False, plt_crop=False):
+    """Crop social media posts so that comments are cut off.
+
+    Args:
+        files (list): List of all the files to be cropped.
+        ref_files (list): List of all the reference images that signify
+            which regions should be cropped.
+        save_crop_dir (str): Directory where to write the cropped images to.
+        plt_match (Bool, optional): Display the matched areas on the image.
+            Defaults to False.
+        plt_crop (Bool, optional): Display the cropped image.
+            Defaults to False.
+    """
+
+    ref_views = []
+    for ref_file in ref_files:
+        ref_view = cv2.imread(ref_file)
+        ref_views.append(ref_view)
+
+    for crop_file in files:
+        view = cv2.imread(crop_file)
+        print(crop_file)
         crop_view = crop_posts_from_refs(
             ref_views, view, plt_match=plt_match, plt_crop=plt_crop
         )
@@ -267,3 +312,21 @@ def test_crop_from_folder():
     crop_posts_from_files(
         ref_dir, crop_dir, save_crop_dir, plt_match=False, plt_crop=False
     )
+
+
+if __name__ == "__main__":
+    # ref_view = np.array(Image.open("data/ref/ref-00.png"))
+    # view = np.array(Image.open("data/test-debug/examples cropped/examples original/100123_ara.png"))
+    # plt.imshow(ref_view)
+    # plt.show()
+    # plt.imshow(view)
+    # plt.show()
+    # crop_view, match_num = crop_posts_image(ref_view, view, plt_match=True, plt_crop=True)
+    # print("done")
+    # files = utils.find_files(path="../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/", limit=100,)
+    ref_files = utils.find_files(path="data/ref", limit=100)
+    files = [
+        "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_104103_eng.png"
+    ]
+    crop_media_posts(files, ref_files, "data/crop/", plt_match=True, plt_crop=True)
+    print("done")
