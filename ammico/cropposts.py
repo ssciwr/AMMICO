@@ -43,6 +43,9 @@ def draw_matches(matches, img1, img2, kp1, kp2):
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
 
         M = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)[0]
+        if not isinstance(M, np.ndarray):
+            print("Could not match images for drawing.")
+            return
 
         # Draw detected template in scene image
         h = img1.shape[0]
@@ -153,8 +156,6 @@ def crop_posts_image(
     # ref_view, view, plt_match=False, plt_crop=False, correct_margin=700
     ref_view,
     view,
-    plt_match=False,
-    plt_crop=False,
 ):
     """
     get file lists from dir and sub dirs
@@ -167,15 +168,12 @@ def crop_posts_image(
     filtered_matches, kp1, kp2 = matching_points(ref_view, view)
     MIN_MATCH_COUNT = 6
     if len(filtered_matches) < MIN_MATCH_COUNT:
+        print("Found too few matches - {}".format(filtered_matches))
         return None
-
-    if plt_match:
-        img1 = cv2.cvtColor(ref_view, cv2.COLOR_BGR2GRAY)
-        img2 = cv2.cvtColor(view, cv2.COLOR_BGR2GRAY)
-        draw_matches(filtered_matches, img1, img2, kp1, kp2)
 
     corner = compute_crop_corner(filtered_matches, kp1, kp2)
     if corner is None:
+        print("Found no corner")
         return None
     v, h = corner
 
@@ -185,84 +183,46 @@ def crop_posts_image(
     # h = view.shape[1] - ref_view.shape[1]
 
     crop_view = view[0:v, h:, :]
-    if plt_crop:
-        view[v, :, 0:3] = [255, 0, 0]
-        view[:, h, 0:3] = [255, 0, 0]
+
+    return crop_view, len(filtered_matches), v, h
+
+
+def crop_posts_from_refs(ref_views, view, plt_match=False, plt_crop=False):
+    crop_view = None
+    max_matchs = 0
+    rte = None
+    found_match = False
+    for ref_view in ref_views:
+        rte = crop_posts_image(ref_view, view)
+        if rte is not None:
+            crop_img, match_num, v, h = rte
+            if match_num > max_matchs:
+                crop_view = crop_img
+                final_ref = ref_view
+                final_v = v
+                final_h = h
+                max_matchs = match_num  # find the one with the most matches
+                found_match = True
+
+    # plot only the one with the most matches
+    if found_match and plt_match:
+        # now plot the match
+        filtered_matches, kp1, kp2 = matching_points(final_ref, view)
+        img1 = cv2.cvtColor(final_ref, cv2.COLOR_BGR2GRAY)
+        img2 = cv2.cvtColor(view, cv2.COLOR_BGR2GRAY)
+        draw_matches(filtered_matches, img1, img2, kp1, kp2)
+
+    if found_match and plt_crop:
+        # now plot the cropped image
+        view[final_v, :, 0:3] = [255, 0, 0]
+        view[:, final_h, 0:3] = [255, 0, 0]
         plt.imshow(cv2.cvtColor(view, cv2.COLOR_BGR2RGB))
         plt.show()
 
         plt.imshow(cv2.cvtColor(crop_view, cv2.COLOR_BGR2RGB))
         plt.show()
 
-    return crop_view, len(filtered_matches)
-
-
-def get_file_list(dir, filelist, ext=None, convert_unix=True):
-    """
-    get file lists from dir and sub dirs
-    dir： root dir for file lists
-    ext: file extension
-    rte： File list
-    """
-    if os.path.isfile(dir):
-        if ext is None:
-            filelist.append(dir)
-        else:
-            if ext in dir[-3:]:
-                filelist.append(dir)
-
-    elif os.path.isdir(dir):
-        for s in os.listdir(dir):
-            new_dir = os.path.join(dir, s)
-            get_file_list(new_dir, filelist, ext)
-
-    if convert_unix:
-        new_filelist = []
-        for file_ in filelist:
-            file_ = file_.replace("\\", "/")
-            new_filelist.append(file_)
-        return new_filelist
-    else:
-        return filelist
-
-
-def crop_posts_from_refs(ref_views, view, plt_match=False, plt_crop=False):
-    crop_view = None
-    max_matchs = 0
-    for ref_view in ref_views:
-        rte = crop_posts_image(ref_view, view, plt_match=plt_match, plt_crop=plt_crop)
-        if rte is not None:
-            crop_img, match_num = rte
-            if match_num > max_matchs:
-                crop_view = crop_img
-                max_matchs = match_num
-                print("match_num = ", match_num)
-
     return crop_view
-
-
-def crop_posts_from_files(
-    ref_dir, crop_dir, save_crop_dir, plt_match=False, plt_crop=False
-):
-    ref_list = []
-    ref_list = get_file_list(ref_dir, ref_list, ext="png")
-    ref_views = []
-    for ref_file in ref_list:
-        ref_view = cv2.imread(ref_file)
-        ref_views.append(ref_view)
-    crop_list = []
-    crop_list = get_file_list(crop_dir, crop_list, ext="png")
-
-    for crop_file in crop_list:
-        view = cv2.imread(crop_file)
-        crop_view = crop_posts_from_refs(
-            ref_views, view, plt_match=plt_match, plt_crop=plt_crop
-        )
-        if crop_view is not None:
-            filename = ntpath.basename(crop_file)
-            save_path = os.path.join(save_crop_dir, filename)
-            save_path = save_path.replace("\\", "/")
-            cv2.imwrite(save_path, crop_view)
 
 
 def crop_media_posts(files, ref_files, save_crop_dir, plt_match=False, plt_crop=False):
@@ -286,7 +246,7 @@ def crop_media_posts(files, ref_files, save_crop_dir, plt_match=False, plt_crop=
 
     for crop_file in files:
         view = cv2.imread(crop_file)
-        print(crop_file)
+        print("Doing file {}".format(crop_file))
         crop_view = crop_posts_from_refs(
             ref_views, view, plt_match=plt_match, plt_crop=plt_crop
         )
@@ -301,17 +261,8 @@ def test_crop_from_file():
     # Load images
     view1 = np.array(Image.open("data/ref/ref-06.png"))
     view2 = np.array(Image.open("data/napsa/102956_eng.png"))
-    crop_view, _ = crop_posts_image(view1, view2, plt_match=True, plt_crop=True)
+    crop_view, _, _, _ = crop_posts_image(view1, view2)
     cv2.imwrite("data/crop_100489_ind.png", crop_view)
-
-
-def test_crop_from_folder():
-    ref_dir = "./data/ref"
-    crop_dir = "./data/apsa"
-    save_crop_dir = "data/crop"
-    crop_posts_from_files(
-        ref_dir, crop_dir, save_crop_dir, plt_match=False, plt_crop=False
-    )
 
 
 if __name__ == "__main__":
@@ -321,12 +272,15 @@ if __name__ == "__main__":
     # plt.show()
     # plt.imshow(view)
     # plt.show()
-    # crop_view, match_num = crop_posts_image(ref_view, view, plt_match=True, plt_crop=True)
+    # crop_view, match_num, _, _ = crop_posts_image(ref_view, view)
     # print("done")
-    # files = utils.find_files(path="../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/", limit=100,)
+    # files = utils.find_files(path="../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/", limit=10,)
     ref_files = utils.find_files(path="data/ref", limit=100)
+    # files = [
+    # "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_104103_eng.png"
+    # ]
     files = [
-        "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_104103_eng.png"
+        "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_100641_mya.png"
     ]
-    crop_media_posts(files, ref_files, "data/crop/", plt_match=True, plt_crop=True)
+    crop_media_posts(files, ref_files, "data/crop/", plt_match=False, plt_crop=True)
     print("done")
