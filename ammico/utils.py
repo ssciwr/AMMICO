@@ -105,7 +105,7 @@ def is_interactive():
 
 def get_color_table():
     df_colors = read_csv(
-        os.path.join(os.path.dirname(__file__), "..", "notebooks", "Color_tables.csv"),
+        os.path.join(os.path.dirname(__file__), "data", "Color_tables.csv"),
         delimiter=";",
         dtype=str,
         encoding="UTF-8",

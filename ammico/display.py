@@ -11,6 +11,7 @@ import dash_renderjson
 from dash import html, Input, Output, dcc, State
 import jupyter_dash
 from PIL import Image
+import plotly.express as px
 
 
 class JSONContainer:
@@ -187,3 +188,24 @@ class AnalysisExplorer:
 
         self.mydict[image_id] = identify_function(self.mydict[image_id]).analyse_image()
         return self.mydict[image_id]
+
+
+def show_piechart(df, n_max=-1):
+    if n_max == -1:
+        n_max = len(df.T)
+
+    df = df.T.sort_values(by="percentage", ascending=False).head(n_max)
+
+    color_map = {color: color for color in df["label"]}
+    fig = px.pie(
+        df,
+        values="percentage",
+        names="label",
+        title="Color analysis",
+        color="label",
+        color_discrete_map=color_map,
+        hole=0.3,
+    )
+    fig.update_traces(marker=dict(line=dict(color="#000000", width=0.6)))
+
+    fig.show()

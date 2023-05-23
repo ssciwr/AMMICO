@@ -63,3 +63,7 @@ ammico_prefetch_models = "ammico.utils:ammico_prefetch_models"
 
 [tool.setuptools]
 packages = ["ammico"]
+
+
+[tool.setuptools.package-data]
+mypkg = [ "*.csv"]
