@@ -7,7 +7,7 @@ from lavis.models import load_model_and_preprocess
 class SummaryDetector(AnalysisMethod):
     def __init__(self, subdict: dict) -> None:
         super().__init__(subdict)
-        self.summary_device = device("cuda" if cuda.is_available() else "cpu")
+        self.summary_device = "cuda" if cuda.is_available() else "cpu"
 
     def load_model_base(self):
         """

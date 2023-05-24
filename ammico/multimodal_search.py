@@ -334,8 +334,8 @@ class MultimodalSearch(AnalysisMethod):
             r = requests.get(url, allow_redirects=False)
             open(path_to_lib + "bpe_simple_vocab_16e6.txt.gz", "wb").write(r.content)
 
-        image_keys = sorted(self.keys())
-        image_names = [self[k]["filename"] for k in image_keys]
+        image_keys = sorted(self.subdict.keys())
+        image_names = [self.subdict[k]["filename"] for k in image_keys]
 
         select_model = {
             "blip2": MultimodalSearch.load_feature_extractor_model_blip2,
@@ -505,7 +505,7 @@ class MultimodalSearch(AnalysisMethod):
             sorted_lists (list): sorted list of similarity.
         """
         if filter_number_of_images is None:
-            filter_number_of_images = len(self)
+            filter_number_of_images = len(self.subdict)
         if filter_val_limit is None:
             filter_val_limit = 0
         if filter_rel_error is None:
@@ -531,17 +531,17 @@ class MultimodalSearch(AnalysisMethod):
                     and 100 * abs(max_val - similarity[key][q].item()) / max_val
                     < filter_rel_error
                 ):
-                    self[image_keys[key]][
+                    self.subdict[image_keys[key]][
                         "rank " + list(search_query[q].values())[0]
                     ] = places[q][key]
-                    self[image_keys[key]][
+                    self.subdict[image_keys[key]][
                         list(search_query[q].values())[0]
                     ] = similarity[key][q].item()
                 else:
-                    self[image_keys[key]][
+                    self.subdict[image_keys[key]][
                         "rank " + list(search_query[q].values())[0]
                     ] = None
-                    self[image_keys[key]][list(search_query[q].values())[0]] = 0
+                    self.subdict[image_keys[key]][list(search_query[q].values())[0]] = 0
         return similarity, sorted_lists
 
     def itm_text_precessing(self, search_query: list[dict[str, str]]) -> list:
@@ -580,7 +580,9 @@ class MultimodalSearch(AnalysisMethod):
         paths = []
         image_names = []
         for s in sorted(
-            self.items(), key=lambda t: t[1][list(query.values())[0]], reverse=True
+            self.subdict.items(),
+            key=lambda t: t[1][list(query.values())[0]],
+            reverse=True,
         ):
             if s[1]["rank " + list(query.values())[0]] is None:
                 break
@@ -896,17 +898,17 @@ class MultimodalSearch(AnalysisMethod):
             }
             for i, key in zip(range(len(image_keys)), sorted_lists[index_text_query]):
                 if image_keys[key] in image_names:
-                    self[image_keys[key]][
+                    self.subdict[image_keys[key]][
                         "itm " + list(search_query[index_text_query].values())[0]
                     ] = image_names_with_itm[image_keys[key]]
-                    self[image_keys[key]][
+                    self.subdict[image_keys[key]][
                         "itm_rank " + list(search_query[index_text_query].values())[0]
                     ] = image_names_with_new_rank[image_keys[key]]
                 else:
-                    self[image_keys[key]][
+                    self.subdict[image_keys[key]][
                         "itm " + list(search_query[index_text_query].values())[0]
                     ] = 0
-                    self[image_keys[key]][
+                    self.subdict[image_keys[key]][
                         "itm_rank " + list(search_query[index_text_query].values())[0]
                     ] = None
 
@@ -966,7 +968,7 @@ class MultimodalSearch(AnalysisMethod):
             current_querry_rank = "rank " + list(query.values())[0]
 
         for s in sorted(
-            self.items(), key=lambda t: t[1][current_querry_val], reverse=True
+            self.subdict.items(), key=lambda t: t[1][current_querry_val], reverse=True
         ):
             if s[1][current_querry_rank] is None:
                 break
