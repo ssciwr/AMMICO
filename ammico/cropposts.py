@@ -276,11 +276,11 @@ if __name__ == "__main__":
     # print("done")
     # files = utils.find_files(path="../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/", limit=10,)
     ref_files = utils.find_files(path="data/ref", limit=100)
-    # files = [
-    # "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_104103_eng.png"
-    # ]
     files = [
-        "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_100641_mya.png"
+        "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_106101_por.png"
     ]
-    crop_media_posts(files, ref_files, "data/crop/", plt_match=False, plt_crop=True)
+    # files = [
+    # "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_100641_mya.png"
+    # ]
+    crop_media_posts(files, ref_files, "data/crop/", plt_match=True, plt_crop=True)
     print("done")
