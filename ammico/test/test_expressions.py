@@ -23,13 +23,21 @@ def test_analyze_images(get_path):
 
     pd.testing.assert_frame_equal(df_list, df_string)
 
-    df = analyze_images([path_img_1, path_img_2], n_colors=10, reduce_colors=True)
-    assert df["green"].loc["sum"] == 0.4704398648321647
-    assert df.shape == (3, 7)
+    df = analyze_images([path_img_1, path_img_2], n_colors=100, reduce_colors=True)
+    assert df["green"].loc["sum"] == 0.06987253824869791
+    assert df.shape == (3, 8)
 
-    df = analyze_images([path_img_1, path_img_2], n_colors=10, reduce_colors=False)
-    assert df["purple"].loc["sum"] == 0.029468227931013505
-    assert df.shape == (3, 17)
+    df = analyze_images([path_img_1, path_img_2], n_colors=100, reduce_colors=False)
+    assert df["darkgray"].loc["sum"] == 0.5488878885904949
+    assert df.shape == (3, 23)
 
     df = analyze_images([path_img_1, path_img_2], n_colors=2, reduce_colors=False)
-    assert df.shape == (3, 4)
+    assert df.shape == (3, 3)
+
+    df = analyze_images(
+        [path_img_1, path_img_2],
+        n_colors=10,
+        reduce_colors=True,
+        delta_e_method="CIE 2000",
+    )
+    assert df.shape == (3, 3)

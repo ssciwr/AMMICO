@@ -10,7 +10,7 @@ import colour
 from ammico.utils import get_color_table
 
 
-def rgb2name(c, merge_color=True):
+def rgb2name(c, merge_color=True, delta_e_method="CIE 1976"):
     """This function takes a rgb color as input and returns the closest color name from the CSS3 color list.
 
     :param c: RGB value as list or tuple
@@ -32,7 +32,7 @@ def rgb2name(c, merge_color=True):
 
             # calculate color Delta-E
 
-            delta_e = colour.delta_E(c, cur_clr, method="CIE 2000")
+            delta_e = colour.delta_E(c, cur_clr, method=delta_e_method)
 
             delta_e_lst.append(delta_e)
 
@@ -58,7 +58,9 @@ def rgb2name(c, merge_color=True):
     return output_color
 
 
-def analyze_images(image_paths, n_colors=100, reduce_colors=True):
+def analyze_images(
+    image_paths, n_colors=100, reduce_colors=True, delta_e_method="CIE 1976"
+):
     """This function takes a list of image paths as input and returns a dataframe with the percentage of each color in the images.
     It uses the colorgram library to extract the n most common colors from the images.
     One problem is, that the most common colors are taken before beeing categorized,
@@ -77,7 +79,9 @@ def analyze_images(image_paths, n_colors=100, reduce_colors=True):
         Note that the total amount of colors can be higher if multiple images are processed.
         Defaults to 10.
         reduce_colors (bool, optional): whether to merge the colors into a reduced color list. Defaults to True.
-
+        delta_e_method (str, optional): The delta-e method to use. Defaults to "CIE 1976". Possibly values are:
+        'CIE 1976', 'CIE 1994', 'CIE 2000', 'CMC', 'ITP', 'CAM02-LCD', 'CAM02-SCD', 'CAM02-UCS',
+        'CAM16-LCD', 'CAM16-SCD', 'CAM16-UCS', 'DIN99', 'cie1976', 'cie1994', 'cie2000'
     """
     if isinstance(image_paths, str):
         image_paths = [image_paths]
@@ -88,7 +92,9 @@ def analyze_images(image_paths, n_colors=100, reduce_colors=True):
     for image_path in image_paths:
         colors = colorgram.extract(image_path, n_colors)
         for color in colors:
-            rgb_name = rgb2name(color.rgb, merge_color=reduce_colors)
+            rgb_name = rgb2name(
+                color.rgb, merge_color=reduce_colors, delta_e_method=delta_e_method
+            )
             merged_images[rgb_name] += color.proportion
 
     df = pd.DataFrame(merged_images, index=["sum"])
