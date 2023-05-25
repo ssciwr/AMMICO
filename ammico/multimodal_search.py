@@ -153,7 +153,7 @@ class MultimodalSearch(AnalysisMethod):
         raw_image = Image.open(filepath).convert("RGB")
         return raw_image
 
-    def read_and_process_images(self, image_paths: str, vis_processor) -> tuple:
+    def read_and_process_images(self, image_paths: list, vis_processor) -> tuple:
         """
         Read and process images with vis_processor.
 
