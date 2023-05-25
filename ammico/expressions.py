@@ -5,29 +5,34 @@ from collections import defaultdict
 
 import colorgram
 
-from colormath.color_diff import delta_e_cie2000
-from colormath.color_objects import sRGBColor, LabColor
-from colormath.color_conversions import convert_color
+import colour
 
 from ammico.utils import get_color_table
 
 
 def rgb2name(c, merge_color=True):
+    """This function takes a rgb color as input and returns the closest color name from the CSS3 color list.
+
+    :param c: RGB value as list or tuple
+    :type c: list or tuple
+    :param merge_color: Wether color name should be reduced, defaults to True
+    :type merge_color: bool, optional
+    :return: color name
+    :rtype: str
+    """
     h_color = "#{:02x}{:02x}{:02x}".format(int(c[0]), int(c[1]), int(c[2]))
     try:
         output_color = webcolors.hex_to_name(h_color, spec="css3")
     except ValueError:
         delta_e_lst = []
         filtered_colors = webcolors.CSS3_NAMES_TO_HEX
-        c1 = convert_color(sRGBColor(c[0], c[1], c[2]), LabColor)
 
         for img_clr, img_hex in filtered_colors.items():
             cur_clr = webcolors.hex_to_rgb(img_hex)
 
             # calculate color Delta-E
-            c2 = convert_color(sRGBColor(cur_clr[0], cur_clr[1], cur_clr[2]), LabColor)
 
-            delta_e = delta_e_cie2000(c1, c2)
+            delta_e = colour.delta_E(c, cur_clr, method="CIE 2000")
 
             delta_e_lst.append(delta_e)
 
@@ -53,9 +58,13 @@ def rgb2name(c, merge_color=True):
     return output_color
 
 
-def analyze_images(image_paths, n_colors=10, reduce_colors=True):
+def analyze_images(image_paths, n_colors=100, reduce_colors=True):
     """This function takes a list of image paths as input and returns a dataframe with the percentage of each color in the images.
     It uses the colorgram library to extract the n most common colors from the images.
+    One problem is, that the most common colors are taken before beeing categorized,
+    so for small values it might occur that the ten most common colors are shades of grey,
+    while other colors are present but will be ignored. Because of this n_colors=100 was chosen as default.
+
     The colors are then matched to the closest color in the CSS3 color list using the delta-e metric.
     They are then merged into one data frame.
     The colors can be reduced to a smaller list of colors using the get_color_table function.

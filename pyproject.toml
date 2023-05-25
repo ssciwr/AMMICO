@@ -57,7 +57,7 @@ dependencies = [
     "dash_renderjson",
     "colorgram.py",
     "webcolors",
-    "colormath",
+    "colour-science",
 ]
 
 [project.scripts]
