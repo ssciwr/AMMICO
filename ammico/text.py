@@ -1,4 +1,5 @@
 from google.cloud import vision
+from google.auth.exceptions import DefaultCredentialsError
 from googletrans import Translator
 import spacy
 from spacytextblob.spacytextblob import SpacyTextBlob
@@ -60,7 +61,12 @@ class TextDetector(utils.AnalysisMethod):
     def get_text_from_image(self):
         """Detects text on the image."""
         path = self.subdict["filename"]
-        client = vision.ImageAnnotatorClient()
+        try:
+            client = vision.ImageAnnotatorClient()
+        except DefaultCredentialsError:
+            raise DefaultCredentialsError(
+                "Please provide credentials for google cloud vision API, see https://cloud.google.com/docs/authentication/application-default-credentials."
+            )
         with io.open(path, "rb") as image_file:
             content = image_file.read()
         image = vision.Image(content=content)
