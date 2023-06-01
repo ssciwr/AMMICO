@@ -11,6 +11,7 @@ import grpc
 import pandas as pd
 from bertopic import BERTopic
 from transformers import pipeline
+import os
 
 # clean text has weird spaces and separation of "do n't"
 # increase coverage for text
@@ -140,9 +141,15 @@ class TextDetector(utils.AnalysisMethod):
             min_length=5,
             max_length=20,
         )
-        print(self.subdict["text_english"])
-        summary = pipe(self.subdict["text_english"][0:max_number_of_characters])
-        self.subdict["text_summary"] = summary[0]["summary_text"]
+        try:
+            summary = pipe(self.subdict["text_english"][0:max_number_of_characters])
+            self.subdict["text_summary"] = summary[0]["summary_text"]
+        except IndexError:
+            print(
+                "Cannot provide summary for this object - please check that the text has been translated correctly."
+            )
+            print("Image: {}".format(self.subdict["filename"]))
+            self.subdict["text_summary"] = None
 
     def text_sentiment_transformers(self):
         # use the transformers pipeline for text classification
@@ -255,3 +262,19 @@ class PostprocessText:
                 )
             )
         return self.df[analyze_text].tolist()
+
+
+if __name__ == "__main__":
+    images = utils.find_files(
+        path="data/test-debug/101-200fullposts",
+        limit=110,
+    )
+    # images = ["data/test-debug/101-200fullposts/100638_mya.png"]
+    print(images)
+    mydict = utils.initialize_dict(images)
+    os.environ[
+        "GOOGLE_APPLICATION_CREDENTIALS"
+    ] = "data/misinformation-campaign-981aa55a3b13.json"
+    for key in mydict:
+        print(key)
+        mydict[key] = TextDetector(mydict[key], analyse_text=True).analyse_image()
