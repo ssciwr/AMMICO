@@ -1,37 +1,10 @@
 import os
 import ntpath
-from PIL import Image
-from matplotlib.patches import ConnectionPatch
 import cv2
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from ammico import utils
-
-
-# use this function to visualize the matches
-def plot_matches(img1, img2, keypoints1, keypoints2):
-    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
-
-    # draw images
-    axes[0].imshow(img1)
-    axes[1].imshow(img2)
-
-    # draw matches
-    for kp1, kp2 in zip(keypoints1, keypoints2):
-        c = np.random.rand(3)
-        con = ConnectionPatch(
-            xyA=kp1,
-            coordsA=axes[0].transData,
-            xyB=kp2,
-            coordsB=axes[1].transData,
-            color=c,
-        )
-        fig.add_artist(con)
-        axes[0].plot(*kp1, color=c, marker="x")
-        axes[1].plot(*kp2, color=c, marker="x")
-
-    plt.show()
 
 
 # use this function to visualize the matches from sift
@@ -102,8 +75,6 @@ def matching_points(img1, img2):
     for m, n in matches:
         if m.distance < 0.7 * n.distance:
             filtered_matches.append(m)
-
-    # draw_matches(filtered_matches, img1, img2, kp1, kp2)
 
     return filtered_matches, kp1, kp2
 
@@ -184,10 +155,6 @@ def crop_posts_image(
         h = h - correct_margin
     else:
         h = 0
-    # if view.shape[1] - h > correct_margin:
-    # h = view.shape[1] - ref_view.shape[1]
-    # if view.shape[1] - h < ref_view.shape[1]:
-    # h = view.shape[1] - ref_view.shape[1]
 
     crop_view = view[0:v, h:, :]
 
@@ -240,10 +207,6 @@ def crop_posts_from_refs(
             plt.show()
         # now concatenate the two images
         crop_view = paste_image_and_comment(crop_post, crop_view)
-
-    if found_match:
-        plt.imshow(cv2.cvtColor(crop_view, cv2.COLOR_BGR2RGB))
-        plt.show()
 
     return crop_view
 
@@ -300,30 +263,12 @@ def crop_media_posts(
             cv2.imwrite(save_path, crop_view)
 
 
-def test_crop_from_file():
-    # Load images
-    view1 = np.array(Image.open("data/ref/ref-06.png"))
-    view2 = np.array(Image.open("data/napsa/102956_eng.png"))
-    crop_view, _, _, _ = crop_posts_image(view1, view2)
-    cv2.imwrite("data/crop_100489_ind.png", crop_view)
-
-
 if __name__ == "__main__":
-    files = utils.find_files(
-        path="../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/",
-        limit=100,
-    )
     files = utils.find_files(
         path="data/test-debug/examples cropped/examples original/",
         limit=100,
     )
     ref_files = utils.find_files(path="data/ref", limit=100)
-    # files = [
-    # "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_106101_por.png"
-    # ]
-    # files = [
-    # "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_100641_mya.png"
-    # ]
     # 103395_eng, 10071_tur, 109363_spa, 106740, 102355_eng, 102284, 104150, 102131, 103163, 106797
     crop_media_posts(
         files, ref_files, "data/crop/", plt_match=True, plt_crop=True, plt_image=True
