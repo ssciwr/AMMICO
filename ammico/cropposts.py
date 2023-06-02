@@ -122,7 +122,8 @@ def compute_crop_corner(
     kp1,
     kp2,
     region=30,
-    h_margin=28,
+    # h_margin=28,
+    h_margin=0,
     v_margin=5,
     min_match=6,
 ):
@@ -146,6 +147,7 @@ def compute_crop_corner(
         if 0 <= kp[1] - v <= region:
             hs.append(kp[0])
 
+    # do not use margin if h < image width/2, else use margin
     h = int(np.min(hs)) - h_margin if int(np.min(hs)) > h_margin else 0
 
     return v, h
@@ -168,15 +170,20 @@ def crop_posts_image(
     filtered_matches, kp1, kp2 = matching_points(ref_view, view)
     MIN_MATCH_COUNT = 6
     if len(filtered_matches) < MIN_MATCH_COUNT:
-        print("Found too few matches - {}".format(filtered_matches))
+        # print("Found too few matches - {}".format(filtered_matches))
         return None
 
     corner = compute_crop_corner(filtered_matches, kp1, kp2)
     if corner is None:
-        print("Found no corner")
+        # print("Found no corner")
         return None
     v, h = corner
 
+    correct_margin = 30
+    if h >= view.shape[1] / 2:
+        h = h - correct_margin
+    else:
+        h = 0
     # if view.shape[1] - h > correct_margin:
     # h = view.shape[1] - ref_view.shape[1]
     # if view.shape[1] - h < ref_view.shape[1]:
@@ -187,7 +194,9 @@ def crop_posts_image(
     return crop_view, len(filtered_matches), v, h
 
 
-def crop_posts_from_refs(ref_views, view, plt_match=False, plt_crop=False):
+def crop_posts_from_refs(
+    ref_views, view, plt_match=False, plt_crop=False, plt_image=False
+):
     crop_view = None
     max_matchs = 0
     rte = None
@@ -213,19 +222,49 @@ def crop_posts_from_refs(ref_views, view, plt_match=False, plt_crop=False):
         draw_matches(filtered_matches, img1, img2, kp1, kp2)
 
     if found_match and plt_crop:
+        view2 = view.copy()
         # now plot the cropped image
-        view[final_v, :, 0:3] = [255, 0, 0]
-        view[:, final_h, 0:3] = [255, 0, 0]
-        plt.imshow(cv2.cvtColor(view, cv2.COLOR_BGR2RGB))
+        view2[final_v, :, 0:3] = [255, 0, 0]
+        view2[:, final_h, 0:3] = [255, 0, 0]
+        plt.imshow(cv2.cvtColor(view2, cv2.COLOR_BGR2RGB))
         plt.show()
 
+        plt.imshow(cv2.cvtColor(crop_view, cv2.COLOR_BGR2RGB))
+        plt.show()
+
+    # show posted image only if crop is in the left column
+    if found_match and final_h >= view.shape[1] / 2:
+        crop_post = crop_image_from_post(view, final_h)
+        if plt_image:
+            plt.imshow(cv2.cvtColor(crop_post, cv2.COLOR_BGR2RGB))
+            plt.show()
+        # now concatenate the two images
+        crop_view = paste_image_and_comment(crop_post, crop_view)
+
+    if found_match:
         plt.imshow(cv2.cvtColor(crop_view, cv2.COLOR_BGR2RGB))
         plt.show()
 
     return crop_view
 
 
-def crop_media_posts(files, ref_files, save_crop_dir, plt_match=False, plt_crop=False):
+def crop_image_from_post(view, final_h):
+    crop_post = view[:, 0:final_h, :]
+    return crop_post
+
+
+def paste_image_and_comment(crop_post, crop_view):
+    h1, w1 = crop_post.shape[:2]
+    h2, w2 = crop_view.shape[:2]
+    image_all = np.zeros((max(h1, h2), w1 + w2, 3), np.uint8)
+    image_all[:h1, :w1, :3] = crop_post
+    image_all[:h2, w1 : w1 + w2, :3] = crop_view
+    return image_all
+
+
+def crop_media_posts(
+    files, ref_files, save_crop_dir, plt_match=False, plt_crop=False, plt_image=False
+):
     """Crop social media posts so that comments are cut off.
 
     Args:
@@ -248,7 +287,11 @@ def crop_media_posts(files, ref_files, save_crop_dir, plt_match=False, plt_crop=
         view = cv2.imread(crop_file)
         print("Doing file {}".format(crop_file))
         crop_view = crop_posts_from_refs(
-            ref_views, view, plt_match=plt_match, plt_crop=plt_crop
+            ref_views,
+            view,
+            plt_match=plt_match,
+            plt_crop=plt_crop,
+            plt_image=plt_image,
         )
         if crop_view is not None:
             filename = ntpath.basename(crop_file)
@@ -266,21 +309,23 @@ def test_crop_from_file():
 
 
 if __name__ == "__main__":
-    # ref_view = np.array(Image.open("data/ref/ref-00.png"))
-    # view = np.array(Image.open("data/test-debug/examples cropped/examples original/100123_ara.png"))
-    # plt.imshow(ref_view)
-    # plt.show()
-    # plt.imshow(view)
-    # plt.show()
-    # crop_view, match_num, _, _ = crop_posts_image(ref_view, view)
-    # print("done")
-    # files = utils.find_files(path="../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/", limit=10,)
+    files = utils.find_files(
+        path="../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/",
+        limit=100,
+    )
+    files = utils.find_files(
+        path="data/test-debug/examples cropped/examples original/",
+        limit=100,
+    )
     ref_files = utils.find_files(path="data/ref", limit=100)
-    files = [
-        "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_106101_por.png"
-    ]
+    # files = [
+    # "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_106101_por.png"
+    # ]
     # files = [
     # "../misinformation-notes/data/all_disinformation_posts/all_posts/apsa22/x_100641_mya.png"
     # ]
-    crop_media_posts(files, ref_files, "data/crop/", plt_match=True, plt_crop=True)
+    # 103395_eng, 10071_tur, 109363_spa, 106740, 102355_eng, 102284, 104150, 102131, 103163, 106797
+    crop_media_posts(
+        files, ref_files, "data/crop/", plt_match=True, plt_crop=True, plt_image=True
+    )
     print("done")
