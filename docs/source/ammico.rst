@@ -61,3 +61,20 @@ color_analysis module
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+multimodal search module
+------------------------
+
+.. automodule:: multimodal_search
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+summary module
+--------------
+
+.. automodule:: summary
+   :members:
+   :undoc-members:
+   :show-inheritance:

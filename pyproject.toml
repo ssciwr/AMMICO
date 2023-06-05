@@ -22,7 +22,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "bertopic",
+    "bertopic<=0.14.1",
     "cvlib",
     "deepface<=0.0.75",
     "googletrans==3.1.0a0",

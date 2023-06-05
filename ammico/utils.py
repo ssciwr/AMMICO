@@ -45,7 +45,7 @@ class AnalysisMethod:
 
 
 def find_files(path=None, pattern="*.png", recursive=True, limit=20):
-    """Find image files on the file system
+    """Find image files on the file system.
 
     :param path:
         The base directory where we are looking for the images. Defaults
