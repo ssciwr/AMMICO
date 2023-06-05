@@ -53,3 +53,11 @@ cropposts module
    :members:
    :undoc-members:
    :show-inheritance:
+
+color_analysis module
+---------------------
+
+.. automodule:: color_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
