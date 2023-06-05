@@ -5,10 +5,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from ammico import utils
+from typing import List
 
 
 # use this function to visualize the matches from sift
-def draw_matches(matches, img1, img2, kp1, kp2):
+def draw_matches(
+    matches: List, img1: np.ndarray, img2: np.ndarray, kp1: tuple, kp2: tuple
+) -> None:
+    """Visualize the matches from SIFT."""
     MIN_MATCH_COUNT = 4
     if len(matches) > MIN_MATCH_COUNT:
         # Estimate homography between template and scene
@@ -71,6 +75,7 @@ def matching_points(img1, img2):
     flann = cv2.FlannBasedMatcher(index_params, search_params)
     matches = flann.knnMatch(des1, des2, k=2)
 
+    print(type(kp1))
     filtered_matches = []
     for m, n in matches:
         if m.distance < 0.7 * n.distance:
@@ -168,6 +173,7 @@ def crop_posts_from_refs(
     max_matchs = 0
     rte = None
     found_match = False
+    print(type(view))
     for ref_view in ref_views:
         rte = crop_posts_image(ref_view, view)
         if rte is not None:
@@ -185,6 +191,7 @@ def crop_posts_from_refs(
         # now plot the match
         filtered_matches, kp1, kp2 = matching_points(final_ref, view)
         img1 = cv2.cvtColor(final_ref, cv2.COLOR_BGR2GRAY)
+        print(type(img1))
         img2 = cv2.cvtColor(view, cv2.COLOR_BGR2GRAY)
         draw_matches(filtered_matches, img1, img2, kp1, kp2)
 
