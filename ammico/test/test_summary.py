@@ -77,6 +77,7 @@ def test_analyse_image(get_dict):
         summary_vis_processors = None
 
 
+@pytest.mark.win_skip
 def test_analyse_questions(get_dict):
     list_of_questions = [
         "How many persons on the picture?",
