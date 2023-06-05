@@ -1,4 +1,4 @@
-from ammico.expressions import rgb2name, analyze_images
+from ammico.color_analysis import rgb2name, analyze_images
 from ammico.display import show_piechart
 import pandas as pd
 
