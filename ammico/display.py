@@ -192,9 +192,9 @@ class AnalysisExplorer:
 
 def show_piechart(df, n_max=-1):
     if n_max == -1:
-        n_max = len(df.T)
+        n_max = len(df)
 
-    df = df.T.sort_values(by="percentage", ascending=False).head(n_max)
+    df = df.sort_values(by="percentage", ascending=False).head(n_max)
 
     color_map = {color: color for color in df["label"]}
     fig = px.pie(

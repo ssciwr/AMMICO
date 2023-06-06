@@ -5,12 +5,9 @@ from collections import defaultdict
 import colorgram
 import colour
 from ammico.utils import get_color_table
-from typing import Union, List
 
 
-def rgb2name(
-    c: Union[List, tuple], merge_color: bool = True, delta_e_method: str = "CIE 1976"
-) -> str:
+def rgb2name(c, merge_color: bool = True, delta_e_method: str = "CIE 1976") -> str:
     """Take an rgb color as input and return the closest color name from the CSS3 color list.
 
     Args:
@@ -52,7 +49,7 @@ def rgb2name(
 
 
 def analyze_images(
-    image_paths: List,
+    image_paths: list[str],
     n_colors: int = 100,
     reduce_colors: bool = True,
     delta_e_method: str = "CIE 1976",
@@ -71,7 +68,7 @@ def analyze_images(
 
 
     Args:
-        image_paths (list): list of image paths
+        image_paths (list[str]): list of strings of image files.
         n_colors (int, optional): number of colors to extract from each image.
         Note that the total amount of colors can be higher if multiple images are processed.
         Defaults to 10.
@@ -102,4 +99,4 @@ def analyze_images(
     )
     label_row = pd.DataFrame({color: color for color in df.columns}, index=["label"])
     df = pd.concat([percentage_row, label_row, df.loc[:]])
-    return df
+    return df.T
