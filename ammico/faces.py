@@ -85,8 +85,19 @@ retinaface_model = DownloadResource(
 
 class EmotionDetector(utils.AnalysisMethod):
     def __init__(
-        self, subdict: dict, emotion_threshold=50.0, race_threshold=50.0
+        self,
+        subdict: dict,
+        emotion_threshold: float = 50.0,
+        race_threshold: float = 50.0,
     ) -> None:
+        """
+        Initializes the EmotionDetector object.
+
+        Args:
+            subdict (dict): The dictionary to store the analysis results.
+            emotion_threshold (float): The threshold for detecting emotions (default: 50.0).
+            race_threshold (float): The threshold for detecting race (default: 50.0).
+        """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.emotion_threshold = emotion_threshold
@@ -102,6 +113,12 @@ class EmotionDetector(utils.AnalysisMethod):
         }
 
     def set_keys(self) -> dict:
+        """
+        Sets the initial parameters for the analysis.
+
+        Returns:
+            dict: The dictionary with initial parameter values.
+        """
         params = {
             "face": "No",
             "multiple_faces": "No",
@@ -116,16 +133,31 @@ class EmotionDetector(utils.AnalysisMethod):
         return params
 
     def analyse_image(self):
+        """
+        Performs facial expression analysis on the image.
+
+        Returns:
+            dict: The updated subdict dictionary with analysis results.
+        """
         return self.facial_expression_analysis()
 
     def analyze_single_face(self, face: np.ndarray) -> dict:
+        """
+        Analyzes the features of a single face.
+
+        Args:
+            face (np.ndarray): The face image array.
+
+        Returns:
+            dict: The analysis results for the face.
+        """
         fresult = {}
 
         # Determine whether the face wears a mask
         fresult["wears_mask"] = self.wears_mask(face)
 
-        # Adapt the features we are looking for depending on whether a mask is
-        # worn. White masks screw race detection, emotion detection is useless.
+        # Adapt the features we are looking for depending on whether a mask is worn.
+        # White masks screw race detection, emotion detection is useless.
         actions = ["age", "gender"]
         if not fresult["wears_mask"]:
             actions = actions + ["race", "emotion"]
@@ -153,6 +185,12 @@ class EmotionDetector(utils.AnalysisMethod):
         return fresult
 
     def facial_expression_analysis(self) -> dict:
+        """
+        Performs facial expression analysis on the image.
+
+        Returns:
+            dict: The updated subdict dictionary with analysis results.
+        """
         # Find (multiple) faces in the image and cut them
         retinaface_model.get()
         faces = RetinaFace.extract_faces(self.subdict["filename"])
@@ -178,7 +216,16 @@ class EmotionDetector(utils.AnalysisMethod):
         return self.subdict
 
     def clean_subdict(self, result: dict) -> dict:
-        # each person subdict converted into list for keys
+        """
+        Cleans the subdict dictionary by converting results into appropriate formats.
+
+        Args:
+            result (dict): The analysis results.
+
+        Returns:
+            dict: The updated subdict dictionary.
+        """
+        # Each person subdict converted into list for keys
         self.subdict["wears_mask"] = []
         self.subdict["age"] = []
         self.subdict["gender"] = []
@@ -191,12 +238,12 @@ class EmotionDetector(utils.AnalysisMethod):
                 "Yes" if result[person]["wears_mask"] else "No"
             )
             self.subdict["age"].append(result[person]["age"])
-            # gender is now reported as a list of dictionaries
-            # each dict represents one face
-            # each dict contains probability for Woman and Man
-            # take only the higher prob result for each dict
+            # Gender is now reported as a list of dictionaries.
+            # Each dict represents one face.
+            # Each dict contains probability for Woman and Man.
+            # We take only the higher probability result for each dict.
             self.subdict["gender"].append(result[person]["gender"])
-            # race, emotion only detected if person does not wear mask
+            # Race and emotion are only detected if a person does not wear a mask
             if result[person]["wears_mask"]:
                 self.subdict["race"].append(None)
                 self.subdict["emotion"].append(None)
@@ -227,10 +274,18 @@ class EmotionDetector(utils.AnalysisMethod):
         return self.subdict
 
     def wears_mask(self, face: np.ndarray) -> bool:
+        """
+        Determines whether a face wears a mask.
+
+        Args:
+            face (np.ndarray): The face image array.
+
+        Returns:
+            bool: True if the face wears a mask, False otherwise.
+        """
         global mask_detection_model
 
-        # Preprocess the face to match the assumptions of the face mask
-        # detection model
+        # Preprocess the face to match the assumptions of the face mask detection model
         face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
         face = cv2.resize(face, (224, 224))
         face = img_to_array(face)
