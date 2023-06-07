@@ -98,6 +98,7 @@ def dump_df(mydict: dict) -> DataFrame:
 
 
 def is_interactive():
+    """Check if we are running in an interactive environment."""
     import __main__ as main
 
     return not hasattr(main, "__file__")
