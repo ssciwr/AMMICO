@@ -13,22 +13,19 @@ import jupyter_dash
 from PIL import Image
 
 
-class JSONContainer:
-    """Expose a Python dictionary as a JSON document in JupyterLab
-    rich display rendering.
-    """
-
-    def __init__(self, data=None):
-        if data is None:
-            data = {}
-        self._data = data
-
-    def _repr_json_(self):
-        return self._data
-
-
 class AnalysisExplorer:
     def __init__(self, mydict, identify="faces") -> None:
+        """
+        Initializes the AnalysisExplorer class.
+
+        Parameters:
+        - mydict: A dictionary containing image data.
+        - identify: The type of analysis to perform (default: "faces").
+
+        Note:
+        - The class uses the Dash framework to create an interactive analysis explorer.
+        - It sets up the layout and defines the callbacks for the Dash app.
+        """
         self.app = jupyter_dash.JupyterDash(__name__)
         self.mydict = mydict
         self.identify = identify
@@ -53,19 +50,18 @@ class AnalysisExplorer:
             "base0F": "#cc6633",
         }
 
-        # setup the layout
+        #  Setup the layout
         app_layout = html.Div(
             [
-                # top
+                # Top
                 html.Div(
                     ["Identify: ", identify, self._top_file_explorer(mydict)],
                     id="Div_top",
                     style={
                         "width": "30%",
-                        # "display": "inline-block",
                     },
                 ),
-                # middle
+                # Middle
                 html.Div(
                     [self._middle_picture_frame()],
                     id="Div_middle",
@@ -75,7 +71,7 @@ class AnalysisExplorer:
                         "verticalAlign": "top",
                     },
                 ),
-                # right
+                # Right
                 html.Div(
                     [self._right_output_json()],
                     id="Div_right",
@@ -89,7 +85,8 @@ class AnalysisExplorer:
             style={"width": "95%", "display": "inline-block"},
         )
         self.app.layout = app_layout
-        # add callbacks to app
+
+        # Add callbacks to the app
         self.app.callback(
             Output("img_middle_picture_id", "src"),
             Input("left_select_id", "value"),
@@ -106,7 +103,15 @@ class AnalysisExplorer:
 
     # I split the different sections into subfunctions for better clarity
     def _top_file_explorer(self, mydict):
-        # initilizes the dropdown that selects which file is to be analyzed.
+        """
+        Initializes the file explorer dropdown for selecting the file to be analyzed.
+
+        Parameters:
+        - mydict: A dictionary containing image data.
+
+        Returns:
+        - The layout for the file explorer dropdown.
+        """
         left_layout = html.Div(
             [
                 dcc.Dropdown(
@@ -118,7 +123,12 @@ class AnalysisExplorer:
         return left_layout
 
     def _middle_picture_frame(self):
-        # This just holds the image
+        """
+        Initializes the picture frame to display the image.
+
+        Returns:
+        - The layout for the picture frame.
+        """
         middle_layout = html.Div(
             [
                 html.Img(
@@ -132,7 +142,12 @@ class AnalysisExplorer:
         return middle_layout
 
     def _right_output_json(self):
-        # provides the json viewer for the analysis output.
+        """
+        Initializes the JSON viewer for displaying the analysis output.
+
+        Returns:
+        - The layout for the JSON viewer.
+        """
         right_layout = html.Div(
             [
                 dcc.Loading(
@@ -157,15 +172,38 @@ class AnalysisExplorer:
         return right_layout
 
     def run_server(self, port=8050):
+        """
+        Runs the Dash server to start the analysis explorer.
+
+        Parameters:
+        - port: The port number to run the server on (default: 8050).
+
+        Note:
+        - This method should only be called in an interactive environment like Jupyter notebooks.
+        - Raises an EnvironmentError if not called in an interactive environment.
+        """
         if not is_interactive():
             raise EnvironmentError(
-                "Dash server should only be called in interactive an interactive environment like jupyter notebooks."
+                "Dash server should only be called in an interactive environment like Jupyter notebooks."
             )
 
         self.app.run_server(debug=True, mode="inline", port=port)
 
     # Dash callbacks
     def update_picture(self, img_path):
+        """
+        Callback function to update the displayed image.
+
+        Parameters:
+        - img_path: The path of the selected image.
+
+        Returns:
+        - The image object to be displayed.
+
+        Note:
+        - This function is called when the value of the file explorer dropdown changes.
+        - Reads the image file and returns the image object.
+        """
         if img_path is not None:
             image = Image.open(img_path)
             return image
@@ -173,14 +211,29 @@ class AnalysisExplorer:
             return None
 
     def _right_output_analysis(self, image, all_options, current_value):
-        # calls the analysis function and returns the output
+        """
+        Callback function to perform analysis on the selected image and return the output.
+
+        Parameters:
+        - image: The image object of the selected image.
+        - all_options: The available options in the file explorer dropdown.
+        - current_value: The current selected value in the file explorer dropdown.
+
+        Returns:
+        - The analysis output for the selected image.
+
+        Note:
+        - This function is called when the displayed image changes.
+        - Performs the analysis based on the selected identify type and returns the output.
+        """
         identify_dict = {
             "faces": faces.EmotionDetector,
             "text-on-image": text.TextDetector,
             "objects": objects.ObjectDetector,
             "summary": summary.SummaryDetector,
         }
-        # get image ID from dropdown value, which is the filepath.
+
+        # Get image ID from dropdown value, which is the filepath
         image_id = all_options[current_value]
 
         identify_function = identify_dict[self.identify]
