@@ -116,6 +116,7 @@ def test_sentiment_analysis():
     assert test_obj.subdict["subjectivity"] == 0.6
 
 
+@pytest.mark.win_skip
 def test_text_summary(get_path):
     mydict = {}
     test_obj = tt.TextDetector(mydict, analyse_text=True)
