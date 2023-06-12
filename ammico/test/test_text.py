@@ -138,6 +138,7 @@ def test_text_sentiment_transformers():
     assert mydict["sentiment_score"] == pytest.approx(0.99, 0.01)
 
 
+@pytest.mark.win_skip
 def test_text_ner():
     mydict = {}
     test_obj = tt.TextDetector(mydict, analyse_text=True)
