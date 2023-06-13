@@ -70,7 +70,7 @@ class AnalysisExplorer:
                     [self._middle_picture_frame()],
                     id="Div_middle",
                     style={
-                        "width": "60%",
+                        "width": "50%",
                         "display": "inline-block",
                         "verticalAlign": "top",
                     },
@@ -80,13 +80,13 @@ class AnalysisExplorer:
                     [self._right_output_json()],
                     id="Div_right",
                     style={
-                        "width": "30%",
+                        "width": "45%",
                         "display": "inline-block",
                         "verticalAlign": "top",
                     },
                 ),
             ],
-            style={"width": "80%", "display": "inline-block"},
+            style={"width": "95%", "display": "inline-block"},
         )
         self.app.layout = app_layout
         # add callbacks to app

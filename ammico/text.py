@@ -1,4 +1,5 @@
 from google.cloud import vision
+from google.auth.exceptions import DefaultCredentialsError
 from googletrans import Translator
 import spacy
 from spacytextblob.spacytextblob import SpacyTextBlob
@@ -10,8 +11,8 @@ import grpc
 import pandas as pd
 from bertopic import BERTopic
 from transformers import pipeline
+import os
 
-# make widgets work again
 # clean text has weird spaces and separation of "do n't"
 # increase coverage for text
 
@@ -61,7 +62,12 @@ class TextDetector(utils.AnalysisMethod):
     def get_text_from_image(self):
         """Detects text on the image."""
         path = self.subdict["filename"]
-        client = vision.ImageAnnotatorClient()
+        try:
+            client = vision.ImageAnnotatorClient()
+        except DefaultCredentialsError:
+            raise DefaultCredentialsError(
+                "Please provide credentials for google cloud vision API, see https://cloud.google.com/docs/authentication/application-default-credentials."
+            )
         with io.open(path, "rb") as image_file:
             content = image_file.read()
         image = vision.Image(content=content)
@@ -127,6 +133,7 @@ class TextDetector(utils.AnalysisMethod):
         # use the current default model - 03/2023
         model_name = "sshleifer/distilbart-cnn-12-6"
         model_revision = "a4f8f3e"
+        max_number_of_characters = 3000
         pipe = pipeline(
             "summarization",
             model=model_name,
@@ -134,8 +141,15 @@ class TextDetector(utils.AnalysisMethod):
             min_length=5,
             max_length=20,
         )
-        summary = pipe(self.subdict["text_english"])
-        self.subdict["text_summary"] = summary[0]["summary_text"]
+        try:
+            summary = pipe(self.subdict["text_english"][0:max_number_of_characters])
+            self.subdict["text_summary"] = summary[0]["summary_text"]
+        except IndexError:
+            print(
+                "Cannot provide summary for this object - please check that the text has been translated correctly."
+            )
+            print("Image: {}".format(self.subdict["filename"]))
+            self.subdict["text_summary"] = None
 
     def text_sentiment_transformers(self):
         # use the transformers pipeline for text classification
@@ -143,7 +157,10 @@ class TextDetector(utils.AnalysisMethod):
         model_name = "distilbert-base-uncased-finetuned-sst-2-english"
         model_revision = "af0f99b"
         pipe = pipeline(
-            "text-classification", model=model_name, revision=model_revision
+            "text-classification",
+            model=model_name,
+            revision=model_revision,
+            truncation=True,
         )
         result = pipe(self.subdict["text_english"])
         self.subdict["sentiment"] = result[0]["label"]
@@ -161,7 +178,6 @@ class TextDetector(utils.AnalysisMethod):
             aggregation_strategy="simple",
         )
         result = pipe(self.subdict["text_english"])
-        # self.subdict["entity"] = result
         self.subdict["entity"] = []
         self.subdict["entity_type"] = []
         for entity in result:
@@ -246,3 +262,19 @@ class PostprocessText:
                 )
             )
         return self.df[analyze_text].tolist()
+
+
+if __name__ == "__main__":
+    images = utils.find_files(
+        path="data/test-debug/101-200fullposts",
+        limit=110,
+    )
+    # images = ["data/test-debug/101-200fullposts/100638_mya.png"]
+    print(images)
+    mydict = utils.initialize_dict(images)
+    os.environ[
+        "GOOGLE_APPLICATION_CREDENTIALS"
+    ] = "data/misinformation-campaign-981aa55a3b13.json"
+    for key in mydict:
+        print(key)
+        mydict[key] = TextDetector(mydict[key], analyse_text=True).analyse_image()
