@@ -59,3 +59,7 @@ ammico_prefetch_models = "ammico.utils:ammico_prefetch_models"
 
 [tool.setuptools]
 packages = ["ammico"]
+
+[tool.setuptools.package-data]
+# Include any png files found in the "data" subdirectory of "ammico"
+"ammico.data" = ["*.png"]
