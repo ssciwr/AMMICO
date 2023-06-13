@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from ammico import utils
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 
 MIN_MATCH_COUNT = 6
@@ -83,7 +83,7 @@ def matching_points(
     """
     img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-    sift = cv2.xfeatures2d.SIFT_create()
+    sift = cv2.SIFT_create()
     kp1, des1 = sift.detectAndCompute(img1, None)
     kp2, des2 = sift.detectAndCompute(img2, None)
     des1 = np.float32(des1)
@@ -165,7 +165,7 @@ def compute_crop_corner(
 def crop_posts_image(
     ref_view: List,
     view: np.ndarray,
-) -> Tuple[np.ndarray, int, int, int]:
+) -> Union[None, Tuple[np.ndarray, int, int, int]]:
     """Crop the social media post to exclude additional comments. Sometimes also crops the
     image part of the post - this is put back in later.
 
@@ -340,16 +340,3 @@ def crop_media_posts(
             save_path = os.path.join(save_crop_dir, filename)
             save_path = save_path.replace("\\", "/")
             cv2.imwrite(save_path, crop_view)
-
-
-if __name__ == "__main__":
-    files = utils.find_files(
-        path="data/test-debug/examples cropped/examples original/",
-        limit=1,
-    )
-    ref_files = utils.find_files(path="data/ref", limit=100)
-    # 103395_eng, 10071_tur, 109363_spa, 106740, 102355_eng, 102284, 104150, 102131, 103163, 106797
-    crop_media_posts(
-        files, ref_files, "data/crop/", plt_match=True, plt_crop=True, plt_image=True
-    )
-    print("done")

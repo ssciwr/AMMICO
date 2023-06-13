@@ -75,11 +75,13 @@ def test_paste_image_and_comment(open_images):
     assert np.array_equal(full_post[-1, -1], ref_array2)
 
 
-def test_crop_media_posts(get_path, open_images, tmp_path):
+def test_crop_media_posts(get_path, tmp_path):
     files = [get_path + TEST_IMAGE_1]
     ref_files = [get_path + TEST_IMAGE_2]
     crpo.crop_media_posts(files, ref_files, tmp_path)
     assert len(list(tmp_path.iterdir())) == 1
     # now check that image in tmp_path is the cropped one
     filename = tmp_path / "pic1.png"
-    cv2.imread(str(filename))
+    cropped_image = cv2.imread(str(filename))
+    ref = np.array([222, 205, 156], dtype=np.uint8)
+    assert np.array_equal(cropped_image[0, 0], ref)
