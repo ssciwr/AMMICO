@@ -1,7 +1,9 @@
 import ammico.cropposts as crpo
-import numpy as np
 import cv2
 import pytest
+import numpy as np
+from pathlib import Path
+
 
 TEST_IMAGE_1 = "pic1.png"
 TEST_IMAGE_2 = "pic2.png"
@@ -54,3 +56,30 @@ def test_crop_posts_from_refs(open_images):
         crop_view.shape[0] * crop_view.shape[1]
         <= open_images[1].shape[0] * open_images[1].shape[1]
     )
+
+
+def test_crop_image_from_post(open_images):
+    crop_post = crpo.crop_image_from_post(open_images[0], 4)
+    ref_array = np.array(
+        [[220, 202, 155], [221, 204, 155], [221, 204, 155], [221, 204, 155]],
+        dtype=np.uint8,
+    )
+    assert np.array_equal(crop_post[0], ref_array)
+
+
+def test_paste_image_and_comment(open_images):
+    full_post = crpo.paste_image_and_comment(open_images[0], open_images[1])
+    ref_array1 = np.array([220, 202, 155], dtype=np.uint8)
+    ref_array2 = np.array([74, 76, 64], dtype=np.uint8)
+    assert np.array_equal(full_post[0, 0], ref_array1)
+    assert np.array_equal(full_post[-1, -1], ref_array2)
+
+
+def test_crop_media_posts(get_path, open_images, tmp_path):
+    files = [get_path + TEST_IMAGE_1]
+    ref_files = [get_path + TEST_IMAGE_2]
+    crpo.crop_media_posts(files, ref_files, tmp_path)
+    assert len(list(tmp_path.iterdir())) == 1
+    # now check that image in tmp_path is the cropped one
+    filename = tmp_path / "pic1.png"
+    cv2.imread(str(filename))
