@@ -116,6 +116,7 @@ def test_sentiment_analysis():
     assert test_obj.subdict["subjectivity"] == 0.6
 
 
+@pytest.mark.win_skip
 def test_text_summary(get_path):
     mydict = {}
     test_obj = tt.TextDetector(mydict, analyse_text=True)
@@ -137,6 +138,7 @@ def test_text_sentiment_transformers():
     assert mydict["sentiment_score"] == pytest.approx(0.99, 0.01)
 
 
+@pytest.mark.win_skip
 def test_text_ner():
     mydict = {}
     test_obj = tt.TextDetector(mydict, analyse_text=True)
@@ -146,6 +148,7 @@ def test_text_ner():
     assert mydict["entity_type"] == ["PER", "LOC"]
 
 
+@pytest.mark.win_skip
 def test_PostprocessText(set_testdict, get_path):
     reference_dict = "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON"
     reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"
