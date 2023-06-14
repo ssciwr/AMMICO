@@ -29,7 +29,6 @@ dependencies = [
     "grpcio",
     "importlib_metadata",
     "ipython",
-    "ipywidgets<8.0.5",
     "ipykernel",
     "matplotlib",
     "numpy<=1.23.4",
