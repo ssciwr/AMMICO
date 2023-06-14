@@ -10,16 +10,6 @@ import matplotlib.pyplot as plt
 
 # use this function to visualize the matches
 def plot_matches(img1, img2, keypoints1, keypoints2):
-    """
-    Plots two images side by side and draws matching keypoints between them.
-
-    Parameters:
-    - img1: The first image (numpy array or PIL image object).
-    - img2: The second image (numpy array or PIL image object).
-    - keypoints1: List of keypoints from the first image.
-    - keypoints2: List of keypoints from the second image.
-    """
-
     fig, axes = plt.subplots(1, 2, figsize=(16, 7))
 
     # draw images
@@ -47,16 +37,6 @@ def plot_matches(img1, img2, keypoints1, keypoints2):
 
 
 def draw_matches(matches, img1, img2, kp1, kp2):
-    """
-    Visualizes the matches between two images using the SIFT algorithm.
-
-    Parameters:
-    - matches: List of keypoint matches.
-    - img1: The first image (numpy array or PIL image object).
-    - img2: The second image (numpy array or PIL image object).
-    - kp1: List of keypoints from the first image.
-    - kp2: List of keypoints from the second image.
-    """
     MIN_MATCH_COUNT = 4
 
     if len(matches) > MIN_MATCH_COUNT:
@@ -107,18 +87,6 @@ def draw_matches(matches, img1, img2, kp1, kp2):
 
 
 def matching_points(img1, img2):
-    """
-    Computes keypoint matches using the SIFT algorithm between two images.
-
-    Parameters:
-    - img1: The first image (numpy array or PIL image object).
-    - img2: The second image (numpy array or PIL image object).
-
-    Returns:
-    - filtered_matches: List of filtered keypoint matches.
-    - kp1: List of keypoints from the first image.
-    - kp2: List of keypoints from the second image.
-    """
     # Convert images to grayscale
     img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
@@ -157,18 +125,6 @@ def matching_points(img1, img2):
 def kp_from_matches(
     matches: list[cv2.DMatch], kp1: list[cv2.KeyPoint], kp2: list[cv2.KeyPoint]
 ) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Extracts keypoints from the matched keypoints.
-
-    Parameters:
-    - matches: List of keypoint matches.
-    - kp1: List of keypoints from the first image.
-    - kp2: List of keypoints from the second image.
-
-    Returns:
-    - kp1: NumPy array of keypoints from the first image.
-    - kp2: NumPy array of keypoints from the second image.
-    """
     kp1_pts = np.float32([kp1[m.queryIdx].pt for m in matches])
     kp2_pts = np.float32([kp2[m.trainIdx].pt for m in matches])
     return kp1_pts, kp2_pts
@@ -183,22 +139,6 @@ def compute_crop_corner(
     v_margin: int = 5,
     min_match: int = 6,
 ):
-    """
-    Computes the crop corner coordinates based on keypoint matches.
-
-    Parameters:
-    - matches: List of keypoint matches.
-    - kp1: NumPy array of keypoints from the first image.
-    - kp2: NumPy array of keypoints from the second image.
-    - region: Region size to consider around the keypoints (default: 30).
-    - h_margin: Horizontal margin to subtract from the minimum x-coordinate (default: 28).
-    - v_margin: Vertical margin to subtract from the y-coordinate (default: 5).
-    - min_match: Minimum number of matches required (default: 6).
-
-    Returns:
-    - Optional[Tuple[int, int]]: Tuple of vertical and horizontal crop corner coordinates,
-                                 or None if the minimum number of matches is not met.
-    """
     kp1, kp2 = kp_from_matches(matches, kp1, kp2)
     ys = kp2[:, 1]
     covers = []
@@ -240,20 +180,6 @@ def crop_posts_image(
     plt_crop: bool = False,
     correct_margin: int = 700,
 ):
-    """
-    Crops the posts image based on the reference view.
-
-    Parameters:
-    - ref_view: The reference view for cropping the posts image.
-    - view: The posts image that needs cropping.
-    - plt_match: Boolean flag to plot the matches (default: False).
-    - plt_crop: Boolean flag to plot the crop view (default: False).
-    - correct_margin: Margin correction value (default: 700).
-
-    Returns:
-    - Tuple containing the cropped view and the number of matches,
-                                 or None if the minimum number of matches is not met.
-    """
     # Compute the filtered matches and keypoints between reference view and posts image
     filtered_matches, kp1, kp2 = matching_points(ref_view, view)
 
@@ -301,22 +227,6 @@ def crop_posts_image(
 def get_file_list(
     dir: str, filelist: list[str], ext: str = None, convert_unix: bool = True
 ) -> list[str]:
-    """
-    Retrieves the list of files from a directory and its subdirectories.
-
-    Parameters:
-    - dir: Root directory for retrieving file lists.
-    - filelist: List to store the file paths.
-    - ext: File extension to filter files (optional).
-    - convert_unix: Boolean flag to convert file paths to Unix-style (default: True).
-
-    Returns:
-    - List[str]: List of file paths.
-
-    Note:
-    - If `dir` is a file path and matches the specified extension, it will be included in the filelist.
-    - If `dir` is a directory, files from the directory and its subdirectories will be added to the filelist.
-    """
     if os.path.isfile(dir):
         # If dir is a file path
         if ext is None:
@@ -348,24 +258,6 @@ def get_file_list(
 def crop_posts_from_refs(
     ref_views: list[str], view: str, plt_match: bool = False, plt_crop: bool = False
 ):
-    """
-    Crop posts from reference views based on a target view.
-
-    Parameters:
-    - ref_views: List of reference views for cropping the posts.
-    - view: Target view that needs cropping.
-    - plt_match: Boolean flag to visualize matching points (default: False).
-    - plt_crop: Boolean flag to visualize the cropped view (default: False).
-
-    Returns:
-    - Optional[str]: Cropped view if successful, None otherwise.
-
-    Note:
-    - The function iterates through the reference views and attempts to crop the target view using `crop_posts_image`.
-    - If cropping is successful and results in a higher number of matches, the cropped view is updated.
-    - If `plt_match` is True, the matching points are visualized using `draw_matches`.
-    - If `plt_crop` is True, both the original view and the cropped view are visualized using `plt.imshow`.
-    """
     crop_view = None
     max_matches = 0
 
@@ -388,22 +280,6 @@ def crop_posts_from_files(
     plt_match: bool = False,
     plt_crop: bool = False,
 ) -> None:
-    """
-    Crop posts from files and save the cropped images.
-
-    Parameters:
-    - ref_dir: Directory containing reference images.
-    - crop_dir: Directory containing images to be cropped.
-    - save_crop_dir: Directory to save the cropped images.
-    - plt_match: Boolean flag to visualize matching points (default: False).
-    - plt_crop: Boolean flag to visualize the cropped view (default: False).
-
-    Note:
-    - The function retrieves the file list of reference images and images to be cropped using `get_file_list`.
-    - It iterates through the crop list, crops each image using `crop_posts_from_refs`, and saves the cropped image.
-    - If `plt_match` is True, the matching points are visualized using `draw_matches`.
-    - If `plt_crop` is True, both the original view and the cropped view are visualized using `plt.imshow`.
-    """
     ref_list = []
     ref_list = get_file_list(ref_dir, ref_list, ext="png")
 
@@ -428,15 +304,6 @@ def crop_posts_from_files(
 
 
 def test_crop_from_file() -> None:
-    """
-    Test cropping of images from a file.
-
-    Note:
-    - The function loads two images, `view1` and `view2`, and crops `view2` based on `view1` using `crop_posts_image`.
-    - If `plt_match` is True, the matching points are visualized using `draw_matches`.
-    - If `plt_crop` is True, both the original view and the cropped view are visualized using `plt.imshow`.
-    - The cropped image is saved as "data/crop_100489_ind.png".
-    """
     # Load images
     view1 = np.array(Image.open("data/ref/ref-06.png"))
     view2 = np.array(Image.open("data/napsa/102956_eng.png"))
@@ -445,16 +312,6 @@ def test_crop_from_file() -> None:
 
 
 def test_crop_from_folder():
-    """
-    Test cropping of images from a folder.
-
-    Note:
-    - The function specifies the directories for reference images, images to be cropped, and the directory to save the cropped images.
-    - It calls `crop_posts_from_files` to perform cropping and save the cropped images.
-    - If `plt_match` is True, the matching points are visualized using `draw_matches`.
-    - If `plt_crop` is True, both the original view and the cropped view are visualized using `plt.imshow`.
-
-    """
     ref_dir = "./data/ref"
     crop_dir = "./data/apsa"
     save_crop_dir = "data/crop"
