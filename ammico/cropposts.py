@@ -345,4 +345,3 @@ def crop_media_posts(
             save_path = os.path.join(save_crop_dir, filename)
             save_path = save_path.replace("\\", "/")
             cv2.imwrite(save_path, crop_view)
-
