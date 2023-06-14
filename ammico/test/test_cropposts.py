@@ -2,7 +2,6 @@ import ammico.cropposts as crpo
 import cv2
 import pytest
 import numpy as np
-from pathlib import Path
 
 
 TEST_IMAGE_1 = "pic1.png"
