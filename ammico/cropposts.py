@@ -84,6 +84,8 @@ def matching_points(
     sift = cv2.SIFT_create()
     kp1, des1 = sift.detectAndCompute(img1, None)
     kp2, des2 = sift.detectAndCompute(img2, None)
+
+    # Convert descriptors to float32
     des1 = np.float32(des1)
     des2 = np.float32(des2)
     # Initialize and use FLANN
@@ -93,6 +95,7 @@ def matching_points(
     matches = flann.knnMatch(des1, des2, k=2)
     filtered_matches = []
     for m, n in matches:
+        # Apply ratio test to filter out ambiguous matches
         if m.distance < 0.7 * n.distance:
             filtered_matches.append(m)
     return filtered_matches, kp1, kp2
@@ -141,6 +144,8 @@ def compute_crop_corner(
     kp1, kp2 = kp_from_matches(matches, kp1, kp2)
     ys = kp2[:, 1]
     covers = []
+
+    # Compute the number of keypoints within the region around each y-coordinate
     for y in ys:
         ys_c = ys - y
         series = pd.Series(ys_c)
@@ -151,7 +156,10 @@ def compute_crop_corner(
         return None
     kp_id = ys[covers.argmax()]
     v = int(kp_id) - v_margin if int(kp_id) > v_margin else int(kp_id)
+
     hs = []
+
+    # Find the minimum x-coordinate within the region around the selected y-coordinate
     for kp in kp2:
         if 0 <= kp[1] - v <= region:
             hs.append(kp[0])
@@ -320,7 +328,6 @@ def crop_media_posts(
     for ref_file in ref_files:
         ref_view = cv2.imread(ref_file)
         ref_views.append(ref_view)
-
     # parse through the social media posts to be cropped
     for crop_file in files:
         view = cv2.imread(crop_file)

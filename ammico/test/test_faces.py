@@ -2,6 +2,14 @@ import ammico.faces as fc
 import json
 
 
+def test_set_keys():
+    ed = fc.EmotionDetector({})
+    assert ed.subdict["face"] == "No"
+    assert ed.subdict["multiple_faces"] == "No"
+    assert ed.subdict["wears_mask"] == ["No"]
+    assert ed.subdict["emotion"] == [None]
+
+
 def test_analyse_faces(get_path):
     mydict = {
         "filename": get_path + "IMG_2746.png",

@@ -3,16 +3,14 @@ import numpy as np
 import os
 import shutil
 import pathlib
-import ipywidgets
-
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from deepface import DeepFace
 from retinaface import RetinaFace
-
 from ammico.utils import DownloadResource
 import ammico.utils as utils
+
 
 DEEPFACE_PATH = ".deepface"
 
@@ -85,8 +83,19 @@ retinaface_model = DownloadResource(
 
 class EmotionDetector(utils.AnalysisMethod):
     def __init__(
-        self, subdict: dict, emotion_threshold=50.0, race_threshold=50.0
+        self,
+        subdict: dict,
+        emotion_threshold: float = 50.0,
+        race_threshold: float = 50.0,
     ) -> None:
+        """
+        Initializes the EmotionDetector object.
+
+        Args:
+            subdict (dict): The dictionary to store the analysis results.
+            emotion_threshold (float): The threshold for detecting emotions (default: 50.0).
+            race_threshold (float): The threshold for detecting race (default: 50.0).
+        """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.emotion_threshold = emotion_threshold
@@ -102,6 +111,12 @@ class EmotionDetector(utils.AnalysisMethod):
         }
 
     def set_keys(self) -> dict:
+        """
+        Sets the initial parameters for the analysis.
+
+        Returns:
+            dict: The dictionary with initial parameter values.
+        """
         params = {
             "face": "No",
             "multiple_faces": "No",
@@ -115,27 +130,38 @@ class EmotionDetector(utils.AnalysisMethod):
         }
         return params
 
-    def analyse_image(self):
+    def analyse_image(self) -> dict:
+        """
+        Performs facial expression analysis on the image.
+
+        Returns:
+            dict: The updated subdict dictionary with analysis results.
+        """
         return self.facial_expression_analysis()
 
     def analyze_single_face(self, face: np.ndarray) -> dict:
-        fresult = {}
+        """
+        Analyzes the features of a single face.
 
+        Args:
+            face (np.ndarray): The face image array.
+
+        Returns:
+            dict: The analysis results for the face.
+        """
+        fresult = {}
         # Determine whether the face wears a mask
         fresult["wears_mask"] = self.wears_mask(face)
-
-        # Adapt the features we are looking for depending on whether a mask is
-        # worn. White masks screw race detection, emotion detection is useless.
+        # Adapt the features we are looking for depending on whether a mask is worn.
+        # White masks screw race detection, emotion detection is useless.
         actions = ["age", "gender"]
         if not fresult["wears_mask"]:
             actions = actions + ["race", "emotion"]
-
         # Ensure that all data has been fetched by pooch
         deepface_age_model.get()
         deepface_face_expression_model.get()
         deepface_gender_model.get()
         deepface_race_model.get()
-
         # Run the full DeepFace analysis
         fresult.update(
             DeepFace.analyze(
@@ -145,25 +171,26 @@ class EmotionDetector(utils.AnalysisMethod):
                 detector_backend="skip",
             )
         )
-
         # We remove the region, as the data is not correct - after all we are
         # running the analysis on a subimage.
         del fresult["region"]
-
         return fresult
 
     def facial_expression_analysis(self) -> dict:
+        """
+        Performs facial expression analysis on the image.
+
+        Returns:
+            dict: The updated subdict dictionary with analysis results.
+        """
         # Find (multiple) faces in the image and cut them
         retinaface_model.get()
         faces = RetinaFace.extract_faces(self.subdict["filename"])
-
         # If no faces are found, we return empty keys
         if len(faces) == 0:
             return self.subdict
-
         # Sort the faces by sight to prioritize prominent faces
         faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
-
         self.subdict["face"] = "Yes"
         self.subdict["multiple_faces"] = "Yes" if len(faces) > 1 else "No"
         self.subdict["no_faces"] = len(faces) if len(faces) <= 15 else 99
@@ -172,13 +199,19 @@ class EmotionDetector(utils.AnalysisMethod):
         # We limit ourselves to three faces
         for i, face in enumerate(faces[:3]):
             result[f"person{ i+1 }"] = self.analyze_single_face(face)
-
         self.clean_subdict(result)
-
         return self.subdict
 
     def clean_subdict(self, result: dict) -> dict:
-        # each person subdict converted into list for keys
+        """
+        Cleans the subdict dictionary by converting results into appropriate formats.
+
+        Args:
+            result (dict): The analysis results.
+        Returns:
+            dict: The updated subdict dictionary.
+        """
+        # Each person subdict converted into list for keys
         self.subdict["wears_mask"] = []
         self.subdict["age"] = []
         self.subdict["gender"] = []
@@ -191,12 +224,12 @@ class EmotionDetector(utils.AnalysisMethod):
                 "Yes" if result[person]["wears_mask"] else "No"
             )
             self.subdict["age"].append(result[person]["age"])
-            # gender is now reported as a list of dictionaries
-            # each dict represents one face
-            # each dict contains probability for Woman and Man
-            # take only the higher prob result for each dict
+            # Gender is now reported as a list of dictionaries.
+            # Each dict represents one face.
+            # Each dict contains probability for Woman and Man.
+            # We take only the higher probability result for each dict.
             self.subdict["gender"].append(result[person]["gender"])
-            # race, emotion only detected if person does not wear mask
+            # Race and emotion are only detected if a person does not wear a mask
             if result[person]["wears_mask"]:
                 self.subdict["race"].append(None)
                 self.subdict["emotion"].append(None)
@@ -223,36 +256,28 @@ class EmotionDetector(utils.AnalysisMethod):
                 else:
                     self.subdict["emotion"].append(None)
                     self.subdict["emotion (category)"].append(None)
-
         return self.subdict
 
     def wears_mask(self, face: np.ndarray) -> bool:
-        global mask_detection_model
+        """
+        Determines whether a face wears a mask.
 
-        # Preprocess the face to match the assumptions of the face mask
-        # detection model
+        Args:
+            face (np.ndarray): The face image array.
+
+        Returns:
+            bool: True if the face wears a mask, False otherwise.
+        """
+        global mask_detection_model
+        # Preprocess the face to match the assumptions of the face mask detection model
         face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
         face = cv2.resize(face, (224, 224))
         face = img_to_array(face)
         face = preprocess_input(face)
         face = np.expand_dims(face, axis=0)
-
         # Lazily load the model
         mask_detection_model = load_model(face_mask_model.get())
-
-        # Run the model (ignoring output)
-        with NocatchOutput():
-            mask, without_mask = mask_detection_model.predict(face)[0]
-
+        # Run the model
+        mask, without_mask = mask_detection_model.predict(face)[0]
         # Convert from np.bool_ to bool to later be able to serialize the result
         return bool(mask > without_mask)
-
-
-class NocatchOutput(ipywidgets.Output):
-    """An output container that suppresses output, but not exceptions
-
-    Taken from https://github.com/jupyter-widgets/ipywidgets/issues/3208#issuecomment-1070836153
-    """
-
-    def __exit__(self, *args, **kwargs):
-        super().__exit__(*args, **kwargs)
