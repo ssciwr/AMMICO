@@ -24,13 +24,16 @@ classifiers = [
 dependencies = [
     "bertopic<=0.14.1",
     "cvlib",
+    "dash",
+    "dash_renderjson",
     "deepface<=0.0.75",
     "googletrans==3.1.0a0",
+    "google-cloud-vision",
     "grpcio",
     "importlib_metadata",
     "ipython",
     "ipywidgets<8.0.5",
-    "ipykernel",
+    "jupyter_dash",
     "matplotlib",
     "numpy<=1.23.4",
     "pandas",
@@ -39,22 +42,16 @@ dependencies = [
     "protobuf",
     "pytest",
     "pytest-cov",
-    "pytest-xdist",
-    "requests",
+    "Requests",
     "retina_face",
     "salesforce-lavis",
+    "setuptools",
     "spacy",
     "spacytextblob",
     "tensorflow",
     "textblob",
     "torch",
     "transformers",
-    "google-cloud-vision",
-    "setuptools",
-    "opencv-contrib-python",
-    "dash",
-    "jupyter_dash",
-    "dash_renderjson",
 ]
 
 [project.scripts]
@@ -62,3 +59,7 @@ ammico_prefetch_models = "ammico.utils:ammico_prefetch_models"
 
 [tool.setuptools]
 packages = ["ammico"]
+
+[tool.setuptools.package-data]
+# Include any png files found in the "data" subdirectory of "ammico"
+"ammico.data" = ["*.png"]
