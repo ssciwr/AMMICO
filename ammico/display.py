@@ -8,12 +8,13 @@ import dash_renderjson
 from dash import html, Input, Output, dcc, State
 import jupyter_dash
 from PIL import Image
+from typing import Union
 
 
 class AnalysisExplorer:
     def __init__(self, mydict: dict, identify: str = "faces") -> None:
         """Initialize the AnalysisExplorer class to create an interactive
-        analysis explorer.
+        visualization of the analysis results.
 
         Args:
             mydict (dict): A nested dictionary containing image data for all images.
@@ -98,15 +99,14 @@ class AnalysisExplorer:
         )(self._right_output_analysis)
 
     # I split the different sections into subfunctions for better clarity
-    def _top_file_explorer(self, mydict):
-        """
-        Initializes the file explorer dropdown for selecting the file to be analyzed.
+    def _top_file_explorer(self, mydict: dict) -> html.Div:
+        """Initialize the file explorer dropdown for selecting the file to be analyzed.
 
-        Parameters:
-        - mydict: A dictionary containing image data.
+        Args:
+            mydict (dict): A dictionary containing image data.
 
         Returns:
-        - The layout for the file explorer dropdown.
+            html.Div: The layout for the file explorer dropdown.
         """
         left_layout = html.Div(
             [
@@ -118,12 +118,11 @@ class AnalysisExplorer:
         )
         return left_layout
 
-    def _middle_picture_frame(self):
-        """
-        Initializes the picture frame to display the image.
+    def _middle_picture_frame(self) -> html.Div:
+        """Initialize the picture frame to display the image.
 
         Returns:
-        - The layout for the picture frame.
+            html.Div: The layout for the picture frame.
         """
         middle_layout = html.Div(
             [
@@ -137,12 +136,11 @@ class AnalysisExplorer:
         )
         return middle_layout
 
-    def _right_output_json(self):
-        """
-        Initializes the JSON viewer for displaying the analysis output.
+    def _right_output_json(self) -> html.Div:
+        """Initialize the JSON viewer for displaying the analysis output.
 
         Returns:
-        - The layout for the JSON viewer.
+            html.Div: The layout for the JSON viewer.
         """
         right_layout = html.Div(
             [
@@ -167,16 +165,14 @@ class AnalysisExplorer:
         )
         return right_layout
 
-    def run_server(self, port=8050):
-        """
-        Runs the Dash server to start the analysis explorer.
+    def run_server(self, port: int = 8050) -> None:
+        """Run the Dash server to start the analysis explorer.
 
-        Parameters:
-        - port: The port number to run the server on (default: 8050).
+        This method should only be called in an interactive environment like Jupyter notebooks.
+        Raises an EnvironmentError if not called in an interactive environment.
 
-        Note:
-        - This method should only be called in an interactive environment like Jupyter notebooks.
-        - Raises an EnvironmentError if not called in an interactive environment.
+        Args:
+            port (int, optional): The port number to run the server on (default: 8050).
         """
         if not is_interactive():
             raise EnvironmentError(
@@ -186,15 +182,15 @@ class AnalysisExplorer:
         self.app.run_server(debug=True, mode="inline", port=port)
 
     # Dash callbacks
-    def update_picture(self, img_path):
-        """
-        Callback function to update the displayed image.
+    def update_picture(self, img_path: str):
+        """Callback function to update the displayed image.
 
-        Parameters:
-        - img_path: The path of the selected image.
+        Args:
+            img_path (str): The path of the selected image.
 
         Returns:
-        - The image object to be displayed.
+            Union[PIL.PngImagePlugin, None]: The image object to be displayed
+            or None if the image path is
 
         Note:
         - This function is called when the value of the file explorer dropdown changes.
@@ -206,21 +202,15 @@ class AnalysisExplorer:
         else:
             return None
 
-    def _right_output_analysis(self, image, all_options, current_value):
-        """
-        Callback function to perform analysis on the selected image and return the output.
+    def _right_output_analysis(self, all_options: dict, current_value: str) -> dict:
+        """Callback function to perform analysis on the selected image and return the output.
 
-        Parameters:
-        - image: The image object of the selected image.
-        - all_options: The available options in the file explorer dropdown.
-        - current_value: The current selected value in the file explorer dropdown.
+        Args:
+            all_options (dict): The available options in the file explorer dropdown.
+            current_value (str): The current selected value in the file explorer dropdown.
 
         Returns:
-        - The analysis output for the selected image.
-
-        Note:
-        - This function is called when the displayed image changes.
-        - Performs the analysis based on the selected identify type and returns the output.
+            dict: The analysis output for the selected image.
         """
         identify_dict = {
             "faces": faces.EmotionDetector,
