@@ -4,7 +4,6 @@ import cv2
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from ammico import utils
 from typing import List, Optional, Tuple, Union
 
 
@@ -29,7 +28,6 @@ def draw_matches(
         kp1 (list[cv2.KeyPoint]): List of keypoints from the first image.
         kp2 (list[cv2.KeyPoint]): List of keypoints from the second image.
     """
-    MIN_MATCH_COUNT = 4
     if len(matches) > MIN_MATCH_COUNT:
         # Estimate homography between template and scene
         src_pts = np.float32([kp1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
