@@ -1,12 +1,9 @@
 from IPython.display import display
-
 import ammico.faces as faces
 import ammico.text as text
 import ammico.objects as objects
 from ammico.utils import is_interactive
-
 import ammico.summary as summary
-
 import dash_renderjson
 from dash import html, Input, Output, dcc, State
 import jupyter_dash
@@ -14,17 +11,16 @@ from PIL import Image
 
 
 class AnalysisExplorer:
-    def __init__(self, mydict, identify="faces") -> None:
-        """
-        Initializes the AnalysisExplorer class.
+    def __init__(self, mydict: dict, identify: str = "faces") -> None:
+        """Initialize the AnalysisExplorer class to create an interactive
+        analysis explorer.
 
-        Parameters:
-        - mydict: A dictionary containing image data.
-        - identify: The type of analysis to perform (default: "faces").
-
-        Note:
-        - The class uses the Dash framework to create an interactive analysis explorer.
-        - It sets up the layout and defines the callbacks for the Dash app.
+        Args:
+            mydict (dict): A nested dictionary containing image data for all images.
+            identify (str, optional): The type of analysis to perform (default: "faces").
+            Options are "faces" (face and emotion detection), "text-on-image" (image
+            extraction and analysis), "objects" (object detection), "summary" (image caption
+            generation).
         """
         self.app = jupyter_dash.JupyterDash(__name__)
         self.mydict = mydict
