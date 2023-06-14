@@ -1,4 +1,3 @@
-from IPython.display import display
 import ammico.faces as faces
 import ammico.text as text
 import ammico.objects as objects
@@ -8,7 +7,6 @@ import dash_renderjson
 from dash import html, Input, Output, dcc, State
 import jupyter_dash
 from PIL import Image
-from typing import Union
 
 
 class AnalysisExplorer:
