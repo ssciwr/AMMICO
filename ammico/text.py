@@ -19,6 +19,14 @@ import os
 
 class TextDetector(utils.AnalysisMethod):
     def __init__(self, subdict: dict, analyse_text: bool = False) -> None:
+        """Init text detection class.
+
+        Args:
+            subdict (dict): Dictionary containing file name/path, and possibly previous
+            analysis results from other modules.
+            analyse_text (bool, optional): Decide if extracted text will be further subject
+            to analysis. Defaults to False.
+        """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
@@ -53,7 +61,7 @@ class TextDetector(utils.AnalysisMethod):
             download_corpora.main()
 
     def analyse_image(self) -> dict:
-        """Perform text analysis on the image.
+        """Perform text extraction and analysis of the text.
 
         Returns:
             dict: The updated dictionary with text analysis results.
@@ -212,7 +220,7 @@ class PostprocessText:
         analyze_text: str = "text_english",
     ) -> None:
         """
-        Initializes the PostprocessText class.
+        Initializes the PostprocessText class that handles the topic analysis.
 
         Args:
             mydict (dict, optional): Dictionary with textual data. Defaults to None.
@@ -236,7 +244,7 @@ class PostprocessText:
                              `csv_path`."
             )
 
-    def analyse_topic(self, return_topics: int = 3):
+    def analyse_topic(self, return_topics: int = 3) -> tuple:
         """
         Performs topic analysis using BERTopic.
 
@@ -272,7 +280,7 @@ class PostprocessText:
             most_frequent_topics.append(self.topic_model.get_topic(i))
         return self.topic_model, topic_df, most_frequent_topics
 
-    def get_text_dict(self, analyze_text):
+    def get_text_dict(self, analyze_text: str) -> list:
         """
         Extracts text from the provided dictionary.
 
@@ -295,7 +303,7 @@ class PostprocessText:
             list_text_english.append(self.mydict[key][analyze_text])
         return list_text_english
 
-    def get_text_df(self, analyze_text):
+    def get_text_df(self, analyze_text: str) -> list:
         """
         Extracts text from the provided dataframe.
 
@@ -315,19 +323,3 @@ class PostprocessText:
                 )
             )
         return self.df[analyze_text].tolist()
-
-
-if __name__ == "__main__":
-    images = utils.find_files(
-        path="data/test-debug/101-200fullposts",
-        limit=110,
-    )
-    # images = ["data/test-debug/101-200fullposts/100638_mya.png"]
-    print(images)
-    mydict = utils.initialize_dict(images)
-    os.environ[
-        "GOOGLE_APPLICATION_CREDENTIALS"
-    ] = "data/misinformation-campaign-981aa55a3b13.json"
-    for key in mydict:
-        print(key)
-        mydict[key] = TextDetector(mydict[key], analyse_text=True).analyse_image()
