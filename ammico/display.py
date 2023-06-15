@@ -17,9 +17,9 @@ class AnalysisExplorer:
         Args:
             mydict (dict): A nested dictionary containing image data for all images.
             identify (str, optional): The type of analysis to perform (default: "faces").
-            Options are "faces" (face and emotion detection), "text-on-image" (image
-            extraction and analysis), "objects" (object detection), "summary" (image caption
-            generation).
+                Options are "faces" (face and emotion detection), "text-on-image" (image
+                extraction and analysis), "objects" (object detection), "summary" (image caption
+                generation).
         """
         self.app = jupyter_dash.JupyterDash(__name__)
         self.mydict = mydict
@@ -188,11 +188,8 @@ class AnalysisExplorer:
 
         Returns:
             Union[PIL.PngImagePlugin, None]: The image object to be displayed
-            or None if the image path is
+                or None if the image path is
 
-        Note:
-        - This function is called when the value of the file explorer dropdown changes.
-        - Reads the image file and returns the image object.
         """
         if img_path is not None:
             image = Image.open(img_path)
