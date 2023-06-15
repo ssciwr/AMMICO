@@ -6,7 +6,7 @@ from spacytextblob.spacytextblob import SpacyTextBlob
 from textblob import TextBlob
 from textblob import download_corpora
 import io
-from ammico import utils
+from ammico.utils import AnalysisMethod
 import grpc
 import pandas as pd
 from bertopic import BERTopic
@@ -17,7 +17,7 @@ import os
 # increase coverage for text
 
 
-class TextDetector(utils.AnalysisMethod):
+class TextDetector(AnalysisMethod):
     def __init__(self, subdict: dict, analyse_text: bool = False) -> None:
         """Init text detection class.
 
