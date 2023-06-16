@@ -13,6 +13,13 @@ class ColorDetector(AnalysisMethod):
         subdict: dict,
         delta_e_method: str = "CIE 1976",
     ):
+        """Color Analsysis class
+
+        :param subdict: The dictoriary containing the image path
+        :type subdict: dict
+        :param delta_e_method: The calculation method used for assigning closest color name, defaults to "CIE 1976"
+        :type delta_e_method: str, optional
+        """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.merge_color = True
