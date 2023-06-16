@@ -14,7 +14,7 @@ from transformers import pipeline
 import os
 
 # clean text has weird spaces and separation of "do n't"
-# increase coverage for text
+# use bertopic directly without spacy?
 
 
 class TextDetector(AnalysisMethod):
