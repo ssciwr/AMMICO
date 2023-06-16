@@ -43,7 +43,7 @@ dependencies = [
     "pytest-cov",
     "Requests",
     "retina_face",
-    "salesforce-lavis @ git+https://github.com/piterand/LAVIS.git@fixed_MacOS_compatibility",
+    "salesforce-lavis @ git+https://github.com/piterand/LAVIS.git@release_1.0.2",
     "setuptools",
     "spacy",
     "spacytextblob",
