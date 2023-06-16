@@ -1,43 +1,56 @@
-from ammico.colors import rgb2name, analyze_images
-from ammico.display import show_piechart
+from ammico.colors import ColorDetector
 import pandas as pd
+import pytest
+
+
+def test_set_keys():
+    colors = {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "yellow": 0,
+        "cyan": 0,
+        "orange": 0,
+        "purple": 0,
+        "pink": 0,
+        "brown": 0,
+        "grey": 0,
+        "white": 0,
+        "black": 0,
+    }
+    cd = ColorDetector({})
+
+    for color_key, value in colors.items():
+        assert cd.subdict[color_key] == value
 
 
 def test_rgb2name(get_path):
-    assert rgb2name([0, 0, 0]) == "black"
-    assert rgb2name([255, 255, 255]) == "white"
-    assert rgb2name([205, 133, 63]) == "brown"
+    cd = ColorDetector({})
 
-    assert rgb2name([255, 255, 255], merge_color=False) == "white"
-    assert rgb2name([0, 0, 0], merge_color=False) == "black"
-    assert rgb2name([205, 133, 63], merge_color=False) == "peru"
+    assert cd.rgb2name([0, 0, 0]) == "black"
+    assert cd.rgb2name([255, 255, 255]) == "white"
+    assert cd.rgb2name([205, 133, 63]) == "brown"
+
+    assert cd.rgb2name([255, 255, 255], merge_color=False) == "white"
+    assert cd.rgb2name([0, 0, 0], merge_color=False) == "black"
+    assert cd.rgb2name([205, 133, 63], merge_color=False) == "peru"
+
+    with pytest.raises(ValueError):
+        cd.rgb2name([1, 2])
+
+    with pytest.raises(ValueError):
+        cd.rgb2name([1, 2, 3, 4])
 
 
 def test_analyze_images(get_path):
-    path_img_1 = get_path + "IMG_2809.png"
-    path_img_2 = get_path + "IMG_2746.png"
+    mydict_1 = {
+        "filename": get_path + "IMG_2809.png",
+    }
 
-    df_list = analyze_images([path_img_1], n_colors=10, reduce_colors=True)
+    test1 = ColorDetector(mydict_1, delta_e_method="CIE 2000").analyse_image()
+    assert test1["red"] == 0.0
+    assert round(test1["green"], 2) == 0.62
 
-    df_string = analyze_images(path_img_1, n_colors=10, reduce_colors=True)
-
-    pd.testing.assert_frame_equal(df_list, df_string)
-
-    df = analyze_images([path_img_1, path_img_2], n_colors=100, reduce_colors=True)
-    assert df["sum"].loc["green"] == 0.06987253824869791
-    assert df.shape == (8, 3)
-
-    df = analyze_images([path_img_1, path_img_2], n_colors=100, reduce_colors=False)
-    assert df["sum"].loc["darkgray"] == 0.5488878885904949
-    assert df.shape == (23, 3)
-
-    df = analyze_images([path_img_1, path_img_2], n_colors=2, reduce_colors=False)
-    assert df.shape == (3, 3)
-
-    df = analyze_images(
-        [path_img_1, path_img_2],
-        n_colors=10,
-        reduce_colors=True,
-        delta_e_method="CIE 2000",
-    )
-    assert df.shape == (3, 3)
+    test2 = ColorDetector(mydict_1).analyse_image()
+    assert test2["red"] == 0.0
+    assert test2["green"] == 0.05

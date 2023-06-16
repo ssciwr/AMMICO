@@ -75,6 +75,9 @@ class ColorDetector(AnalysisMethod):
         Returns:
             str: Closest matching color name.
         """
+        if len(c) != 3:
+            raise ValueError("Input color must be a list or tuple of length 3 (RGB).")
+
         h_color = "#{:02x}{:02x}{:02x}".format(int(c[0]), int(c[1]), int(c[2]))
         try:
             output_color = webcolors.hex_to_name(h_color, spec="css3")
