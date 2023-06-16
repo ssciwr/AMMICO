@@ -19,6 +19,14 @@ import os
 
 class TextDetector(utils.AnalysisMethod):
     def __init__(self, subdict: dict, analyse_text: bool = False) -> None:
+        """Init text detection class.
+
+        Args:
+            subdict (dict): Dictionary containing file name/path, and possibly previous
+            analysis results from other modules.
+            analyse_text (bool, optional): Decide if extracted text will be further subject
+            to analysis. Defaults to False.
+        """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
@@ -28,10 +36,16 @@ class TextDetector(utils.AnalysisMethod):
             self._initialize_textblob()
 
     def set_keys(self) -> dict:
+        """Set the default keys for text analysis.
+
+        Returns:
+            dict: The dictionary with default text keys.
+        """
         params = {"text": None, "text_language": None, "text_english": None}
         return params
 
     def _initialize_spacy(self):
+        """Initialize the Spacy library for text analysis."""
         try:
             self.nlp = spacy.load("en_core_web_md")
         except Exception:
@@ -40,12 +54,18 @@ class TextDetector(utils.AnalysisMethod):
         self.nlp.add_pipe("spacytextblob")
 
     def _initialize_textblob(self):
+        """Initialize the TextBlob library for text analysis."""
         try:
             TextBlob("Here")
         except Exception:
             download_corpora.main()
 
-    def analyse_image(self):
+    def analyse_image(self) -> dict:
+        """Perform text extraction and analysis of the text.
+
+        Returns:
+            dict: The updated dictionary with text analysis results.
+        """
         self.get_text_from_image()
         self.translate_text()
         self.remove_linebreaks()
@@ -60,7 +80,7 @@ class TextDetector(utils.AnalysisMethod):
         return self.subdict
 
     def get_text_from_image(self):
-        """Detects text on the image."""
+        """Detect text on the image using Google Cloud Vision API."""
         path = self.subdict["filename"]
         try:
             client = vision.ImageAnnotatorClient()
@@ -92,6 +112,7 @@ class TextDetector(utils.AnalysisMethod):
             )
 
     def translate_text(self):
+        """Translate the detected text to English using the Translator object."""
         translated = self.translator.translate(self.subdict["text"])
         self.subdict["text_language"] = translated.src
         self.subdict["text_english"] = translated.text
@@ -105,7 +126,7 @@ class TextDetector(utils.AnalysisMethod):
             )
 
     def _run_spacy(self):
-        """Generate spacy doc object."""
+        """Generate Spacy doc object for further text analysis."""
         self.doc = self.nlp(self.subdict["text_english"])
 
     def clean_text(self):
@@ -118,10 +139,12 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict["text_clean"] = " ".join(templist).rstrip().lstrip()
 
     def correct_spelling(self):
+        """Correct the spelling of the English text using TextBlob."""
         self.textblob = TextBlob(self.subdict["text_english"])
         self.subdict["text_english_correct"] = str(self.textblob.correct())
 
     def sentiment_analysis(self):
+        """Perform sentiment analysis on the text using SpacyTextBlob."""
         # polarity is between [-1.0, 1.0]
         self.subdict["polarity"] = self.doc._.blob.polarity
         # subjectivity is a float within the range [0.0, 1.0]
@@ -129,6 +152,7 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict["subjectivity"] = self.doc._.blob.subjectivity
 
     def text_summary(self):
+        """Generate a summary of the text using the Transformers pipeline."""
         # use the transformers pipeline to summarize the text
         # use the current default model - 03/2023
         model_name = "sshleifer/distilbart-cnn-12-6"
@@ -152,6 +176,7 @@ class TextDetector(utils.AnalysisMethod):
             self.subdict["text_summary"] = None
 
     def text_sentiment_transformers(self):
+        """Perform text classification for sentiment using the Transformers pipeline."""
         # use the transformers pipeline for text classification
         # use the current default model - 03/2023
         model_name = "distilbert-base-uncased-finetuned-sst-2-english"
@@ -167,6 +192,7 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict["sentiment_score"] = result[0]["score"]
 
     def text_ner(self):
+        """Perform named entity recognition on the text using the Transformers pipeline."""
         # use the transformers pipeline for named entity recognition
         # use the current default model - 03/2023
         model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"
@@ -193,6 +219,15 @@ class PostprocessText:
         csv_path: str = None,
         analyze_text: str = "text_english",
     ) -> None:
+        """
+        Initializes the PostprocessText class that handles the topic analysis.
+
+        Args:
+            mydict (dict, optional): Dictionary with textual data. Defaults to None.
+            use_csv (bool, optional): Flag indicating whether to use a CSV file. Defaults to False.
+            csv_path (str, optional): Path to the CSV file. Required if `use_csv` is True. Defaults to None.
+            analyze_text (str, optional): Key for the text field to analyze. Defaults to "text_english".
+        """
         self.use_csv = use_csv
         if mydict:
             print("Reading data from dict.")
@@ -209,8 +244,16 @@ class PostprocessText:
                              `csv_path`."
             )
 
-    def analyse_topic(self, return_topics: int = 3):
-        """Topic analysis using BERTopic."""
+    def analyse_topic(self, return_topics: int = 3) -> tuple:
+        """
+        Performs topic analysis using BERTopic.
+
+        Args:
+            return_topics (int, optional): Number of topics to return. Defaults to 3.
+
+        Returns:
+            tuple: A tuple containing the topic model, topic dataframe, and most frequent topics.
+        """
         # load spacy pipeline
         nlp = spacy.load(
             "en_core_web_md",
@@ -237,7 +280,16 @@ class PostprocessText:
             most_frequent_topics.append(self.topic_model.get_topic(i))
         return self.topic_model, topic_df, most_frequent_topics
 
-    def get_text_dict(self, analyze_text):
+    def get_text_dict(self, analyze_text: str) -> list:
+        """
+        Extracts text from the provided dictionary.
+
+        Args:
+            analyze_text (str): Key for the text field to analyze.
+
+        Returns:
+            list: A list of text extracted from the dictionary.
+        """
         # use dict to put text_english or text_summary in list
         list_text_english = []
         for key in self.mydict.keys():
@@ -251,7 +303,16 @@ class PostprocessText:
             list_text_english.append(self.mydict[key][analyze_text])
         return list_text_english
 
-    def get_text_df(self, analyze_text):
+    def get_text_df(self, analyze_text: str) -> list:
+        """
+        Extracts text from the provided dataframe.
+
+        Args:
+            analyze_text (str): Column name for the text field to analyze.
+
+        Returns:
+            list: A list of text extracted from the dataframe.
+        """
         # use csv file to obtain dataframe and put text_english or text_summary in list
         # check that "text_english" or "text_summary" is there
         if analyze_text not in self.df:
@@ -262,19 +323,3 @@ class PostprocessText:
                 )
             )
         return self.df[analyze_text].tolist()
-
-
-if __name__ == "__main__":
-    images = utils.find_files(
-        path="data/test-debug/101-200fullposts",
-        limit=110,
-    )
-    # images = ["data/test-debug/101-200fullposts/100638_mya.png"]
-    print(images)
-    mydict = utils.initialize_dict(images)
-    os.environ[
-        "GOOGLE_APPLICATION_CREDENTIALS"
-    ] = "data/misinformation-campaign-981aa55a3b13.json"
-    for key in mydict:
-        print(key)
-        mydict[key] = TextDetector(mydict[key], analyse_text=True).analyse_image()

@@ -1,5 +1,5 @@
 from ammico.utils import AnalysisMethod
-from torch import device, cuda, no_grad
+from torch import cuda, no_grad
 from PIL import Image
 from lavis.models import load_model_and_preprocess
 
