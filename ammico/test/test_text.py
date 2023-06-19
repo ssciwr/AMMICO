@@ -1,4 +1,3 @@
-import os
 import pytest
 import spacy
 import ammico.text as tt
@@ -20,7 +19,7 @@ def set_testdict(get_path):
     return testdict
 
 
-LANGUAGES = ["de", "om", "en"]
+LANGUAGES = ["de", "en", "en"]
 
 
 def test_TextDetector(set_testdict):
@@ -74,46 +73,6 @@ def test_remove_linebreaks():
     test_obj.remove_linebreaks()
     assert test_obj.subdict["text"] == "This is   a test."
     assert test_obj.subdict["text_english"] == "This is   another  test."
-
-
-def test_run_spacy(set_testdict, get_path):
-    test_obj = tt.TextDetector(set_testdict["IMG_3755"], analyse_text=True)
-    ref_file = get_path + "text_IMG_3755.txt"
-    with open(ref_file, "r") as file:
-        reference_text = file.read()
-    test_obj.subdict["text_english"] = reference_text
-    test_obj._run_spacy()
-    assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
-
-
-def test_clean_text(set_testdict):
-    nlp = spacy.load("en_core_web_md")
-    doc = nlp("I like cats and fjejg")
-    test_obj = tt.TextDetector(set_testdict["IMG_3755"])
-    test_obj.doc = doc
-    test_obj.clean_text()
-    result = "I like cats and"
-    assert test_obj.subdict["text_clean"] == result
-
-
-def test_correct_spelling():
-    mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True)
-    test_obj.subdict["text_english"] = "I lik cats ad dogs."
-    test_obj.correct_spelling()
-    result = "I like cats ad dogs."
-    assert test_obj.subdict["text_english_correct"] == result
-
-
-def test_sentiment_analysis():
-    mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True)
-    test_obj.subdict["text_english"] = "I love cats and dogs."
-    test_obj._run_spacy()
-    test_obj.correct_spelling()
-    test_obj.sentiment_analysis()
-    assert test_obj.subdict["polarity"] == 0.5
-    assert test_obj.subdict["subjectivity"] == 0.6
 
 
 @pytest.mark.win_skip

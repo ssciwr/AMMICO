@@ -46,9 +46,7 @@ dependencies = [
     "salesforce-lavis",
     "setuptools",
     "spacy",
-    "spacytextblob",
     "tensorflow",
-    "textblob",
     "torch",
     "transformers",
 ]
