@@ -1,43 +1,3 @@
-utils module
-------------
-
-.. automodule:: utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-display module
---------------
-
-.. automodule:: display
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-faces module
-------------
-
-.. automodule:: faces
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-objects_cvlib module
---------------------
-
-.. automodule:: objects_cvlib
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-objects module
---------------
-
-.. automodule:: objects
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 text module
 -----------
 
@@ -46,10 +6,10 @@ text module
    :undoc-members:
    :show-inheritance:
 
-cropposts module
-----------------
+summary module
+--------------
 
-.. automodule:: cropposts
+.. automodule:: summary
    :members:
    :undoc-members:
    :show-inheritance:
@@ -62,10 +22,50 @@ multimodal search module
    :undoc-members:
    :show-inheritance:
 
-summary module
+faces module
+------------
+
+.. automodule:: faces
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+objects module
 --------------
 
-.. automodule:: summary
+.. automodule:: objects
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+objects_cvlib module
+--------------------
+
+.. automodule:: objects_cvlib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cropposts module
+----------------
+
+.. automodule:: cropposts
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+utils module
+------------
+
+.. automodule:: utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+display module
+--------------
+
+.. automodule:: display
    :members:
    :undoc-members:
    :show-inheritance:

@@ -47,7 +47,7 @@ class ObjectCVLib(ObjectsMethod):
         """Localize objects in the local image.
 
         Args:
-        image_path: The path to the local file.
+            image_path: The path to the local file.
         """
         img = cv2.imread(image_path)
 
@@ -59,7 +59,7 @@ class ObjectCVLib(ObjectsMethod):
         """Localize objects in the local image.
 
         Args:
-        image_path: The path to the local file.
+            image_path: The path to the local file.
         """
         objects = self.detect_objects_cvlib(image_path)
         return objects
@@ -68,7 +68,7 @@ class ObjectCVLib(ObjectsMethod):
         """Localize objects in the local image.
 
         Args:
-        subdict: The dictionary for an image expression instance.
+            subdict: The dictionary for an image expression instance.
         """
         objects = self.analyse_image_from_file(subdict["filename"])
         for key in objects:

@@ -8,8 +8,7 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from deepface import DeepFace
 from retinaface import RetinaFace
-from ammico.utils import DownloadResource
-import ammico.utils as utils
+from ammico.utils import DownloadResource, AnalysisMethod
 
 
 DEEPFACE_PATH = ".deepface"
@@ -81,7 +80,7 @@ retinaface_model = DownloadResource(
 )
 
 
-class EmotionDetector(utils.AnalysisMethod):
+class EmotionDetector(AnalysisMethod):
     def __init__(
         self,
         subdict: dict,

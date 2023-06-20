@@ -51,14 +51,14 @@ def find_files(
 
     Args:
         path (str, optional): The base directory where we are looking for the images. Defaults
-        to None, which uses the XDG data directory if set or the current
-        working directory otherwise.
+            to None, which uses the XDG data directory if set or the current
+            working directory otherwise.
         pattern (str, optional): The naming pattern that the filename should match. Defaults to
-        "*.png". Can be used to allow other patterns or to only include
-        specific prefixes or suffixes.
+            "*.png". Can be used to allow other patterns or to only include
+            specific prefixes or suffixes.
         recursive (bool, optional): Whether to recurse into subdirectories. Default is set to False.
         limit (int, optional): The maximum number of images to be found.
-        Defaults to 20. To return all images, set to None.
+            Defaults to 20. To return all images, set to None.
 
     Returns:
         list: A list with all filenames including the path.
