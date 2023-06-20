@@ -197,7 +197,7 @@ class AnalysisExplorer:
         else:
             return None
 
-    def _right_output_analysis(self, all_options: dict, current_value: str) -> dict:
+    def _right_output_analysis(self,image, all_options: dict, current_value: str) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
         Args:
