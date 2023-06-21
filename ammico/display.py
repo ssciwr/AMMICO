@@ -100,7 +100,7 @@ class AnalysisExplorer:
             Output("settings_TextDetector", "style"),
             Output("settings_EmotionDetector", "style"),
             Input("Dropdown_select_Detector", "value"),
-        )(self._update_Detector_setting)
+        )(self._update_detector_setting)
 
     # I split the different sections into subfunctions for better clarity
     def _top_file_explorer(self, mydict: dict) -> html.Div:
