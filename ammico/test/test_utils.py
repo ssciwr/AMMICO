@@ -1,11 +1,14 @@
 import json
 import pandas as pd
 import ammico.utils as ut
+import pytest
 
 
 def test_find_files(get_path):
     result = ut.find_files(path=get_path, pattern="*.png", recursive=True, limit=10)
     assert len(result) > 0
+    with pytest.raises(FileNotFoundError):
+        ut.find_files(path=".", pattern="*.png")
 
 
 def test_initialize_dict(get_path):

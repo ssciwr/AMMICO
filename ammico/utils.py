@@ -68,6 +68,10 @@ def find_files(
     result = list(glob.glob(f"{path}/{pattern}", recursive=recursive))
     if limit is not None:
         result = result[:limit]
+
+    if len(result) == 0:
+        raise FileNotFoundError(f"No files found in {path} with pattern '{pattern}'")
+
     return result
 
 
