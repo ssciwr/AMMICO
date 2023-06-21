@@ -283,8 +283,8 @@ class AnalysisExplorer:
         else:
             return None
 
-    def _update_Detector_setting(self, setting_input):
-        # return settings_TextDetector - style, settings_EmotionDetector - style
+    def _update_detector_setting(self, setting_input):
+        # return settings_TextDetector -> style, settings_EmotionDetector -> style
         display_none = {"display": "none"}
         display_flex = {
             "display": "flex",
@@ -307,9 +307,9 @@ class AnalysisExplorer:
         all_img_options: dict,
         current_img_value: str,
         detector_value: str,
-        settings_Text_analyse_text: bool,
-        setting_Emotion_emotion_threshold: int,
-        setting_Emotion_race_threshold: int,
+        settings_text_analyse_text: bool,
+        setting_emotion_emotion_threshold: int,
+        setting_emotion_race_threshold: int,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
@@ -337,13 +337,13 @@ class AnalysisExplorer:
         identify_function = identify_dict[detector_value]
         if detector_value == "TextDetector":
             detector_class = identify_function(
-                image_copy, analyse_text=settings_Text_analyse_text
+                image_copy, analyse_text=settings_text_analyse_text
             )
         elif detector_value == "EmotionDetector":
             detector_class = identify_function(
                 image_copy,
-                race_threshold=setting_Emotion_race_threshold,
-                emotion_threshold=setting_Emotion_emotion_threshold,
+                race_threshold=setting_emotion_race_threshold,
+                emotion_threshold=setting_emotion_emotion_threshold,
             )
         else:
             detector_class = identify_function(image_copy)
