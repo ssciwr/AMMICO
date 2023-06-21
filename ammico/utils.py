@@ -96,7 +96,7 @@ def _limit_results(results, limit):
 
 def find_files(
     path: str = None,
-    pattern=["png", "jpg"],
+    pattern=["png", "jpg", "jpeg", "gif", "webp", "avif", "tiff"],
     recursive: bool = True,
     limit=20,
     random_seed: int = None,
@@ -109,7 +109,7 @@ def find_files(
             working directory otherwise.
         pattern (str|list, optional): The naming pattern that the filename should match.
                 Use either '.ext' or just 'ext'
-                Defaults to ["png", "jpg"]. Can be used to allow other patterns or to only include
+                Defaults to ["png", "jpg", "jpeg", "gif", "webp", "avif","tiff"]. Can be used to allow other patterns or to only include
                 specific prefixes or suffixes.
         recursive (bool, optional): Whether to recurse into subdirectories. Default is set to True.
         limit (int/list, optional): The maximum number of images to be found.
