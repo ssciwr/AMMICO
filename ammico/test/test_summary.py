@@ -63,9 +63,12 @@ def test_analyse_image(get_dict):
         )
         # run two different images
         for key in get_dict.keys():
-            get_dict[key] = sm.SummaryDetector(get_dict[key]).analyse_image(
-                summary_model, summary_vis_processors
-            )
+            get_dict[key] = sm.SummaryDetector(
+                get_dict[key],
+                analysis_type="summary",
+                summary_model=summary_model,
+                summary_vis_processors=summary_vis_processors,
+            ).analyse_image()
         assert len(get_dict) == 2
         for key in get_dict.keys():
             assert len(get_dict[key]["3_non-deterministic summary"]) == 3
@@ -84,9 +87,11 @@ def test_analyse_questions(get_dict):
         "What happends on the picture?",
     ]
     for key in get_dict:
-        get_dict[key] = sm.SummaryDetector(get_dict[key]).analyse_questions(
-            list_of_questions
-        )
+        get_dict[key] = sm.SummaryDetector(
+            get_dict[key],
+            analysis_type="questions",
+            list_of_questions=list_of_questions,
+        ).analyse_image()
     assert len(get_dict) == 2
     list_of_questions_ans = ["2", "100"]
     list_of_questions_ans2 = ["flood", "festival"]
