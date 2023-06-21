@@ -3,9 +3,15 @@ import os
 from pandas import DataFrame, read_csv
 import pooch
 import importlib_resources
+import collections
+import random
 
 
 pkg = importlib_resources.files("ammico")
+
+
+def iterable(arg):
+    return isinstance(arg, collections.abc.Iterable) and not isinstance(arg, str)
 
 
 class DownloadResource:
@@ -48,8 +54,52 @@ class AnalysisMethod:
         raise NotImplementedError()
 
 
+def _match_pattern(path, pattern, recursive):
+    # helper function for find_files
+    # find all matches for a single pattern.
+
+    if pattern.startswith("."):
+        pattern = pattern[1:]
+    if recursive:
+        search_path = f"{path}/**/*.{pattern}"
+    else:
+        search_path = f"{path}/*.{pattern}"
+    return list(glob.glob(search_path, recursive=recursive))
+
+
+def _limit_results(results, limit):
+    # helper function for find_files
+    # use -1 or None to return all images
+    if limit == -1 or limit is None:
+        limit = len(results)
+
+    # limit or batch the images
+    if isinstance(limit, int):
+        if limit < -1:
+            raise ValueError("limit must be an integer greater than 0 or equal to -1")
+        results = results[:limit]
+
+    elif iterable(limit):
+        if len(limit) == 2:
+            results = results[limit[0] : limit[1]]
+        else:
+            raise ValueError(
+                f"limit must be an integer or a tuple of length 2, but is {limit}"
+            )
+    else:
+        raise ValueError(
+            f"limit must be an integer or a tuple of length 2, but is {limit}"
+        )
+
+    return results
+
+
 def find_files(
-    path: str = None, pattern: str = "*.png", recursive: bool = True, limit: int = 20
+    path: str = None,
+    pattern=["png", "jpg"],
+    recursive: bool = True,
+    limit=20,
+    random_seed: int = None,
 ) -> list:
     """Find image files on the file system.
 
@@ -57,26 +107,37 @@ def find_files(
         path (str, optional): The base directory where we are looking for the images. Defaults
             to None, which uses the XDG data directory if set or the current
             working directory otherwise.
-        pattern (str, optional): The naming pattern that the filename should match. Defaults to
-            "*.png". Can be used to allow other patterns or to only include
-            specific prefixes or suffixes.
-        recursive (bool, optional): Whether to recurse into subdirectories. Default is set to False.
-        limit (int, optional): The maximum number of images to be found.
-            Defaults to 20. To return all images, set to None.
-
+        pattern (str|list, optional): The naming pattern that the filename should match.
+                Use either '.ext' or just 'ext'
+                Defaults to ["png", "jpg"]. Can be used to allow other patterns or to only include
+                specific prefixes or suffixes.
+        recursive (bool, optional): Whether to recurse into subdirectories. Default is set to True.
+        limit (int/list, optional): The maximum number of images to be found.
+            Provide a list or tuple of length 2 to batch the images.
+            Defaults to 20. To return all images, set to None or -1.
+        random_seed (int, optional): The random seed to use for shuffling the images.
+            If None is provided the data will not be shuffeled. Defaults to None.
     Returns:
         list: A list with all filenames including the path.
     """
+
     if path is None:
         path = os.environ.get("XDG_DATA_HOME", ".")
-    result = list(glob.glob(f"{path}/{pattern}", recursive=recursive))
-    if limit is not None:
-        result = result[:limit]
 
-    if len(result) == 0:
+    if isinstance(pattern, str):
+        pattern = [pattern]
+    results = []
+    for p in pattern:
+        results.extend(_match_pattern(path, p, recursive=recursive))
+
+    if len(results) == 0:
         raise FileNotFoundError(f"No files found in {path} with pattern '{pattern}'")
 
-    return result
+    if random_seed is not None:
+        random.seed(random_seed)
+        random.shuffle(results)
+
+    return _limit_results(results, limit)
 
 
 def initialize_dict(filelist: list) -> dict:
