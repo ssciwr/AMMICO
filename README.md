@@ -6,7 +6,7 @@
 ![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ssciwr_ammico&metric=alert_status)
 ![Language](https://img.shields.io/github/languages/top/ssciwr/AMMICO)
 
-This package extracts data from images such as social media images, and the accompanying text/text that is included in the image. The analysis can extract a very large number of features, depending on the user input.
+This package extracts data from images such as social media posts that contain an image part and a text part. The analysis can generate a very large number of features, depending on the user input.
 
 **_This project is currently under development!_**
 
@@ -61,14 +61,18 @@ There are further notebooks that are currently of exploratory nature (`colors_ex
 
 ## Features
 ### Text extraction
-The text is extracted from the images using [`google-cloud-vision`](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website.
+The text is extracted from the images using [google-cloud-vision](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website.
 You then need to export the location of the API key as an environment variable:
-`export GOOGLE_APPLICATION_CREDENTIALS="location of your .json"`
+```
+export GOOGLE_APPLICATION_CREDENTIALS="location of your .json"
+```
 The extracted text is then stored under the `text` key (column when exporting a csv).
 
 [Googletrans](https://py-googletrans.readthedocs.io/en/latest/) is used to recognize the language automatically and translate into English. The text language and translated text is then stored under the `text_language` and `text_english` key (column when exporting a csv).
 
 If you further want to analyse the text, you have to set the `analyse_text` keyword to `True`. In doing so, the text is then processed using [spacy](https://spacy.io/) (tokenized, part-of-speech, lemma, ...). The English text is cleaned from numbers and unrecognized words (`text_clean`), spelling of the English text is corrected (`text_english_correct`), and further sentiment and subjectivity analysis are carried out (`polarity`, `subjectivity`). The latter two steps are carried out using [TextBlob](https://textblob.readthedocs.io/en/dev/index.html). For more information on the sentiment analysis using TextBlob see [here](https://towardsdatascience.com/my-absolute-go-to-for-sentiment-analysis-textblob-3ac3a11d524).
+
+The [Hugging Face transformers library](https://huggingface.co/) is used to perform another sentiment analysis, a text summary, and named entity recognition, using the `transformers` pipeline.
 
 ### Content extraction
 

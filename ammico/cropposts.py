@@ -132,11 +132,11 @@ def compute_crop_corner(
         kp1 (np.ndarray): Key points of the matches for the reference image.
         kp2 (np.ndarray): Key points of the matches for the social media posts.
         region (int, optional): Area to consider around the keypoints.
-        Defaults to 30.
+            Defaults to 30.
         h_margin (int, optional): Horizontal margin to subtract from the minimum
-        horizontal position. Defaults to 0.
+            horizontal position. Defaults to 0.
         v_margin (int, optional): Vertical margin to subtract from the minimum
-        vertical position. Defaults to 5.
+            vertical position. Defaults to 5.
         min_match: Minimum number of matches required. Defaults to 6.
     Returns:
         tuple, optional: Tuple of vertical and horizontal crop corner coordinates.
@@ -177,7 +177,7 @@ def crop_posts_image(
 
     Args:
         ref_views (list): List of all the reference images (as numpy arrays) that signify
-        below which regions should be cropped.
+            below which regions should be cropped.
         view (np.ndarray): The image to crop.
     Returns:
         np.ndarray: The cropped social media post.

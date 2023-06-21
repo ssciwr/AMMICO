@@ -16,6 +16,7 @@ Welcome to AMMICO's documentation!
    notebooks/Example summary
    notebooks/Example multimodal
    notebooks/Example objects
+   notebooks/Example cropposts
    modules
    license_link
 

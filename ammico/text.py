@@ -2,22 +2,15 @@ from google.cloud import vision
 from google.auth.exceptions import DefaultCredentialsError
 from googletrans import Translator
 import spacy
-from spacytextblob.spacytextblob import SpacyTextBlob
-from textblob import TextBlob
-from textblob import download_corpora
 import io
-from ammico import utils
+from ammico.utils import AnalysisMethod
 import grpc
 import pandas as pd
 from bertopic import BERTopic
 from transformers import pipeline
-import os
-
-# clean text has weird spaces and separation of "do n't"
-# increase coverage for text
 
 
-class TextDetector(utils.AnalysisMethod):
+class TextDetector(AnalysisMethod):
     def __init__(self, subdict: dict, analyse_text: bool = False) -> None:
         """Init text detection class.
 
@@ -31,9 +24,6 @@ class TextDetector(utils.AnalysisMethod):
         self.subdict.update(self.set_keys())
         self.translator = Translator()
         self.analyse_text = analyse_text
-        if self.analyse_text:
-            self._initialize_spacy()
-            self._initialize_textblob()
 
     def set_keys(self) -> dict:
         """Set the default keys for text analysis.
@@ -43,22 +33,6 @@ class TextDetector(utils.AnalysisMethod):
         """
         params = {"text": None, "text_language": None, "text_english": None}
         return params
-
-    def _initialize_spacy(self):
-        """Initialize the Spacy library for text analysis."""
-        try:
-            self.nlp = spacy.load("en_core_web_md")
-        except Exception:
-            spacy.cli.download("en_core_web_md")
-            self.nlp = spacy.load("en_core_web_md")
-        self.nlp.add_pipe("spacytextblob")
-
-    def _initialize_textblob(self):
-        """Initialize the TextBlob library for text analysis."""
-        try:
-            TextBlob("Here")
-        except Exception:
-            download_corpora.main()
 
     def analyse_image(self) -> dict:
         """Perform text extraction and analysis of the text.
@@ -70,10 +44,6 @@ class TextDetector(utils.AnalysisMethod):
         self.translate_text()
         self.remove_linebreaks()
         if self.analyse_text:
-            self._run_spacy()
-            self.clean_text()
-            self.correct_spelling()
-            self.sentiment_analysis()
             self.text_summary()
             self.text_sentiment_transformers()
             self.text_ner()
@@ -124,32 +94,6 @@ class TextDetector(utils.AnalysisMethod):
             self.subdict["text_english"] = self.subdict["text_english"].replace(
                 "\n", " "
             )
-
-    def _run_spacy(self):
-        """Generate Spacy doc object for further text analysis."""
-        self.doc = self.nlp(self.subdict["text_english"])
-
-    def clean_text(self):
-        """Clean the text from unrecognized words and any numbers."""
-        templist = []
-        for token in self.doc:
-            templist.append(
-                token.text
-            ) if token.pos_ != "NUM" and token.has_vector else None
-        self.subdict["text_clean"] = " ".join(templist).rstrip().lstrip()
-
-    def correct_spelling(self):
-        """Correct the spelling of the English text using TextBlob."""
-        self.textblob = TextBlob(self.subdict["text_english"])
-        self.subdict["text_english_correct"] = str(self.textblob.correct())
-
-    def sentiment_analysis(self):
-        """Perform sentiment analysis on the text using SpacyTextBlob."""
-        # polarity is between [-1.0, 1.0]
-        self.subdict["polarity"] = self.doc._.blob.polarity
-        # subjectivity is a float within the range [0.0, 1.0]
-        # where 0.0 is very objective and 1.0 is very subjective
-        self.subdict["subjectivity"] = self.doc._.blob.subjectivity
 
     def text_summary(self):
         """Generate a summary of the text using the Transformers pipeline."""
@@ -243,6 +187,21 @@ class PostprocessText:
                               a csv file by setting `use_csv` to True and providing a \
                              `csv_path`."
             )
+        # initialize spacy
+        self._initialize_spacy()
+
+    def _initialize_spacy(self):
+        try:
+            self.nlp = spacy.load(
+                "en_core_web_md",
+                exclude=["tagger", "parser", "ner", "attribute_ruler", "lemmatizer"],
+            )
+        except Exception:
+            spacy.cli.download("en_core_web_md")
+            self.nlp = spacy.load(
+                "en_core_web_md",
+                exclude=["tagger", "parser", "ner", "attribute_ruler", "lemmatizer"],
+            )
 
     def analyse_topic(self, return_topics: int = 3) -> tuple:
         """
@@ -254,14 +213,9 @@ class PostprocessText:
         Returns:
             tuple: A tuple containing the topic model, topic dataframe, and most frequent topics.
         """
-        # load spacy pipeline
-        nlp = spacy.load(
-            "en_core_web_md",
-            exclude=["tagger", "parser", "ner", "attribute_ruler", "lemmatizer"],
-        )
         try:
             # unfortunately catching exceptions does not work here - need to figure out why
-            self.topic_model = BERTopic(embedding_model=nlp)
+            self.topic_model = BERTopic(embedding_model=self.nlp)
         except TypeError:
             print("BERTopic excited with an error - maybe your dataset is too small?")
         self.topics, self.probs = self.topic_model.fit_transform(self.list_text_english)
