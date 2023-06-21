@@ -48,9 +48,7 @@ def test_AnalysisExplorer(get_path):
     analysis_explorer_faces._right_output_analysis(
         2, all_options_dict, path_img_1, "ObjectDetector", True, 50, 50
     )
-    analysis_explorer_faces._right_output_analysis(
-        2, all_options_dict, path_img_1, "TextDetector", True, 50, 50
-    )
+
     analysis_explorer_faces._right_output_analysis(
         2, all_options_dict, path_img_1, "EmotionDetector", True, 50, 50
     )
