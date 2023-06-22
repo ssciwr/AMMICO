@@ -12,13 +12,13 @@ class ColorDetector(AnalysisMethod):
         self,
         subdict: dict,
         delta_e_method: str = "CIE 1976",
-    ):
-        """Color Analsysis class
+    ) -> None:
+        """Color Analysis class, analyse hue and identify named colors.
 
-        :param subdict: The dictoriary containing the image path
-        :type subdict: dict
-        :param delta_e_method: The calculation method used for assigning closest color name, defaults to "CIE 1976"
-        :type delta_e_method: str, optional
+        Args:
+            subdict (dict): The dictionary containing the image path.
+            delta_e_method (str): The calculation method used for assigning the
+                closest color name, defaults to "CIE 1976".
         """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
@@ -26,7 +26,7 @@ class ColorDetector(AnalysisMethod):
         self.n_colors = 100
         self.delta_e_method = delta_e_method
 
-    def set_keys(self):
+    def set_keys(self) -> dict:
         colors = {
             "red": 0,
             "green": 0,

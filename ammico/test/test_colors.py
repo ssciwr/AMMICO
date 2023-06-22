@@ -1,5 +1,4 @@
 from ammico.colors import ColorDetector
-import pandas as pd
 import pytest
 
 
