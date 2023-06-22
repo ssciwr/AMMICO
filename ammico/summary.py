@@ -25,11 +25,20 @@ class SummaryDetector(AnalysisMethod):
 
         Args:
             subdict (dict, optional): Dictionary containing the image to be analysed. Defaults to {}.
-            summary_model_type (str, optional): Type of blip_caption model to use. Defaults to "base".
-            analysis_type (str, optional): Type of analysis to perform. Defaults to "analyse_summary_and_questions".
+            summary_model_type (str, optional): Type of blip_caption model to use. Can be "base" or "large". Defaults to "base".
+            analysis_type (str, optional): Type of analysis to perform. Can be "summary", "questions" or "summary_and_questions". Defaults to "summary_and_questions".
             list_of_questions (list, optional): List of questions to answer. Defaults to ["Are there people in the image?", "What is this picture about?"].
             summary_model ([type], optional): blip_caption model. Defaults to None.
             summary_vis_processors ([type], optional): Preprocessors for visual inputs. Defaults to None.
+            summary_vqa_model ([type], optional): blip_vqa model. Defaults to None.
+            summary_vqa_vis_processors ([type], optional): Preprocessors for vqa visual inputs. Defaults to None.
+            summary_vqa_txt_processors ([type], optional): Preprocessors for vqa text inputs. Defaults to None.
+
+        Raises:
+            ValueError: If analysis_type is not one of "summary", "questions" or "summary_and_questions".
+
+        Returns:
+            None.
         """
 
         super().__init__(subdict)
@@ -37,6 +46,10 @@ class SummaryDetector(AnalysisMethod):
         self.summary_model_type = summary_model_type
         self.analysis_type = analysis_type
         self.list_of_questions = list_of_questions
+        if analysis_type not in ["summary", "questions", "summary_and_questions"]:
+            raise ValueError(
+                "analysis_type must be one of 'summary', 'questions' or 'summary_and_questions'"
+            )
         if (
             (summary_model is None)
             and (summary_vis_processors is None)
@@ -147,7 +160,6 @@ class SummaryDetector(AnalysisMethod):
         Analyse image with blip_caption model.
 
         Args:
-            analysis_type (str): type of the analysis.
 
         Returns:
             self.subdict (dict): dictionary with analysis results.
@@ -167,11 +179,9 @@ class SummaryDetector(AnalysisMethod):
         Create 1 constant and 3 non deterministic captions for image.
 
         Args:
-            summary_model (str): model.
-            summary_vis_processors (str): preprocessors for visual inputs.
 
         Returns:
-            self.subdict (dict): dictionary with constant image summary and 3 non deterministic summary.
+            self.subdict (dict): dictionary with analysis results.
         """
 
         path = self.subdict["filename"]
