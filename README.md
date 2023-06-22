@@ -36,7 +36,7 @@ Use pre-processed image files such as social media posts with comments and proce
 
 The `AMMICO` package can be installed using pip: 
 ```
-pip install git+https://github.com/ssciwr/ammico.git
+pip install ammico
 ```
 This will install the package and its dependencies locally.
 
@@ -45,19 +45,21 @@ This will install the package and its dependencies locally.
 
 There are sample notebooks in the `notebooks` folder for you to explore the package:
 1. Text extraction: Use the notebook `get-text-from-image.ipynb` to extract any text from the images. The text is directly translated into English. If the text should be further analysed, set the keyword `analyse_text` to `True` as demonstrated in the notebook.\
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/notebooks/get-text-from-image.ipynb)**  
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.
 1. Emotion recognition: Use the notebook `facial_expressions.ipynb` to identify if there are faces on the image, if they are wearing masks, and if they are not wearing masks also the race, gender and dominant emotion.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/notebooks/facial_expressions.ipynb)**   
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/facial_expressions.ipynb)**   
 Place the data files in your google drive to access the data.
 1. Content extraction: Use the notebook `image_summary.ipynb` to create captions for the images and ask questions about the image content.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/notebooks/image_summary.ipynb)**
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/image_summary.ipynb)**
 1. Multimodal content: Use the notebook `multimodal_search.ipynb` to find the best fitting images to an image or text query.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/notebooks/multimodal_search.ipynb)**
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/multimodal_search.ipynb)**
+1. Color analysis: Use the notebook `color_analysis.ipynb` to identify colors the image. The colors are then classified into the main named colors in the English language.
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/colors_analysis.ipynb)**
 1. Object analysis: Use the notebook `ojects_expression.ipynb` to identify certain objects in the image. Currently, the following objects are being identified: person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/notebooks/objects_expression.ipynb)**
-
-There are further notebooks that are currently of exploratory nature (`colors_expression.ipynb` to identify certain colors on the image). To crop social media posts use the `cropposts.ipynb` notebook.
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/objects_expression.ipynb)**
+1. To crop social media posts use the `cropposts.ipynb` notebook. 
+**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/cropposts.ipynb)**
 
 ## Features
 ### Text extraction
@@ -85,6 +87,10 @@ Emotion recognition is carried out using the [deepface](https://github.com/seren
 ### Object detection
 
 Object detection is carried out using [cvlib](https://github.com/arunponnusamy/cvlib) and the [YOLOv4](https://github.com/AlexeyAB/darknet) model. This library detects faces, people, and several inanimate objects; we currently have restricted the output to person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
+
+### Color/hue detection
+
+Color detection is carried out using [colorgram.py](https://github.com/obskyr/colorgram.py) and [colour](https://github.com/vaab/colour) for the distance metric. The colors can be classified into the main named colors/hues in the English language, that are red, green, blue, yellow, cyan, orange, purple, pink, brown, grey, white, black.
 
 ### Cropping of posts
 
