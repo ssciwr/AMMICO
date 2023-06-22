@@ -10,10 +10,7 @@ class SummaryDetector(AnalysisMethod):
         subdict: dict = {},
         summary_model_type: str = "base",
         analysis_type: str = "summary_and_questions",
-        list_of_questions: list = [
-            "Are there people in the image?",
-            "What is this picture about?",
-        ],
+        list_of_questions: str = None,
         summary_model=None,
         summary_vis_processors=None,
         summary_vqa_model=None,
@@ -45,7 +42,13 @@ class SummaryDetector(AnalysisMethod):
         self.summary_device = "cuda" if cuda.is_available() else "cpu"
         self.summary_model_type = summary_model_type
         self.analysis_type = analysis_type
-        self.list_of_questions = list_of_questions
+        if list_of_questions is None:
+            list_of_questions = [
+                "Are there people in the image?",
+                "What is this picture about?",
+            ]
+        else:
+            self.list_of_questions = list_of_questions
         if analysis_type not in ["summary", "questions", "summary_and_questions"]:
             raise ValueError(
                 "analysis_type must be one of 'summary', 'questions' or 'summary_and_questions'"
