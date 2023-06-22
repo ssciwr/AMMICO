@@ -49,8 +49,8 @@ def test_AnalysisExplorer(get_path):
 
     assert analysis_explorer_objects.update_picture(None) is None
 
-    analysis_explorer_faces._right_output_analysis(1, all_options_dict, path_img_1)
-    analysis_explorer_objects._right_output_analysis(1, all_options_dict, path_img_2)
+    analysis_explorer_faces._right_output_analysis(None, all_options_dict, path_img_1)
+    analysis_explorer_objects._right_output_analysis(None, all_options_dict, path_img_2)
 
     with pytest.raises(EnvironmentError):
         analysis_explorer_faces.run_server(port=8050)
