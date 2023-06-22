@@ -15,6 +15,7 @@ Welcome to AMMICO's documentation!
    notebooks/Example text
    notebooks/Example summary
    notebooks/Example multimodal
+   notebooks/Example colors
    notebooks/Example objects
    notebooks/Example cropposts
    modules
