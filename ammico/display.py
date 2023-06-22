@@ -1,6 +1,7 @@
 import ammico.faces as faces
 import ammico.text as text
 import ammico.objects as objects
+import ammico.colors as colors
 from ammico.utils import is_interactive
 import ammico.summary as summary
 import dash_renderjson
@@ -41,7 +42,7 @@ class AnalysisExplorer:
             "base0F": "#cc6633",
         }
 
-        #  Setup the layout
+        # Setup the layout
         app_layout = html.Div(
             [
                 # Top
@@ -325,6 +326,7 @@ class AnalysisExplorer:
             "TextDetector": text.TextDetector,
             "ObjectDetector": objects.ObjectDetector,
             "SummaryDetector": summary.SummaryDetector,
+            # "colors": colors.ColorDetector,
         }
 
         # Get image ID from dropdown value, which is the filepath
