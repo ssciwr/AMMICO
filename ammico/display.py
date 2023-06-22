@@ -1,6 +1,7 @@
 import ammico.faces as faces
 import ammico.text as text
 import ammico.objects as objects
+import ammico.colors as colors
 from ammico.utils import is_interactive
 import ammico.summary as summary
 import dash_renderjson
@@ -45,7 +46,7 @@ class AnalysisExplorer:
             "base0F": "#cc6633",
         }
 
-        #  Setup the layout
+        # Setup the layout
         app_layout = html.Div(
             [
                 # Top
@@ -197,7 +198,9 @@ class AnalysisExplorer:
         else:
             return None
 
-    def _right_output_analysis(self, all_options: dict, current_value: str) -> dict:
+    def _right_output_analysis(
+        self, image, all_options: dict, current_value: str
+    ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
         Args:
@@ -212,6 +215,7 @@ class AnalysisExplorer:
             "text-on-image": text.TextDetector,
             "objects": objects.ObjectDetector,
             "summary": summary.SummaryDetector,
+            "colors": colors.ColorDetector,
         }
 
         # Get image ID from dropdown value, which is the filepath
