@@ -2,6 +2,18 @@ from ammico.colors import ColorDetector
 import pytest
 
 
+def test_init():
+    delta_e_method = "CIE 1976"
+    cd = ColorDetector({})
+    assert cd.delta_e_method == delta_e_method
+    delta_e_method = "CIE 1994"
+    cd = ColorDetector({}, delta_e_method)
+    assert cd.delta_e_method == delta_e_method
+    delta_e_method = "nonsense"
+    with pytest.raises(ValueError):
+        cd = ColorDetector({}, delta_e_method)
+
+
 def test_set_keys():
     colors = {
         "red": 0,
