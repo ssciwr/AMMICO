@@ -418,9 +418,9 @@ class AnalysisExplorer:
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
         setting_color_delta_e_method: str,
-        setting_Summary_analysis_type: str,
-        setting_Summary_model: str,
-        setting_Summary_list_of_questions: str,
+        setting_summary_analysis_type: str,
+        setting_summary_model: str,
+        setting_summary_list_of_questions: str,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
@@ -465,10 +465,10 @@ class AnalysisExplorer:
         elif detector_value == "SummaryDetector":
             detector_class = identify_function(
                 image_copy,
-                analysis_type=setting_Summary_analysis_type,
-                summary_model_type=setting_Summary_model,
-                list_of_questions=[setting_Summary_list_of_questions]
-                if (setting_Summary_list_of_questions is not None)
+                analysis_type=setting_summary_analysis_type,
+                summary_model_type=setting_summary_model,
+                list_of_questions=[setting_summary_list_of_questions]
+                if (setting_summary_list_of_questions is not None)
                 else None,
             )
         else:

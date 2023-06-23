@@ -56,7 +56,7 @@ def test_AnalysisExplorer(get_path):
         "CIE 1976",
         "summary_and_questions",
         "base",
-        None,
+        "How many people are in the picture?",
     )
 
     analysis_explorer._right_output_analysis(
@@ -70,7 +70,7 @@ def test_AnalysisExplorer(get_path):
         "CIE 1976",
         "summary_and_questions",
         "base",
-        None,
+        "How many people are in the picture?",
     )
 
     analysis_explorer._right_output_analysis(
@@ -84,7 +84,7 @@ def test_AnalysisExplorer(get_path):
         "CIE 1976",
         "summary_and_questions",
         "base",
-        None,
+        "How many people are in the picture?",
     )
 
     analysis_explorer._right_output_analysis(
@@ -98,7 +98,7 @@ def test_AnalysisExplorer(get_path):
         "CIE 1976",
         "summary_and_questions",
         "base",
-        None,
+        "How many people are in the picture?",
     )
 
     with pytest.raises(EnvironmentError):
