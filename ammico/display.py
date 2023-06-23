@@ -10,6 +10,22 @@ import jupyter_dash
 from PIL import Image
 
 
+COLOR_SCHEMES = [
+    "CIE 1976",
+    "CIE 1994",
+    "CIE 2000",
+    "CMC",
+    "ITP",
+    "CAM02-LCD",
+    "CAM02-SCD",
+    "CAM02-UCS",
+    "CAM16-LCD",
+    "CAM16-SCD",
+    "CAM16-UCS",
+    "DIN99",
+]
+
+
 class AnalysisExplorer:
     def __init__(self, mydict: dict) -> None:
         """Initialize the AnalysisExplorer class to create an interactive
@@ -210,19 +226,18 @@ class AnalysisExplorer:
                     children=[
                         html.Div(
                             [
-                                html.Div(
-                                    "Color name assignment",
-                                    style={"height": "30px", "margin-top": "5px"},
-                                ),
-                                dcc.Input(
+                                dcc.Dropdown(
+                                    options=COLOR_SCHEMES,
                                     value="CIE 1976",
-                                    type="text",
                                     id="setting_Color_delta_e_method",
-                                    style={"height": "auto", "margin-bottom": "auto"},
-                                ),
+                                )
                             ],
-                            style={"width": "49%", "display": "inline-block"},
-                        ),
+                            style={
+                                "width": "49%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
+                        )
                     ],
                 ),
             ],
