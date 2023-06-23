@@ -11,7 +11,7 @@ def test_init():
     assert cd.delta_e_method == delta_e_method
     delta_e_method = "nonsense"
     with pytest.raises(ValueError):
-        cd = ColorDetector({}, delta_e_method)
+        ColorDetector({}, delta_e_method)
 
 
 def test_set_keys():

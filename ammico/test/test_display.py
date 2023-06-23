@@ -39,22 +39,26 @@ def test_AnalysisExplorer(get_path):
         path_img_2: "IMG_2746",
     }
 
-    analysis_explorer_faces = ammico_display.AnalysisExplorer(mydict)
+    analysis_explorer = ammico_display.AnalysisExplorer(mydict)
 
-    analysis_explorer_faces.update_picture(path_img_1)
+    analysis_explorer.update_picture(path_img_1)
 
-    assert analysis_explorer_faces.update_picture(None) is None
+    assert analysis_explorer.update_picture(None) is None
 
-    analysis_explorer_faces._right_output_analysis(
+    analysis_explorer._right_output_analysis(
         2, all_options_dict, path_img_1, "ObjectDetector", True, 50, 50, "CIE 1976"
     )
 
-    analysis_explorer_faces._right_output_analysis(
+    analysis_explorer._right_output_analysis(
         2, all_options_dict, path_img_1, "EmotionDetector", True, 50, 50, "CIE 1976"
     )
-    analysis_explorer_faces._right_output_analysis(
+    analysis_explorer._right_output_analysis(
         2, all_options_dict, path_img_1, "SummaryDetector", True, 50, 50, "CIE 1976"
     )
 
+    analysis_explorer._right_output_analysis(
+        2, all_options_dict, path_img_1, "ColorDetector", True, 50, 50, "CIE 1976"
+    )
+
     with pytest.raises(EnvironmentError):
-        analysis_explorer_faces.run_server(port=8050)
+        analysis_explorer.run_server(port=8050)
