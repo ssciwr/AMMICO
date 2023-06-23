@@ -24,6 +24,8 @@ COLOR_SCHEMES = [
     "CAM16-UCS",
     "DIN99",
 ]
+SUMMARY_ANALYSIS_TYPE = ["summary_and_questions", "summary", "questions"]
+SUMMARY_MODEL = ["base", "large"]
 
 
 class AnalysisExplorer:
@@ -111,6 +113,9 @@ class AnalysisExplorer:
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
             State("setting_Color_delta_e_method", "value"),
+            State("setting_Summary_analysis_type", "value"),
+            State("setting_Summary_model", "value"),
+            State("setting_Summary_list_of_questions", "value"),
             prevent_initial_call=True,
         )(self._right_output_analysis)
 
@@ -118,6 +123,7 @@ class AnalysisExplorer:
             Output("settings_TextDetector", "style"),
             Output("settings_EmotionDetector", "style"),
             Output("settings_ColorDetector", "style"),
+            Output("settings_Summary_Detector", "style"),
             Input("Dropdown_select_Detector", "value"),
         )(self._update_detector_setting)
 
@@ -240,6 +246,62 @@ class AnalysisExplorer:
                         )
                     ],
                 ),
+                html.Div(
+                    id="settings_Summary_Detector",
+                    style={"display": "none"},
+                    children=[
+                        html.Div(
+                            [
+                                dcc.Dropdown(
+                                    options=SUMMARY_ANALYSIS_TYPE,
+                                    value="summary_and_questions",
+                                    id="setting_Summary_analysis_type",
+                                )
+                            ],
+                            style={
+                                "width": "49%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
+                        ),
+                        html.Div(
+                            [
+                                dcc.Dropdown(
+                                    options=SUMMARY_MODEL,
+                                    value="base",
+                                    id="setting_Summary_model",
+                                )
+                            ],
+                            style={
+                                "width": "49%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Please enter a question",
+                                    style={
+                                        "height": "30px",
+                                        "margin-top": "5px",
+                                    },
+                                ),
+                                dcc.Input(
+                                    type="text",
+                                    placeholder="",
+                                    id="setting_Summary_list_of_questions",
+                                    style={"height": "auto", "margin-bottom": "auto"},
+                                ),
+                            ],
+                            style={
+                                "width": "49%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
+                        ),
+                    ],
+                ),
             ],
         )
         return settings_layout
@@ -342,6 +404,9 @@ class AnalysisExplorer:
         if setting_input == "ColorDetector":
             return display_none, display_none, display_flex
 
+        if setting_input == "SummaryDetector":
+            return display_none, display_none, display_flex
+
         else:
             return display_none, display_none, display_none
 
@@ -355,6 +420,9 @@ class AnalysisExplorer:
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
         setting_color_delta_e_method: str,
+        setting_Summary_analysis_type: str,
+        setting_Summary_model: str,
+        setting_Summary_list_of_questions: str,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
@@ -395,6 +463,13 @@ class AnalysisExplorer:
             detector_class = identify_function(
                 image_copy,
                 delta_e_method=setting_color_delta_e_method,
+            )
+        elif detector_value == "SummaryDetector":
+            detector_class = identify_function(
+                image_copy,
+                analysis_type=setting_Summary_analysis_type,
+                summary_model_type=setting_Summary_model,
+                list_of_questions=list[setting_Summary_list_of_questions],
             )
         else:
             detector_class = identify_function(image_copy)

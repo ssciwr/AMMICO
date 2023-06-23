@@ -6,7 +6,12 @@ if __name__ == "__main__":
     )
     mydict = ammico.initialize_dict(images)
     obj = ammico.SummaryDetector()
-    summary_m, summary_v = obj.load_model("base")
+    # summary_m, summary_v = obj.load_model("base")
+    (
+        summary_vqa_model,
+        summary_vqa_vis_processors,
+        summary_vqa_txt_processors,
+    ) = obj.load_vqa_model()
     (
         summary_vqa_model,
         summary_vqa_vis_processors,
@@ -15,9 +20,9 @@ if __name__ == "__main__":
     for key in mydict:
         mydict[key] = ammico.SummaryDetector(
             mydict[key],
-            analysis_type="summary_and_questions",
-            summary_model=summary_m,
-            summary_vis_processors=summary_v,
+            analysis_type="questions",
+            # summary_model=summary_m,
+            # summary_vis_processors=summary_v,
             summary_vqa_model=summary_vqa_model,
             summary_vqa_vis_processors=summary_vqa_vis_processors,
             summary_vqa_txt_processors=summary_vqa_txt_processors,

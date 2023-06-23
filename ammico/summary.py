@@ -219,35 +219,31 @@ class SummaryDetector(AnalysisMethod):
             and (self.summary_vqa_txt_processors is None)
         ):
             (
-                summary_vqa_model,
-                summary_vqa_vis_processors,
-                summary_vqa_txt_processors,
+                self.summary_vqa_model,
+                self.summary_vqa_vis_processors,
+                self.summary_vqa_txt_processors,
             ) = load_model_and_preprocess(
                 name="blip_vqa",
                 model_type="vqav2",
                 is_eval=True,
                 device=self.summary_device,
             )
-        else:
-            summary_vqa_model = self.summary_vqa_model
-            summary_vqa_vis_processors = self.summary_vqa_vis_processors
-            summary_vqa_txt_processors = self.summary_vqa_txt_processors
         if len(list_of_questions) > 0:
             path = self.subdict["filename"]
             raw_image = Image.open(path).convert("RGB")
             image = (
-                summary_vqa_vis_processors["eval"](raw_image)
+                self.summary_vqa_vis_processors["eval"](raw_image)
                 .unsqueeze(0)
                 .to(self.summary_device)
             )
             question_batch = []
             for quest in list_of_questions:
-                question_batch.append(summary_vqa_txt_processors["eval"](quest))
+                question_batch.append(self.summary_vqa_txt_processors["eval"](quest))
             batch_size = len(list_of_questions)
             image_batch = image.repeat(batch_size, 1, 1, 1)
 
             with no_grad():
-                answers_batch = summary_vqa_model.predict_answers(
+                answers_batch = self.summary_vqa_model.predict_answers(
                     samples={"image": image_batch, "text_input": question_batch},
                     inference_method="generate",
                 )
