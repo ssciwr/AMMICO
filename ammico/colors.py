@@ -6,6 +6,21 @@ import colorgram
 import colour
 from ammico.utils import get_color_table, AnalysisMethod
 
+COLOR_SCHEMES = [
+    "CIE 1976",
+    "CIE 1994",
+    "CIE 2000",
+    "CMC",
+    "ITP",
+    "CAM02-LCD",
+    "CAM02-SCD",
+    "CAM02-UCS",
+    "CAM16-LCD",
+    "CAM16-SCD",
+    "CAM16-UCS",
+    "DIN99",
+]
+
 
 class ColorDetector(AnalysisMethod):
     def __init__(
@@ -19,11 +34,20 @@ class ColorDetector(AnalysisMethod):
             subdict (dict): The dictionary containing the image path.
             delta_e_method (str): The calculation method used for assigning the
                 closest color name, defaults to "CIE 1976".
+                The available options are: 'CIE 1976', 'CIE 1994', 'CIE 2000',
+                'CMC', 'ITP', 'CAM02-LCD', 'CAM02-SCD', 'CAM02-UCS', 'CAM16-LCD',
+                'CAM16-SCD', 'CAM16-UCS', 'DIN99'
         """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.merge_color = True
         self.n_colors = 100
+        if delta_e_method not in COLOR_SCHEMES:
+            raise ValueError(
+                "Invalid selection for assigning the color name. Please select one of {}".format(
+                    COLOR_SCHEMES
+                )
+            )
         self.delta_e_method = delta_e_method
 
     def set_keys(self) -> dict:
