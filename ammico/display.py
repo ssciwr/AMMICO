@@ -94,12 +94,14 @@ class AnalysisExplorer:
             State("setting_Text_analyse_text", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
+            State("setting_Color_delta_e_method", "value"),
             prevent_initial_call=True,
         )(self._right_output_analysis)
 
         self.app.callback(
             Output("settings_TextDetector", "style"),
             Output("settings_EmotionDetector", "style"),
+            Output("settings_ColorDetector", "style"),
             Input("Dropdown_select_Detector", "value"),
         )(self._update_detector_setting)
 
@@ -202,6 +204,27 @@ class AnalysisExplorer:
                         ),
                     ],
                 ),
+                html.Div(
+                    id="settings_ColorDetector",
+                    style={"display": "none"},
+                    children=[
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Color name assignment",
+                                    style={"height": "30px", "margin-top": "5px"},
+                                ),
+                                dcc.Input(
+                                    value="CIE 1976",
+                                    type="text",
+                                    id="setting_Color_delta_e_method",
+                                    style={"height": "auto", "margin-bottom": "auto"},
+                                ),
+                            ],
+                            style={"width": "49%", "display": "inline-block"},
+                        ),
+                    ],
+                ),
             ],
         )
         return settings_layout
@@ -225,6 +248,7 @@ class AnalysisExplorer:
                                         "ObjectDetector",
                                         "EmotionDetector",
                                         "SummaryDetector",
+                                        "ColorDetector",
                                     ],
                                     value="TextDetector",
                                     id="Dropdown_select_Detector",
@@ -295,12 +319,16 @@ class AnalysisExplorer:
         }
 
         if setting_input == "TextDetector":
-            return display_flex, display_none
+            return display_flex, display_none, display_none
 
         if setting_input == "EmotionDetector":
-            return display_none, display_flex
+            return display_none, display_flex, display_none
+
+        if setting_input == "ColorDetector":
+            return display_none, display_none, display_flex
+
         else:
-            return display_none, display_none
+            return display_none, display_none, display_none
 
     def _right_output_analysis(
         self,
@@ -311,6 +339,7 @@ class AnalysisExplorer:
         settings_text_analyse_text: bool,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
+        setting_color_delta_e_method: str,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
@@ -326,7 +355,7 @@ class AnalysisExplorer:
             "TextDetector": text.TextDetector,
             "ObjectDetector": objects.ObjectDetector,
             "SummaryDetector": summary.SummaryDetector,
-            # "colors": colors.ColorDetector,
+            "ColorDetector": colors.ColorDetector,
         }
 
         # Get image ID from dropdown value, which is the filepath
@@ -346,6 +375,11 @@ class AnalysisExplorer:
                 image_copy,
                 race_threshold=setting_emotion_race_threshold,
                 emotion_threshold=setting_emotion_emotion_threshold,
+            )
+        elif detector_value == "ColorDetector":
+            detector_class = identify_function(
+                image_copy,
+                delta_e_method=setting_color_delta_e_method,
             )
         else:
             detector_class = identify_function(image_copy)
