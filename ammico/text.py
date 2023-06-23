@@ -133,7 +133,7 @@ class TextDetector(AnalysisMethod):
         )
         result = pipe(self.subdict["text_english"])
         self.subdict["sentiment"] = result[0]["label"]
-        self.subdict["sentiment_score"] = result[0]["score"]
+        self.subdict["sentiment_score"] = round(result[0]["score"], 2)
 
     def text_ner(self):
         """Perform named entity recognition on the text using the Transformers pipeline."""
