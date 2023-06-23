@@ -10,21 +10,33 @@ import jupyter_dash
 from PIL import Image
 
 
+COLOR_SCHEMES = [
+    "CIE 1976",
+    "CIE 1994",
+    "CIE 2000",
+    "CMC",
+    "ITP",
+    "CAM02-LCD",
+    "CAM02-SCD",
+    "CAM02-UCS",
+    "CAM16-LCD",
+    "CAM16-SCD",
+    "CAM16-UCS",
+    "DIN99",
+]
+
+
 class AnalysisExplorer:
-    def __init__(self, mydict: dict, identify: str = "faces") -> None:
+    def __init__(self, mydict: dict) -> None:
         """Initialize the AnalysisExplorer class to create an interactive
         visualization of the analysis results.
 
         Args:
             mydict (dict): A nested dictionary containing image data for all images.
-            identify (str, optional): The type of analysis to perform (default: "faces").
-                Options are "faces" (face and emotion detection), "text-on-image" (image
-                extraction and analysis), "objects" (object detection), "summary" (image caption
-                generation).
+
         """
         self.app = jupyter_dash.JupyterDash(__name__)
         self.mydict = mydict
-        self.identify = identify
         self.theme = {
             "scheme": "monokai",
             "author": "wimer hazenberg (http://www.monokai.nl)",
@@ -51,7 +63,7 @@ class AnalysisExplorer:
             [
                 # Top
                 html.Div(
-                    ["Identify: ", identify, self._top_file_explorer(mydict)],
+                    [self._top_file_explorer(mydict)],
                     id="Div_top",
                     style={
                         "width": "30%",
@@ -91,11 +103,23 @@ class AnalysisExplorer:
 
         self.app.callback(
             Output("right_json_viewer", "data"),
-            Input("img_middle_picture_id", "src"),
+            Input("button_run", "n_clicks"),
             State("left_select_id", "options"),
             State("left_select_id", "value"),
+            State("Dropdown_select_Detector", "value"),
+            State("setting_Text_analyse_text", "value"),
+            State("setting_Emotion_emotion_threshold", "value"),
+            State("setting_Emotion_race_threshold", "value"),
+            State("setting_Color_delta_e_method", "value"),
             prevent_initial_call=True,
         )(self._right_output_analysis)
+
+        self.app.callback(
+            Output("settings_TextDetector", "style"),
+            Output("settings_EmotionDetector", "style"),
+            Output("settings_ColorDetector", "style"),
+            Input("Dropdown_select_Detector", "value"),
+        )(self._update_detector_setting)
 
     # I split the different sections into subfunctions for better clarity
     def _top_file_explorer(self, mydict: dict) -> html.Div:
@@ -135,8 +159,93 @@ class AnalysisExplorer:
         )
         return middle_layout
 
+    def _create_setting_layout(self):
+        settings_layout = html.Div(
+            [
+                html.Div(
+                    id="settings_TextDetector",
+                    style={"display": "none"},
+                    children=[
+                        dcc.Checklist(
+                            ["Analyse text"],
+                            ["Analyse text"],
+                            id="setting_Text_analyse_text",
+                        ),
+                    ],
+                ),
+                html.Div(
+                    id="settings_EmotionDetector",
+                    style={"display": "none"},
+                    children=[
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Emotion threshold",
+                                    style={"height": "30px", "margin-top": "5px"},
+                                ),
+                                dcc.Input(
+                                    value=50,
+                                    type="number",
+                                    max=100,
+                                    min=0,
+                                    id="setting_Emotion_emotion_threshold",
+                                    style={"height": "auto", "margin-bottom": "auto"},
+                                ),
+                            ],
+                            style={"width": "49%", "display": "inline-block"},
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Race threshold",
+                                    style={
+                                        "height": "30px",
+                                        "margin-top": "5px",
+                                    },
+                                ),
+                                dcc.Input(
+                                    type="number",
+                                    value=50,
+                                    max=100,
+                                    min=0,
+                                    id="setting_Emotion_race_threshold",
+                                    style={"height": "auto", "margin-bottom": "auto"},
+                                ),
+                            ],
+                            style={
+                                "width": "49%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
+                        ),
+                    ],
+                ),
+                html.Div(
+                    id="settings_ColorDetector",
+                    style={"display": "none"},
+                    children=[
+                        html.Div(
+                            [
+                                dcc.Dropdown(
+                                    options=COLOR_SCHEMES,
+                                    value="CIE 1976",
+                                    id="setting_Color_delta_e_method",
+                                )
+                            ],
+                            style={
+                                "width": "49%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
+                        )
+                    ],
+                ),
+            ],
+        )
+        return settings_layout
+
     def _right_output_json(self) -> html.Div:
-        """Initialize the JSON viewer for displaying the analysis output.
+        """Initialize the DetectorDropdown, argument Div and JSON viewer for displaying the analysis output.
 
         Returns:
             html.Div: The layout for the JSON viewer.
@@ -148,13 +257,29 @@ class AnalysisExplorer:
                     children=[
                         html.Div(
                             [
+                                dcc.Dropdown(
+                                    options=[
+                                        "TextDetector",
+                                        "ObjectDetector",
+                                        "EmotionDetector",
+                                        "SummaryDetector",
+                                        "ColorDetector",
+                                    ],
+                                    value="TextDetector",
+                                    id="Dropdown_select_Detector",
+                                ),
+                                html.Div(
+                                    children=[self._create_setting_layout()],
+                                    id="div_detector_args",
+                                ),
+                                html.Button("Run Detector", id="button_run"),
                                 dash_renderjson.DashRenderjson(
                                     id="right_json_viewer",
                                     data={},
                                     max_depth=-1,
                                     theme=self.theme,
                                     invert_theme=True,
-                                )
+                                ),
                             ]
                         )
                     ],
@@ -198,8 +323,38 @@ class AnalysisExplorer:
         else:
             return None
 
+    def _update_detector_setting(self, setting_input):
+        # return settings_TextDetector -> style, settings_EmotionDetector -> style
+        display_none = {"display": "none"}
+        display_flex = {
+            "display": "flex",
+            "flexWrap": "wrap",
+            "width": 400,
+            "margin-top": "20px",
+        }
+
+        if setting_input == "TextDetector":
+            return display_flex, display_none, display_none
+
+        if setting_input == "EmotionDetector":
+            return display_none, display_flex, display_none
+
+        if setting_input == "ColorDetector":
+            return display_none, display_none, display_flex
+
+        else:
+            return display_none, display_none, display_none
+
     def _right_output_analysis(
-        self, image, all_options: dict, current_value: str
+        self,
+        n_clicks,
+        all_img_options: dict,
+        current_img_value: str,
+        detector_value: str,
+        settings_text_analyse_text: bool,
+        setting_emotion_emotion_threshold: int,
+        setting_emotion_race_threshold: int,
+        setting_color_delta_e_method: str,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
@@ -211,17 +366,36 @@ class AnalysisExplorer:
             dict: The analysis output for the selected image.
         """
         identify_dict = {
-            "faces": faces.EmotionDetector,
-            "text-on-image": text.TextDetector,
-            "objects": objects.ObjectDetector,
-            "summary": summary.SummaryDetector,
-            "colors": colors.ColorDetector,
+            "EmotionDetector": faces.EmotionDetector,
+            "TextDetector": text.TextDetector,
+            "ObjectDetector": objects.ObjectDetector,
+            "SummaryDetector": summary.SummaryDetector,
+            "ColorDetector": colors.ColorDetector,
         }
 
         # Get image ID from dropdown value, which is the filepath
-        image_id = all_options[current_value]
+        if current_img_value is None:
+            return {}
+        image_id = all_img_options[current_img_value]
+        # copy image so prvious runs don't leave their default values in the dict
+        image_copy = self.mydict[image_id].copy()
 
-        identify_function = identify_dict[self.identify]
-
-        self.mydict[image_id] = identify_function(self.mydict[image_id]).analyse_image()
-        return self.mydict[image_id]
+        identify_function = identify_dict[detector_value]
+        if detector_value == "TextDetector":
+            detector_class = identify_function(
+                image_copy, analyse_text=settings_text_analyse_text
+            )
+        elif detector_value == "EmotionDetector":
+            detector_class = identify_function(
+                image_copy,
+                race_threshold=setting_emotion_race_threshold,
+                emotion_threshold=setting_emotion_emotion_threshold,
+            )
+        elif detector_value == "ColorDetector":
+            detector_class = identify_function(
+                image_copy,
+                delta_e_method=setting_color_delta_e_method,
+            )
+        else:
+            detector_class = identify_function(image_copy)
+        return detector_class.analyse_image()
