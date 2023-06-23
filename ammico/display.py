@@ -463,20 +463,13 @@ class AnalysisExplorer:
                 delta_e_method=setting_color_delta_e_method,
             )
         elif detector_value == "SummaryDetector":
-            if setting_Summary_list_of_questions is None:
-                current_list_of_questions = [
-                    "What is the main idea?",
-                    "What is the author's purpose?",
-                ]
-            else:
-                current_list_of_questions = [
-                    setting_Summary_list_of_questions,
-                ]
             detector_class = identify_function(
                 image_copy,
                 analysis_type=setting_Summary_analysis_type,
                 summary_model_type=setting_Summary_model,
-                list_of_questions=current_list_of_questions,
+                list_of_questions=[setting_Summary_list_of_questions]
+                if (setting_Summary_list_of_questions is not None)
+                else None,
             )
         else:
             detector_class = identify_function(image_copy)
