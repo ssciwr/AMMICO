@@ -15,7 +15,7 @@ if __name__ == "__main__":
     for key in mydict:
         mydict[key] = ammico.SummaryDetector(
             mydict[key],
-            analysis_type="summary_and_questions",
+            analysis_type="questions",
             # summary_model=summary_m,
             # summary_vis_processors=summary_v,
             # summary_vqa_model=summary_vqa_model,

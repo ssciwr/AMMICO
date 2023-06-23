@@ -46,13 +46,13 @@ class SummaryDetector(AnalysisMethod):
         self.summary_device = "cuda" if cuda.is_available() else "cpu"
         self.summary_model_type = summary_model_type
         self.analysis_type = analysis_type
-        if (not isinstance(list_of_questions, list)) or (None in list_of_questions):
-            raise ValueError("list_of_questions must be a list of string (questions)")
         if list_of_questions is None:
             self.list_of_questions = [
                 "Are there people in the image?",
                 "What is this picture about?",
             ]
+        elif (not isinstance(list_of_questions, list)) or (None in list_of_questions):
+            raise ValueError("list_of_questions must be a list of string (questions)")
         else:
             self.list_of_questions = list_of_questions
         if (
