@@ -26,7 +26,3 @@ if __name__ == "__main__":
     outdict = ammico.append_data_to_dict(mydict)
     df = ammico.dump_df(outdict)
     df.to_csv("data_out4.csv")
-# ammico.TextDetector
-# ammico.EmotionDetector
-# ammico.ObjectDetector
-# ammico.SummaryDetector

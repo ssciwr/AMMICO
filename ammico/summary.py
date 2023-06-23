@@ -43,7 +43,7 @@ class SummaryDetector(AnalysisMethod):
         self.summary_model_type = summary_model_type
         self.analysis_type = analysis_type
         if list_of_questions is None:
-            list_of_questions = [
+            self.list_of_questions = [
                 "Are there people in the image?",
                 "What is this picture about?",
             ]
