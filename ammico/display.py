@@ -259,9 +259,8 @@ class AnalysisExplorer:
                                 )
                             ],
                             style={
-                                "width": "49%",
+                                "width": "33%",
                                 "display": "inline-block",
-                                "margin-top": "10px",
                             },
                         ),
                         html.Div(
@@ -273,7 +272,7 @@ class AnalysisExplorer:
                                 )
                             ],
                             style={
-                                "width": "49%",
+                                "width": "33%",
                                 "display": "inline-block",
                                 "margin-top": "10px",
                             },
@@ -283,19 +282,18 @@ class AnalysisExplorer:
                                 html.Div(
                                     "Please enter a question",
                                     style={
-                                        "height": "30px",
+                                        "height": "50px",
                                         "margin-top": "5px",
                                     },
                                 ),
                                 dcc.Input(
                                     type="text",
-                                    placeholder="",
                                     id="setting_Summary_list_of_questions",
                                     style={"height": "auto", "margin-bottom": "auto"},
                                 ),
                             ],
                             style={
-                                "width": "49%",
+                                "width": "33%",
                                 "display": "inline-block",
                                 "margin-top": "10px",
                             },
@@ -396,19 +394,19 @@ class AnalysisExplorer:
         }
 
         if setting_input == "TextDetector":
-            return display_flex, display_none, display_none
+            return display_flex, display_none, display_none, display_none
 
         if setting_input == "EmotionDetector":
-            return display_none, display_flex, display_none
+            return display_none, display_flex, display_none, display_none
 
         if setting_input == "ColorDetector":
-            return display_none, display_none, display_flex
+            return display_none, display_none, display_flex, display_none
 
         if setting_input == "SummaryDetector":
-            return display_none, display_none, display_flex
+            return display_none, display_none, display_none, display_flex
 
         else:
-            return display_none, display_none, display_none
+            return display_none, display_none, display_none, display_none
 
     def _right_output_analysis(
         self,
@@ -465,11 +463,20 @@ class AnalysisExplorer:
                 delta_e_method=setting_color_delta_e_method,
             )
         elif detector_value == "SummaryDetector":
+            if setting_Summary_list_of_questions is None:
+                current_list_of_questions = [
+                    "What is the main idea?",
+                    "What is the author's purpose?",
+                ]
+            else:
+                current_list_of_questions = [
+                    setting_Summary_list_of_questions,
+                ]
             detector_class = identify_function(
                 image_copy,
                 analysis_type=setting_Summary_analysis_type,
                 summary_model_type=setting_Summary_model,
-                list_of_questions=list[setting_Summary_list_of_questions],
+                list_of_questions=current_list_of_questions,
             )
         else:
             detector_class = identify_function(image_copy)

@@ -39,9 +39,15 @@ class SummaryDetector(AnalysisMethod):
         """
 
         super().__init__(subdict)
+        if analysis_type not in ["summary", "questions", "summary_and_questions"]:
+            raise ValueError(
+                "analysis_type must be one of 'summary', 'questions' or 'summary_and_questions'"
+            )
         self.summary_device = "cuda" if cuda.is_available() else "cpu"
         self.summary_model_type = summary_model_type
         self.analysis_type = analysis_type
+        if (not isinstance(list_of_questions, list)) or (None in list_of_questions):
+            raise ValueError("list_of_questions must be a list of string (questions)")
         if list_of_questions is None:
             self.list_of_questions = [
                 "Are there people in the image?",
@@ -49,10 +55,6 @@ class SummaryDetector(AnalysisMethod):
             ]
         else:
             self.list_of_questions = list_of_questions
-        if analysis_type not in ["summary", "questions", "summary_and_questions"]:
-            raise ValueError(
-                "analysis_type must be one of 'summary', 'questions' or 'summary_and_questions'"
-            )
         if (
             (summary_model is None)
             and (summary_vis_processors is None)
