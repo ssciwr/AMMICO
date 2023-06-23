@@ -46,18 +46,59 @@ def test_AnalysisExplorer(get_path):
     assert analysis_explorer.update_picture(None) is None
 
     analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "ObjectDetector", True, 50, 50, "CIE 1976"
+        2,
+        all_options_dict,
+        path_img_1,
+        "ObjectDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        None,
     )
 
     analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "EmotionDetector", True, 50, 50, "CIE 1976"
-    )
-    analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "SummaryDetector", True, 50, 50, "CIE 1976"
+        2,
+        all_options_dict,
+        path_img_1,
+        "EmotionDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        None,
     )
 
     analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "ColorDetector", True, 50, 50, "CIE 1976"
+        2,
+        all_options_dict,
+        path_img_1,
+        "SummaryDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        None,
+    )
+
+    analysis_explorer._right_output_analysis(
+        2,
+        all_options_dict,
+        path_img_1,
+        "ColorDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        None,
     )
 
     with pytest.raises(EnvironmentError):
