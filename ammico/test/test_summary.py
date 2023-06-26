@@ -40,7 +40,7 @@ def get_dict(get_path):
     return mydict
 
 
-@pytest.mark.long
+# @pytest.mark.long
 def test_analyse_image(get_dict):
     reference_results = {
         "run1": {
