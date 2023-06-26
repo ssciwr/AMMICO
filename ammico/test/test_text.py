@@ -29,6 +29,35 @@ def test_TextDetector(set_testdict):
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
+        assert test_obj.model_summary == "sshleifer/distilbart-cnn-12-6"
+        assert (
+            test_obj.model_sentiment
+            == "distilbert-base-uncased-finetuned-sst-2-english"
+        )
+        assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+        assert test_obj.revision_summary == "a4f8f3e"
+        assert test_obj.revision_sentiment == "af0f99b"
+        assert test_obj.revision_ner == "f2482bf"
+    model_names = ["facebook/bart-large-cnn", None, None]
+    test_obj = tt.TextDetector({}, model_names=model_names)
+    assert test_obj.model_summary == "facebook/bart-large-cnn"
+    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
+    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+    assert not test_obj.revision_summary
+    assert test_obj.revision_sentiment == "af0f99b"
+    assert test_obj.revision_ner == "f2482bf"
+    revision_numbers = ["3d22493", None, None]
+    test_obj = tt.TextDetector(
+        set_testdict["IMG_3755"],
+        model_names=model_names,
+        revision_numbers=revision_numbers,
+    )
+    assert test_obj.model_summary == "facebook/bart-large-cnn"
+    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
+    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+    assert test_obj.revision_summary == "3d22493"
+    assert test_obj.revision_sentiment == "af0f99b"
+    assert test_obj.revision_ner == "f2482bf"
 
 
 @pytest.mark.gcv

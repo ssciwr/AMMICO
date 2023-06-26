@@ -12,7 +12,11 @@ from transformers import pipeline
 
 class TextDetector(AnalysisMethod):
     def __init__(
-        self, subdict: dict, analyse_text: bool = False, model_names: list = None
+        self,
+        subdict: dict,
+        analyse_text: bool = False,
+        model_names: list = None,
+        revision_numbers: list = None,
     ) -> None:
         """Init text detection class.
 
@@ -29,6 +33,11 @@ class TextDetector(AnalysisMethod):
                 To select other models, provide a list with three entries, the first for
                 summary, second for sentiment, third for NER, with the desired model names.
                 Set one of these to None to still use the default model.
+            revision_numbers (list, optional): Model revision (commit) numbers on the
+                Hugging Face hub. Provide this to make sure you are using the same model.
+                Defaults to None, except if the default models are used; then it defaults to
+                "a4f8f3e" (summary, distilbart), "af0f99b" (sentiment, distilbert),
+                "f2482bf" (NER, bert).
         """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
@@ -41,12 +50,38 @@ class TextDetector(AnalysisMethod):
             "distilbert-base-uncased-finetuned-sst-2-english",
             "dbmdz/bert-large-cased-finetuned-conll03-english",
         ]
+        revision_numbers_default = ["a4f8f3e", "af0f99b", "f2482bf"]
+        if not revision_numbers and not model_names:
+            revision_numbers = revision_numbers_default
+        elif not revision_numbers and model_names:
+            revision_numbers = [None, None, None]
         if not model_names:
             model_names = model_names_default
         if len(model_names) != 3:
             raise ValueError(
                 "Not enough or too many model names provided - three are required, one each for summary, sentiment, ner"
             )
+        if len(revision_numbers) != 3:
+            raise ValueError(
+                "Not enough or too many revision numbers provided - three are required, one each for summary, sentiment, ner"
+            )
+        # now assign revision numbers for the models, for each of the methods
+        if model_names[0]:
+            # a model was specified for this task, set specified revision number or None
+            self.revision_summary = revision_numbers[0] if revision_numbers[0] else None
+        else:
+            # model for this task was set to None, so we take default version number for default model
+            self.revision_summary = revision_numbers_default[0]
+        if model_names[1]:
+            self.revision_sentiment = (
+                revision_numbers[1] if revision_numbers[1] else None
+            )
+        else:
+            self.revision_sentiment = revision_numbers_default[1]
+        if model_names[2]:
+            self.revision_ner = revision_numbers[2] if revision_numbers[2] else None
+        else:
+            self.revision_ner = revision_numbers_default[2]
         # now assign model names for each of the methods
         self.model_summary = (
             model_names[0] if model_names[0] else model_names_default[0]
@@ -130,13 +165,11 @@ class TextDetector(AnalysisMethod):
         """Generate a summary of the text using the Transformers pipeline."""
         # use the transformers pipeline to summarize the text
         # use the current default model - 03/2023
-        model_name = "sshleifer/distilbart-cnn-12-6"
-        model_revision = "a4f8f3e"
         max_number_of_characters = 3000
         pipe = pipeline(
             "summarization",
-            model=model_name,
-            revision=model_revision,
+            model=self.model_summary,
+            revision=self.revision_summary,
             min_length=5,
             max_length=20,
         )
@@ -154,12 +187,10 @@ class TextDetector(AnalysisMethod):
         """Perform text classification for sentiment using the Transformers pipeline."""
         # use the transformers pipeline for text classification
         # use the current default model - 03/2023
-        model_name = "distilbert-base-uncased-finetuned-sst-2-english"
-        model_revision = "af0f99b"
         pipe = pipeline(
             "text-classification",
-            model=model_name,
-            revision=model_revision,
+            model=self.model_sentiment,
+            revision=self.revision_sentiment,
             truncation=True,
         )
         result = pipe(self.subdict["text_english"])
@@ -170,12 +201,10 @@ class TextDetector(AnalysisMethod):
         """Perform named entity recognition on the text using the Transformers pipeline."""
         # use the transformers pipeline for named entity recognition
         # use the current default model - 03/2023
-        model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"
-        model_revision = "f2482bf"
         pipe = pipeline(
             "token-classification",
-            model=model_name,
-            revision=model_revision,
+            model=self.model_ner,
+            revision=self.revision_ner,
             aggregation_strategy="simple",
         )
         result = pipe(self.subdict["text_english"])
