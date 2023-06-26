@@ -109,18 +109,18 @@ def test_init_summary():
     assert sd.analysis_type == "summary"
     with pytest.raises(ValueError):
         sm.SummaryDetector({}, analysis_type="something")
-    # list_of_questions = ["Question 1", "Question 2"]
-    # sd = sm.SummaryDetector({}, list_of_questions=list_of_questions)
-    # assert sd.list_of_questions == list_of_questions
-    # with pytest.raises(ValueError):
-    #     sm.SummaryDetector({}, list_of_questions={})
-    # with pytest.raises(ValueError):
-    #     sm.SummaryDetector({}, list_of_questions=[None])
-    # with pytest.raises(ValueError):
-    #     sm.SummaryDetector({}, list_of_questions=[0.1])
-    # sd = sm.SummaryDetector({})
-    # assert sd.summary_model
-    # assert sd.summary_vis_processors
+    list_of_questions = ["Question 1", "Question 2"]
+    sd = sm.SummaryDetector({}, list_of_questions=list_of_questions)
+    assert sd.list_of_questions == list_of_questions
+    with pytest.raises(ValueError):
+        sm.SummaryDetector({}, list_of_questions={})
+    with pytest.raises(ValueError):
+        sm.SummaryDetector({}, list_of_questions=[None])
+    with pytest.raises(ValueError):
+        sm.SummaryDetector({}, list_of_questions=[0.1])
+    sd = sm.SummaryDetector({})
+    assert sd.summary_model
+    assert sd.summary_vis_processors
     # sd = sm.SummaryDetector({}, summary_model_type="large")
     # assert sd.summary_model
     # assert sd.summary_vis_processors
