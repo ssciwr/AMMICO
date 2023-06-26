@@ -31,6 +31,7 @@ dependencies = [
     "google-cloud-vision",
     "grpcio",
     "importlib_metadata",
+    "importlib_resources",
     "ipython",
     "jupyter_dash",
     "matplotlib",
