@@ -118,6 +118,10 @@ def test_init_summary():
         sm.SummaryDetector({}, list_of_questions=[None])
     with pytest.raises(ValueError):
         sm.SummaryDetector({}, list_of_questions=[0.1])
+
+
+@pytest.mark.long
+def test_advanced_init_summary():
     sd = sm.SummaryDetector({})
     assert sd.summary_model
     assert sd.summary_vis_processors
