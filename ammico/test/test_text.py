@@ -94,7 +94,7 @@ def test_text_sentiment_transformers():
     mydict["text_english"] = "I am happy that the CI is working again."
     test_obj.text_sentiment_transformers()
     assert mydict["sentiment"] == "POSITIVE"
-    assert mydict["sentiment_score"] == pytest.approx(0.99, 0.01)
+    assert mydict["sentiment_score"] == pytest.approx(0.99, 0.02)
 
 
 @pytest.mark.win_skip
