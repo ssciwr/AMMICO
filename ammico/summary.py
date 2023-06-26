@@ -44,6 +44,13 @@ class SummaryDetector(AnalysisMethod):
                 "analysis_type must be one of 'summary', 'questions' or 'summary_and_questions'"
             )
         self.summary_device = "cuda" if cuda.is_available() else "cpu"
+        allowed_model_types = ["base", "large"]
+        if summary_model_type not in allowed_model_types:
+            raise ValueError(
+                "Model type is not allowed - please select one of {}".format(
+                    allowed_model_types
+                )
+            )
         self.summary_model_type = summary_model_type
         self.analysis_type = analysis_type
         if list_of_questions is None:
@@ -51,7 +58,9 @@ class SummaryDetector(AnalysisMethod):
                 "Are there people in the image?",
                 "What is this picture about?",
             ]
-        elif (not isinstance(list_of_questions, list)) or (None in list_of_questions):
+        elif (not isinstance(list_of_questions, list)) or (
+            not all(isinstance(i, str) for i in list_of_questions)
+        ):
             raise ValueError("list_of_questions must be a list of string (questions)")
         else:
             self.list_of_questions = list_of_questions
