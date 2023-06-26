@@ -121,27 +121,27 @@ def test_init_summary():
     sd = sm.SummaryDetector({})
     assert sd.summary_model
     assert sd.summary_vis_processors
-    # sd = sm.SummaryDetector({}, summary_model_type="large")
-    # assert sd.summary_model
-    # assert sd.summary_vis_processors
-    # with pytest.raises(ValueError):
-    #     sm.SummaryDetector({}, summary_model_type="bla")
-    # (
-    #     summary_vqa_model,
-    #     summary_vqa_vis_processors,
-    #     summary_vqa_txt_processors,
-    # ) = load_model_and_preprocess(
-    #     name="blip_vqa",
-    #     model_type="vqav2",
-    #     is_eval=True,
-    #     device="cpu",
-    # )
-    # sd = sm.SummaryDetector(
-    #     {},
-    #     summary_vqa_model=summary_vqa_model,
-    #     summary_vqa_vis_processors=summary_vqa_vis_processors,
-    #     summary_vqa_txt_processors=summary_vqa_txt_processors,
-    # )
-    # assert sd.summary_vqa_model
-    # assert sd.summary_vqa_vis_processors
-    # assert sd.summary_vqa_txt_processors
+    sd = sm.SummaryDetector({}, summary_model_type="large")
+    assert sd.summary_model
+    assert sd.summary_vis_processors
+    with pytest.raises(ValueError):
+        sm.SummaryDetector({}, summary_model_type="bla")
+    (
+        summary_vqa_model,
+        summary_vqa_vis_processors,
+        summary_vqa_txt_processors,
+    ) = load_model_and_preprocess(
+        name="blip_vqa",
+        model_type="vqav2",
+        is_eval=True,
+        device="cpu",
+    )
+    sd = sm.SummaryDetector(
+        {},
+        summary_vqa_model=summary_vqa_model,
+        summary_vqa_vis_processors=summary_vqa_vis_processors,
+        summary_vqa_txt_processors=summary_vqa_txt_processors,
+    )
+    assert sd.summary_vqa_model
+    assert sd.summary_vqa_vis_processors
+    assert sd.summary_vqa_txt_processors
