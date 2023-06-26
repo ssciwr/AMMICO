@@ -58,7 +58,7 @@ jobs:
     - name: Run pytest test_text
       run: |
         cd ammico
-        python -m pytest test/test_text.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_text.py -m "not gcv" -svv --cov=. --cov-report=xml
     - name: Run pytest test_utils
       run: |
         cd ammico
