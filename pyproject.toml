@@ -49,6 +49,7 @@ dependencies = [
     "tensorflow",
     "torch",
     "transformers",
+    "tqdm==4.41.1",
     "google-cloud-vision",
     "setuptools",
     "opencv-contrib-python",
