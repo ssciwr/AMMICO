@@ -2,6 +2,10 @@ import glob
 import os
 from pandas import DataFrame, read_csv
 import pooch
+import importlib_resources
+
+
+pkg = importlib_resources.files("ammico")
 
 
 class DownloadResource:
@@ -110,8 +114,9 @@ def is_interactive():
 
 
 def get_color_table():
+    path_tables = pkg / "data" / "Color_tables.csv"
     df_colors = read_csv(
-        os.path.join(os.path.dirname(__file__), "data", "Color_tables.csv"),
+        path_tables,
         delimiter=";",
         dtype=str,
         encoding="UTF-8",

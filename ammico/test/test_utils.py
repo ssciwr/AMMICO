@@ -36,3 +36,22 @@ def test_dump_df(get_path):
     df = ut.dump_df(outdict)
     out_df = pd.read_csv(get_path + "example_dump_df.csv", index_col=[0])
     pd.testing.assert_frame_equal(df, out_df)
+
+
+def test_is_interactive():
+    assert ut.is_interactive
+
+
+def test_get_color_table():
+    colors = ut.get_color_table()
+    assert colors["Pink"] == {
+        "ColorName": [
+            "Pink",
+            "LightPink",
+            "HotPink",
+            "DeepPink",
+            "PaleVioletRed",
+            "MediumVioletRed",
+        ],
+        "HEX": ["#FFC0CB", "#FFB6C1", "#FF69B4", "#FF1493", "#DB7093", "#C71585"],
+    }
