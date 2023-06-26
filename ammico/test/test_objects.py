@@ -2,6 +2,7 @@ import json
 import pytest
 import ammico.objects as ob
 import ammico.objects_cvlib as ob_cvlib
+import sys
 
 OBJECT_1 = "cell phone"
 OBJECT_2 = "motorcycle"
@@ -25,6 +26,7 @@ def test_objects_from_cvlib(default_objects):
     assert str(objects) == str(out_objects)
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_analyse_image_cvlib(get_path):
     mydict = {"filename": get_path + TEST_IMAGE_1}
     ob_cvlib.ObjectCVLib().analyse_image(mydict)
