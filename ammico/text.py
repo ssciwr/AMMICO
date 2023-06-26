@@ -11,19 +11,50 @@ from transformers import pipeline
 
 
 class TextDetector(AnalysisMethod):
-    def __init__(self, subdict: dict, analyse_text: bool = False) -> None:
+    def __init__(
+        self, subdict: dict, analyse_text: bool = False, model_names: list = None
+    ) -> None:
         """Init text detection class.
 
         Args:
             subdict (dict): Dictionary containing file name/path, and possibly previous
-            analysis results from other modules.
+                analysis results from other modules.
             analyse_text (bool, optional): Decide if extracted text will be further subject
-            to analysis. Defaults to False.
+                to analysis. Defaults to False.
+            model_names (list, optional): Provide model names for summary, sentiment and ner
+                analysis. Defaults to None, in which case the default model from transformers
+                are used (as of 03/2023): "sshleifer/distilbart-cnn-12-6" (summary),
+                "distilbert-base-uncased-finetuned-sst-2-english" (sentiment),
+                "dbmdz/bert-large-cased-finetuned-conll03-english".
+                To select other models, provide a list with three entries, the first for
+                summary, second for sentiment, third for NER, with the desired model names.
+                Set one of these to None to still use the default model.
         """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
         self.analyse_text = analyse_text
+        # assign models for each of the text analysis methods
+        # and check that they are valid
+        model_names_default = [
+            "sshleifer/distilbart-cnn-12-6",
+            "distilbert-base-uncased-finetuned-sst-2-english",
+            "dbmdz/bert-large-cased-finetuned-conll03-english",
+        ]
+        if not model_names:
+            model_names = model_names_default
+        if len(model_names) != 3:
+            raise ValueError(
+                "Not enough or too many model names provided - three are required, one each for summary, sentiment, ner"
+            )
+        # now assign model names for each of the methods
+        self.model_summary = (
+            model_names[0] if model_names[0] else model_names_default[0]
+        )
+        self.model_sentiment = (
+            model_names[1] if model_names[1] else model_names_default[1]
+        )
+        self.model_ner = model_names[2] if model_names[2] else model_names_default[2]
 
     def set_keys(self) -> dict:
         """Set the default keys for text analysis.
