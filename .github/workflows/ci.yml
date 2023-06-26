@@ -46,7 +46,7 @@ jobs:
     - name: Run pytest test_multimodal_search
       run: |
         cd ammico
-        python -m pytest test/test_multimodal_search.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml
     - name: Run pytest test_objects
       run: |
         cd ammico
@@ -54,7 +54,7 @@ jobs:
     - name: Run pytest test_summary
       run: |
         cd ammico
-        python -m pytest test/test_summary.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml
     - name: Run pytest test_text
       run: |
         cd ammico

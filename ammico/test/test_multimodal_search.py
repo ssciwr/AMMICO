@@ -443,7 +443,7 @@ def test_parsing_images(
     cuda.empty_cache()
 
 
-@pytest.mark.long
+# @pytest.mark.long
 def test_itm(get_test_my_dict, get_path):
     search_query3 = [
         {"text_input": "A bus"},
