@@ -1,6 +1,7 @@
 import json
 import ammico.display as ammico_display
 import pytest
+import sys
 
 
 def test_explore_analysis_faces(get_path):
@@ -25,6 +26,7 @@ def test_explore_analysis_objects(get_path):
             assert sub_dict[key] == outs[key]
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_AnalysisExplorer(get_path):
     path_img_1 = get_path + "IMG_2809.png"
     path_img_2 = get_path + "IMG_2746.png"
