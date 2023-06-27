@@ -58,6 +58,17 @@ def test_TextDetector(set_testdict):
     assert test_obj.revision_summary == "3d22493"
     assert test_obj.revision_sentiment == "af0f99b"
     assert test_obj.revision_ner == "f2482bf"
+    # now test the exceptions
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, analyse_text=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, model_names=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, revision_numbers=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, model_names=["something"])
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, revision_numbers=["something"])
 
 
 @pytest.mark.gcv

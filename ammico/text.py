@@ -42,6 +42,8 @@ class TextDetector(AnalysisMethod):
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
+        if not isinstance(analyse_text, bool):
+            raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
         # assign models for each of the text analysis methods
         # and check that they are valid
@@ -57,6 +59,10 @@ class TextDetector(AnalysisMethod):
             revision_numbers = [None, None, None]
         if not model_names:
             model_names = model_names_default
+        if not isinstance(model_names, list):
+            raise ValueError("Model names need to be provided as a list!")
+        if not isinstance(revision_numbers, list):
+            raise ValueError("Revision numbers need to be provided as a list!")
         if len(model_names) != 3:
             raise ValueError(
                 "Not enough or too many model names provided - three are required, one each for summary, sentiment, ner"
