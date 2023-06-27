@@ -30,39 +30,39 @@ jobs:
     - name: Run pytest test_colors
       run: |
         cd ammico
-        python -m pytest test/test_colors.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_colors.py -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_cropposts
       run: |
         cd ammico
-        python -m pytest test/test_cropposts.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_cropposts.py -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_display
       run: |
         cd ammico
-        python -m pytest test/test_display.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_display.py -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_faces
       run: |
         cd ammico
-        python -m pytest test/test_faces.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_faces.py -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_multimodal_search
       run: |
         cd ammico
-        python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml
+        python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_objects
       run: |
         cd ammico
-        python -m pytest test/test_objects.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_objects.py -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_summary
       run: |
         cd ammico
-        python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml
+        python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_text
       run: |
         cd ammico
-        python -m pytest test/test_text.py -m "not gcv" -svv --cov=. --cov-report=xml
+        python -m pytest test/test_text.py -m "not gcv" -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_utils
       run: |
         cd ammico
-        python -m pytest test/test_utils.py -svv --cov=. --cov-report=xml
+        python -m pytest test/test_utils.py -svv --cov=. --cov-report=xml --cov-append
     - name: Upload coverage
       if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.9'
       uses: codecov/codecov-action@v3
