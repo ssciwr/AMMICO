@@ -45,6 +45,70 @@ class TextDetector(AnalysisMethod):
         if not isinstance(analyse_text, bool):
             raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
+        if model_names:
+            self._check_valid_models(model_names)
+        if revision_numbers:
+            self._check_revision_numbers(revision_numbers)
+        # initialize revision numbers and models
+        self._init_revision_numbers(model_names, revision_numbers)
+        self._init_model(model_names)
+
+    def _check_valid_models(self, model_names):
+        # check that model_names and revision_numbers are valid lists or None
+        # check that model names are a list
+        if not isinstance(model_names, list):
+            raise ValueError("Model names need to be provided as a list!")
+        # check that enough models are provided, one for each method
+        if len(model_names) != 3:
+            raise ValueError(
+                "Not enough or too many model names provided - three are required, one each for summary, sentiment, ner"
+            )
+
+    def _check_revision_numbers(self, revision_numbers):
+        # check that revision numbers are list
+        if not isinstance(revision_numbers, list):
+            raise ValueError("Revision numbers need to be provided as a list!")
+        # check that three revision numbers are provided, one for each method
+        if len(revision_numbers) != 3:
+            raise ValueError(
+                "Not enough or too many revision numbers provided - three are required, one each for summary, sentiment, ner"
+            )
+
+    def _init_revision_numbers(self, model_names, revision_numbers):
+        """Helper method to set the revision (version) number for each model."""
+        revision_numbers_default = ["a4f8f3e", "af0f99b", "f2482bf"]
+        if model_names:
+            # if model_names is provided, set revision numbers for each of the methods
+            # either as the provided revision number or None or as the default revision number,
+            # if one of the methods uses the default model
+            self._init_revision_numbers_per_model(
+                model_names, revision_numbers, revision_numbers_default
+            )
+        else:
+            # model_names was not provided, revision numbers are the default revision numbers or None
+            self.revision_summary = revision_numbers_default[0]
+            self.revision_sentiment = revision_numbers_default[1]
+            self.revision_ner = revision_numbers_default[2]
+
+    def _init_revision_numbers_per_model(
+        self, model_names, revision_numbers, revision_numbers_default
+    ):
+        task_list = []
+        if not revision_numbers:
+            # no revision numbers for non-default models provided
+            revision_numbers = [None, None, None]
+        for model, revision, revision_default in zip(
+            model_names, revision_numbers, revision_numbers_default
+        ):
+            # a model was specified for this task, set specified revision number or None
+            # or: model for this task was set to None, so we take default version number for default model
+            task_list.append(revision if model else revision_default)
+        self.revision_summary = task_list[0]
+        self.revision_sentiment = task_list[1]
+        self.revision_ner = task_list[2]
+
+    def _init_model(self, model_names):
+        """Helper method to set the model name for each analysis method."""
         # assign models for each of the text analysis methods
         # and check that they are valid
         model_names_default = [
@@ -52,43 +116,12 @@ class TextDetector(AnalysisMethod):
             "distilbert-base-uncased-finetuned-sst-2-english",
             "dbmdz/bert-large-cased-finetuned-conll03-english",
         ]
-        revision_numbers_default = ["a4f8f3e", "af0f99b", "f2482bf"]
-        if not revision_numbers and not model_names:
-            revision_numbers = revision_numbers_default
-        elif not revision_numbers and model_names:
-            revision_numbers = [None, None, None]
+        # no model names provided, set the default
         if not model_names:
             model_names = model_names_default
-        if not isinstance(model_names, list):
-            raise ValueError("Model names need to be provided as a list!")
-        if not isinstance(revision_numbers, list):
-            raise ValueError("Revision numbers need to be provided as a list!")
-        if len(model_names) != 3:
-            raise ValueError(
-                "Not enough or too many model names provided - three are required, one each for summary, sentiment, ner"
-            )
-        if len(revision_numbers) != 3:
-            raise ValueError(
-                "Not enough or too many revision numbers provided - three are required, one each for summary, sentiment, ner"
-            )
-        # now assign revision numbers for the models, for each of the methods
-        if model_names[0]:
-            # a model was specified for this task, set specified revision number or None
-            self.revision_summary = revision_numbers[0] if revision_numbers[0] else None
-        else:
-            # model for this task was set to None, so we take default version number for default model
-            self.revision_summary = revision_numbers_default[0]
-        if model_names[1]:
-            self.revision_sentiment = (
-                revision_numbers[1] if revision_numbers[1] else None
-            )
-        else:
-            self.revision_sentiment = revision_numbers_default[1]
-        if model_names[2]:
-            self.revision_ner = revision_numbers[2] if revision_numbers[2] else None
-        else:
-            self.revision_ner = revision_numbers_default[2]
         # now assign model names for each of the methods
+        # either to the provided model name or the default if one of the
+        # task's models is set to None
         self.model_summary = (
             model_names[0] if model_names[0] else model_names_default[0]
         )
