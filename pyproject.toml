@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ammico"
-version = "0.0.1"
+version = "0.1.0"
 description = "AI Media and Misinformation Content Analysis Tool"
 readme = "README.md"
 maintainers = [
@@ -31,6 +31,7 @@ dependencies = [
     "google-cloud-vision",
     "grpcio",
     "importlib_metadata",
+    "importlib_resources",
     "ipython",
     "jupyter_dash",
     "matplotlib",
@@ -71,7 +72,6 @@ documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 packages = ["ammico"]
 
 [tool.setuptools.package-data]
-# Include any png files found in the "data" subdirectory of "ammico"
-"ammico.data" = ["*.png"]
-mypkg = [ "*.csv"]
+# Include any png and csv files found in the "data" subdirectory of "ammico"
+"ammico.data" = ["*.png", "*.csv"]
 
