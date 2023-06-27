@@ -1,6 +1,7 @@
 import json
 import ammico.display as ammico_display
 import pytest
+import sys
 
 
 def test_explore_analysis_faces(get_path):
@@ -25,6 +26,7 @@ def test_explore_analysis_objects(get_path):
             assert sub_dict[key] == outs[key]
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_AnalysisExplorer(get_path):
     path_img_1 = get_path + "IMG_2809.png"
     path_img_2 = get_path + "IMG_2746.png"
@@ -46,18 +48,59 @@ def test_AnalysisExplorer(get_path):
     assert analysis_explorer.update_picture(None) is None
 
     analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "ObjectDetector", True, 50, 50, "CIE 1976"
+        2,
+        all_options_dict,
+        path_img_1,
+        "ObjectDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        "How many people are in the picture?",
     )
 
     analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "EmotionDetector", True, 50, 50, "CIE 1976"
-    )
-    analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "SummaryDetector", True, 50, 50, "CIE 1976"
+        2,
+        all_options_dict,
+        path_img_1,
+        "EmotionDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        "How many people are in the picture?",
     )
 
     analysis_explorer._right_output_analysis(
-        2, all_options_dict, path_img_1, "ColorDetector", True, 50, 50, "CIE 1976"
+        2,
+        all_options_dict,
+        path_img_1,
+        "SummaryDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        "How many people are in the picture?",
+    )
+
+    analysis_explorer._right_output_analysis(
+        2,
+        all_options_dict,
+        path_img_1,
+        "ColorDetector",
+        True,
+        50,
+        50,
+        "CIE 1976",
+        "summary_and_questions",
+        "base",
+        "How many people are in the picture?",
     )
 
     with pytest.raises(EnvironmentError):
