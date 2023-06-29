@@ -1,5 +1,4 @@
 import pytest
-import spacy
 import ammico.text as tt
 
 
@@ -29,6 +28,49 @@ def test_TextDetector(set_testdict):
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
+
+
+def test_init_revision_numbers_and_models():
+    test_obj = tt.TextDetector({})
+    # check the default options
+    assert test_obj.model_summary == "sshleifer/distilbart-cnn-12-6"
+    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
+    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+    assert test_obj.revision_summary == "a4f8f3e"
+    assert test_obj.revision_sentiment == "af0f99b"
+    assert test_obj.revision_ner == "f2482bf"
+    # provide non-default options
+    model_names = ["facebook/bart-large-cnn", None, None]
+    test_obj = tt.TextDetector({}, model_names=model_names)
+    assert test_obj.model_summary == "facebook/bart-large-cnn"
+    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
+    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+    assert not test_obj.revision_summary
+    assert test_obj.revision_sentiment == "af0f99b"
+    assert test_obj.revision_ner == "f2482bf"
+    revision_numbers = ["3d22493", None, None]
+    test_obj = tt.TextDetector(
+        {},
+        model_names=model_names,
+        revision_numbers=revision_numbers,
+    )
+    assert test_obj.model_summary == "facebook/bart-large-cnn"
+    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
+    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+    assert test_obj.revision_summary == "3d22493"
+    assert test_obj.revision_sentiment == "af0f99b"
+    assert test_obj.revision_ner == "f2482bf"
+    # now test the exceptions
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, analyse_text=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, model_names=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, revision_numbers=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, model_names=["something"])
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, revision_numbers=["something"])
 
 
 @pytest.mark.gcv
