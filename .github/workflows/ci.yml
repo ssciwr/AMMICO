@@ -32,7 +32,7 @@ jobs:
         cd ammico
         python -m pytest test/test_objects.py -svv --cov=. --cov-report=xml --cov-append
     - name: Upload coverage
-      if: matrix.os == 'macos-latest' && matrix.python-version == '3.9'
+      if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.9'
       uses: codecov/codecov-action@v3
       with:
         fail_ci_if_error: true
