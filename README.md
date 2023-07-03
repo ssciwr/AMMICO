@@ -40,11 +40,12 @@ pip install ammico
 ```
 This will install the package and its dependencies locally.
 
-To make pycocotools work on Windows OS you may need to install vs_BuildTools.exe from https://visualstudio.microsoft.com/visual-cpp-build-tools/ and choose following elements:
-- Visual Studio extension development 
-- MSVC v143 - VS 2022 C++ x64/x86 build tools
-- Windows 11 SDK
-Be careful, it requires 7.04 GB of disk space.
+To make pycocotools work on Windows OS you may need to install `vs_BuildTools.exe` from https://visualstudio.microsoft.com/visual-cpp-build-tools/ and choose following elements:
+- `Visual Studio extension development`
+- `MSVC v143 - VS 2022 C++ x64/x86 build tools`
+- `Windows 11 SDK` for Windows 11 (or `Windows 10 SDK` for Windows 10)
+
+Be careful, it requires around 7 GB of disk space.
 
 ![Screenshot 2023-06-01 165712](https://github.com/ssciwr/AMMICO/assets/8105097/3dfb302f-c390-46a7-a700-4e044f56c30f)
 
