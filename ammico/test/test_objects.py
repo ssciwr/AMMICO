@@ -26,7 +26,6 @@ def test_objects_from_cvlib(default_objects):
     assert str(objects) == str(out_objects)
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_analyse_image_cvlib(get_path):
     mydict = {"filename": get_path + TEST_IMAGE_1}
     ob_cvlib.ObjectCVLib().analyse_image(mydict)
@@ -57,7 +56,6 @@ def test_init_default_objects():
         assert init_objects[obj] == "no"
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_analyse_image_from_file_cvlib(get_path):
     file_path = get_path + TEST_IMAGE_1
     objs = ob_cvlib.ObjectCVLib().analyse_image_from_file(file_path)
@@ -69,7 +67,6 @@ def test_analyse_image_from_file_cvlib(get_path):
         assert objs[key] == out_dict[key]
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_detect_objects_cvlib(get_path):
     file_path = get_path + TEST_IMAGE_1
     objs = ob_cvlib.ObjectCVLib().detect_objects_cvlib(file_path)
@@ -86,7 +83,6 @@ def test_set_keys(default_objects, get_path):
     assert str(default_objects) == str(key_objs)
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_analyse_image(get_path):
     mydict = {"filename": get_path + TEST_IMAGE_1}
     ob.ObjectDetector.set_client_to_cvlib()
