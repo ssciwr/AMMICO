@@ -72,7 +72,10 @@ documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 [tool.setuptools]
 packages = ["ammico"]
 
+[tool.setuptools.packages.find]
+where = ["ammico"]
+
 [tool.setuptools.package-data]
 # Include any png and csv files found in the "data" subdirectory of "ammico"
-"ammico.data" = ["*.png", "*.csv"]
+"data" = ["*.png", "*.csv"]
 
