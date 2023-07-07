@@ -74,5 +74,5 @@ packages = ["ammico","ammico.data"]
 
 [tool.setuptools.package-data]
 # Include any png and csv files found in the "data" subdirectory of "ammico"
-"data" = ["*.png", "*.csv"]
+"ammico.data" = ["*.png", "*.csv"]
 
