@@ -47,7 +47,7 @@ dependencies = [
     "salesforce-lavis @ git+https://github.com/piterand/LAVIS.git@release_1.0.2",
     "setuptools",
     "spacy",
-    "tensorflow",
+    "tensorflow<=2.12.3",
     "torch",
     "transformers",
     "google-cloud-vision",
@@ -59,7 +59,7 @@ dependencies = [
     "colorgram.py",
     "webcolors",
     "colour-science",
-    "scikit-learn != 1.3.0",
+    "scikit-learn!=1.3.0",
 ]
 
 [project.scripts]
@@ -70,7 +70,7 @@ homepage = "https://github.com/ssciwr/AMMICO"  # FIXME not shown by pip
 documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 
 [tool.setuptools]
-packages = ["ammico"]
+packages = ["ammico","ammico.data"]
 
 [tool.setuptools.package-data]
 # Include any png and csv files found in the "data" subdirectory of "ammico"
