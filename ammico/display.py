@@ -6,6 +6,7 @@ from ammico.utils import is_interactive
 import ammico.summary as summary
 import dash_renderjson
 from dash import html, Input, Output, dcc, State
+import dash_daq as daq
 import jupyter_dash
 from PIL import Image
 
@@ -105,11 +106,12 @@ class AnalysisExplorer:
 
         self.app.callback(
             Output("right_json_viewer", "data"),
+            Output("setting_Text_analyse_text", "children"),
+            Input("setting_Text_analyse_text", "on"),
             Input("button_run", "n_clicks"),
             State("left_select_id", "options"),
             State("left_select_id", "value"),
             State("Dropdown_select_Detector", "value"),
-            State("setting_Text_analyse_text", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
             State("setting_Color_delta_e_method", "value"),
@@ -172,11 +174,10 @@ class AnalysisExplorer:
                     id="settings_TextDetector",
                     style={"display": "none"},
                     children=[
-                        dcc.Checklist(
-                            ["Analyse text"],
-                            ["Analyse text"],
-                            id="setting_Text_analyse_text",
+                        daq.BooleanSwitch(
+                            on=False, label="Analyse text", labelPosition="top"
                         ),
+                        html.Div(id="setting_Text_analyse_text"),
                     ],
                 ),
                 html.Div(
@@ -410,11 +411,11 @@ class AnalysisExplorer:
 
     def _right_output_analysis(
         self,
+        settings_text_analyse_text: bool,
         n_clicks,
         all_img_options: dict,
         current_img_value: str,
         detector_value: str,
-        settings_text_analyse_text: bool,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
         setting_color_delta_e_method: str,
