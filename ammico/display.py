@@ -110,6 +110,8 @@ class AnalysisExplorer:
             State("left_select_id", "value"),
             State("Dropdown_select_Detector", "value"),
             State("setting_Text_analyse_text", "value"),
+            State("setting_Text_model_names", "value"),
+            State("setting_Text_revision_numbers", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
             State("setting_Color_delta_e_method", "value"),
@@ -176,6 +178,48 @@ class AnalysisExplorer:
                             ["Analyse text"],
                             ["Analyse text"],
                             id="setting_Text_analyse_text",
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Select models for text_summary, text_sentiment, text_NER or leave blank for default:",
+                                    style={
+                                        "height": "30px",
+                                        "margin-top": "5px",
+                                    },
+                                ),
+                                dcc.Input(
+                                    type="text",
+                                    id="setting_Text_model_names",
+                                    style={"height": "auto", "margin-bottom": "auto"},
+                                ),
+                            ],
+                            style={
+                                "width": "33%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Select model revision number for text_summary, text_sentiment, text_NER or leave blank for default:",
+                                    style={
+                                        "height": "30px",
+                                        "margin-top": "5px",
+                                    },
+                                ),
+                                dcc.Input(
+                                    type="text",
+                                    id="setting_Text_revision_numbers",
+                                    style={"height": "auto", "margin-bottom": "auto"},
+                                ),
+                            ],
+                            style={
+                                "width": "33%",
+                                "display": "inline-block",
+                                "margin-top": "10px",
+                            },
                         ),
                     ],
                 ),
@@ -415,6 +459,8 @@ class AnalysisExplorer:
         current_img_value: str,
         detector_value: str,
         settings_text_analyse_text: bool,
+        settings_text_model_names: str,
+        settings_text_revision_numbers: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
         setting_color_delta_e_method: str,
@@ -449,7 +495,14 @@ class AnalysisExplorer:
         identify_function = identify_dict[detector_value]
         if detector_value == "TextDetector":
             detector_class = identify_function(
-                image_copy, analyse_text=settings_text_analyse_text
+                image_copy,
+                analyse_text=settings_text_analyse_text,
+                model_names=[settings_text_model_names]
+                if (settings_text_model_names is not None)
+                else None,
+                revision_numbers=[settings_text_revision_numbers]
+                if (settings_text_revision_numbers is not None)
+                else None,
             )
         elif detector_value == "EmotionDetector":
             detector_class = identify_function(

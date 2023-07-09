@@ -42,6 +42,10 @@ class TextDetector(AnalysisMethod):
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
         self.translator = Translator()
+        if analyse_text == ["Analyse text"]:
+            analyse_text = True
+        elif analyse_text == []:
+            analyse_text = False
         if not isinstance(analyse_text, bool):
             raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
