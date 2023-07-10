@@ -1,7 +1,31 @@
 import json
 import ammico.display as ammico_display
 import pytest
-import sys
+
+# import sys
+
+
+@pytest.fixture
+def get_options(get_path):
+    path_img_1 = get_path + "IMG_2809.png"
+    path_img_2 = get_path + "IMG_2746.png"
+
+    mydict = {
+        "IMG_2809": {"filename": path_img_1},
+        "IMG_2746": {"filename": path_img_2},
+    }
+
+    all_options_dict = {
+        path_img_1: "IMG_2809",
+        path_img_2: "IMG_2746",
+    }
+    return path_img_1, path_img_2, mydict, all_options_dict
+
+
+@pytest.fixture
+def get_AE(get_options):
+    analysis_explorer = ammico_display.AnalysisExplorer(get_options[2])
+    return analysis_explorer
 
 
 def test_explore_analysis_faces(get_path):
@@ -26,33 +50,21 @@ def test_explore_analysis_objects(get_path):
             assert sub_dict[key] == outs[key]
 
 
-@pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
-def test_AnalysisExplorer(get_path):
-    path_img_1 = get_path + "IMG_2809.png"
-    path_img_2 = get_path + "IMG_2746.png"
+# @pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
+def test_AnalysisExplorer(get_AE, get_options):
+    get_AE.update_picture(get_options[0])
+    assert get_AE.update_picture(None) is None
 
-    mydict = {
-        "IMG_2809": {"filename": path_img_1},
-        "IMG_2746": {"filename": path_img_2},
-    }
 
-    all_options_dict = {
-        path_img_1: "IMG_2809",
-        path_img_2: "IMG_2746",
-    }
-
-    analysis_explorer = ammico_display.AnalysisExplorer(mydict)
-
-    analysis_explorer.update_picture(path_img_1)
-
-    assert analysis_explorer.update_picture(None) is None
-
-    analysis_explorer._right_output_analysis(
+def test_right_output_analysis_objects(get_AE, get_options):
+    get_AE._right_output_analysis(
         2,
-        all_options_dict,
-        path_img_1,
+        get_options[3],
+        get_options[0],
         "ObjectDetector",
         True,
+        None,
+        None,
         50,
         50,
         "CIE 1976",
@@ -61,13 +73,17 @@ def test_AnalysisExplorer(get_path):
         "How many people are in the picture?",
     )
 
-    analysis_explorer._right_output_analysis(
+
+def test_right_output_analysis_emotions(get_AE, get_options):
+    get_AE._right_output_analysis(
         2,
-        all_options_dict,
-        path_img_1,
+        get_options[3],
+        get_options[0],
         "EmotionDetector",
         True,
         50,
+        None,
+        None,
         50,
         "CIE 1976",
         "summary_and_questions",
@@ -75,12 +91,16 @@ def test_AnalysisExplorer(get_path):
         "How many people are in the picture?",
     )
 
-    analysis_explorer._right_output_analysis(
+
+def test_right_output_analysis_summary(get_AE, get_options):
+    get_AE._right_output_analysis(
         2,
-        all_options_dict,
-        path_img_1,
+        get_options[3],
+        get_options[0],
         "SummaryDetector",
         True,
+        None,
+        None,
         50,
         50,
         "CIE 1976",
@@ -89,12 +109,16 @@ def test_AnalysisExplorer(get_path):
         "How many people are in the picture?",
     )
 
-    analysis_explorer._right_output_analysis(
+
+def test_right_output_analysis_colors(get_AE, get_options):
+    get_AE._right_output_analysis(
         2,
-        all_options_dict,
-        path_img_1,
+        get_options[3],
+        get_options[0],
         "ColorDetector",
         True,
+        None,
+        None,
         50,
         50,
         "CIE 1976",
@@ -102,6 +126,5 @@ def test_AnalysisExplorer(get_path):
         "base",
         "How many people are in the picture?",
     )
-
     with pytest.raises(EnvironmentError):
-        analysis_explorer.run_server(port=8050)
+        get_AE.run_server(port=8050)
