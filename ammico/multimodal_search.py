@@ -935,7 +935,7 @@ class MultimodalSearch(AnalysisMethod):
         return itm_scores2, image_gradcam_with_itm
 
     def show_results(
-        self, query: dict, itm=False, image_gradcam_with_itm=False
+        self, query: dict, itm: bool = False, image_gradcam_with_itm: dict = {}
     ) -> None:
         """
         Show results of search.
@@ -943,7 +943,7 @@ class MultimodalSearch(AnalysisMethod):
         Args:
             query (dict): query.
             itm (bool): use itm model. Default: False.
-            image_gradcam_with_itm (bool): use gradcam. Default: False.
+            image_gradcam_with_itm (dict): use gradcam. Default: empty.
         """
         if "image" in query.keys():
             pic = Image.open(query["image"]).convert("RGB")
@@ -972,11 +972,11 @@ class MultimodalSearch(AnalysisMethod):
         ):
             if s[1][current_querry_rank] is None:
                 break
-            if image_gradcam_with_itm is False:
-                p1 = Image.open(s[1]["filename"]).convert("RGB")
-            else:
+            if bool(image_gradcam_with_itm) is True and itm is True:
                 image = image_gradcam_with_itm[list(query.values())[0]][s[0]]
                 p1 = Image.fromarray(image.astype("uint8"), "RGB")
+            else:
+                p1 = Image.open(s[1]["filename"]).convert("RGB")
             p1.thumbnail((400, 400))
             display(
                 "Rank: "
