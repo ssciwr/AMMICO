@@ -494,9 +494,12 @@ class AnalysisExplorer:
 
         identify_function = identify_dict[detector_value]
         if detector_value == "TextDetector":
+            analyse_text = (
+                True if settings_text_analyse_text == ["Analyse text"] else False
+            )
             detector_class = identify_function(
                 image_copy,
-                analyse_text=settings_text_analyse_text,
+                analyse_text=analyse_text,
                 model_names=[settings_text_model_names]
                 if (settings_text_model_names is not None)
                 else None,
