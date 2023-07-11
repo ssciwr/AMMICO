@@ -2,8 +2,6 @@ import json
 import ammico.display as ammico_display
 import pytest
 
-# import sys
-
 
 @pytest.fixture
 def get_options(get_path):
@@ -50,7 +48,6 @@ def test_explore_analysis_objects(get_path):
             assert sub_dict[key] == outs[key]
 
 
-# @pytest.mark.skipif(sys.platform == "darwin", reason="segmentation fault on mac")
 def test_AnalysisExplorer(get_AE, get_options):
     get_AE.update_picture(get_options[0])
     assert get_AE.update_picture(None) is None
