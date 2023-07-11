@@ -458,7 +458,7 @@ class AnalysisExplorer:
         all_img_options: dict,
         current_img_value: str,
         detector_value: str,
-        settings_text_analyse_text: bool,
+        settings_text_analyse_text: list,
         settings_text_model_names: str,
         settings_text_revision_numbers: str,
         setting_emotion_emotion_threshold: int,
