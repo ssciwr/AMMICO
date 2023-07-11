@@ -3,7 +3,7 @@ try:
 except ImportError:
     # Running on pre-3.8 Python; use importlib-metadata package
     import importlib_metadata as metadata  # type: ignore
-from ammico.cropposts import crop_media_posts
+from ammico.cropposts import crop_media_posts, crop_posts_from_refs
 from ammico.display import AnalysisExplorer
 from ammico.faces import EmotionDetector
 from ammico.multimodal_search import MultimodalSearch
@@ -18,6 +18,7 @@ del metadata
 
 __all__ = [
     "crop_media_posts",
+    "crop_posts_from_refs",
     "AnalysisExplorer",
     "EmotionDetector",
     "MultimodalSearch",
