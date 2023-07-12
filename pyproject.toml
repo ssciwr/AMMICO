@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools==61",
+    "setuptools>=61",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -11,7 +11,6 @@ description = "AI Media and Misinformation Content Analysis Tool"
 readme = "README.md"
 maintainers = [
     { name = "Inga Ulusoy", email = "ssc@iwr.uni-heidelberg.de" },
-    { name = "Dominic Kempf", email = "ssc@iwr.uni-heidelberg.de" },
     { name = "Petr Andriushchenko", email = "ssc@iwr.uni-heidelberg.de" },
 ]
 requires-python = ">=3.8"
