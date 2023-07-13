@@ -16,6 +16,10 @@ class SummaryDetector(AnalysisMethod):
         summary_vqa_model=None,
         summary_vqa_vis_processors=None,
         summary_vqa_txt_processors=None,
+        summary_vqa_model_new=None,
+        summary_vqa_vis_processors_new=None,
+        summary_vqa_txt_processors_new=None,
+        device_type: str = None,
     ) -> None:
         """
         SummaryDetector class for analysing images using the blip_caption model.
@@ -39,24 +43,52 @@ class SummaryDetector(AnalysisMethod):
         """
 
         super().__init__(subdict)
-        if analysis_type not in ["summary", "questions", "summary_and_questions"]:
+        allowed_analysis_types = ["summary", "questions", "summary_and_questions"]
+        allowed_new_analysis_types = [
+            "new_summary",
+            "new_questions",
+            "new_summary_and_questions",
+        ]
+        all_allowed_analysis_types = allowed_analysis_types + allowed_new_analysis_types
+        if analysis_type not in all_allowed_analysis_types:
             raise ValueError(
-                "analysis_type must be one of 'summary', 'questions' or 'summary_and_questions'"
+                "analysis_type must be one of {}".format(all_allowed_analysis_types)
             )
-        self.summary_device = "cuda" if cuda.is_available() else "cpu"
-        allowed_model_types = ["base", "large"]
-        if summary_model_type not in allowed_model_types:
+        if device_type is None:
+            self.summary_device = "cuda" if cuda.is_available() else "cpu"
+        else:
+            self.summary_device = device_type
+        allowed_model_types = [
+            "base",
+            "large",
+        ]
+        allowed_new_model_types = [
+            "blip2_t5_pretrain_flant5xxl",
+            "blip2_t5_pretrain_flant5xl",
+            "blip2_t5_caption_coco_flant5xl",
+            "blip2_opt_pretrain_opt2.7b",
+            "blip2_opt_pretrain_opt6.7b",
+            "blip2_opt_caption_coco_opt2.7b",
+            "blip2_opt_caption_coco_opt6.7b",
+        ]
+        all_allowed_model_types = allowed_model_types + allowed_new_model_types
+        if summary_model_type not in all_allowed_model_types:
             raise ValueError(
                 "Model type is not allowed - please select one of {}".format(
-                    allowed_model_types
+                    all_allowed_model_types
                 )
             )
         self.summary_model_type = summary_model_type
         self.analysis_type = analysis_type
-        if list_of_questions is None:
+        if list_of_questions is None and analysis_type in allowed_analysis_types:
             self.list_of_questions = [
                 "Are there people in the image?",
                 "What is this picture about?",
+            ]
+        elif list_of_questions is None and analysis_type in allowed_new_analysis_types:
+            self.list_of_questions = [
+                "Question: Are there people in the image? Answer:",
+                "Question: What is this picture about? Answer:",
             ]
         elif (not isinstance(list_of_questions, list)) or (
             not all(isinstance(i, str) for i in list_of_questions)
@@ -67,7 +99,7 @@ class SummaryDetector(AnalysisMethod):
         if (
             (summary_model is None)
             and (summary_vis_processors is None)
-            and (analysis_type != "questions")
+            and (analysis_type == "summary" or analysis_type == "summary_and_questions")
         ):
             self.summary_model, self.summary_vis_processors = self.load_model(
                 model_type=summary_model_type
@@ -79,7 +111,9 @@ class SummaryDetector(AnalysisMethod):
             (summary_vqa_model is None)
             and (summary_vqa_vis_processors is None)
             and (summary_vqa_txt_processors is None)
-            and (analysis_type != "summary")
+            and (
+                analysis_type == "questions" or analysis_type == "summary_and_questions"
+            )
         ):
             (
                 self.summary_vqa_model,
@@ -90,6 +124,21 @@ class SummaryDetector(AnalysisMethod):
             self.summary_vqa_model = summary_vqa_model
             self.summary_vqa_vis_processors = summary_vqa_vis_processors
             self.summary_vqa_txt_processors = summary_vqa_txt_processors
+        if (
+            (summary_vqa_model_new is None)
+            and (summary_vqa_vis_processors_new is None)
+            and (summary_vqa_txt_processors_new is None)
+            and (analysis_type in allowed_new_analysis_types)
+        ):
+            (
+                self.summary_vqa_model_new,
+                self.summary_vqa_vis_processors_new,
+                self.summary_vqa_txt_processors_new,
+            ) = self.load_new_model(model_type=summary_model_type)
+        else:
+            self.summary_vqa_model_new = summary_vqa_model_new
+            self.summary_vqa_vis_processors_new = summary_vqa_vis_processors_new
+            self.summary_vqa_txt_processors_new = summary_vqa_txt_processors_new
 
     def load_model_base(self):
         """
@@ -185,6 +234,13 @@ class SummaryDetector(AnalysisMethod):
             self.analyse_summary()
         elif self.analysis_type == "questions":
             self.analyse_questions(self.list_of_questions)
+        elif self.analysis_type == "new_summary":
+            self.analyse_summary_new()
+        elif self.analysis_type == "new_questions":
+            self.analyse_questions_new(self.list_of_questions)
+        elif self.analysis_type == "new_summary_and_questions":
+            self.analyse_summary_new()
+            self.analyse_questions_new(self.list_of_questions)
 
         return self.subdict
 
@@ -264,4 +320,188 @@ class SummaryDetector(AnalysisMethod):
 
         else:
             print("Please, enter list of questions")
+        return self.subdict
+
+    def load_new_model(self, model_type: str):
+        """
+        Load blip_caption model and preprocessors for visual inputs from lavis.models.
+
+        Args:
+            model_type (str): type of the model.
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+        """
+        select_model = {
+            "blip2_t5_pretrain_flant5xxl": SummaryDetector.load_model_blip2_t5_pretrain_flant5xxl,
+            "blip2_t5_pretrain_flant5xl": SummaryDetector.load_model_blip2_t5_pretrain_flant5xl,
+            "blip2_t5_caption_coco_flant5xl": SummaryDetector.load_model_blip2_t5_caption_coco_flant5xl,
+            "blip2_opt_pretrain_opt2.7b": SummaryDetector.load_model_blip2_opt_pretrain_opt2,
+            "blip2_opt_pretrain_opt6.7b": SummaryDetector.load_model_base_blip2_opt_pretrain_opt67b,
+            "blip2_opt_caption_coco_opt2.7b": SummaryDetector.load_model_blip2_opt_caption_coco_opt27b,
+            "blip2_opt_caption_coco_opt6.7b": SummaryDetector.load_model_base_blip2_opt_caption_coco_opt67b,
+        }
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = select_model[model_type](self)
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def load_model_blip2_t5_pretrain_flant5xxl(self):
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = load_model_and_preprocess(
+            name="blip2_t5",
+            model_type="pretrain_flant5xxl",
+            is_eval=True,
+            device=self.summary_device,
+        )
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def load_model_blip2_t5_pretrain_flant5xl(self):
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = load_model_and_preprocess(
+            name="blip2_t5",
+            model_type="pretrain_flant5xl",
+            is_eval=True,
+            device=self.summary_device,
+        )
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def load_model_blip2_t5_caption_coco_flant5xl(self):
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = load_model_and_preprocess(
+            name="blip2_t5",
+            model_type="caption_coco_flant5xl",
+            is_eval=True,
+            device=self.summary_device,
+        )
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def load_model_blip2_opt_pretrain_opt2(self):
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = load_model_and_preprocess(
+            name="blip2_opt",
+            model_type="pretrain_opt2",
+            is_eval=True,
+            device=self.summary_device,
+        )
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def load_model_base_blip2_opt_pretrain_opt67b(self):
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = load_model_and_preprocess(
+            name="blip2_opt",
+            model_type="pretrain_opt6.7b",
+            is_eval=True,
+            device=self.summary_device,
+        )
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def load_model_blip2_opt_caption_coco_opt27b(self):
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = load_model_and_preprocess(
+            name="blip2_opt",
+            model_type="caption_coco_opt2.7b",
+            is_eval=True,
+            device=self.summary_device,
+        )
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def load_model_base_blip2_opt_caption_coco_opt67b(self):
+        (
+            summary_vqa_model,
+            summary_vqa_vis_processors,
+            summary_vqa_txt_processors,
+        ) = load_model_and_preprocess(
+            name="blip2_opt",
+            model_type="caption_coco_opt6.7b",
+            is_eval=True,
+            device=self.summary_device,
+        )
+        return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
+
+    def analyse_questions_new(self, list_of_questions: list[str]) -> dict:
+        """
+        Generate answers to free-form questions about image written in natural language.
+
+        Args:
+            list_of_questions (list[str]): list of questions.
+
+        Returns:
+            self.subdict (dict): dictionary with answers to questions.
+        """
+        if len(list_of_questions) > 0:
+            path = self.subdict["filename"]
+            raw_image = Image.open(path).convert("RGB")
+            image = (
+                self.summary_vqa_vis_processors_new["eval"](raw_image)
+                .unsqueeze(0)
+                .to(self.summary_device)
+            )
+            question_batch = []
+            answers_batch = []
+            for quest in list_of_questions:
+                question = (str)(quest)
+                question_batch.append(question)
+                answer = self.summary_vqa_model_new.generate(
+                    {"image": image, "prompt": question}
+                )
+                answers_batch.append(answer)
+
+            for q, a in zip(list_of_questions, answers_batch):
+                self.subdict[q] = a[0]
+        else:
+            print("Please, enter list of questions")
+        return self.subdict
+
+    def analyse_summary_new(self):
+        """
+        Create 1 constant and 3 non deterministic captions for image.
+
+        Args:
+
+        Returns:
+            self.subdict (dict): dictionary with analysis results.
+        """
+
+        path = self.subdict["filename"]
+        raw_image = Image.open(path).convert("RGB")
+        image = (
+            self.summary_vqa_vis_processors_new["eval"](raw_image)
+            .unsqueeze(0)
+            .to(self.summary_device)
+        )
+        self.subdict["const_image_summary"] = self.summary_vqa_model_new.generate(
+            {"image": image}
+        )[0]
+        self.subdict[
+            "3_non-deterministic summary"
+        ] = self.summary_vqa_model_new.generate(
+            {"image": image}, use_nucleus_sampling=True, num_captions=3
+        )
+        if not bool(self.subdict["const_image_summary"].strip()):
+            for sum in self.subdict["3_non-deterministic summary"]:
+                if not bool(sum.strip()):
+                    self.subdict["const_image_summary"] = sum
+                    break
         return self.subdict
