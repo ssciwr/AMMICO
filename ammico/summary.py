@@ -8,7 +8,7 @@ class SummaryDetector(AnalysisMethod):
     def __init__(
         self,
         subdict: dict = {},
-        summary_model_type: str = "base",
+        model_type: str = "base",
         analysis_type: str = "summary_and_questions",
         list_of_questions: str = None,
         summary_model=None,
@@ -26,7 +26,7 @@ class SummaryDetector(AnalysisMethod):
 
         Args:
             subdict (dict, optional): Dictionary containing the image to be analysed. Defaults to {}.
-            summary_model_type (str, optional): Type of blip_caption model to use. Can be "base" or "large". Defaults to "base".
+            model_type (str, optional): Type of blip_caption model to use. Can be "base" or "large". Defaults to "base".
             analysis_type (str, optional): Type of analysis to perform. Can be "summary", "questions" or "summary_and_questions". Defaults to "summary_and_questions".
             list_of_questions (list, optional): List of questions to answer. Defaults to ["Are there people in the image?", "What is this picture about?"].
             summary_model ([type], optional): blip_caption model. Defaults to None.
@@ -72,13 +72,13 @@ class SummaryDetector(AnalysisMethod):
             "blip2_opt_caption_coco_opt6.7b",
         ]
         all_allowed_model_types = allowed_model_types + allowed_new_model_types
-        if summary_model_type not in all_allowed_model_types:
+        if model_type not in all_allowed_model_types:
             raise ValueError(
                 "Model type is not allowed - please select one of {}".format(
                     all_allowed_model_types
                 )
             )
-        self.summary_model_type = summary_model_type
+        self.model_type = model_type
         self.analysis_type = analysis_type
         if list_of_questions is None and analysis_type in allowed_analysis_types:
             self.list_of_questions = [
@@ -102,7 +102,7 @@ class SummaryDetector(AnalysisMethod):
             and (analysis_type == "summary" or analysis_type == "summary_and_questions")
         ):
             self.summary_model, self.summary_vis_processors = self.load_model(
-                model_type=summary_model_type
+                model_type=model_type
             )
         else:
             self.summary_model = summary_model
@@ -134,7 +134,7 @@ class SummaryDetector(AnalysisMethod):
                 self.summary_vqa_model_new,
                 self.summary_vqa_vis_processors_new,
                 self.summary_vqa_txt_processors_new,
-            ) = self.load_new_model(model_type=summary_model_type)
+            ) = self.load_new_model(model_type=model_type)
         else:
             self.summary_vqa_model_new = summary_vqa_model_new
             self.summary_vqa_vis_processors_new = summary_vqa_vis_processors_new
@@ -218,7 +218,12 @@ class SummaryDetector(AnalysisMethod):
         )
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
-    def analyse_image(self):
+    def analyse_image(
+        self,
+        analysis_type: str = None,
+        subdict: dict = {},
+        list_of_questions: list[str] = None,
+    ):
         """
         Analyse image with blip_caption model.
 
@@ -227,6 +232,12 @@ class SummaryDetector(AnalysisMethod):
         Returns:
             self.subdict (dict): dictionary with analysis results.
         """
+        if analysis_type is not None:
+            self.analysis_type = analysis_type
+        if bool(subdict):
+            self.subdict = subdict
+        if list_of_questions is not None:
+            self.list_of_questions = list_of_questions
         if self.analysis_type == "summary_and_questions":
             self.analyse_summary()
             self.analyse_questions(self.list_of_questions)
@@ -241,7 +252,6 @@ class SummaryDetector(AnalysisMethod):
         elif self.analysis_type == "new_summary_and_questions":
             self.analyse_summary_new()
             self.analyse_questions_new(self.list_of_questions)
-
         return self.subdict
 
     def analyse_summary(self):

@@ -522,7 +522,7 @@ class AnalysisExplorer:
             detector_class = identify_function(
                 image_copy,
                 analysis_type=setting_summary_analysis_type,
-                summary_model_type=setting_summary_model,
+                model_type=setting_summary_model,
                 list_of_questions=[setting_summary_list_of_questions]
                 if (setting_summary_list_of_questions is not None)
                 else None,
