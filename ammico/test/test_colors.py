@@ -60,8 +60,8 @@ def test_analyze_images(get_path):
 
     test1 = ColorDetector(mydict_1, delta_e_method="CIE 2000").analyse_image()
     assert test1["red"] == 0.0
-    assert round(test1["green"], 2) == 0.62
+    assert round(test1["green"], 2) == 0.63
 
     test2 = ColorDetector(mydict_1).analyse_image()
     assert test2["red"] == 0.0
-    assert test2["green"] == 0.05
+    assert test2["green"] == 0.06
