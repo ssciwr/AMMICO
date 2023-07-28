@@ -5,6 +5,22 @@ from lavis.models import load_model_and_preprocess
 
 
 class SummaryDetector(AnalysisMethod):
+    allowed_model_types = [
+        "base",
+        "large",
+    ]
+    allowed_new_model_types = [
+        "blip2_t5_pretrain_flant5xxl",
+        "blip2_t5_pretrain_flant5xl",
+        "blip2_t5_caption_coco_flant5xl",
+        "blip2_opt_pretrain_opt2.7b",
+        "blip2_opt_pretrain_opt6.7b",
+        "blip2_opt_caption_coco_opt2.7b",
+        "blip2_opt_caption_coco_opt6.7b",
+    ]
+    all_allowed_model_types = allowed_model_types + allowed_new_model_types
+    allowed_analysis_types = ["summary", "questions", "summary_and_questions"]
+
     def __init__(
         self,
         subdict: dict = {},
@@ -43,49 +59,36 @@ class SummaryDetector(AnalysisMethod):
         """
 
         super().__init__(subdict)
-        allowed_analysis_types = ["summary", "questions", "summary_and_questions"]
-        allowed_new_analysis_types = [
-            "new_summary",
-            "new_questions",
-            "new_summary_and_questions",
-        ]
-        all_allowed_analysis_types = allowed_analysis_types + allowed_new_analysis_types
-        if analysis_type not in all_allowed_analysis_types:
+        # allowed_analysis_types = ["summary", "questions", "summary_and_questions"]
+        # allowed_new_analysis_types = [
+        #     "new_summary",
+        #     "new_questions",
+        #     "new_summary_and_questions",
+        # ]
+        # all_allowed_analysis_types = allowed_analysis_types + allowed_new_analysis_types
+        if analysis_type not in self.allowed_analysis_types:
             raise ValueError(
-                "analysis_type must be one of {}".format(all_allowed_analysis_types)
+                "analysis_type must be one of {}".format(self.allowed_analysis_types)
             )
         if device_type is None:
             self.summary_device = "cuda" if cuda.is_available() else "cpu"
         else:
             self.summary_device = device_type
-        allowed_model_types = [
-            "base",
-            "large",
-        ]
-        allowed_new_model_types = [
-            "blip2_t5_pretrain_flant5xxl",
-            "blip2_t5_pretrain_flant5xl",
-            "blip2_t5_caption_coco_flant5xl",
-            "blip2_opt_pretrain_opt2.7b",
-            "blip2_opt_pretrain_opt6.7b",
-            "blip2_opt_caption_coco_opt2.7b",
-            "blip2_opt_caption_coco_opt6.7b",
-        ]
-        all_allowed_model_types = allowed_model_types + allowed_new_model_types
-        if model_type not in all_allowed_model_types:
+
+        if model_type not in self.all_allowed_model_types:
             raise ValueError(
                 "Model type is not allowed - please select one of {}".format(
-                    all_allowed_model_types
+                    self.all_allowed_model_types
                 )
             )
         self.model_type = model_type
         self.analysis_type = analysis_type
-        if list_of_questions is None and analysis_type in allowed_analysis_types:
+        if list_of_questions is None and model_type in self.allowed_model_types:
             self.list_of_questions = [
                 "Are there people in the image?",
                 "What is this picture about?",
             ]
-        elif list_of_questions is None and analysis_type in allowed_new_analysis_types:
+        elif list_of_questions is None and model_type in self.allowed_new_model_types:
             self.list_of_questions = [
                 "Question: Are there people in the image? Answer:",
                 "Question: What is this picture about? Answer:",
@@ -97,7 +100,8 @@ class SummaryDetector(AnalysisMethod):
         else:
             self.list_of_questions = list_of_questions
         if (
-            (summary_model is None)
+            model_type in self.allowed_model_types
+            and (summary_model is None)
             and (summary_vis_processors is None)
             and (analysis_type == "summary" or analysis_type == "summary_and_questions")
         ):
@@ -108,7 +112,8 @@ class SummaryDetector(AnalysisMethod):
             self.summary_model = summary_model
             self.summary_vis_processors = summary_vis_processors
         if (
-            (summary_vqa_model is None)
+            model_type in self.allowed_model_types
+            and (summary_vqa_model is None)
             and (summary_vqa_vis_processors is None)
             and (summary_vqa_txt_processors is None)
             and (
@@ -125,10 +130,10 @@ class SummaryDetector(AnalysisMethod):
             self.summary_vqa_vis_processors = summary_vqa_vis_processors
             self.summary_vqa_txt_processors = summary_vqa_txt_processors
         if (
-            (summary_vqa_model_new is None)
+            model_type in self.allowed_new_model_types
+            and (summary_vqa_model_new is None)
             and (summary_vqa_vis_processors_new is None)
             and (summary_vqa_txt_processors_new is None)
-            and (analysis_type in allowed_new_analysis_types)
         ):
             (
                 self.summary_vqa_model_new,
@@ -245,13 +250,6 @@ class SummaryDetector(AnalysisMethod):
             self.analyse_summary()
         elif self.analysis_type == "questions":
             self.analyse_questions(self.list_of_questions)
-        elif self.analysis_type == "new_summary":
-            self.analyse_summary_new()
-        elif self.analysis_type == "new_questions":
-            self.analyse_questions_new(self.list_of_questions)
-        elif self.analysis_type == "new_summary_and_questions":
-            self.analyse_summary_new()
-            self.analyse_questions_new(self.list_of_questions)
         return self.subdict
 
     def analyse_summary(self):
@@ -263,22 +261,30 @@ class SummaryDetector(AnalysisMethod):
         Returns:
             self.subdict (dict): dictionary with analysis results.
         """
-
+        if self.model_type in self.allowed_model_types:
+            vis_processors = self.summary_vis_processors
+            model = self.summary_model
+        elif self.model_type in self.allowed_new_model_types:
+            vis_processors = self.summary_vqa_vis_processors_new
+            model = self.summary_vqa_model_new
+        else:
+            raise ValueError(
+                "Model type is not allowed - please select one of {}".format(
+                    self.all_allowed_model_types
+                )
+            )
         path = self.subdict["filename"]
         raw_image = Image.open(path).convert("RGB")
-        image = (
-            self.summary_vis_processors["eval"](raw_image)
-            .unsqueeze(0)
-            .to(self.summary_device)
-        )
+        image = vis_processors["eval"](raw_image).unsqueeze(0).to(self.summary_device)
         with no_grad():
-            self.subdict["const_image_summary"] = self.summary_model.generate(
-                {"image": image}
-            )[0]
-            self.subdict["3_non-deterministic summary"] = self.summary_model.generate(
+            self.subdict["const_image_summary"] = model.generate({"image": image})[0]
+            self.subdict["3_non-deterministic summary"] = model.generate(
                 {"image": image}, use_nucleus_sampling=True, num_captions=3
             )
         return self.subdict
+
+    def _check_is_empty(self, string_to_check: str) -> bool:
+        return bool(string_to_check.strip())
 
     def analyse_questions(self, list_of_questions: list[str]) -> dict:
         """
@@ -482,36 +488,4 @@ class SummaryDetector(AnalysisMethod):
                 self.subdict[q] = a[0]
         else:
             print("Please, enter list of questions")
-        return self.subdict
-
-    def analyse_summary_new(self):
-        """
-        Create 1 constant and 3 non deterministic captions for image.
-
-        Args:
-
-        Returns:
-            self.subdict (dict): dictionary with analysis results.
-        """
-
-        path = self.subdict["filename"]
-        raw_image = Image.open(path).convert("RGB")
-        image = (
-            self.summary_vqa_vis_processors_new["eval"](raw_image)
-            .unsqueeze(0)
-            .to(self.summary_device)
-        )
-        self.subdict["const_image_summary"] = self.summary_vqa_model_new.generate(
-            {"image": image}
-        )[0]
-        self.subdict[
-            "3_non-deterministic summary"
-        ] = self.summary_vqa_model_new.generate(
-            {"image": image}, use_nucleus_sampling=True, num_captions=3
-        )
-        if not bool(self.subdict["const_image_summary"].strip()):
-            for sum in self.subdict["3_non-deterministic summary"]:
-                if not bool(sum.strip()):
-                    self.subdict["const_image_summary"] = sum
-                    break
         return self.subdict
