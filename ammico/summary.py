@@ -2,6 +2,7 @@ from ammico.utils import AnalysisMethod
 from torch import cuda, no_grad
 from PIL import Image
 from lavis.models import load_model_and_preprocess
+import math
 
 
 class SummaryDetector(AnalysisMethod):
@@ -59,22 +60,19 @@ class SummaryDetector(AnalysisMethod):
         """
 
         super().__init__(subdict)
-        # allowed_analysis_types = ["summary", "questions", "summary_and_questions"]
-        # allowed_new_analysis_types = [
-        #     "new_summary",
-        #     "new_questions",
-        #     "new_summary_and_questions",
-        # ]
-        # all_allowed_analysis_types = allowed_analysis_types + allowed_new_analysis_types
+        # check if analysis_type is valid
         if analysis_type not in self.allowed_analysis_types:
             raise ValueError(
                 "analysis_type must be one of {}".format(self.allowed_analysis_types)
             )
+        # check if device_type is valid
         if device_type is None:
             self.summary_device = "cuda" if cuda.is_available() else "cpu"
+        elif device_type not in ["cuda", "cpu"]:
+            raise ValueError("device_type must be one of {}".format(["cuda", "cpu"]))
         else:
             self.summary_device = device_type
-
+        # check if model_type is valid
         if model_type not in self.all_allowed_model_types:
             raise ValueError(
                 "Model type is not allowed - please select one of {}".format(
@@ -83,6 +81,7 @@ class SummaryDetector(AnalysisMethod):
             )
         self.model_type = model_type
         self.analysis_type = analysis_type
+        # check if list_of_questions is valid
         if list_of_questions is None and model_type in self.allowed_model_types:
             self.list_of_questions = [
                 "Are there people in the image?",
@@ -96,9 +95,12 @@ class SummaryDetector(AnalysisMethod):
         elif (not isinstance(list_of_questions, list)) or (
             not all(isinstance(i, str) for i in list_of_questions)
         ):
-            raise ValueError("list_of_questions must be a list of string (questions)")
+            raise ValueError(
+                "list_of_questions must be a list of string (questions)"
+            )  # add sequence of questions
         else:
             self.list_of_questions = list_of_questions
+        # load models and preprocessors
         if (
             model_type in self.allowed_model_types
             and (summary_model is None)
@@ -244,15 +246,15 @@ class SummaryDetector(AnalysisMethod):
         if list_of_questions is not None:
             self.list_of_questions = list_of_questions
         if self.analysis_type == "summary_and_questions":
-            self.analyse_summary()
+            self.analyse_summary(nondeterministic_summaries=True)
             self.analyse_questions(self.list_of_questions)
         elif self.analysis_type == "summary":
-            self.analyse_summary()
+            self.analyse_summary(nondeterministic_summaries=True)
         elif self.analysis_type == "questions":
             self.analyse_questions(self.list_of_questions)
         return self.subdict
 
-    def analyse_summary(self):
+    def analyse_summary(self, nondeterministic_summaries: bool = True):
         """
         Create 1 constant and 3 non deterministic captions for image.
 
@@ -278,13 +280,16 @@ class SummaryDetector(AnalysisMethod):
         image = vis_processors["eval"](raw_image).unsqueeze(0).to(self.summary_device)
         with no_grad():
             self.subdict["const_image_summary"] = model.generate({"image": image})[0]
-            self.subdict["3_non-deterministic summary"] = model.generate(
-                {"image": image}, use_nucleus_sampling=True, num_captions=3
-            )
+            if nondeterministic_summaries:
+                self.subdict["3_non-deterministic summary"] = model.generate(
+                    {"image": image}, use_nucleus_sampling=True, num_captions=3
+                )
+        # if self._check_is_empty(self.subdict["const_image_summary"]):
+        #    self.subdict["const_image_summary"] = math.nan
         return self.subdict
 
-    def _check_is_empty(self, string_to_check: str) -> bool:
-        return bool(string_to_check.strip())
+    # def _check_is_empty(self, string_to_check: str) -> bool:
+    #     return bool(string_to_check.strip())
 
     def analyse_questions(self, list_of_questions: list[str]) -> dict:
         """
@@ -296,37 +301,34 @@ class SummaryDetector(AnalysisMethod):
         Returns:
             self.subdict (dict): dictionary with answers to questions.
         """
-        if (
-            (self.summary_vqa_model is None)
-            and (self.summary_vqa_vis_processors is None)
-            and (self.summary_vqa_txt_processors is None)
-        ):
-            (
-                self.summary_vqa_model,
-                self.summary_vqa_vis_processors,
-                self.summary_vqa_txt_processors,
-            ) = load_model_and_preprocess(
-                name="blip_vqa",
-                model_type="vqav2",
-                is_eval=True,
-                device=self.summary_device,
+        if self.model_type in self.allowed_model_types:
+            vis_processors = self.summary_vqa_vis_processors
+            model = self.summary_vqa_model
+            txt_processors = self.summary_vqa_txt_processors
+        elif self.model_type in self.allowed_new_model_types:
+            vis_processors = self.summary_vqa_vis_processors_new
+            model = self.summary_vqa_model_new
+            txt_processors = self.summary_vqa_txt_processors_new
+        else:
+            raise ValueError(
+                "Model type is not allowed - please select one of {}".format(
+                    self.all_allowed_model_types
+                )
             )
         if len(list_of_questions) > 0:
             path = self.subdict["filename"]
             raw_image = Image.open(path).convert("RGB")
             image = (
-                self.summary_vqa_vis_processors["eval"](raw_image)
-                .unsqueeze(0)
-                .to(self.summary_device)
+                vis_processors["eval"](raw_image).unsqueeze(0).to(self.summary_device)
             )
             question_batch = []
             for quest in list_of_questions:
-                question_batch.append(self.summary_vqa_txt_processors["eval"](quest))
+                question_batch.append(txt_processors["eval"](quest))
             batch_size = len(list_of_questions)
             image_batch = image.repeat(batch_size, 1, 1, 1)
 
             with no_grad():
-                answers_batch = self.summary_vqa_model.predict_answers(
+                answers_batch = model.predict_answers(
                     samples={"image": image_batch, "text_input": question_batch},
                     inference_method="generate",
                 )
@@ -334,6 +336,40 @@ class SummaryDetector(AnalysisMethod):
             for q, a in zip(list_of_questions, answers_batch):
                 self.subdict[q] = a
 
+        else:
+            print("Please, enter list of questions")
+        return self.subdict
+
+    def analyse_questions_new(self, list_of_questions: list[str]) -> dict:
+        """
+        Generate answers to free-form questions about image written in natural language.
+
+        Args:
+            list_of_questions (list[str]): list of questions.
+
+        Returns:
+            self.subdict (dict): dictionary with answers to questions.
+        """
+        if len(list_of_questions) > 0:
+            path = self.subdict["filename"]
+            raw_image = Image.open(path).convert("RGB")
+            image = (
+                self.summary_vqa_vis_processors_new["eval"](raw_image)
+                .unsqueeze(0)
+                .to(self.summary_device)
+            )
+            question_batch = []
+            answers_batch = []
+            for quest in list_of_questions:
+                question = (str)(quest)
+                question_batch.append(question)
+                answer = self.summary_vqa_model_new.generate(
+                    {"image": image, "prompt": question}
+                )
+                answers_batch.append(answer)
+
+            for q, a in zip(list_of_questions, answers_batch):
+                self.subdict[q] = a[0]
         else:
             print("Please, enter list of questions")
         return self.subdict
@@ -455,37 +491,3 @@ class SummaryDetector(AnalysisMethod):
             device=self.summary_device,
         )
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
-
-    def analyse_questions_new(self, list_of_questions: list[str]) -> dict:
-        """
-        Generate answers to free-form questions about image written in natural language.
-
-        Args:
-            list_of_questions (list[str]): list of questions.
-
-        Returns:
-            self.subdict (dict): dictionary with answers to questions.
-        """
-        if len(list_of_questions) > 0:
-            path = self.subdict["filename"]
-            raw_image = Image.open(path).convert("RGB")
-            image = (
-                self.summary_vqa_vis_processors_new["eval"](raw_image)
-                .unsqueeze(0)
-                .to(self.summary_device)
-            )
-            question_batch = []
-            answers_batch = []
-            for quest in list_of_questions:
-                question = (str)(quest)
-                question_batch.append(question)
-                answer = self.summary_vqa_model_new.generate(
-                    {"image": image, "prompt": question}
-                )
-                answers_batch.append(answer)
-
-            for q, a in zip(list_of_questions, answers_batch):
-                self.subdict[q] = a[0]
-        else:
-            print("Please, enter list of questions")
-        return self.subdict
