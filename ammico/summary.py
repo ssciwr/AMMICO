@@ -252,6 +252,10 @@ class SummaryDetector(AnalysisMethod):
             self.analyse_summary(nondeterministic_summaries=True)
         elif self.analysis_type == "questions":
             self.analyse_questions(self.list_of_questions)
+        else:
+            raise ValueError(
+                "analysis_type must be one of {}".format(self.allowed_analysis_types)
+            )
         return self.subdict
 
     def analyse_summary(self, nondeterministic_summaries: bool = True):
@@ -284,12 +288,7 @@ class SummaryDetector(AnalysisMethod):
                 self.subdict["3_non-deterministic summary"] = model.generate(
                     {"image": image}, use_nucleus_sampling=True, num_captions=3
                 )
-        # if self._check_is_empty(self.subdict["const_image_summary"]):
-        #    self.subdict["const_image_summary"] = math.nan
         return self.subdict
-
-    # def _check_is_empty(self, string_to_check: str) -> bool:
-    #     return bool(string_to_check.strip())
 
     def analyse_questions(self, list_of_questions: list[str]) -> dict:
         """
@@ -305,10 +304,12 @@ class SummaryDetector(AnalysisMethod):
             vis_processors = self.summary_vqa_vis_processors
             model = self.summary_vqa_model
             txt_processors = self.summary_vqa_txt_processors
+            model_old = True
         elif self.model_type in self.allowed_new_model_types:
             vis_processors = self.summary_vqa_vis_processors_new
             model = self.summary_vqa_model_new
             txt_processors = self.summary_vqa_txt_processors_new
+            model_old = False
         else:
             raise ValueError(
                 "Model type is not allowed - please select one of {}".format(
@@ -322,54 +323,34 @@ class SummaryDetector(AnalysisMethod):
                 vis_processors["eval"](raw_image).unsqueeze(0).to(self.summary_device)
             )
             question_batch = []
-            for quest in list_of_questions:
-                question_batch.append(txt_processors["eval"](quest))
+            list_of_questions_processed = []
+
+            if model_old:
+                for quest in list_of_questions:
+                    list_of_questions_processed.append(txt_processors["eval"](quest))
+            else:
+                for quest in list_of_questions:
+                    list_of_questions_processed.append((str)(quest))
+
+            for quest in list_of_questions_processed:
+                question_batch.append(quest)
             batch_size = len(list_of_questions)
             image_batch = image.repeat(batch_size, 1, 1, 1)
 
             with no_grad():
-                answers_batch = model.predict_answers(
-                    samples={"image": image_batch, "text_input": question_batch},
-                    inference_method="generate",
-                )
+                if model_old:
+                    answers_batch = model.predict_answers(
+                        samples={"image": image_batch, "text_input": question_batch},
+                        inference_method="generate",
+                    )
+                else:
+                    answers_batch = model.generate(
+                        {"image": image_batch, "prompt": question_batch}
+                    )
 
             for q, a in zip(list_of_questions, answers_batch):
                 self.subdict[q] = a
 
-        else:
-            print("Please, enter list of questions")
-        return self.subdict
-
-    def analyse_questions_new(self, list_of_questions: list[str]) -> dict:
-        """
-        Generate answers to free-form questions about image written in natural language.
-
-        Args:
-            list_of_questions (list[str]): list of questions.
-
-        Returns:
-            self.subdict (dict): dictionary with answers to questions.
-        """
-        if len(list_of_questions) > 0:
-            path = self.subdict["filename"]
-            raw_image = Image.open(path).convert("RGB")
-            image = (
-                self.summary_vqa_vis_processors_new["eval"](raw_image)
-                .unsqueeze(0)
-                .to(self.summary_device)
-            )
-            question_batch = []
-            answers_batch = []
-            for quest in list_of_questions:
-                question = (str)(quest)
-                question_batch.append(question)
-                answer = self.summary_vqa_model_new.generate(
-                    {"image": image, "prompt": question}
-                )
-                answers_batch.append(answer)
-
-            for q, a in zip(list_of_questions, answers_batch):
-                self.subdict[q] = a[0]
         else:
             print("Please, enter list of questions")
         return self.subdict
