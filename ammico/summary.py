@@ -230,6 +230,7 @@ class SummaryDetector(AnalysisMethod):
         analysis_type: str = None,
         subdict: dict = {},
         list_of_questions: list[str] = None,
+        consequential_questions: bool = False,
     ):
         """
         Analyse image with blip_caption model.
@@ -247,11 +248,11 @@ class SummaryDetector(AnalysisMethod):
             self.list_of_questions = list_of_questions
         if self.analysis_type == "summary_and_questions":
             self.analyse_summary(nondeterministic_summaries=True)
-            self.analyse_questions(self.list_of_questions)
+            self.analyse_questions(self.list_of_questions, consequential_questions)
         elif self.analysis_type == "summary":
             self.analyse_summary(nondeterministic_summaries=True)
         elif self.analysis_type == "questions":
-            self.analyse_questions(self.list_of_questions)
+            self.analyse_questions(self.list_of_questions, consequential_questions)
         else:
             raise ValueError(
                 "analysis_type must be one of {}".format(self.allowed_analysis_types)
@@ -290,7 +291,9 @@ class SummaryDetector(AnalysisMethod):
                 )
         return self.subdict
 
-    def analyse_questions(self, list_of_questions: list[str]) -> dict:
+    def analyse_questions(
+        self, list_of_questions: list[str], consequential_questions: bool = False
+    ) -> dict:
         """
         Generate answers to free-form questions about image written in natural language.
 
@@ -300,22 +303,7 @@ class SummaryDetector(AnalysisMethod):
         Returns:
             self.subdict (dict): dictionary with answers to questions.
         """
-        if self.model_type in self.allowed_model_types:
-            vis_processors = self.summary_vqa_vis_processors
-            model = self.summary_vqa_model
-            txt_processors = self.summary_vqa_txt_processors
-            model_old = True
-        elif self.model_type in self.allowed_new_model_types:
-            vis_processors = self.summary_vqa_vis_processors_new
-            model = self.summary_vqa_model_new
-            txt_processors = self.summary_vqa_txt_processors_new
-            model_old = False
-        else:
-            raise ValueError(
-                "Model type is not allowed - please select one of {}".format(
-                    self.all_allowed_model_types
-                )
-            )
+        vis_processors, model, txt_processors, model_old = self.check_model()
         if len(list_of_questions) > 0:
             path = self.subdict["filename"]
             raw_image = Image.open(path).convert("RGB")
@@ -337,23 +325,57 @@ class SummaryDetector(AnalysisMethod):
             batch_size = len(list_of_questions)
             image_batch = image.repeat(batch_size, 1, 1, 1)
 
-            with no_grad():
-                if model_old:
-                    answers_batch = model.predict_answers(
-                        samples={"image": image_batch, "text_input": question_batch},
-                        inference_method="generate",
-                    )
-                else:
-                    answers_batch = model.generate(
-                        {"image": image_batch, "prompt": question_batch}
-                    )
+            if not consequential_questions:
+                with no_grad():
+                    if model_old:
+                        answers_batch = model.predict_answers(
+                            samples={
+                                "image": image_batch,
+                                "text_input": question_batch,
+                            },
+                            inference_method="generate",
+                        )
+                    else:
+                        answers_batch = model.generate(
+                            {"image": image_batch, "prompt": question_batch}
+                        )
 
-            for q, a in zip(list_of_questions, answers_batch):
-                self.subdict[q] = a
+                for q, a in zip(list_of_questions, answers_batch):
+                    self.subdict[q] = a
 
+            if consequential_questions and not model_old:
+                query_with_context = ""
+                for quest in question_batch:
+                    query_with_context = query_with_context + quest
+                    with no_grad():
+                        answer = model.generate(
+                            {"image": image, "prompt": query_with_context}
+                        )
+                    self.subdict[query_with_context] = answer[0]
+                    query_with_context = query_with_context + " " + answer[0] + ". "
         else:
             print("Please, enter list of questions")
         return self.subdict
+
+    def check_model(self):
+        if self.model_type in self.allowed_model_types:
+            vis_processors = self.summary_vqa_vis_processors
+            model = self.summary_vqa_model
+            txt_processors = self.summary_vqa_txt_processors
+            model_old = True
+        elif self.model_type in self.allowed_new_model_types:
+            vis_processors = self.summary_vqa_vis_processors_new
+            model = self.summary_vqa_model_new
+            txt_processors = self.summary_vqa_txt_processors_new
+            model_old = False
+        else:
+            raise ValueError(
+                "Model type is not allowed - please select one of {}".format(
+                    self.all_allowed_model_types
+                )
+            )
+
+        return vis_processors, model, txt_processors, model_old
 
     def load_new_model(self, model_type: str):
         """
