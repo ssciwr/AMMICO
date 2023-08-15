@@ -176,28 +176,28 @@ def check_for_missing_keys(mydict: dict) -> dict:
         )
     for key in mydict.keys():
         # compare keys of next item with first item
-        if not subdict.keys() == mydict[key].keys():
+        if subdict.keys() != mydict[key].keys():
             # print a warning if key is not found and set to None
-            keys_A = set(subdict.keys())
-            keys_B = set(mydict[key].keys())
-            missing_keys_in_B = keys_A - keys_B
-            if missing_keys_in_B:
+            keys_a = set(subdict.keys())
+            keys_b = set(mydict[key].keys())
+            missing_keys_in_b = keys_a - keys_b
+            if missing_keys_in_b:
                 print(
                     "Found missing key(s) {} in subdict {} - setting to None.".format(
-                        missing_keys_in_B, key
+                        missing_keys_in_b, key
                     )
                 )
-                for missing_key in missing_keys_in_B:
+                for missing_key in missing_keys_in_b:
                     mydict[key][missing_key] = None
             # check that there are no other keys in the subdicts -
             # this would only happen if there is a key missing in the first subdict
             # then we would need to start over so best to
             # abort if this happens - this is a very unlikely case
-            missing_keys_in_A = keys_B - keys_A
-            if missing_keys_in_A:
+            missing_keys_in_a = keys_b - keys_a
+            if missing_keys_in_a:
                 raise ValueError(
                     "Could not update missing keys - first item already missing {}".format(
-                        missing_keys_in_A
+                        missing_keys_in_a
                     )
                 )
     return mydict
