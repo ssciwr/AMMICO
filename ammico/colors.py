@@ -92,8 +92,11 @@ class ColorDetector(AnalysisMethod):
                 delta_e_method=self.delta_e_method,
             )
             self.subdict[rgb_name] += color.proportion
-            # ensure color rounding
-            self.subdict[rgb_name] = round(self.subdict[rgb_name], 2)
+
+        # ensure color rounding
+        for key in self.set_keys().keys():
+            if self.subdict[key]:
+                self.subdict[key] = round(self.subdict[key], 2)
 
         return self.subdict
 
