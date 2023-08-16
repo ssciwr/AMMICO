@@ -2,6 +2,7 @@ from ammico.utils import AnalysisMethod
 from torch import cuda, no_grad
 from PIL import Image
 from lavis.models import load_model_and_preprocess
+from typing import Optional
 import math
 
 
@@ -27,7 +28,7 @@ class SummaryDetector(AnalysisMethod):
         subdict: dict = {},
         model_type: str = "base",
         analysis_type: str = "summary_and_questions",
-        list_of_questions: str = None,
+        list_of_questions: Optional[str] = None,
         summary_model=None,
         summary_vis_processors=None,
         summary_vqa_model=None,
@@ -36,7 +37,7 @@ class SummaryDetector(AnalysisMethod):
         summary_vqa_model_new=None,
         summary_vqa_vis_processors_new=None,
         summary_vqa_txt_processors_new=None,
-        device_type: str = None,
+        device_type: Optional[str] = None,
     ) -> None:
         """
         SummaryDetector class for analysing images using the blip_caption model.
@@ -227,9 +228,9 @@ class SummaryDetector(AnalysisMethod):
 
     def analyse_image(
         self,
-        analysis_type: str = None,
+        analysis_type: Optional[str] = None,
         subdict: dict = {},
-        list_of_questions: list[str] = None,
+        list_of_questions: Optional[list[str]] = None,
         consequential_questions: bool = False,
     ):
         """
