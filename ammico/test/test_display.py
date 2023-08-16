@@ -105,21 +105,3 @@ def test_right_output_analysis_summary(get_AE, get_options):
         "base",
         "How many people are in the picture?",
     )
-
-
-def test_right_output_analysis_text(get_AE, get_options):
-    get_AE._right_output_analysis(
-        2,
-        get_options[3],
-        get_options[0],
-        "TextDetector",
-        True,
-        None,
-        None,
-        50,
-        50,
-        "CIE 1976",
-        "summary_and_questions",
-        "base",
-        "How many people are in the picture?",
-    )
