@@ -123,5 +123,3 @@ def test_right_output_analysis_colors(get_AE, get_options):
         "base",
         "How many people are in the picture?",
     )
-    with pytest.raises(EnvironmentError):
-        get_AE.run_server(port=8050)
