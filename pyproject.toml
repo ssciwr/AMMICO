@@ -20,6 +20,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License",
 ]
+
 dependencies = [
     "bertopic<=0.14.1",
     "cvlib",
