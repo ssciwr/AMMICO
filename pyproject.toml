@@ -23,7 +23,7 @@ classifiers = [
 dependencies = [
     "bertopic<=0.14.1",
     "cvlib",
-    "dash",
+    "dash<=2.11.0",
     "dash_renderjson",
     "deepface<=0.0.75",
     "googletrans==3.1.0a0",
