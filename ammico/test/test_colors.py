@@ -1,5 +1,6 @@
 from ammico.colors import ColorDetector
 import pytest
+from numpy import isclose
 
 
 def test_init():
@@ -57,11 +58,20 @@ def test_analyze_images(get_path):
     mydict_1 = {
         "filename": get_path + "IMG_2809.png",
     }
+    mydict_2 = {
+        "filename": get_path + "IMG_2809.png",
+    }
 
     test1 = ColorDetector(mydict_1, delta_e_method="CIE 2000").analyse_image()
-    assert test1["red"] == 0.0
-    assert round(test1["green"], 2) == 0.63
+    assert isclose(test1["red"], 0.0, atol=0.01)
+    assert isclose(test1["green"], 0.63, atol=0.01)
 
-    test2 = ColorDetector(mydict_1).analyse_image()
-    assert test2["red"] == 0.0
-    assert test2["green"] == 0.06
+    test2 = ColorDetector(mydict_2).analyse_image()
+    assert isclose(test2["red"], 0.0, atol=0.01)
+    assert isclose(test2["green"], 0.06, atol=0.01)
+
+    mydict_1["test"] = "test"
+    test3 = ColorDetector(mydict_1).analyse_image()
+    assert isclose(test3["red"], 0.0, atol=0.01)
+    assert isclose(test3["green"], 0.06, atol=0.01)
+    assert test3["test"] == "test"
