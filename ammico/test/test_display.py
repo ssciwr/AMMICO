@@ -107,12 +107,12 @@ def test_right_output_analysis_summary(get_AE, get_options):
     )
 
 
-def test_right_output_analysis_colors(get_AE, get_options):
+def test_right_output_analysis_text(get_AE, get_options):
     get_AE._right_output_analysis(
         2,
         get_options[3],
         get_options[0],
-        "ColorDetector",
+        "TextDetector",
         True,
         None,
         None,
