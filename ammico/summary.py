@@ -3,7 +3,6 @@ from torch import cuda, no_grad
 from PIL import Image
 from lavis.models import load_model_and_preprocess
 from typing import Optional
-import math
 
 
 class SummaryDetector(AnalysisMethod):
@@ -28,7 +27,7 @@ class SummaryDetector(AnalysisMethod):
         subdict: dict = {},
         model_type: str = "base",
         analysis_type: str = "summary_and_questions",
-        list_of_questions: Optional[str] = None,
+        list_of_questions: Optional[list[str]] = None,
         summary_model=None,
         summary_vis_processors=None,
         summary_vqa_model=None,
@@ -44,7 +43,15 @@ class SummaryDetector(AnalysisMethod):
 
         Args:
             subdict (dict, optional): Dictionary containing the image to be analysed. Defaults to {}.
-            model_type (str, optional): Type of blip_caption model to use. Can be "base" or "large". Defaults to "base".
+
+            model_type (str, optional): Type of model to use. Can be "base" or "large" for blip_caption. Or can be one of the new models:
+                "blip2_t5_pretrain_flant5xxl",
+                "blip2_t5_pretrain_flant5xl",
+                "blip2_t5_caption_coco_flant5xl",
+                "blip2_opt_pretrain_opt2.7b",
+                "blip2_opt_pretrain_opt6.7b",
+                "blip2_opt_caption_coco_opt2.7b",
+                "blip2_opt_caption_coco_opt6.7b". Defaults to "base".
             analysis_type (str, optional): Type of analysis to perform. Can be "summary", "questions" or "summary_and_questions". Defaults to "summary_and_questions".
             list_of_questions (list, optional): List of questions to answer. Defaults to ["Are there people in the image?", "What is this picture about?"].
             summary_model ([type], optional): blip_caption model. Defaults to None.
@@ -52,6 +59,9 @@ class SummaryDetector(AnalysisMethod):
             summary_vqa_model ([type], optional): blip_vqa model. Defaults to None.
             summary_vqa_vis_processors ([type], optional): Preprocessors for vqa visual inputs. Defaults to None.
             summary_vqa_txt_processors ([type], optional): Preprocessors for vqa text inputs. Defaults to None.
+            summary_vqa_model_new ([type], optional): new_vqa model. Defaults to None.
+            summary_vqa_vis_processors_new ([type], optional): Preprocessors for vqa visual inputs. Defaults to None.
+            summary_vqa_txt_processors_new ([type], optional): Preprocessors for vqa text inputs. Defaults to None.
 
         Raises:
             ValueError: If analysis_type is not one of "summary", "questions" or "summary_and_questions".
@@ -237,6 +247,10 @@ class SummaryDetector(AnalysisMethod):
         Analyse image with blip_caption model.
 
         Args:
+            analysis_type (str): type of the analysis.
+            subdict (dict): dictionary with analising pictures.
+            list_of_questions (list[str]): list of questions.
+            consequential_questions (bool): whether to ask consequential questions. Worked only for new models.
 
         Returns:
             self.subdict (dict): dictionary with analysis results.
@@ -300,6 +314,7 @@ class SummaryDetector(AnalysisMethod):
 
         Args:
             list_of_questions (list[str]): list of questions.
+            consequential_questions (bool): whether to ask consequential questions. Worked only for new models.
 
         Returns:
             self.subdict (dict): dictionary with answers to questions.
@@ -359,6 +374,17 @@ class SummaryDetector(AnalysisMethod):
         return self.subdict
 
     def check_model(self):
+        """
+        Check model type and return appropriate preprocessors and model.
+
+        Args:
+
+        Returns:
+            vis_processors (dict): visual preprocessor.
+            model (nn.Module): model.
+            txt_processors (dict): text preprocessor.
+            model_old (bool): whether model is old or new.
+        """
         if self.model_type in self.allowed_model_types:
             vis_processors = self.summary_vqa_vis_processors
             model = self.summary_vqa_model
