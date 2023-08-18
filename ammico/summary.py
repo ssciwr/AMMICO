@@ -165,8 +165,8 @@ class SummaryDetector(AnalysisMethod):
         Args:
 
         Returns:
-            model (torch.nn.Module): model.
-            vis_processors (dict): preprocessors for visual inputs.
+            summary_model (torch.nn.Module): model.
+            summary_vis_processors (dict): preprocessors for visual inputs.
         """
         summary_model, summary_vis_processors, _ = load_model_and_preprocess(
             name="blip_caption",
@@ -183,8 +183,8 @@ class SummaryDetector(AnalysisMethod):
         Args:
 
         Returns:
-            model (torch.nn.Module): model.
-            vis_processors (dict): preprocessors for visual inputs.
+            summary_model (torch.nn.Module): model.
+            summary_vis_processors (dict): preprocessors for visual inputs.
         """
         summary_model, summary_vis_processors, _ = load_model_and_preprocess(
             name="blip_caption",
@@ -202,8 +202,8 @@ class SummaryDetector(AnalysisMethod):
             model_type (str): type of the model.
 
         Returns:
-            model (torch.nn.Module): model.
-            vis_processors (dict): preprocessors for visual inputs.
+            summary_model (torch.nn.Module): model.
+            summary_vis_processors (dict): preprocessors for visual inputs.
         """
         select_model = {
             "base": SummaryDetector.load_model_base,
@@ -219,9 +219,9 @@ class SummaryDetector(AnalysisMethod):
         Args:
 
         Returns:
-            model (torch.nn.Module): model.
-            vis_processors (dict): preprocessors for visual inputs.
-            txt_processors (dict): preprocessors for text inputs.
+            summary_vqa_model (torch.nn.Module): model.
+            summary_vqa_vis_processors (dict): preprocessors for visual inputs.
+            summary_vqa_txt_processors (dict): preprocessors for text inputs.
 
         """
         (
@@ -250,7 +250,7 @@ class SummaryDetector(AnalysisMethod):
             analysis_type (str): type of the analysis.
             subdict (dict): dictionary with analising pictures.
             list_of_questions (list[str]): list of questions.
-            consequential_questions (bool): whether to ask consequential questions. Worked only for new models.
+            consequential_questions (bool): whether to ask consequential questions. Works only for new BLIP2 models.
 
         Returns:
             self.subdict (dict): dictionary with analysis results.
@@ -279,6 +279,7 @@ class SummaryDetector(AnalysisMethod):
         Create 1 constant and 3 non deterministic captions for image.
 
         Args:
+            nondeterministic_summaries (bool): whether to create 3 non deterministic captions.
 
         Returns:
             self.subdict (dict): dictionary with analysis results.
@@ -314,12 +315,12 @@ class SummaryDetector(AnalysisMethod):
 
         Args:
             list_of_questions (list[str]): list of questions.
-            consequential_questions (bool): whether to ask consequential questions. Worked only for new models.
+            consequential_questions (bool): whether to ask consequential questions. Works only for new BLIP2 models.
 
         Returns:
             self.subdict (dict): dictionary with answers to questions.
         """
-        vis_processors, model, txt_processors, model_old = self.check_model()
+        model, vis_processors, txt_processors, model_old = self.check_model()
         if len(list_of_questions) > 0:
             path = self.subdict["filename"]
             raw_image = Image.open(path).convert("RGB")
@@ -369,19 +370,23 @@ class SummaryDetector(AnalysisMethod):
                         )
                     self.subdict[query_with_context] = answer[0]
                     query_with_context = query_with_context + " " + answer[0] + ". "
+            elif consequential_questions and model_old:
+                raise ValueError(
+                    "Consequential questions are not allowed for old models"
+                )
         else:
             print("Please, enter list of questions")
         return self.subdict
 
     def check_model(self):
         """
-        Check model type and return appropriate preprocessors and model.
+        Check model type and return appropriate model and preprocessors.
 
         Args:
 
         Returns:
-            vis_processors (dict): visual preprocessor.
             model (nn.Module): model.
+            vis_processors (dict): visual preprocessor.
             txt_processors (dict): text preprocessor.
             model_old (bool): whether model is old or new.
         """
@@ -402,11 +407,11 @@ class SummaryDetector(AnalysisMethod):
                 )
             )
 
-        return vis_processors, model, txt_processors, model_old
+        return model, vis_processors, txt_processors, model_old
 
     def load_new_model(self, model_type: str):
         """
-        Load blip_caption model and preprocessors for visual inputs from lavis.models.
+        Load new BLIP2 models.
 
         Args:
             model_type (str): type of the model.
@@ -414,12 +419,13 @@ class SummaryDetector(AnalysisMethod):
         Returns:
             model (torch.nn.Module): model.
             vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
         """
         select_model = {
             "blip2_t5_pretrain_flant5xxl": SummaryDetector.load_model_blip2_t5_pretrain_flant5xxl,
             "blip2_t5_pretrain_flant5xl": SummaryDetector.load_model_blip2_t5_pretrain_flant5xl,
             "blip2_t5_caption_coco_flant5xl": SummaryDetector.load_model_blip2_t5_caption_coco_flant5xl,
-            "blip2_opt_pretrain_opt2.7b": SummaryDetector.load_model_blip2_opt_pretrain_opt2,
+            "blip2_opt_pretrain_opt2.7b": SummaryDetector.load_model_blip2_opt_pretrain_opt27b,
             "blip2_opt_pretrain_opt6.7b": SummaryDetector.load_model_base_blip2_opt_pretrain_opt67b,
             "blip2_opt_caption_coco_opt2.7b": SummaryDetector.load_model_blip2_opt_caption_coco_opt27b,
             "blip2_opt_caption_coco_opt6.7b": SummaryDetector.load_model_base_blip2_opt_caption_coco_opt67b,
@@ -432,6 +438,16 @@ class SummaryDetector(AnalysisMethod):
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
     def load_model_blip2_t5_pretrain_flant5xxl(self):
+        """
+        Load BLIP2 model with FLAN-T5 XXL architecture.
+
+        Args:
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
+        """
         (
             summary_vqa_model,
             summary_vqa_vis_processors,
@@ -445,6 +461,16 @@ class SummaryDetector(AnalysisMethod):
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
     def load_model_blip2_t5_pretrain_flant5xl(self):
+        """
+        Load BLIP2 model with FLAN-T5 XL architecture.
+
+        Args:
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
+        """
         (
             summary_vqa_model,
             summary_vqa_vis_processors,
@@ -458,6 +484,16 @@ class SummaryDetector(AnalysisMethod):
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
     def load_model_blip2_t5_caption_coco_flant5xl(self):
+        """
+        Load BLIP2 model with caption_coco_flant5xl architecture.
+
+        Args:
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
+        """
         (
             summary_vqa_model,
             summary_vqa_vis_processors,
@@ -470,20 +506,40 @@ class SummaryDetector(AnalysisMethod):
         )
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
-    def load_model_blip2_opt_pretrain_opt2(self):
+    def load_model_blip2_opt_pretrain_opt27b(self):
+        """
+        Load BLIP2 model with pretrain_opt2 architecture.
+
+        Args:
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
+        """
         (
             summary_vqa_model,
             summary_vqa_vis_processors,
             summary_vqa_txt_processors,
         ) = load_model_and_preprocess(
             name="blip2_opt",
-            model_type="pretrain_opt2",
+            model_type="pretrain_opt2.7b",
             is_eval=True,
             device=self.summary_device,
         )
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
     def load_model_base_blip2_opt_pretrain_opt67b(self):
+        """
+        Load BLIP2 model with pretrain_opt6.7b architecture.
+
+        Args:
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
+        """
         (
             summary_vqa_model,
             summary_vqa_vis_processors,
@@ -497,6 +553,16 @@ class SummaryDetector(AnalysisMethod):
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
     def load_model_blip2_opt_caption_coco_opt27b(self):
+        """
+        Load BLIP2 model with caption_coco_opt2.7b architecture.
+
+        Args:
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
+        """
         (
             summary_vqa_model,
             summary_vqa_vis_processors,
@@ -510,6 +576,16 @@ class SummaryDetector(AnalysisMethod):
         return summary_vqa_model, summary_vqa_vis_processors, summary_vqa_txt_processors
 
     def load_model_base_blip2_opt_caption_coco_opt67b(self):
+        """
+        Load BLIP2 model with caption_coco_opt6.7b architecture.
+
+        Args:
+
+        Returns:
+            model (torch.nn.Module): model.
+            vis_processors (dict): preprocessors for visual inputs.
+            txt_processors (dict): preprocessors for text inputs.
+        """
         (
             summary_vqa_model,
             summary_vqa_vis_processors,
