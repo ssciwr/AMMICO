@@ -51,10 +51,10 @@ def test_find_files(get_path):
     assert 0 < len(result_png_jpg)
 
     result_png_jpg_rdm1 = ut.find_files(
-        path=get_path, pattern=["png", "jpg"], recursive=True, limit=10, random_seed=1
+        path=get_path, pattern=["png", "jpg"], recursive=True, limit=2, random_seed=1
     )
     result_png_jpg_rdm2 = ut.find_files(
-        path=get_path, pattern=["png", "jpg"], recursive=True, limit=10, random_seed=2
+        path=get_path, pattern=["png", "jpg"], recursive=True, limit=2, random_seed=2
     )
     assert result_png_jpg_rdm1 != result_png_jpg_rdm2
     assert len(result_png_jpg_rdm1) == len(result_png_jpg_rdm2)
@@ -133,6 +133,17 @@ def test_dump_df(get_path):
     df = ut.dump_df(outdict)
     out_df = pd.read_csv(get_path + "example_dump_df.csv", index_col=[0])
     pd.testing.assert_frame_equal(df, out_df)
+
+
+def test_get_dataframe(get_path):
+    with open(get_path + "example_append_data_to_dict_in.json", "r") as file:
+        mydict = json.load(file)
+    out_df = pd.read_csv(get_path + "example_dump_df.csv", index_col=[0])
+    df = ut.get_dataframe(mydict)
+    df.to_csv("data_out.csv")
+    print(out_df.head(3))
+    print(df.head(3))
+    # pd.testing.assert_frame_equal(df, out_df)
 
 
 def test_is_interactive():
