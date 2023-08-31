@@ -1,5 +1,6 @@
 import pytest
 import ammico.text as tt
+import spacy
 
 
 @pytest.fixture
@@ -28,6 +29,26 @@ def test_TextDetector(set_testdict):
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
+
+
+def test_run_spacy(set_testdict, get_path):
+    test_obj = tt.TextDetector(set_testdict["IMG_3755"], analyse_text=True)
+    ref_file = get_path + "text_IMG_3755.txt"
+    with open(ref_file, "r") as file:
+        reference_text = file.read()
+    test_obj.subdict["text_english"] = reference_text
+    test_obj._run_spacy()
+    assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
+
+
+def test_clean_text(set_testdict):
+    nlp = spacy.load("en_core_web_md")
+    doc = nlp("I like cats and fjejg")
+    test_obj = tt.TextDetector(set_testdict["IMG_3755"])
+    test_obj.doc = doc
+    test_obj.clean_text()
+    result = "I like cats and"
+    assert test_obj.subdict["text_clean"] == result
 
 
 def test_init_revision_numbers_and_models():
