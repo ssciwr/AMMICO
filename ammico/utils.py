@@ -105,7 +105,7 @@ def find_files(
 
     Args:
         path (str, optional): The base directory where we are looking for the images. Defaults
-            to None, which uses the XDG data directory if set or the current
+            to None, which uses the ammico data directory if set or the current
             working directory otherwise.
         pattern (str|list, optional): The naming pattern that the filename should match.
                 Use either '.ext' or just 'ext'
@@ -122,7 +122,7 @@ def find_files(
     """
 
     if path is None:
-        path = os.environ.get("XDG_DATA_HOME", ".")
+        path = os.environ.get("AMMICO_DATA_HOME", ".")
 
     if isinstance(pattern, str):
         pattern = [pattern]
