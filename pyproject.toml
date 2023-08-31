@@ -20,10 +20,11 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License",
 ]
+
 dependencies = [
     "bertopic<=0.14.1",
     "cvlib",
-    "dash",
+    "dash>=2.11.0",
     "dash_renderjson",
     "deepface<=0.0.75",
     "googletrans==3.1.0a0",
@@ -53,8 +54,8 @@ dependencies = [
     "setuptools",
     "opencv-contrib-python",
     "dash",
-    "jupyter_dash",
     "dash_renderjson",
+    "dash_bootstrap_components",
     "colorgram.py",
     "webcolors",
     "colour-science",
