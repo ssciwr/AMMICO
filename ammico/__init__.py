@@ -10,7 +10,7 @@ from ammico.multimodal_search import MultimodalSearch
 from ammico.objects import ObjectDetector
 from ammico.summary import SummaryDetector
 from ammico.text import TextDetector, PostprocessText
-from ammico.utils import find_files, initialize_dict, append_data_to_dict, dump_df
+from ammico.utils import find_files, get_dataframe
 
 # Export the version defined in project metadata
 __version__ = metadata.version(__package__)
@@ -27,7 +27,5 @@ __all__ = [
     "TextDetector",
     "PostprocessText",
     "find_files",
-    "initialize_dict",
-    "append_data_to_dict",
-    "append_data_to_dict",
+    "get_dataframe",
 ]
