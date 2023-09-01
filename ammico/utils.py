@@ -224,8 +224,8 @@ def dump_df(mydict: dict) -> DataFrame:
 
 def get_dataframe(mydict: dict) -> DataFrame:
     check_for_missing_keys(mydict)
-    append_data_to_dict(mydict)
-    return dump_df(mydict)
+    outdict = append_data_to_dict(mydict)
+    return dump_df(outdict)
 
 
 def is_interactive():

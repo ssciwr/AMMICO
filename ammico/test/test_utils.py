@@ -141,9 +141,7 @@ def test_get_dataframe(get_path):
     out_df = pd.read_csv(get_path + "example_dump_df.csv", index_col=[0])
     df = ut.get_dataframe(mydict)
     df.to_csv("data_out.csv")
-    print(out_df.head(3))
-    print(df.head(3))
-    # pd.testing.assert_frame_equal(df, out_df)
+    pd.testing.assert_frame_equal(df, out_df)
 
 
 def test_is_interactive():
