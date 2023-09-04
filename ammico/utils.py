@@ -100,7 +100,7 @@ def find_files(
     recursive: bool = True,
     limit=20,
     random_seed: int = None,
-) -> list:
+) -> dict:
     """Find image files on the file system.
 
     Args:
@@ -118,7 +118,7 @@ def find_files(
         random_seed (int, optional): The random seed to use for shuffling the images.
             If None is provided the data will not be shuffeled. Defaults to None.
     Returns:
-        list: A list with all filenames including the path.
+        dict: A nested dictionary with file ids and all filenames including the path.
     """
 
     if path is None:
@@ -137,7 +137,9 @@ def find_files(
         random.seed(random_seed)
         random.shuffle(results)
 
-    return _limit_results(results, limit)
+    images = _limit_results(results, limit)
+
+    return initialize_dict(images)
 
 
 def initialize_dict(filelist: list) -> dict:
@@ -218,6 +220,12 @@ def append_data_to_dict(mydict: dict) -> dict:
 def dump_df(mydict: dict) -> DataFrame:
     """Utility to dump the dictionary into a dataframe."""
     return DataFrame.from_dict(mydict)
+
+
+def get_dataframe(mydict: dict) -> DataFrame:
+    check_for_missing_keys(mydict)
+    outdict = append_data_to_dict(mydict)
+    return dump_df(outdict)
 
 
 def is_interactive():
