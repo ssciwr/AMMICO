@@ -51,10 +51,10 @@ def test_find_files(get_path):
     assert 0 < len(result_png_jpg)
 
     result_png_jpg_rdm1 = ut.find_files(
-        path=get_path, pattern=["png", "jpg"], recursive=True, limit=10, random_seed=1
+        path=get_path, pattern=["png", "jpg"], recursive=True, limit=2, random_seed=1
     )
     result_png_jpg_rdm2 = ut.find_files(
-        path=get_path, pattern=["png", "jpg"], recursive=True, limit=10, random_seed=2
+        path=get_path, pattern=["png", "jpg"], recursive=True, limit=2, random_seed=2
     )
     assert result_png_jpg_rdm1 != result_png_jpg_rdm2
     assert len(result_png_jpg_rdm1) == len(result_png_jpg_rdm2)
@@ -84,6 +84,38 @@ def test_initialize_dict(get_path):
     assert mydict == out_dict
 
 
+def test_check_for_missing_keys():
+    mydict = {
+        "file1": {"faces": "Yes", "text_english": "Something"},
+        "file2": {"faces": "No", "text_english": "Otherthing"},
+    }
+    # check that dict is not changed
+    mydict2 = ut.check_for_missing_keys(mydict)
+    assert mydict2 == mydict
+    # check that dict is updated if key is missing
+    mydict = {
+        "file1": {"faces": "Yes", "text_english": "Something"},
+        "file2": {"faces": "No"},
+    }
+    mydict2 = ut.check_for_missing_keys(mydict)
+    assert mydict2["file2"] == {"faces": "No", "text_english": None}
+    # check that dict is updated if more than one key is missing
+    mydict = {"file1": {"faces": "Yes", "text_english": "Something"}, "file2": {}}
+    mydict2 = ut.check_for_missing_keys(mydict)
+    assert mydict2["file2"] == {"faces": None, "text_english": None}
+    # now test the exceptions
+    with pytest.raises(ValueError):
+        ut.check_for_missing_keys({"File": "path"})
+    with pytest.raises(ValueError):
+        ut.check_for_missing_keys({"File": {}})
+    mydict = {
+        "file1": {"faces": "Yes"},
+        "file2": {"faces": "No", "text_english": "Something"},
+    }
+    with pytest.raises(ValueError):
+        ut.check_for_missing_keys(mydict)
+
+
 def test_append_data_to_dict(get_path):
     with open(get_path + "example_append_data_to_dict_in.json", "r") as file:
         mydict = json.load(file)
@@ -100,6 +132,15 @@ def test_dump_df(get_path):
         outdict = json.load(file)
     df = ut.dump_df(outdict)
     out_df = pd.read_csv(get_path + "example_dump_df.csv", index_col=[0])
+    pd.testing.assert_frame_equal(df, out_df)
+
+
+def test_get_dataframe(get_path):
+    with open(get_path + "example_append_data_to_dict_in.json", "r") as file:
+        mydict = json.load(file)
+    out_df = pd.read_csv(get_path + "example_dump_df.csv", index_col=[0])
+    df = ut.get_dataframe(mydict)
+    df.to_csv("data_out.csv")
     pd.testing.assert_frame_equal(df, out_df)
 
 

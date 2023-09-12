@@ -51,21 +51,16 @@ Be careful, it requires around 7 GB of disk space.
 
 ## Usage
 
-There are sample notebooks in the `notebooks` folder for you to explore the package:
-1. Text extraction: Use the notebook `get-text-from-image.ipynb` to extract any text from the images. The text is directly translated into English. If the text should be further analysed, set the keyword `analyse_text` to `True` as demonstrated in the notebook.\
+The main demonstration notebook can be found in the `notebooks` folder and also on [google colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb)
+
+There are further sample notebooks in the `notebooks` folder for the more experimental features:
+1. Topic analysis: Use the notebook `get-text-from-image.ipynb` to analyse the topics of the extraced text.\
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.
-1. Emotion recognition: Use the notebook `facial_expressions.ipynb` to identify if there are faces on the image, if they are wearing masks, and if they are not wearing masks also the race, gender and dominant emotion.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/facial_expressions.ipynb)**   
-Place the data files in your google drive to access the data.
-1. Content extraction: Use the notebook `image_summary.ipynb` to create captions for the images and ask questions about the image content.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/image_summary.ipynb)**
 1. Multimodal content: Use the notebook `multimodal_search.ipynb` to find the best fitting images to an image or text query.
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/multimodal_search.ipynb)**
 1. Color analysis: Use the notebook `color_analysis.ipynb` to identify colors the image. The colors are then classified into the main named colors in the English language.
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/colors_analysis.ipynb)**
-1. Object analysis: Use the notebook `ojects_expression.ipynb` to identify certain objects in the image. Currently, the following objects are being identified: person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/objects_expression.ipynb)**
 1. To crop social media posts use the `cropposts.ipynb` notebook. 
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/cropposts.ipynb)**
 

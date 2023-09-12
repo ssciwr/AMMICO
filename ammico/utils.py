@@ -100,12 +100,12 @@ def find_files(
     recursive: bool = True,
     limit=20,
     random_seed: int = None,
-) -> list:
+) -> dict:
     """Find image files on the file system.
 
     Args:
         path (str, optional): The base directory where we are looking for the images. Defaults
-            to None, which uses the XDG data directory if set or the current
+            to None, which uses the ammico data directory if set or the current
             working directory otherwise.
         pattern (str|list, optional): The naming pattern that the filename should match.
                 Use either '.ext' or just 'ext'
@@ -118,11 +118,11 @@ def find_files(
         random_seed (int, optional): The random seed to use for shuffling the images.
             If None is provided the data will not be shuffeled. Defaults to None.
     Returns:
-        list: A list with all filenames including the path.
+        dict: A nested dictionary with file ids and all filenames including the path.
     """
 
     if path is None:
-        path = os.environ.get("XDG_DATA_HOME", ".")
+        path = os.environ.get("AMMICO_DATA_HOME", ".")
 
     if isinstance(pattern, str):
         pattern = [pattern]
@@ -137,7 +137,9 @@ def find_files(
         random.seed(random_seed)
         random.shuffle(results)
 
-    return _limit_results(results, limit)
+    images = _limit_results(results, limit)
+
+    return initialize_dict(images)
 
 
 def initialize_dict(filelist: list) -> dict:
@@ -151,6 +153,55 @@ def initialize_dict(filelist: list) -> dict:
     for img_path in filelist:
         id_ = os.path.splitext(os.path.basename(img_path))[0]
         mydict[id_] = {"filename": img_path}
+    return mydict
+
+
+def check_for_missing_keys(mydict: dict) -> dict:
+    """Check the nested dictionary for any missing keys in the subdicts.
+
+    Args:
+        mydict(dict): The nested dictionary with keys to check.
+    Returns:
+        dict: The dictionary with keys appended."""
+    # check that we actually got a nested dict
+    if not isinstance(mydict[next(iter(mydict))], dict):
+        raise ValueError(
+            "Please provide a nested dictionary - you provided {}".format(
+                next(iter(mydict))
+            )
+        )
+    # gather all existing keys of first item in a list
+    subdict = mydict[next(iter(mydict))]
+    if len(list(subdict.keys())) < 1:
+        raise ValueError(
+            "Could not get any keys to compare to - please check if your nested dict is empty!"
+        )
+    for key in mydict.keys():
+        # compare keys of next item with first item
+        if subdict.keys() != mydict[key].keys():
+            # print a warning if key is not found and set to None
+            keys_a = set(subdict.keys())
+            keys_b = set(mydict[key].keys())
+            missing_keys_in_b = keys_a - keys_b
+            if missing_keys_in_b:
+                print(
+                    "Found missing key(s) {} in subdict {} - setting to None.".format(
+                        missing_keys_in_b, key
+                    )
+                )
+                for missing_key in missing_keys_in_b:
+                    mydict[key][missing_key] = None
+            # check that there are no other keys in the subdicts -
+            # this would only happen if there is a key missing in the first subdict
+            # then we would need to start over so best to
+            # abort if this happens - this is a very unlikely case
+            missing_keys_in_a = keys_b - keys_a
+            if missing_keys_in_a:
+                raise ValueError(
+                    "Could not update missing keys - first item already missing {}".format(
+                        missing_keys_in_a
+                    )
+                )
     return mydict
 
 
@@ -169,6 +220,12 @@ def append_data_to_dict(mydict: dict) -> dict:
 def dump_df(mydict: dict) -> DataFrame:
     """Utility to dump the dictionary into a dataframe."""
     return DataFrame.from_dict(mydict)
+
+
+def get_dataframe(mydict: dict) -> DataFrame:
+    check_for_missing_keys(mydict)
+    outdict = append_data_to_dict(mydict)
+    return dump_df(outdict)
 
 
 def is_interactive():

@@ -45,6 +45,8 @@ class TextDetector(AnalysisMethod):
         if not isinstance(analyse_text, bool):
             raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
+        if self.analyse_text:
+            self._initialize_spacy()
         if model_names:
             self._check_valid_models(model_names)
         if revision_numbers:
@@ -139,6 +141,14 @@ class TextDetector(AnalysisMethod):
         params = {"text": None, "text_language": None, "text_english": None}
         return params
 
+    def _initialize_spacy(self):
+        """Initialize the Spacy library for text analysis."""
+        try:
+            self.nlp = spacy.load("en_core_web_md")
+        except Exception:
+            spacy.cli.download("en_core_web_md")
+            self.nlp = spacy.load("en_core_web_md")
+
     def analyse_image(self) -> dict:
         """Perform text extraction and analysis of the text.
 
@@ -149,6 +159,8 @@ class TextDetector(AnalysisMethod):
         self.translate_text()
         self.remove_linebreaks()
         if self.analyse_text:
+            self._run_spacy()
+            self.clean_text()
             self.text_summary()
             self.text_sentiment_transformers()
             self.text_ner()
@@ -199,6 +211,19 @@ class TextDetector(AnalysisMethod):
             self.subdict["text_english"] = self.subdict["text_english"].replace(
                 "\n", " "
             )
+
+    def _run_spacy(self):
+        """Generate Spacy doc object for further text analysis."""
+        self.doc = self.nlp(self.subdict["text_english"])
+
+    def clean_text(self):
+        """Clean the text from unrecognized words and any numbers."""
+        templist = []
+        for token in self.doc:
+            templist.append(
+                token.text
+            ) if token.pos_ != "NUM" and token.has_vector else None
+        self.subdict["text_clean"] = " ".join(templist).rstrip().lstrip()
 
     def text_summary(self):
         """Generate a summary of the text using the Transformers pipeline."""

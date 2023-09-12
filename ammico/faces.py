@@ -184,6 +184,7 @@ class EmotionDetector(AnalysisMethod):
         """
         # Find (multiple) faces in the image and cut them
         retinaface_model.get()
+
         faces = RetinaFace.extract_faces(self.subdict["filename"])
         # If no faces are found, we return empty keys
         if len(faces) == 0:
