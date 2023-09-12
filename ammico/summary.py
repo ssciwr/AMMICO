@@ -239,7 +239,7 @@ class SummaryDetector(AnalysisMethod):
     def analyse_image(
         self,
         analysis_type: Optional[str] = None,
-        subdict: dict = {},
+        subdict: dict = None,
         list_of_questions: Optional[list[str]] = None,
         consequential_questions: bool = False,
     ):
@@ -255,18 +255,59 @@ class SummaryDetector(AnalysisMethod):
         Returns:
             self.subdict (dict): dictionary with analysis results.
         """
-        if analysis_type is not None:
-            self.analysis_type = analysis_type
-        if bool(subdict):
+        if analysis_type is None:
+            analysis_type = self.analysis_type
+        if subdict is not None:
             self.subdict = subdict
         if list_of_questions is not None:
             self.list_of_questions = list_of_questions
-        if self.analysis_type == "summary_and_questions":
+
+        if analysis_type == "summary_and_questions":
+            if (
+                self.model_type in self.allowed_model_types
+                and self.analysis_type != "summary_and_questions"
+            ):  # if model_type is not new and required model is absent
+                if self.summary_model is None:  # load summary model if it is not loaded
+                    self.summary_model, self.summary_vis_processors = self.load_model(
+                        model_type=self.model_type
+                    )
+                elif (
+                    self.summary_vqa_model is None
+                ):  # load vqa model if it is not loaded
+                    (
+                        self.summary_vqa_model,
+                        self.summary_vqa_vis_processors,
+                        self.summary_vqa_txt_processors,
+                    ) = self.load_vqa_model()
+                self.analysis_type = "summary_and_questions"  # now all models are loaded, so you can perform any analysis
             self.analyse_summary(nondeterministic_summaries=True)
             self.analyse_questions(self.list_of_questions, consequential_questions)
-        elif self.analysis_type == "summary":
+        elif analysis_type == "summary":
+            if (
+                (self.model_type in self.allowed_model_types)
+                and (self.analysis_type == "questions")
+                and (self.summary_model is None)
+            ):  # if model_type is not new and required model is absent
+                (
+                    self.summary_model,
+                    self.summary_vis_processors,
+                ) = self.load_model(  # load summary model if it is not loaded
+                    model_type=self.model_type
+                )
+                self.analysis_type = "summary_and_questions"  # now all models are loaded, so you can perform any analysis
             self.analyse_summary(nondeterministic_summaries=True)
-        elif self.analysis_type == "questions":
+        elif analysis_type == "questions":
+            if (
+                (self.model_type in self.allowed_model_types)
+                and (self.analysis_type == "summary")
+                and (self.summary_vqa_model is None)
+            ):  # if model_type is not new and required model is absent
+                (
+                    self.summary_vqa_model,  # load vqa model if it is not loaded
+                    self.summary_vqa_vis_processors,
+                    self.summary_vqa_txt_processors,
+                ) = self.load_vqa_model()
+                self.analysis_type = "summary_and_questions"  # now all models are loaded, so you can perform any analysis
             self.analyse_questions(self.list_of_questions, consequential_questions)
         else:
             raise ValueError(
