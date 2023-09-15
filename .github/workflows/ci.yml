@@ -39,17 +39,14 @@ jobs:
       run: |
         cd ammico
         python -m pytest test/test_display.py -svv --cov=. --cov-report=xml --cov-append
-        rm -rf ~/.cache/*
     - name: Run pytest test_faces
       run: |
         cd ammico
         python -m pytest test/test_faces.py -svv --cov=. --cov-report=xml --cov-append
-        rm -rf ~/.cache/*
     - name: Run pytest test_multimodal_search
       run: |
         cd ammico
         python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-        rm -rf ~/.cache/*
     - name: Run pytest test_objects
       run: |
         cd ammico
@@ -58,12 +55,14 @@ jobs:
       run: |
         cd ammico
         python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-        rm -rf ~/.cache/*
+    - name: Clear cache
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          rm -rf ~/.cache/*
     - name: Run pytest test_text
       run: |
         cd ammico
         python -m pytest test/test_text.py -m "not gcv" -svv --cov=. --cov-report=xml --cov-append
-        rm -rf ~/.cache/*
     - name: Run pytest test_utils
       run: |
         cd ammico
