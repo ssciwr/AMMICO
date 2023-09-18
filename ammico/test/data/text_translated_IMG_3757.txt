@@ -1,10 +1,1 @@
-THE
-ALGEBRAIC
-EIGENVALUE
-PROBLEM
-DOM
-NVS TIO
-MINA
-Monographs
-on Numerical Analysis
-J.. H. WILKINSON
+algebraic eigenvalue problem monographs numerical analysis

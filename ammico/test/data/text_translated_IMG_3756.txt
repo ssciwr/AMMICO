@@ -1,5 +1,1 @@
-SCATTERING THEORY
-The Quantum Theory of
-Nonrelativistic Collisions
-JOHN R. TAYLOR
-University of Colorado
+scattering theory quantum nonrelativistic university

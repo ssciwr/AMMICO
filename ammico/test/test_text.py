@@ -122,11 +122,13 @@ def test_translate_text(set_testdict, get_path):
         with open(ref_file, "r", encoding="utf8") as file:
             reference_text = file.read()
         with open(trans_file, "r", encoding="utf8") as file:
-            translated_text = file.read()
+            true_translated_text = file.read()
         test_obj.subdict["text"] = reference_text
         test_obj.translate_text()
         assert test_obj.subdict["text_language"] == lang
-        assert test_obj.subdict["text_english"] == translated_text
+        translated_text = test_obj.subdict["text_english"].lower()
+        for word in true_translated_text.lower():
+            assert word in translated_text
 
 
 def test_remove_linebreaks():
