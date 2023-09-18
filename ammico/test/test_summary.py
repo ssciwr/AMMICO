@@ -125,11 +125,11 @@ def test_advanced_init_summary():
     sd = sm.SummaryDetector({})
     assert sd.summary_model
     assert sd.summary_vis_processors
-    sd = sm.SummaryDetector({}, summary_model_type="large")
+    sd = sm.SummaryDetector({}, model_type="large")
     assert sd.summary_model
     assert sd.summary_vis_processors
     with pytest.raises(ValueError):
-        sm.SummaryDetector({}, summary_model_type="bla")
+        sm.SummaryDetector({}, model_type="bla")
     (
         summary_vqa_model,
         summary_vqa_vis_processors,
