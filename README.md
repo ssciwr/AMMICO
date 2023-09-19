@@ -40,6 +40,59 @@ pip install ammico
 ```
 This will install the package and its dependencies locally.
 
+Some ammico components require tensorflow (e.g. Emotional detector), some pytorch (e.g. Summary detector). Sometimes there are compatibility problems between these two frameworks. To avoid compatibility problems on your machines, we suggest you to follow these steps before installing the package (you need conda on your machine):
+
+### 1. First, install tensorflow (https://www.tensorflow.org/install/pip)
+- create a new environment with python and activate it
+
+    ```conda create -n ammico_env python=3.10```
+
+    ```conda activate ammico_env```
+- install cudatoolkit from conda-forge
+
+    ``` conda install -c conda-forge cudatoolkit=11.8.0```
+- install nvidia-cudnn-cu11 from pip
+
+    ```python -m pip install nvidia-cudnn-cu11==8.6.0.163```
+- add script that runs when conda environment `ammico_env` is activated to put the right libraries on your LD_LIBRARY_PATH
+
+    ```
+    mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+    echo 'CUDNN_PATH=$(dirname $(python -c "import nvidia.cudnn;print(nvidia.cudnn.__file__)"))' >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+    echo 'export LD_LIBRARY_PATH=$CUDNN_PATH/lib:$CONDA_PREFIX/lib/:$LD_LIBRARY_PATH' >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+    source $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+    ```
+- deactivate and re-activate conda environment to call script above
+
+    ```conda deactivate```
+
+    ```conda activate ammico_env ```
+
+- and now we can install tensorflow
+
+    ```python -m pip install tensorflow==2.12.1```
+
+### 2. Second, install pytorch
+
+-   install pytorch for same cuda version as above
+
+    ```python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118```
+    
+### 3. After we prepared right environment we can install ```AMMICO``` package
+
+-    ```python -m pip install ammico``` 
+
+It is done.
+    
+
+
+### Micromamba
+If you have micromamba on your machine you can prepare environment with just one command: 
+
+```micromamba create --no-channel-priority -c nvidia -c pytorch -c conda-forge -n ammico_env "python=3.10" pytorch torchvision torchaudio pytorch-cuda "tensorflow-gpu<=2.12.3" "numpy<=1.23.4"```  
+   
+### Windows
+
 To make pycocotools work on Windows OS you may need to install `vs_BuildTools.exe` from https://visualstudio.microsoft.com/visual-cpp-build-tools/ and choose following elements:
 - `Visual Studio extension development`
 - `MSVC v143 - VS 2022 C++ x64/x86 build tools`
