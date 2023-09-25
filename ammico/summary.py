@@ -9,6 +9,7 @@ class SummaryDetector(AnalysisMethod):
     allowed_model_types = [
         "base",
         "large",
+        "vqa",
     ]
     allowed_new_model_types = [
         "blip2_t5_pretrain_flant5xxl",
@@ -44,7 +45,7 @@ class SummaryDetector(AnalysisMethod):
         Args:
             subdict (dict, optional): Dictionary containing the image to be analysed. Defaults to {}.
 
-            model_type (str, optional): Type of model to use. Can be "base" or "large" for blip_caption. Or can be one of the new models:
+            model_type (str, optional): Type of model to use. Can be "base" or "large" or "vqa" for blip_caption and VQA. Or can be one of the new models:
                 "blip2_t5_pretrain_flant5xxl",
                 "blip2_t5_pretrain_flant5xl",
                 "blip2_t5_caption_coco_flant5xl",
