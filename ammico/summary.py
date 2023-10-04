@@ -344,7 +344,7 @@ class SummaryDetector(AnalysisMethod):
         with no_grad():
             self.subdict["const_image_summary"] = model.generate({"image": image})[0]
             if nondeterministic_summaries:
-                self.subdict["3_non-deterministic summary"] = model.generate(
+                self.subdict["3_non-deterministic_summary"] = model.generate(
                     {"image": image}, use_nucleus_sampling=True, num_captions=3
                 )
         return self.subdict
