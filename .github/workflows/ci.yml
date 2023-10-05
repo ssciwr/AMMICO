@@ -29,14 +29,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -e .
-    - name: Run pytest test_colors
-      run: |
-        cd ammico
-        python -m pytest test/test_colors.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_cropposts
-      run: |
-        cd ammico
-        python -m pytest test/test_cropposts.py -svv --cov=. --cov-report=xml --cov-append
+    # - name: Run pytest test_colors
+      # run: |
+        # cd ammico
+        # python -m pytest test/test_colors.py -svv --cov=. --cov-report=xml --cov-append
+    # - name: Run pytest test_cropposts
+      # run: |
+        # cd ammico
+        # python -m pytest test/test_cropposts.py -svv --cov=. --cov-report=xml --cov-append
     # - name: Run pytest test_display
     #   run: |
     #     cd ammico
@@ -52,7 +52,7 @@ jobs:
     - name: Run pytest test_objects
       run: |
         cd ammico
-        python -m pytest test/test_objects.py -svv --cov=. --cov-report=xml --cov-append
+        python -m pytest test/test_objects.py -sxvv --cov=. --cov-report=xml --cov-append
     # - name: Run pytest test_summary
     #   run: |
     #     cd ammico

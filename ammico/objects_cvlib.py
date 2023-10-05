@@ -51,7 +51,7 @@ class ObjectCVLib(ObjectsMethod):
         """
         img = cv2.imread(image_path)
         print("read image {}".format(img))
-        _, label, _ = cv.detect_common_objects(img)
+        _, label, _ = cv.detect_common_objects(img, model="yolov3")
         objects = objects_from_cvlib(label)
         return objects
 
