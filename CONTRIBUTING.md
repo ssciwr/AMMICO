@@ -2,7 +2,7 @@
 
 Welcome to `ammico`! Contributions to the package are welcome. Please adhere to the following conventions:
 
-- fork the repository, make your changes, and make sure your changes pass all the tests (Sonarcloud, unit and integration tests, codecoverage limits); then open a Pull Request for your changes. Tag one of `nlpannotator`'s developers for review.
+- fork the repository, make your changes, and make sure your changes pass all the tests (Sonarcloud, unit and integration tests, codecoverage limits); then open a Pull Request for your changes. Tag one of `ammico`'s developers for review.
 - install and use the pre-commit hooks by running `pre-commit install` in the repository directory so that all your changes adhere to the PEP8 style guide and black code formatting
 - make sure to update the documentation if applicable
 
