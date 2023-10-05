@@ -50,7 +50,7 @@ class ObjectCVLib(ObjectsMethod):
             image_path: The path to the local file.
         """
         img = cv2.imread(image_path)
-
+        print("read image {}".format(img))
         _, label, _ = cv.detect_common_objects(img)
         objects = objects_from_cvlib(label)
         return objects
@@ -70,7 +70,9 @@ class ObjectCVLib(ObjectsMethod):
         Args:
             subdict: The dictionary for an image expression instance.
         """
+        print("file is {}".format(subdict["filename"]))
         objects = self.analyse_image_from_file(subdict["filename"])
+        print(objects)
         for key in objects:
             subdict[key] = objects[key]
 

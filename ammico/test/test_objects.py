@@ -28,6 +28,7 @@ def test_objects_from_cvlib(default_objects):
 
 def test_analyse_image_cvlib(get_path):
     mydict = {"filename": get_path + TEST_IMAGE_1}
+    print(mydict)
     ob_cvlib.ObjectCVLib().analyse_image(mydict)
 
     with open(get_path + JSON_1, "r") as file:
