@@ -53,6 +53,7 @@ dependencies = [
     "google-cloud-vision",
     "setuptools",
     "opencv-contrib-python<=4.8.0.76",
+    "opencv-python<=4.8.0.76",
     "dash",
     "dash_renderjson",
     "dash_bootstrap_components",
