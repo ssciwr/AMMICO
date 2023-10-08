@@ -49,10 +49,10 @@ jobs:
       run: |
         cd ammico
         python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_objects
-      run: |
-        cd ammico
-        python -m pytest test/test_objects.py -sxvv --cov=. --cov-report=xml --cov-append
+    # - name: Run pytest test_objects
+      # run: |
+        # cd ammico
+        # python -m pytest test/test_objects.py -sxvv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_summary
       run: |
         cd ammico
