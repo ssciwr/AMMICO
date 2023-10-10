@@ -71,7 +71,7 @@ def test_analyse_image(get_dict):
             ).analyse_image()
         assert len(get_dict) == 2
         for key in get_dict.keys():
-            assert len(get_dict[key]["3_non-deterministic summary"]) == 3
+            assert len(get_dict[key]["3_non-deterministic_summary"]) == 3
             assert (
                 get_dict[key]["const_image_summary"] == reference_results[test_run][key]
             )
