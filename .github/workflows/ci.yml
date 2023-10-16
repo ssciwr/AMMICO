@@ -51,7 +51,7 @@ jobs:
     - name: Clear cache windows
       if: matrix.os == 'windows-latest'
       run: |
-        del /S 'C:\Users\runneradmin\AppData\Local\pooch\pooch\Cache\*'
+        del /S C:\Users\runneradmin\AppData\Local\pooch\pooch\Cache\*
     # - name: Run pytest test_objects
     #   run: |
     #     cd ammico
