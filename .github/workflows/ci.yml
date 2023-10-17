@@ -48,11 +48,15 @@ jobs:
       run: |
         cd ammico
         python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
+    - name: Clear cache ubuntu 1
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+          rm -rf ~/.cache/*    
     - name: Run pytest test_summary
       run: |
         cd ammico
         python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-    - name: Clear cache
+    - name: Clear cache ubuntu 2
       if: matrix.os == 'ubuntu-22.04'
       run: |
           rm -rf ~/.cache/*
