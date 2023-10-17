@@ -37,38 +37,9 @@ def test_explore_analysis_faces(get_path):
             assert sub_dict[key] == outs[key]
 
 
-def test_explore_analysis_objects(get_path):
-    mydict = {"IMG_2809": {"filename": get_path + "IMG_2809.png"}}
-    with open(get_path + "example_analysis_objects.json", "r") as file:
-        outs = json.load(file)
-    mydict["IMG_2809"].pop("filename", None)
-    for im_key in mydict.keys():
-        sub_dict = mydict[im_key]
-        for key in sub_dict.keys():
-            assert sub_dict[key] == outs[key]
-
-
 def test_AnalysisExplorer(get_AE, get_options):
     get_AE.update_picture(get_options[0])
     assert get_AE.update_picture(None) is None
-
-
-def test_right_output_analysis_objects(get_AE, get_options):
-    get_AE._right_output_analysis(
-        2,
-        get_options[3],
-        get_options[0],
-        "ObjectDetector",
-        True,
-        None,
-        None,
-        50,
-        50,
-        "CIE 1976",
-        "summary_and_questions",
-        "base",
-        "How many people are in the picture?",
-    )
 
 
 def test_right_output_analysis_emotions(get_AE, get_options):
