@@ -23,6 +23,7 @@ classifiers = [
 
 dependencies = [
     "bertopic<=0.14.1",
+    "cvlib @ git+https://github.com/iulusoy/cvlib.git@iulusoy-patch-1",
     "dash>=2.11.0",
     "deepface<=0.0.75",
     "googletrans==3.1.0a0",
@@ -50,6 +51,7 @@ dependencies = [
     "transformers",
     "google-cloud-vision",
     "dash_renderjson",
+    "opencv-contrib-python==4.8.0.76",
     "dash_bootstrap_components",
     "colorgram.py",
     "webcolors",
