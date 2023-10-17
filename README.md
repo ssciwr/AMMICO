@@ -6,7 +6,7 @@
 ![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ssciwr_ammico&metric=alert_status)
 ![Language](https://img.shields.io/github/languages/top/ssciwr/AMMICO)
 
-This package extracts data from images such as social media posts that contain an image part and a text part. The analysis can generate a very large number of features, depending on the user input.
+This package extracts data from images such as social media posts that contain an image part and a text part. The analysis can generate a very large number of features, depending on the user input. See [our paper](https://dx.doi.org/10.31235/osf.io/v8txj) for a more in-depth description.
 
 **_This project is currently under development!_**
 
@@ -16,7 +16,6 @@ Use pre-processed image files such as social media posts with comments and proce
     1. Translation into English or other languages
     1. Cleaning of the text, spell-check
     1. Sentiment analysis
-    1. Subjectivity analysis
     1. Named entity recognition
     1. Topic analysis
 1. Content extraction from the images
@@ -27,11 +26,12 @@ Use pre-processed image files such as social media posts with comments and proce
     1. Face mask detection
     1. Age, gender and race detection
     1. Emotion recognition
-1. Object detection in images
-    1. Detection of position and number of objects in the image; currently  person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone
+1. Color analysis
+    1. Analyse hue and percentage of color on image
+1. Multimodal analysis
+    1. Find best matches for image content or image similarity
 1. Cropping images to remove comments from posts
  
-
 ## Installation
 
 The `AMMICO` package can be installed using pip: 
@@ -40,7 +40,7 @@ pip install ammico
 ```
 This will install the package and its dependencies locally.
 
-Some ammico components require tensorflow (e.g. Emotional detector), some pytorch (e.g. Summary detector). Sometimes there are compatibility problems between these two frameworks. To avoid compatibility problems on your machines, we suggest you to follow these steps before installing the package (you need conda on your machine):
+Some ammico components require tensorflow (e.g. Emotion detector), some pytorch (e.g. Summary detector). Sometimes there are compatibility problems between these two frameworks. To avoid compatibility problems on your machines, we suggest you to follow these steps before installing the package (you need conda on your machine):
 
 ### 1. First, install tensorflow (https://www.tensorflow.org/install/pip)
 - create a new environment with python and activate it
@@ -78,14 +78,12 @@ Some ammico components require tensorflow (e.g. Emotional detector), some pytorc
 
     ```python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118```
     
-### 3. After we prepared right environment we can install ```AMMICO``` package
+### 3. After we prepared right environment we can install the ```ammico``` package
 
 -    ```python -m pip install ammico``` 
 
 It is done.
     
-
-
 ### Micromamba
 If you have micromamba on your machine you can prepare environment with just one command: 
 
@@ -139,10 +137,6 @@ The image content ("caption") is extracted using the [LAVIS](https://github.com/
 ### Emotion recognition
 
 Emotion recognition is carried out using the [deepface](https://github.com/serengil/deepface) and [retinaface](https://github.com/serengil/retinaface) libraries. These libraries detect the presence of faces, and their age, gender, emotion and race based on several state-of-the-art models. It is also detected if the person is wearing a face mask - if they are, then no further detection is carried out as the mask prevents an accurate prediction.
-
-### Object detection
-
-Object detection is carried out using [cvlib](https://github.com/arunponnusamy/cvlib) and the [YOLOv4](https://github.com/AlexeyAB/darknet) model. This library detects faces, people, and several inanimate objects; we currently have restricted the output to person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
 
 ### Color/hue detection
 
