@@ -140,10 +140,6 @@ The image content ("caption") is extracted using the [LAVIS](https://github.com/
 
 Emotion recognition is carried out using the [deepface](https://github.com/serengil/deepface) and [retinaface](https://github.com/serengil/retinaface) libraries. These libraries detect the presence of faces, and their age, gender, emotion and race based on several state-of-the-art models. It is also detected if the person is wearing a face mask - if they are, then no further detection is carried out as the mask prevents an accurate prediction.
 
-### Object detection
-
-Object detection is carried out using [cvlib](https://github.com/arunponnusamy/cvlib) and the [YOLOv4](https://github.com/AlexeyAB/darknet) model. This library detects faces, people, and several inanimate objects; we currently have restricted the output to person, bicycle, car, motorcycle, airplane, bus, train, truck, boat, traffic light, cell phone.
-
 ### Color/hue detection
 
 Color detection is carried out using [colorgram.py](https://github.com/obskyr/colorgram.py) and [colour](https://github.com/vaab/colour) for the distance metric. The colors can be classified into the main named colors/hues in the English language, that are red, green, blue, yellow, cyan, orange, purple, pink, brown, grey, white, black.
