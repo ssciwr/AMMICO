@@ -45,7 +45,7 @@ dependencies = [
     "retina_face",
     "salesforce-lavis @ git+https://github.com/piterand/LAVIS.git@release_1.0.2",
     "setuptools",
-    "spacy",
+    "spacy==3.7.1",
     "tensorflow<=2.12.3",
     "torch",
     "transformers",
