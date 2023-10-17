@@ -46,7 +46,7 @@ dependencies = [
     "setuptools",
     "spacy",
     "tensorflow<=2.12.3",
-    "torch==2.0.1",
+    "torch",
     "transformers",
     "google-cloud-vision",
     "dash_renderjson",
