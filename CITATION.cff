@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Dumitrescu"
+  given-names: "Delia"
+  orcid: "https://orcid.org/0000-0002-0065-3875"
+- family-names: "Ulusoy"
+  given-names: "Inga"
+  orcid: "https://orcid.org/0000-0001-7294-4148"
+- family-names: "Andriushchenko"
+  given-names: "Petr"
+  orcid: "https://orcid.org/0000-0002-4518-6588"
+- family-names: "Daskalakis"
+  given-names: "Gwydion"
+  orcid: "https://orcid.org/0000-0002-7557-1364"
+- family-names: "Kempf"
+  given-names: "Dominic"
+  orcid: "https://orcid.org/0000-0002-6140-2332"
+- family-names: "Ma"
+  given-names: "Xianghe"
+title: "AMMICO, an AI Media and Misinformation Content Analysis Tool"
+version: 0.2.0
+doi: 10.31235/osf.io/v8txj
+date-released: 2023-9-4
+url: "https://github.com/ssciwr/AMMICO"
