@@ -54,7 +54,7 @@ dependencies = [
     "colorgram.py",
     "webcolors",
     "colour-science",
-    "scikit-learn!=1.3.0",
+    "scikit-learn>=1.3.0",
 ]
 
 [project.scripts]
