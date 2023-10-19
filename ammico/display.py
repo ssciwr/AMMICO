@@ -1,6 +1,5 @@
 import ammico.faces as faces
 import ammico.text as text
-import ammico.objects as objects
 import ammico.colors as colors
 from ammico.utils import is_interactive
 import ammico.summary as summary
@@ -332,7 +331,6 @@ class AnalysisExplorer:
                             dcc.Dropdown(
                                 options=[
                                     "TextDetector",
-                                    "ObjectDetector",
                                     "EmotionDetector",
                                     "SummaryDetector",
                                     "ColorDetector",
@@ -465,7 +463,6 @@ class AnalysisExplorer:
         identify_dict = {
             "EmotionDetector": faces.EmotionDetector,
             "TextDetector": text.TextDetector,
-            "ObjectDetector": objects.ObjectDetector,
             "SummaryDetector": summary.SummaryDetector,
             "ColorDetector": colors.ColorDetector,
         }

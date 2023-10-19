@@ -7,7 +7,6 @@ from ammico.cropposts import crop_media_posts, crop_posts_from_refs
 from ammico.display import AnalysisExplorer
 from ammico.faces import EmotionDetector
 from ammico.multimodal_search import MultimodalSearch
-from ammico.objects import ObjectDetector
 from ammico.summary import SummaryDetector
 from ammico.text import TextDetector, PostprocessText
 from ammico.utils import find_files, get_dataframe
@@ -22,7 +21,6 @@ __all__ = [
     "AnalysisExplorer",
     "EmotionDetector",
     "MultimodalSearch",
-    "ObjectDetector",
     "SummaryDetector",
     "TextDetector",
     "PostprocessText",
