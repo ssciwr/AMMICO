@@ -50,6 +50,7 @@ dependencies = [
     "transformers",
     "google-cloud-vision",
     "dash_renderjson",
+    "opencv-contrib-python==4.8.0.76",
     "dash_bootstrap_components",
     "colorgram.py",
     "webcolors",
