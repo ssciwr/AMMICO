@@ -11,12 +11,9 @@ Welcome to AMMICO's documentation!
    :caption: Contents:
 
    readme_link
-   notebooks/Example faces
-   notebooks/Example text
-   notebooks/Example summary
+   notebooks/DemoNotebook_ammico
    notebooks/Example multimodal
    notebooks/Example colors
-   notebooks/Example objects
    notebooks/Example cropposts
    modules
    license_link
