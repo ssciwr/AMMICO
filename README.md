@@ -38,9 +38,11 @@ The `AMMICO` package can be installed using pip:
 ```
 pip install ammico
 ```
-This will install the package and its dependencies locally.
+This will install the package and its dependencies locally. If after installation you get some errors when running some modules, please follow the instructions below. 
 
-Some ammico components require tensorflow (e.g. Emotion detector), some pytorch (e.g. Summary detector). Sometimes there are compatibility problems between these two frameworks. To avoid compatibility problems on your machines, we suggest you to follow these steps before installing the package (you need conda on your machine):
+## Compatibility problems solving
+
+Some ammico components require `tensorflow` (e.g. Emotion detector), some `pytorch` (e.g. Summary detector). Sometimes there are compatibility problems between these two frameworks. To avoid these problems on your machines, you can prepare proper environment before installing the package (you need conda on your machine):
 
 ### 1. First, install tensorflow (https://www.tensorflow.org/install/pip)
 - create a new environment with python and activate it
@@ -68,7 +70,7 @@ Some ammico components require tensorflow (e.g. Emotion detector), some pytorch 
 
     ```conda activate ammico_env ```
 
-- and now we can install tensorflow
+- install tensorflow
 
     ```python -m pip install tensorflow==2.12.1```
 
@@ -85,7 +87,7 @@ Some ammico components require tensorflow (e.g. Emotion detector), some pytorch 
 It is done.
     
 ### Micromamba
-If you have micromamba on your machine you can prepare environment with just one command: 
+If you are using micromamba you can prepare environment with just one command: 
 
 ```micromamba create --no-channel-priority -c nvidia -c pytorch -c conda-forge -n ammico_env "python=3.10" pytorch torchvision torchaudio pytorch-cuda "tensorflow-gpu<=2.12.3" "numpy<=1.23.4"```  
    
