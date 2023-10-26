@@ -26,6 +26,9 @@ jobs:
     - name: get pandoc
       run: |
         sudo apt-get install -y pandoc
+    - name: Copy notebooks
+      run: |
+        cp ammico/notebooks/DemoNotebook_ammico.ipynb docs/source/notebooks/
     - name: Build documentation
       run: |
         cd docs
