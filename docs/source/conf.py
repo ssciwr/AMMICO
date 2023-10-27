@@ -24,6 +24,14 @@ extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "myst_parser", "nbsph
 nbsphinx_allow_errors = True
 napoleon_custom_sections = [("Returns", "params_style")]
 
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "ssciwr",  # Username
+    "github_repo": "AMMICO",  # Repo name
+    "github_version": "main",  # Version
+    "conf_py_path": "/source/",  # Path in the checkout to the docs root
+}
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
