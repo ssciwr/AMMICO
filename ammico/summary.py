@@ -239,8 +239,8 @@ class SummaryDetector(AnalysisMethod):
 
     def analyse_image(
         self,
-        analysis_type: Optional[str] = None,
         subdict: dict = None,
+        analysis_type: Optional[str] = None,
         list_of_questions: Optional[list[str]] = None,
         consequential_questions: bool = False,
     ):
@@ -256,8 +256,11 @@ class SummaryDetector(AnalysisMethod):
         Returns:
             self.subdict (dict): dictionary with analysis results.
         """
+        print("checking analysis type:", analysis_type)
         if analysis_type is None:
+            print(" analysis type is None")
             analysis_type = self.analysis_type
+            print("analysis type now is ", analysis_type)
         if subdict is not None:
             self.subdict = subdict
         if list_of_questions is not None:
