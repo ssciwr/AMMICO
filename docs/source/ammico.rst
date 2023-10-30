@@ -33,23 +33,7 @@ faces module
 color_analysis module
 ---------------------
 
-.. automodule:: color_analysis
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-objects module
---------------
-
-.. automodule:: objects
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-objects_cvlib module
---------------------
-
-.. automodule:: objects_cvlib
+.. automodule:: colors
    :members:
    :undoc-members:
    :show-inheritance:

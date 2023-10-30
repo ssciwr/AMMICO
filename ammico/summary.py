@@ -239,8 +239,8 @@ class SummaryDetector(AnalysisMethod):
 
     def analyse_image(
         self,
-        analysis_type: Optional[str] = None,
         subdict: dict = None,
+        analysis_type: Optional[str] = None,
         list_of_questions: Optional[list[str]] = None,
         consequential_questions: bool = False,
     ):
