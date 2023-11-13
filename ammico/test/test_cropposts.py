@@ -2,10 +2,11 @@ import ammico.cropposts as crpo
 import cv2
 import pytest
 import numpy as np
+import ammico.utils as utils
 
 
-TEST_IMAGE_1 = "pic1.png"
-TEST_IMAGE_2 = "pic2.png"
+TEST_IMAGE_1 = "crop_test_files/pic1.png"
+TEST_IMAGE_2 = "crop_test_ref_files/pic2.png"
 
 
 @pytest.fixture
@@ -75,8 +76,9 @@ def test_paste_image_and_comment(open_images):
 
 
 def test_crop_media_posts(get_path, tmp_path):
-    files = [get_path + TEST_IMAGE_1]
-    ref_files = [get_path + TEST_IMAGE_2]
+    print(get_path)
+    files = utils.find_files(path=get_path + "crop_test_files/")
+    ref_files = utils.find_files(path=get_path + "crop_test_ref_files/")
     crpo.crop_media_posts(files, ref_files, tmp_path)
     assert len(list(tmp_path.iterdir())) == 1
     # now check that image in tmp_path is the cropped one

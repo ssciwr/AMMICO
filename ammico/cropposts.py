@@ -325,13 +325,15 @@ def crop_media_posts(
 
     # get the reference images with regions that signify areas to crop
     ref_views = []
-    for ref_file in ref_files:
-        ref_view = cv2.imread(ref_file)
+    for ref_file in ref_files.values():
+        ref_file_path = ref_file["filename"]
+        ref_view = cv2.imread(ref_file_path)
         ref_views.append(ref_view)
     # parse through the social media posts to be cropped
-    for crop_file in files:
-        view = cv2.imread(crop_file)
-        print("Doing file {}".format(crop_file))
+    for crop_file in files.values():
+        crop_file_path = crop_file["filename"]
+        view = cv2.imread(crop_file_path)
+        print("Doing file {}".format(crop_file_path))
         crop_view = crop_posts_from_refs(
             ref_views,
             view,
@@ -341,7 +343,7 @@ def crop_media_posts(
         )
         if crop_view is not None:
             # save the image to the provided folder
-            filename = ntpath.basename(crop_file)
+            filename = ntpath.basename(crop_file_path)
             save_path = os.path.join(save_crop_dir, filename)
             save_path = save_path.replace("\\", "/")
             cv2.imwrite(save_path, crop_view)
