@@ -42,7 +42,7 @@ dependencies = [
     "pytest-cov",
     "Requests",
     "retina_face",
-    "salesforce-lavis @ git+https://github.com/piterand/LAVIS.git@release_1.0.2",
+    "salesforce-lavis",
     "setuptools",
     "spacy",
     "tensorflow<=2.12.3",
