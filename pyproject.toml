@@ -55,6 +55,7 @@ dependencies = [
     "webcolors",
     "colour-science",
     "scikit-learn>1.3.0",
+    "eva-decord",
 ]
 
 [project.scripts]
