@@ -49,7 +49,6 @@ dependencies = [
     "torch<2.1.0",
     "transformers",
     "google-cloud-vision",
-    "dash_renderjson",
     "dash_bootstrap_components",
     "colorgram.py",
     "webcolors",
