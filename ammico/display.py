@@ -3,7 +3,7 @@ import ammico.text as text
 import ammico.colors as colors
 from ammico.utils import is_interactive
 import ammico.summary as summary
-import dash_renderjson
+import pandas as pd
 from dash import html, Input, Output, dcc, State, Dash
 from PIL import Image
 import dash_bootstrap_components as dbc
@@ -91,7 +91,7 @@ class AnalysisExplorer:
         )(self.update_picture)
 
         self.app.callback(
-            Output("right_json_viewer", "data"),
+            Output("right_json_viewer", "children"),
             Input("button_run", "n_clicks"),
             State("left_select_id", "options"),
             State("left_select_id", "value"),
@@ -363,13 +363,8 @@ class AnalysisExplorer:
                             dcc.Loading(
                                 id="loading-2",
                                 children=[
-                                    dash_renderjson.DashRenderjson(
-                                        id="right_json_viewer",
-                                        data={},
-                                        max_depth=-1,
-                                        theme=self.theme,
-                                        invert_theme=True,
-                                    ),
+                                    # This is where the json is shown.
+                                    html.Div(id="right_json_viewer"),
                                 ],
                                 type="circle",
                             ),
@@ -492,7 +487,6 @@ class AnalysisExplorer:
                 else None,
             )
         elif detector_value == "EmotionDetector":
-            print("test")
             detector_class = identify_function(
                 image_copy,
                 race_threshold=setting_emotion_race_threshold,
@@ -514,4 +508,26 @@ class AnalysisExplorer:
             )
         else:
             detector_class = identify_function(image_copy)
-        return detector_class.analyse_image()
+        analysis_dict = detector_class.analyse_image()
+
+        # Initialize an empty dictionary
+        new_analysis_dict = {}
+
+        # Iterate over the items in the original dictionary
+        for k, v in analysis_dict.items():
+            # Check if the value is a list
+            if isinstance(v, list):
+                # If it is, convert each item in the list to a string and join them with a comma
+                new_value = ", ".join([str(f) for f in v])
+            else:
+                # If it's not a list, keep the value as it is
+                new_value = v
+
+            # Add the new key-value pair to the new dictionary
+            new_analysis_dict[k] = new_value
+
+        df = pd.DataFrame([new_analysis_dict]).set_index("filename").T
+        df.index.rename("filename", inplace=True)
+        return dbc.Table.from_dataframe(
+            df, striped=True, bordered=True, hover=True, index=True
+        )
