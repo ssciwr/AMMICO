@@ -1,5 +1,6 @@
 import ammico.faces as fc
 import json
+import pytest
 
 
 def test_set_keys():
@@ -8,6 +9,14 @@ def test_set_keys():
     assert ed.subdict["multiple_faces"] == "No"
     assert ed.subdict["wears_mask"] == ["No"]
     assert ed.subdict["emotion"] == [None]
+    with pytest.raises(ValueError):
+        fc.EmotionDetector({}, emotion_threshold=150)
+    with pytest.raises(ValueError):
+        fc.EmotionDetector({}, emotion_threshold=-50)
+    with pytest.raises(ValueError):
+        fc.EmotionDetector({}, race_threshold=150)
+    with pytest.raises(ValueError):
+        fc.EmotionDetector({}, race_threshold=-50)
 
 
 def test_analyse_faces(get_path):
