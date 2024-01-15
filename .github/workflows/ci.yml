@@ -71,8 +71,9 @@ jobs:
     - name: Upload coverage
       if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.9'
       uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
-        fail_ci_if_error: true
+        fail_ci_if_error: false
         files: ammico/coverage.xml
         verbose: true
-        token: ${{ secrets.CODECOV_TOKEN }}
