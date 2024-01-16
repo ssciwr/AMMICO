@@ -97,6 +97,11 @@ class EmotionDetector(AnalysisMethod):
         """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
+        # check if thresholds are valid
+        if emotion_threshold < 0 or emotion_threshold > 100:
+            raise ValueError("Emotion threshold must be between 0 and 100.")
+        if race_threshold < 0 or race_threshold > 100:
+            raise ValueError("Race threshold must be between 0 and 100.")
         self.emotion_threshold = emotion_threshold
         self.race_threshold = race_threshold
         self.emotion_categories = {
