@@ -220,9 +220,11 @@ class TextDetector(AnalysisMethod):
         """Clean the text from unrecognized words and any numbers."""
         templist = []
         for token in self.doc:
-            templist.append(
-                token.text
-            ) if token.pos_ != "NUM" and token.has_vector else None
+            (
+                templist.append(token.text)
+                if token.pos_ != "NUM" and token.has_vector
+                else None
+            )
         self.subdict["text_clean"] = " ".join(templist).rstrip().lstrip()
 
     def text_summary(self):
