@@ -479,12 +479,16 @@ class AnalysisExplorer:
             detector_class = identify_function(
                 image_copy,
                 analyse_text=analyse_text,
-                model_names=[settings_text_model_names]
-                if (settings_text_model_names is not None)
-                else None,
-                revision_numbers=[settings_text_revision_numbers]
-                if (settings_text_revision_numbers is not None)
-                else None,
+                model_names=(
+                    [settings_text_model_names]
+                    if (settings_text_model_names is not None)
+                    else None
+                ),
+                revision_numbers=(
+                    [settings_text_revision_numbers]
+                    if (settings_text_revision_numbers is not None)
+                    else None
+                ),
             )
         elif detector_value == "EmotionDetector":
             detector_class = identify_function(
@@ -502,9 +506,11 @@ class AnalysisExplorer:
                 image_copy,
                 analysis_type=setting_summary_analysis_type,
                 model_type=setting_summary_model,
-                list_of_questions=[setting_summary_list_of_questions]
-                if (setting_summary_list_of_questions is not None)
-                else None,
+                list_of_questions=(
+                    [setting_summary_list_of_questions]
+                    if (setting_summary_list_of_questions is not None)
+                    else None
+                ),
             )
         else:
             detector_class = identify_function(image_copy)
