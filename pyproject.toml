@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ammico"
-version = "0.2.0"
+version = "0.2.1"
 description = "AI Media and Misinformation Content Analysis Tool"
 readme = "README.md"
 maintainers = [

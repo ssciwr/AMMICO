@@ -534,9 +534,9 @@ class MultimodalSearch(AnalysisMethod):
                     self.subdict[image_keys[key]][
                         "rank " + list(search_query[q].values())[0]
                     ] = places[q][key]
-                    self.subdict[image_keys[key]][
-                        list(search_query[q].values())[0]
-                    ] = similarity[key][q].item()
+                    self.subdict[image_keys[key]][list(search_query[q].values())[0]] = (
+                        similarity[key][q].item()
+                    )
                 else:
                     self.subdict[image_keys[key]][
                         "rank " + list(search_query[q].values())[0]
@@ -915,9 +915,9 @@ class MultimodalSearch(AnalysisMethod):
             avg_gradcams.append(local_avg_gradcams)
             itm_scores.append(local_itm_scores)
             itm_scores2.append(local_itm_scores2)
-            image_gradcam_with_itm[
-                list(search_query[index_text_query].values())[0]
-            ] = localimage_gradcam_with_itm
+            image_gradcam_with_itm[list(search_query[index_text_query].values())[0]] = (
+                localimage_gradcam_with_itm
+            )
         del (
             itm_model,
             vis_processor_itm,

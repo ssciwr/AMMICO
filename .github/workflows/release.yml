@@ -1,9 +1,8 @@
 name: release to pypi
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -95,6 +94,7 @@ jobs:
 
   publish-to-testpypi:
     name: Publish Python distribution to TestPyPI
+    if: startsWith(github.ref, 'refs/tags/')
     needs:
     - build
     runs-on: ubuntu-latest
