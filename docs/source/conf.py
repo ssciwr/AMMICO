@@ -23,6 +23,7 @@ release = "0.0.1"
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "myst_parser", "nbsphinx"]
 nbsphinx_allow_errors = True
 napoleon_custom_sections = [("Returns", "params_style")]
+myst_heading_anchors = 3
 
 html_context = {
     "display_github": True,  # Integrate GitHub
