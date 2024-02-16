@@ -119,7 +119,7 @@ Place the data files and google cloud vision API key in your google drive to acc
 
 ## Features
 ### Text extraction
-The text is extracted from the images using [google-cloud-vision](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website.
+The text is extracted from the images using [google-cloud-vision](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website or as described [here](docs/google_Cloud_Vision_API/set_up_credentials.md).
 You then need to export the location of the API key as an environment variable:
 ```
 export GOOGLE_APPLICATION_CREDENTIALS="location of your .json"
