@@ -29,8 +29,6 @@ jobs:
     - name: Build documentation
       run: |
         cd docs
-        df -h
-        du -sh /
         du -sh ~/*
         make html
     - name: Push changes to gh-pages
