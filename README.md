@@ -119,7 +119,7 @@ Place the data files and google cloud vision API key in your google drive to acc
 
 ## Features
 ### Text extraction
-The text is extracted from the images using [google-cloud-vision](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website or as described [here](docs/google_Cloud_Vision_API/set_up_credentials.md).
+The text is extracted from the images using [google-cloud-vision](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website or as described [here](docs/source/set_up_credentials.md).
 You then need to export the location of the API key as an environment variable:
 ```
 export GOOGLE_APPLICATION_CREDENTIALS="location of your .json"
@@ -147,3 +147,34 @@ Color detection is carried out using [colorgram.py](https://github.com/obskyr/co
 ### Cropping of posts
 
 Social media posts can automatically be cropped to remove further comments on the page and restrict the textual content to the first comment only.
+
+
+# FAQ
+
+## What happens to the images that are sent to google Cloud Vision?
+
+According to the [google Vision API](https://cloud.google.com/vision/docs/data-usage), the images that are uploaded and analysed are not stored and not shared with third parties:
+
+> We won't make the content that you send available to the public. We won't share the content with any third party. The content is only used by Google as necessary to provide the Vision API service. Vision API complies with the Cloud Data Processing Addendum.
+
+> For online (immediate response) operations (`BatchAnnotateImages` and `BatchAnnotateFiles`), the image data is processed in memory and not persisted to disk.
+For asynchronous offline batch operations (`AsyncBatchAnnotateImages` and `AsyncBatchAnnotateFiles`), we must store that image for a short period of time in order to perform the analysis and return the results to you. The stored image is typically deleted right after the processing is done, with a failsafe Time to live (TTL) of a few hours.
+Google also temporarily logs some metadata about your Vision API requests (such as the time the request was received and the size of the request) to improve our service and combat abuse.
+
+## What happens to the text that is sent to google Translate?
+
+According to [google Translate](https://cloud.google.com/translate/data-usage), the data is not stored after processing and not made available to third parties:
+
+> We will not make the content of the text that you send available to the public. We will not share the content with any third party. The content of the text is only used by Google as necessary to provide the Cloud Translation API service. Cloud Translation API complies with the Cloud Data Processing Addendum.
+
+> When you send text to Cloud Translation API, text is held briefly in-memory in order to perform the translation and return the results to you.
+
+## What happens if I don't have internet access - can I still use ammico?
+
+Some features of ammico require internet access; a general answer to this question is not possible, some services require an internet connection, others can be used offline:
+
+- Text extraction: To extract text from images, and translate the text, the data needs to be processed by google Cloud Vision and google Translate, which run in the cloud. Without internet access, text extraction and translation is not possible.
+- Image summary and query: After an initial download of the models, the `summary` module does not require an internet connection.
+- Facial expressions: After an initial download of the models, the `faces` module does not require an internet connection.
+- Multimodal search: After an initial download of the models, the `multimodal_search` module does not require an internet connection.
+- Color analysis: The `color` module does not require an internet connection.

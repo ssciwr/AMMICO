@@ -11,9 +11,8 @@ Welcome to AMMICO's documentation!
    :caption: Contents:
 
    readme_link
+   create_API_key_link
    notebooks/DemoNotebook_ammico
-   notebooks/Example multimodal
-   notebooks/Example colors
    notebooks/Example cropposts
    modules
    license_link
