@@ -29,7 +29,6 @@ jobs:
     - name: Build documentation
       run: |
         cd docs
-        du -sh ~/*
         make html
     - name: Push changes to gh-pages
       uses: JamesIves/github-pages-deploy-action@v4
