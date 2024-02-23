@@ -104,16 +104,12 @@ Be careful, it requires around 7 GB of disk space.
 
 ## Usage
 
-The main demonstration notebook can be found in the `notebooks` folder and also on [google colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb)
+The main demonstration notebook can be found in the `notebooks` folder and also on [google colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb).
 
 There are further sample notebooks in the `notebooks` folder for the more experimental features:
 1. Topic analysis: Use the notebook `get-text-from-image.ipynb` to analyse the topics of the extraced text.\
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.
-1. Multimodal content: Use the notebook `multimodal_search.ipynb` to find the best fitting images to an image or text query.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/multimodal_search.ipynb)**
-1. Color analysis: Use the notebook `color_analysis.ipynb` to identify colors the image. The colors are then classified into the main named colors in the English language.
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/colors_analysis.ipynb)**
 1. To crop social media posts use the `cropposts.ipynb` notebook. 
 **You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/cropposts.ipynb)**
 

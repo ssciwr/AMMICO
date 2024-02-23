@@ -41,4 +41,4 @@
 20. Google Cloud Vision API is now enabled for your key.
 ![img19](img19.png)
 21. Place the JSON key in a selected folder on your computer and reference this key in your Jupyter Notebook / Python console when running ammico. Or, upload it to your google Drive to use it on google Colaboratory.
-
+22. Make sure that [billing is enabled](https://support.google.com/googleapi/answer/6158867?hl=en) for your google account. You can get the first three month for free; after that, you will be charged if processing more than 1000 images / month (currently $1.50 per 1000 images, see [here](https://cloud.google.com/vision/pricing/)).
