@@ -21,7 +21,7 @@ def test_set_keys():
 
 def test_analyse_faces(get_path):
     mydict = {
-        "filename": get_path + "IMG_2746.png",
+        "filename": get_path + "pexels-pixabay-415829.jpg",
     }
     mydict.update(fc.EmotionDetector(mydict).analyse_image())
 

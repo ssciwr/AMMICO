@@ -332,7 +332,8 @@ class MultimodalSearch(AnalysisMethod):
             path_to_lib = lavis.__file__[:-11] + "models/clip_models/"
             url = "https://raw.githubusercontent.com/salesforce/LAVIS/main/lavis/models/clip_models/bpe_simple_vocab_16e6.txt.gz"
             r = requests.get(url, allow_redirects=False)
-            open(path_to_lib + "bpe_simple_vocab_16e6.txt.gz", "wb").write(r.content)
+            with open(path_to_lib + "bpe_simple_vocab_16e6.txt.gz", "wb") as f:
+                f.write(r.content)
 
         image_keys = sorted(self.subdict.keys())
         image_names = [self.subdict[k]["filename"] for k in image_keys]

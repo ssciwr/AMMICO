@@ -1,10 +1,10 @@
 {
         "face": "Yes", 
-        "multiple_faces": "Yes", 
-        "no_faces": 11, 
-        "wears_mask": ["No", "No", "Yes"], 
-        "gender": ["Man", "Man", "Man"], 
-        "race": ["white", "white", null], 
-        "emotion": ["sad", "fear", null], 
-        "emotion (category)": ["Negative", "Negative", null]
+        "multiple_faces": "No", 
+        "no_faces": 1, 
+        "wears_mask": ["No"], 
+        "gender": ["Woman"], 
+        "race": ["asian"], 
+        "emotion": ["happy"], 
+        "emotion (category)": ["Positive"]
 }    
