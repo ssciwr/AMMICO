@@ -15,6 +15,7 @@ class TextDetector(AnalysisMethod):
         self,
         subdict: dict,
         analyse_text: bool = False,
+        skip_extraction: bool = False,
         model_names: list = None,
         revision_numbers: list = None,
     ) -> None:
@@ -25,6 +26,8 @@ class TextDetector(AnalysisMethod):
                 analysis results from other modules.
             analyse_text (bool, optional): Decide if extracted text will be further subject
                 to analysis. Defaults to False.
+            skip_extraction (bool, optional): Decide if text will be extracted from images or
+                is already provided via a csv. Defaults to False.
             model_names (list, optional): Provide model names for summary, sentiment and ner
                 analysis. Defaults to None, in which case the default model from transformers
                 are used (as of 03/2023): "sshleifer/distilbart-cnn-12-6" (summary),
@@ -40,11 +43,19 @@ class TextDetector(AnalysisMethod):
                 "f2482bf" (NER, bert).
         """
         super().__init__(subdict)
-        self.subdict.update(self.set_keys())
+        # disable this for now
+        # maybe it would be better to initialize the keys differently
+        # the reason is that they are inconsistent depending on the selected
+        # options, and also this may not be really necessary and rather restrictive
+        # self.subdict.update(self.set_keys())
         self.translator = Translator()
         if not isinstance(analyse_text, bool):
             raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
+        self.skip_extraction = skip_extraction
+        if self.skip_extraction:
+            print("Skipping text extraction from image.")
+            print("Reading text directly from provided dictionary.")
         if self.analyse_text:
             self._initialize_spacy()
         if model_names:
@@ -155,7 +166,8 @@ class TextDetector(AnalysisMethod):
         Returns:
             dict: The updated dictionary with text analysis results.
         """
-        self.get_text_from_image()
+        if not self.skip_extraction:
+            self.get_text_from_image()
         self.translate_text()
         self.remove_linebreaks()
         if self.analyse_text:
