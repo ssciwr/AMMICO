@@ -1,0 +1,32 @@
+{
+    "test.csvrow-1": 
+    {
+        "filename": "test.csv", 
+        "text": "this is a test"
+    },
+    "test.csvrow-2": 
+    {
+        "filename": "test.csv", 
+        "text": "bu bir denemedir"
+    },
+    "test.csvrow-3": 
+    {
+        "filename": "test.csv", 
+        "text": "dies ist ein Test"
+    },
+    "test.csvrow-4": 
+    {
+        "filename": "test.csv", 
+        "text": "c'est un test"
+    },
+    "test.csvrow-5": 
+    {
+        "filename": "test.csv", 
+        "text": "esto es una prueba"
+    },
+    "test.csvrow-6": 
+    {
+        "filename": "test.csv", 
+        "text": "detta är ett test"
+    }
+}

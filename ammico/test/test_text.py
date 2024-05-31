@@ -1,6 +1,7 @@
 import pytest
 import ammico.text as tt
 import spacy
+import json
 
 
 @pytest.fixture
@@ -170,6 +171,30 @@ def test_text_ner():
     test_obj.text_ner()
     assert mydict["entity"] == ["Bill Gates", "Seattle"]
     assert mydict["entity_type"] == ["PER", "LOC"]
+
+
+def test_init_csv_option(get_path):
+    test_obj = tt.TextAnalyzer(csv_path=get_path + "test.csv")
+    assert test_obj.csv_path == get_path + "test.csv"
+    assert test_obj.column_key is None
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path=1.0)
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path="something")
+    with pytest.raises(FileNotFoundError):
+        tt.TextAnalyzer(csv_path=get_path + "test_no.csv")
+
+
+def test_read_csv(get_path):
+    test_obj = tt.TextAnalyzer(csv_path=get_path + "test.csv")
+    test_obj.read_csv()
+    with open(get_path + "test_read_csv_ref.json", "r") as file:
+        ref_dict = json.load(file)
+    print(test_obj.mydict)
+    print(ref_dict)
+    for key in test_obj.mydict.keys():
+        assert test_obj.mydict[key]["text"] == ref_dict[key]
+    assert test_obj.mydict == ref_dict
 
 
 @pytest.mark.win_skip
