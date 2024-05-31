@@ -203,7 +203,7 @@ class EmotionDetector(AnalysisMethod):
         result = {"number_faces": len(faces) if len(faces) <= 3 else 3}
         # We limit ourselves to three faces
         for i, face in enumerate(faces[:3]):
-            result[f"person{ i+1 }"] = self.analyze_single_face(face)
+            result[f"person{i+1}"] = self.analyze_single_face(face)
         self.clean_subdict(result)
         return self.subdict
 

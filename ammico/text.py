@@ -238,6 +238,7 @@ class TextDetector(AnalysisMethod):
             revision=self.revision_summary,
             min_length=5,
             max_length=20,
+            framework="pt",
         )
         try:
             summary = pipe(self.subdict["text_english"][0:max_number_of_characters])
@@ -258,6 +259,7 @@ class TextDetector(AnalysisMethod):
             model=self.model_sentiment,
             revision=self.revision_sentiment,
             truncation=True,
+            framework="pt",
         )
         result = pipe(self.subdict["text_english"])
         self.subdict["sentiment"] = result[0]["label"]
@@ -272,6 +274,7 @@ class TextDetector(AnalysisMethod):
             model=self.model_ner,
             revision=self.revision_ner,
             aggregation_strategy="simple",
+            framework="pt",
         )
         result = pipe(self.subdict["text_english"])
         self.subdict["entity"] = []
@@ -279,6 +282,58 @@ class TextDetector(AnalysisMethod):
         for entity in result:
             self.subdict["entity"].append(entity["word"])
             self.subdict["entity_type"].append(entity["entity_group"])
+
+
+class TextAnalyzer:
+    """Used to get text from a csv and then run the TextDetector on it."""
+
+    def __init__(self, csv_path: str, column_key: str = None) -> None:
+        """Init the TextTranslator class.
+
+        Args:
+            csv_path (str): Path to the CSV file containing the text entries.
+            column_key (str): Key for the column containing the text entries.
+                Defaults to None.
+        """
+        self.csv_path = csv_path
+        self.column_key = column_key
+        self._check_valid_csv_path()
+        self._check_file_exists()
+
+    def _check_valid_csv_path(self):
+        if not isinstance(self.csv_path, str):
+            raise ValueError("The provided path to the CSV file is not a string.")
+        if not self.csv_path.endswith(".csv"):
+            raise ValueError("The provided file is not a CSV file.")
+
+    def _check_file_exists(self):
+        try:
+            with open(self.csv_path, "r") as file:  # noqa
+                pass
+        except FileNotFoundError:
+            raise FileNotFoundError("The provided CSV file does not exist.")
+
+    def read_csv(self) -> dict:
+        """Read the CSV file and return the dictionary with the text entries.
+
+        Returns:
+            dict: The dictionary with the text entries.
+        """
+        df = pd.read_csv(self.csv_path, encoding="utf8")
+        if not self.column_key:
+            self.column_key = "text"
+
+        if self.column_key not in df:
+            raise ValueError(
+                "The provided column key is not in the CSV file. Please check."
+            )
+        self.mylist = df[self.column_key].to_list()
+        self.mydict = {}
+        for i, text in enumerate(self.mylist):
+            self.mydict[self.csv_path + "row-" + str(i)] = {
+                "filename": self.csv_path,
+                "text": text,
+            }
 
 
 class PostprocessText:

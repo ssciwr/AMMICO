@@ -21,7 +21,7 @@ def test_set_keys():
 
 def test_analyse_faces(get_path):
     mydict = {
-        "filename": get_path + "IMG_2746.png",
+        "filename": get_path + "pexels-pixabay-415829.jpg",
     }
     mydict.update(fc.EmotionDetector(mydict).analyse_image())
 
@@ -29,7 +29,7 @@ def test_analyse_faces(get_path):
         out_dict = json.load(file)
     # delete the filename key
     mydict.pop("filename", None)
-    # delete the age key, as this is conflicting - gives different results sometimes
+    # do not test for age, as this is not a reliable metric
     mydict.pop("age", None)
     for key in mydict.keys():
         assert mydict[key] == out_dict[key]

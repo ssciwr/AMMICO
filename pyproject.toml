@@ -46,7 +46,7 @@ dependencies = [
     "ammico-lavis",
     "setuptools",
     "spacy",
-    "tensorflow<=2.12.3",
+    "tensorflow>=2.13.0",
     "torch<2.1.0",
     "transformers",
     "google-cloud-vision",
