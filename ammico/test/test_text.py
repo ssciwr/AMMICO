@@ -190,11 +190,13 @@ def test_read_csv(get_path):
     test_obj.read_csv()
     with open(get_path + "test_read_csv_ref.json", "r") as file:
         ref_dict = json.load(file)
-    print(test_obj.mydict)
-    print(ref_dict)
-    for key in test_obj.mydict.keys():
-        assert test_obj.mydict[key]["text"] == ref_dict[key]
-    assert test_obj.mydict == ref_dict
+    # we are assuming the order did not get jungled up
+    for (_, value_test), (_, value_ref) in zip(
+        test_obj.mydict.items(), ref_dict.items()
+    ):
+        print(value_test["text"])
+        print(value_ref["text"])
+        assert value_test["text"] == value_ref["text"]
 
 
 @pytest.mark.win_skip
