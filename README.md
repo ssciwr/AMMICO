@@ -176,3 +176,4 @@ Some features of ammico require internet access; a general answer to this questi
 - Color analysis: The `color` module does not require an internet connection.
 
 ## Disclosure
+something
