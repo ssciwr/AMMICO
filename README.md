@@ -174,3 +174,5 @@ Some features of ammico require internet access; a general answer to this questi
 - Facial expressions: After an initial download of the models, the `faces` module does not require an internet connection.
 - Multimodal search: After an initial download of the models, the `multimodal_search` module does not require an internet connection.
 - Color analysis: The `color` module does not require an internet connection.
+
+## Disclosure
