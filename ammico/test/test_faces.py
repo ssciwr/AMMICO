@@ -29,7 +29,5 @@ def test_analyse_faces(get_path):
         out_dict = json.load(file)
     # delete the filename key
     mydict.pop("filename", None)
-    # delete the age key, as this is conflicting - gives different results sometimes
-    mydict.pop("age", None)
     for key in mydict.keys():
         assert mydict[key] == out_dict[key]

@@ -3,6 +3,7 @@
         "multiple_faces": "No", 
         "no_faces": 1, 
         "wears_mask": ["No"], 
+        "age": ["30"],
         "gender": ["Woman"], 
         "race": ["asian"], 
         "emotion": ["happy"], 
