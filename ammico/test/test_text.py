@@ -191,15 +191,26 @@ def test_text_ner():
 def test_init_csv_option(get_path):
     test_obj = tt.TextAnalyzer(csv_path=get_path + "test.csv")
     assert test_obj.csv_path == get_path + "test.csv"
-    assert test_obj.column_key is None
+    assert test_obj.column_key == "text"
+    assert test_obj.csv_encoding == "utf-8"
+    test_obj = tt.TextAnalyzer(
+        csv_path=get_path + "test.csv", column_key="mytext", csv_encoding="utf-16"
+    )
+    assert test_obj.column_key == "mytext"
+    assert test_obj.csv_encoding == "utf-16"
     with pytest.raises(ValueError):
         tt.TextAnalyzer(csv_path=1.0)
     with pytest.raises(ValueError):
         tt.TextAnalyzer(csv_path="something")
     with pytest.raises(FileNotFoundError):
         tt.TextAnalyzer(csv_path=get_path + "test_no.csv")
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path=get_path + "test.csv", column_key=1.0)
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path=get_path + "test.csv", csv_encoding=1.0)
 
 
+@pytest.mark.win_skip(reason="Different encoding on windows")
 def test_read_csv(get_path):
     test_obj = tt.TextAnalyzer(csv_path=get_path + "test.csv")
     test_obj.read_csv()
@@ -209,8 +220,16 @@ def test_read_csv(get_path):
     for (_, value_test), (_, value_ref) in zip(
         test_obj.mydict.items(), ref_dict.items()
     ):
-        print(value_test["text"])
-        print(value_ref["text"])
+        assert value_test["text"] == value_ref["text"]
+    # test with different encoding
+    test_obj = tt.TextAnalyzer(
+        csv_path=get_path + "test-utf16.csv", csv_encoding="utf-16"
+    )
+    test_obj.read_csv()
+    # we are assuming the order did not get jungled up
+    for (_, value_test), (_, value_ref) in zip(
+        test_obj.mydict.items(), ref_dict.items()
+    ):
         assert value_test["text"] == value_ref["text"]
 
 

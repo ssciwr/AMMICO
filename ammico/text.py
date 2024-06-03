@@ -301,18 +301,32 @@ class TextDetector(AnalysisMethod):
 class TextAnalyzer:
     """Used to get text from a csv and then run the TextDetector on it."""
 
-    def __init__(self, csv_path: str, column_key: str = None) -> None:
+    def __init__(
+        self, csv_path: str, column_key: str = None, csv_encoding: str = "utf-8"
+    ) -> None:
         """Init the TextTranslator class.
 
         Args:
             csv_path (str): Path to the CSV file containing the text entries.
             column_key (str): Key for the column containing the text entries.
                 Defaults to None.
+            csv_encoding (str): Encoding of the CSV file. Defaults to "utf-8".
         """
         self.csv_path = csv_path
         self.column_key = column_key
+        self.csv_encoding = csv_encoding
         self._check_valid_csv_path()
         self._check_file_exists()
+        if not self.column_key:
+            print("No column key provided - using 'text' as default.")
+            self.column_key = "text"
+        if not self.csv_encoding:
+            print("No encoding provided - using 'utf-8' as default.")
+            self.csv_encoding = "utf-8"
+        if not isinstance(self.column_key, str):
+            raise ValueError("The provided column key is not a string.")
+        if not isinstance(self.csv_encoding, str):
+            raise ValueError("The provided encoding is not a string.")
 
     def _check_valid_csv_path(self):
         if not isinstance(self.csv_path, str):
@@ -333,9 +347,7 @@ class TextAnalyzer:
         Returns:
             dict: The dictionary with the text entries.
         """
-        df = pd.read_csv(self.csv_path, encoding="utf8")
-        if not self.column_key:
-            self.column_key = "text"
+        df = pd.read_csv(self.csv_path, encoding=self.csv_encoding)
 
         if self.column_key not in df:
             raise ValueError(
