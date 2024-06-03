@@ -26,11 +26,18 @@ LANGUAGES = ["de", "en", "en"]
 def test_TextDetector(set_testdict):
     for item in set_testdict:
         test_obj = tt.TextDetector(set_testdict[item])
-        assert test_obj.subdict["text"] is None
-        assert test_obj.subdict["text_language"] is None
-        assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
         assert not test_obj.skip_extraction
+        assert test_obj.subdict["filename"] == set_testdict[item]["filename"]
+        assert test_obj.model_summary == "sshleifer/distilbart-cnn-12-6"
+        assert (
+            test_obj.model_sentiment
+            == "distilbert-base-uncased-finetuned-sst-2-english"
+        )
+        assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+        assert test_obj.revision_summary == "a4f8f3e"
+        assert test_obj.revision_sentiment == "af0f99b"
+        assert test_obj.revision_ner == "f2482bf"
 
 
 def test_run_spacy(set_testdict, get_path):
