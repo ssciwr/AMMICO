@@ -30,6 +30,7 @@ def test_TextDetector(set_testdict):
         assert test_obj.subdict["text_language"] is None
         assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
+        assert not test_obj.skip_extraction
 
 
 def test_run_spacy(set_testdict, get_path):
