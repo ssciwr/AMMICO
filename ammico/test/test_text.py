@@ -38,6 +38,13 @@ def test_TextDetector(set_testdict):
         assert test_obj.revision_summary == "a4f8f3e"
         assert test_obj.revision_sentiment == "af0f99b"
         assert test_obj.revision_ner == "f2482bf"
+    test_obj = tt.TextDetector({}, analyse_text=True, skip_extraction=True)
+    assert test_obj.analyse_text
+    assert test_obj.skip_extraction
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, analyse_text=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, skip_extraction=1.0)
 
 
 def test_run_spacy(set_testdict, get_path):

@@ -53,6 +53,8 @@ class TextDetector(AnalysisMethod):
             raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
         self.skip_extraction = skip_extraction
+        if not isinstance(skip_extraction, bool):
+            raise ValueError("skip_extraction needs to be set to true or false")
         if self.skip_extraction:
             print("Skipping text extraction from image.")
             print("Reading text directly from provided dictionary.")
