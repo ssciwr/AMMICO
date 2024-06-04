@@ -134,7 +134,7 @@ The image content ("caption") is extracted using the [LAVIS](https://github.com/
 
 ### Emotion recognition
 
-Emotion recognition is carried out using the [deepface](https://github.com/serengil/deepface) and [retinaface](https://github.com/serengil/retinaface) libraries. These libraries detect the presence of faces, and their age, gender, emotion and race based on several state-of-the-art models. It is also detected if the person is wearing a face mask - if they are, then no further detection is carried out as the mask prevents an accurate prediction.
+Emotion recognition is carried out using the [deepface](https://github.com/serengil/deepface) and [retinaface](https://github.com/serengil/retinaface) libraries. These libraries detect the presence of faces, as well as provide probabilistic assessment of their age, gender, race, and emotion based on several state-of-the-art models. It is also detected if the person is wearing a face mask - if they are, then no further detection is carried out as the mask affects the assessment acuracy. Because the detection of gender, race and age is carried out in simplistic categories (e.g., for gender, using only "male" and "female"), and because of the ethical implications of such assessments, users can only access this part of the tool if they agree with a disclaimer (see FAQ). Moreover, once users accept this disclaimer, they can further set their own detection confidence threshholds. 
 
 ### Color/hue detection
 
@@ -175,5 +175,6 @@ Some features of ammico require internet access; a general answer to this questi
 - Multimodal search: After an initial download of the models, the `multimodal_search` module does not require an internet connection.
 - Color analysis: The `color` module does not require an internet connection.
 
-## Disclosure
-something
+## Why don't I get probabilistic assessments of age, gender and race when running the Emotion Detector?
+Due to well documented biases in the detection of minorities with computer vision tools, and to the ethical implications of such detection, these parts of the tool are not directly made available to users. To access these capabilities, users must first agree with a ethical disclosure statement that reads: "The Emotion Detector uses RetinaFace to probabilistically assess the gender, age and race of the detected faces. Such assessments may not reflect how the individuals identified by the tool view themselves. Additionally, the classification is carried out in simplistic categories and contains only the most basic classes, for example “male” and “female” for gender. By continuing to use the tool, you certify that you understand the ethical implications such assessments have for the interpretation of the results."
+This disclosure statement is included as a separate line of code early in the flow of the Emotion Detector. Once the user has agreed with the statement, further data analyses will also include these assessments. 
