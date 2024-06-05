@@ -1,6 +1,8 @@
 import pytest
 import ammico.text as tt
 import spacy
+import json
+import sys
 
 
 @pytest.fixture
@@ -25,10 +27,25 @@ LANGUAGES = ["de", "en", "en"]
 def test_TextDetector(set_testdict):
     for item in set_testdict:
         test_obj = tt.TextDetector(set_testdict[item])
-        assert test_obj.subdict["text"] is None
-        assert test_obj.subdict["text_language"] is None
-        assert test_obj.subdict["text_english"] is None
         assert not test_obj.analyse_text
+        assert not test_obj.skip_extraction
+        assert test_obj.subdict["filename"] == set_testdict[item]["filename"]
+        assert test_obj.model_summary == "sshleifer/distilbart-cnn-12-6"
+        assert (
+            test_obj.model_sentiment
+            == "distilbert-base-uncased-finetuned-sst-2-english"
+        )
+        assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
+        assert test_obj.revision_summary == "a4f8f3e"
+        assert test_obj.revision_sentiment == "af0f99b"
+        assert test_obj.revision_ner == "f2482bf"
+    test_obj = tt.TextDetector({}, analyse_text=True, skip_extraction=True)
+    assert test_obj.analyse_text
+    assert test_obj.skip_extraction
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, analyse_text=1.0)
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, skip_extraction=1.0)
 
 
 def test_run_spacy(set_testdict, get_path):
@@ -140,7 +157,6 @@ def test_remove_linebreaks():
     assert test_obj.subdict["text_english"] == "This is   another  test."
 
 
-@pytest.mark.win_skip
 def test_text_summary(get_path):
     mydict = {}
     test_obj = tt.TextDetector(mydict, analyse_text=True)
@@ -162,7 +178,6 @@ def test_text_sentiment_transformers():
     assert mydict["sentiment_score"] == pytest.approx(0.99, 0.02)
 
 
-@pytest.mark.win_skip
 def test_text_ner():
     mydict = {}
     test_obj = tt.TextDetector(mydict, analyse_text=True)
@@ -172,7 +187,51 @@ def test_text_ner():
     assert mydict["entity_type"] == ["PER", "LOC"]
 
 
-@pytest.mark.win_skip
+def test_init_csv_option(get_path):
+    test_obj = tt.TextAnalyzer(csv_path=get_path + "test.csv")
+    assert test_obj.csv_path == get_path + "test.csv"
+    assert test_obj.column_key == "text"
+    assert test_obj.csv_encoding == "utf-8"
+    test_obj = tt.TextAnalyzer(
+        csv_path=get_path + "test.csv", column_key="mytext", csv_encoding="utf-16"
+    )
+    assert test_obj.column_key == "mytext"
+    assert test_obj.csv_encoding == "utf-16"
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path=1.0)
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path="something")
+    with pytest.raises(FileNotFoundError):
+        tt.TextAnalyzer(csv_path=get_path + "test_no.csv")
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path=get_path + "test.csv", column_key=1.0)
+    with pytest.raises(ValueError):
+        tt.TextAnalyzer(csv_path=get_path + "test.csv", csv_encoding=1.0)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="Encoding different on Window")
+def test_read_csv(get_path):
+    test_obj = tt.TextAnalyzer(csv_path=get_path + "test.csv")
+    test_obj.read_csv()
+    with open(get_path + "test_read_csv_ref.json", "r") as file:
+        ref_dict = json.load(file)
+    # we are assuming the order did not get jungled up
+    for (_, value_test), (_, value_ref) in zip(
+        test_obj.mydict.items(), ref_dict.items()
+    ):
+        assert value_test["text"] == value_ref["text"]
+    # test with different encoding
+    test_obj = tt.TextAnalyzer(
+        csv_path=get_path + "test-utf16.csv", csv_encoding="utf-16"
+    )
+    test_obj.read_csv()
+    # we are assuming the order did not get jungled up
+    for (_, value_test), (_, value_ref) in zip(
+        test_obj.mydict.items(), ref_dict.items()
+    ):
+        assert value_test["text"] == value_ref["text"]
+
+
 def test_PostprocessText(set_testdict, get_path):
     reference_dict = "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON"
     reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"

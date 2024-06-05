@@ -8,7 +8,7 @@ from ammico.display import AnalysisExplorer
 from ammico.faces import EmotionDetector
 from ammico.multimodal_search import MultimodalSearch
 from ammico.summary import SummaryDetector
-from ammico.text import TextDetector, PostprocessText
+from ammico.text import TextDetector, TextAnalyzer, PostprocessText
 from ammico.utils import find_files, get_dataframe
 
 # Export the version defined in project metadata
@@ -23,6 +23,7 @@ __all__ = [
     "MultimodalSearch",
     "SummaryDetector",
     "TextDetector",
+    "TextAnalyzer",
     "PostprocessText",
     "find_files",
     "get_dataframe",

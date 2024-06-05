@@ -15,6 +15,7 @@ class TextDetector(AnalysisMethod):
         self,
         subdict: dict,
         analyse_text: bool = False,
+        skip_extraction: bool = False,
         model_names: list = None,
         revision_numbers: list = None,
     ) -> None:
@@ -25,6 +26,8 @@ class TextDetector(AnalysisMethod):
                 analysis results from other modules.
             analyse_text (bool, optional): Decide if extracted text will be further subject
                 to analysis. Defaults to False.
+            skip_extraction (bool, optional): Decide if text will be extracted from images or
+                is already provided via a csv. Defaults to False.
             model_names (list, optional): Provide model names for summary, sentiment and ner
                 analysis. Defaults to None, in which case the default model from transformers
                 are used (as of 03/2023): "sshleifer/distilbart-cnn-12-6" (summary),
@@ -40,11 +43,21 @@ class TextDetector(AnalysisMethod):
                 "f2482bf" (NER, bert).
         """
         super().__init__(subdict)
-        self.subdict.update(self.set_keys())
+        # disable this for now
+        # maybe it would be better to initialize the keys differently
+        # the reason is that they are inconsistent depending on the selected
+        # options, and also this may not be really necessary and rather restrictive
+        # self.subdict.update(self.set_keys())
         self.translator = Translator()
         if not isinstance(analyse_text, bool):
             raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
+        self.skip_extraction = skip_extraction
+        if not isinstance(skip_extraction, bool):
+            raise ValueError("skip_extraction needs to be set to true or false")
+        if self.skip_extraction:
+            print("Skipping text extraction from image.")
+            print("Reading text directly from provided dictionary.")
         if self.analyse_text:
             self._initialize_spacy()
         if model_names:
@@ -155,7 +168,8 @@ class TextDetector(AnalysisMethod):
         Returns:
             dict: The updated dictionary with text analysis results.
         """
-        self.get_text_from_image()
+        if not self.skip_extraction:
+            self.get_text_from_image()
         self.translate_text()
         self.remove_linebreaks()
         if self.analyse_text:
@@ -287,18 +301,32 @@ class TextDetector(AnalysisMethod):
 class TextAnalyzer:
     """Used to get text from a csv and then run the TextDetector on it."""
 
-    def __init__(self, csv_path: str, column_key: str = None) -> None:
+    def __init__(
+        self, csv_path: str, column_key: str = None, csv_encoding: str = "utf-8"
+    ) -> None:
         """Init the TextTranslator class.
 
         Args:
             csv_path (str): Path to the CSV file containing the text entries.
             column_key (str): Key for the column containing the text entries.
                 Defaults to None.
+            csv_encoding (str): Encoding of the CSV file. Defaults to "utf-8".
         """
         self.csv_path = csv_path
         self.column_key = column_key
+        self.csv_encoding = csv_encoding
         self._check_valid_csv_path()
         self._check_file_exists()
+        if not self.column_key:
+            print("No column key provided - using 'text' as default.")
+            self.column_key = "text"
+        if not self.csv_encoding:
+            print("No encoding provided - using 'utf-8' as default.")
+            self.csv_encoding = "utf-8"
+        if not isinstance(self.column_key, str):
+            raise ValueError("The provided column key is not a string.")
+        if not isinstance(self.csv_encoding, str):
+            raise ValueError("The provided encoding is not a string.")
 
     def _check_valid_csv_path(self):
         if not isinstance(self.csv_path, str):
@@ -319,9 +347,7 @@ class TextAnalyzer:
         Returns:
             dict: The dictionary with the text entries.
         """
-        df = pd.read_csv(self.csv_path, encoding="utf8")
-        if not self.column_key:
-            self.column_key = "text"
+        df = pd.read_csv(self.csv_path, encoding=self.csv_encoding)
 
         if self.column_key not in df:
             raise ValueError(
