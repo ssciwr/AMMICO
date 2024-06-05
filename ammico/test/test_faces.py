@@ -13,10 +13,10 @@ def test_init_EmotionDetector(monkeypatch):
     assert ed.subdict["wears_mask"] == ["No"]
     assert ed.subdict["emotion"] == [None]
     assert ed.subdict["age"] == [None]
-    assert ed.emotion_threshold == 50.0
-    assert ed.age_threshold == 50.0
-    assert ed.gender_threshold == 50.0
-    assert ed.race_threshold == 50.0
+    assert ed.emotion_threshold == 50
+    assert ed.age_threshold == 50
+    assert ed.gender_threshold == 50
+    assert ed.race_threshold == 50
     assert ed.emotion_categories["angry"] == "Negative"
     assert ed.emotion_categories["happy"] == "Positive"
     assert ed.emotion_categories["surprise"] == "Neutral"
@@ -33,10 +33,10 @@ def test_init_EmotionDetector(monkeypatch):
         age_threshold=90,
         accept_disclaimer="OTHER_VAR",
     )
-    assert ed.emotion_threshold == 80.0
-    assert ed.race_threshold == 30.0
-    assert ed.gender_threshold == 70.0
-    assert ed.age_threshold == 90.0
+    assert ed.emotion_threshold == 80
+    assert ed.race_threshold == 30
+    assert ed.gender_threshold == 70
+    assert ed.age_threshold == 90
     monkeypatch.delenv(ed.accept_disclaimer, raising=False)
     # do not accept disclaimer
     monkeypatch.setattr("builtins.input", lambda _: "no")
