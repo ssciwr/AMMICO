@@ -88,17 +88,10 @@ def ethical_disclosure(accept_disclosure: str = "DISCLOSURE_AMMICO"):
         accept_disclosure (str): The name of the disclosure variable (default: "DISCLOSURE_AMMICO").
     """
     if not os.environ.get(accept_disclosure):
-        accepted = EmotionDetector._ask_for_disclosure_acceptance(accept_disclosure)
+        accepted = _ask_for_disclosure_acceptance(accept_disclosure)
     elif os.environ.get(accept_disclosure) == "False":
-        print("You have not accepted the disclosure.")
-        print("No age, gender, race/ethnicity detection will be performed.")
         accepted = False
     elif os.environ.get(accept_disclosure) == "True":
-        print("You have accepted the disclosure.")
-        print(
-            "Age, gender, race/ethnicity detection will be performed based on the provided \
-              confidence thresholds."
-        )
         accepted = True
     else:
         print(
@@ -106,6 +99,47 @@ def ethical_disclosure(accept_disclosure: str = "DISCLOSURE_AMMICO"):
               race/ethnicity, gender and age detection."
         )
         accepted = False
+    return accepted
+
+
+def _ask_for_disclosure_acceptance(accept_disclosure: str = "DISCLOSURE_AMMICO"):
+    """
+    Asks the user to accept the disclosure.
+    """
+    print("This analysis uses the DeepFace and RetinaFace libraries.")
+    print(
+        """
+        DeepFace and RetinaFace provide wrappers to trained models in face recognition and
+        emotion detection. Age, gender and race / ethnicity models were trained
+        on the backbone of VGG-Face with transfer learning.
+        ETHICAL DISCLOSURE STATEMENT:
+        The Emotion Detector uses RetinaFace to probabilistically assess the gender, age and
+        race of the detected faces. Such assessments may not reflect how the individuals
+        identified by the tool view themselves. Additionally, the classification is carried
+        out in simplistic categories and contains only the most basic classes, for example
+        “male” and “female” for gender. By continuing to use the tool, you certify that you
+        understand the ethical implications such assessments have for the interpretation of
+        the results.
+        """
+    )
+    answer = input("Do you accept the disclosure? (yes/no): ")
+    answer = answer.lower().strip()
+    if answer == "yes":
+        print("You have accepted the disclosure.")
+        print(
+            """Age, gender, race/ethnicity detection will be performed based on the provided
+            confidence thresholds."""
+        )
+        os.environ[accept_disclosure] = "True"
+        accepted = True
+    elif answer == "no":
+        print("You have not accepted the disclosure.")
+        print("No age, gender, race/ethnicity detection will be performed.")
+        os.environ[accept_disclosure] = "False"
+        accepted = False
+    else:
+        print("Please answer with yes or no.")
+        accepted = _ask_for_disclosure_acceptance()
     return accepted
 
 
@@ -156,41 +190,6 @@ class EmotionDetector(AnalysisMethod):
             "neutral": "Neutral",
         }
         self.accepted = ethical_disclosure(accept_disclosure)
-
-    @staticmethod
-    def _ask_for_disclosure_acceptance(accept_disclosure: str = "DISCLOSURE_AMMICO"):
-        """
-        Asks the user to accept the disclosure.
-        """
-        print("This analysis uses the DeepFace and RetinaFace libraries.")
-        print(
-            """
-            DeepFace and RetinaFace provide wrappers to trained models in face recognition and
-            emotion detection. Age, gender and race / ethnicity models were trained
-            on the backbone of VGG-Face with transfer learning.
-
-            ETHICAL DISCLOSURE STATEMENT:
-            The Emotion Detector uses RetinaFace to probabilistically assess the gender, age and
-            race of the detected faces. Such assessments may not reflect how the individuals
-            identified by the tool view themselves. Additionally, the classification is carried
-            out in simplistic categories and contains only the most basic classes, for example
-            “male” and “female” for gender. By continuing to use the tool, you certify that you
-            understand the ethical implications such assessments have for the interpretation of
-            the results.
-            """
-        )
-        answer = input("Do you accept the disclosure? (yes/no): ")
-        answer = answer.lower().strip()
-        if answer == "yes":
-            os.environ[accept_disclosure] = "True"
-            accepted = True
-        elif answer == "no":
-            os.environ[accept_disclosure] = "False"
-            accepted = False
-        else:
-            print("Please answer with yes or no.")
-            accepted = EmotionDetector._ask_for_disclosure_acceptance()
-        return accepted
 
     def set_keys(self) -> dict:
         """
