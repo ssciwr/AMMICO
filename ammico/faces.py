@@ -80,6 +80,35 @@ retinaface_model = DownloadResource(
 )
 
 
+def ethical_disclosure(accept_disclosure: str = "DISCLOSURE_AMMICO"):
+    """
+    Asks the user to accept the ethical disclosure.
+
+    Args:
+        accept_disclosure (str): The name of the disclosure variable (default: "DISCLOSURE_AMMICO").
+    """
+    if not os.environ.get(accept_disclosure):
+        accepted = EmotionDetector._ask_for_disclosure_acceptance(accept_disclosure)
+    elif os.environ.get(accept_disclosure) == "False":
+        print("You have not accepted the disclosure.")
+        print("No age, gender, race/ethnicity detection will be performed.")
+        accepted = False
+    elif os.environ.get(accept_disclosure) == "True":
+        print("You have accepted the disclosure.")
+        print(
+            "Age, gender, race/ethnicity detection will be performed based on the provided \
+              confidence thresholds."
+        )
+        accepted = True
+    else:
+        print(
+            "Could not determine disclosure - skipping \
+              race/ethnicity, gender and age detection."
+        )
+        accepted = False
+    return accepted
+
+
 class EmotionDetector(AnalysisMethod):
     def __init__(
         self,
@@ -126,23 +155,10 @@ class EmotionDetector(AnalysisMethod):
             "surprise": "Neutral",
             "neutral": "Neutral",
         }
-        self.accept_disclosure = accept_disclosure
-        if not os.environ.get(self.accept_disclosure):
-            self._ask_for_disclosure_acceptance()
-        if os.environ.get(self.accept_disclosure) == "False":
-            print("You have not accepted the disclosure.")
-            print("No age, gender, race/ethnicity detection will be performed.")
-            self.accepted = False
-        elif os.environ.get(self.accept_disclosure) == "True":
-            self.accepted = True
-        else:
-            print(
-                "Could not determine disclosure - skipping \
-                  race/ethnicity, gender and age detection."
-            )
-            self.accepted = False
+        self.accepted = ethical_disclosure(accept_disclosure)
 
-    def _ask_for_disclosure_acceptance(self):
+    @staticmethod
+    def _ask_for_disclosure_acceptance(accept_disclosure: str = "DISCLOSURE_AMMICO"):
         """
         Asks the user to accept the disclosure.
         """
@@ -166,12 +182,15 @@ class EmotionDetector(AnalysisMethod):
         answer = input("Do you accept the disclosure? (yes/no): ")
         answer = answer.lower().strip()
         if answer == "yes":
-            os.environ[self.accept_disclosure] = "True"
+            os.environ[accept_disclosure] = "True"
+            accepted = True
         elif answer == "no":
-            os.environ[self.accept_disclosure] = "False"
+            os.environ[accept_disclosure] = "False"
+            accepted = False
         else:
             print("Please answer with yes or no.")
-            self._ask_for_disclosure_acceptance()
+            accepted = EmotionDetector._ask_for_disclosure_acceptance()
+        return accepted
 
     def set_keys(self) -> dict:
         """
