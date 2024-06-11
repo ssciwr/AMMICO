@@ -88,7 +88,7 @@ class EmotionDetector(AnalysisMethod):
         race_threshold: float = 50.0,
         gender_threshold: float = 50.0,
         age_threshold: float = 50.0,
-        accept_disclaimer: str = "DISCLAIMER_AMMICO",
+        accept_disclosure: str = "DISCLOSURE_AMMICO",
     ) -> None:
         """
         Initializes the EmotionDetector object.
@@ -99,8 +99,8 @@ class EmotionDetector(AnalysisMethod):
             race_threshold (float): The threshold for detecting race (default: 50.0).
             gender_threshold (float): The threshold for detecting gender (default: 50.0).
             age_threshold (float): The threshold for detecting age (default: 50.0).
-            accept_disclaimer (str): The name of the disclaimer variable, that is
-                set upon accepting the disclaimer (default: "DISCLAIMER_AMMICO").
+            accept_disclosure (str): The name of the disclosure variable, that is
+                set upon accepting the disclosure (default: "DISCLOSURE_AMMICO").
         """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
@@ -126,25 +126,25 @@ class EmotionDetector(AnalysisMethod):
             "surprise": "Neutral",
             "neutral": "Neutral",
         }
-        self.accept_disclaimer = accept_disclaimer
-        if not os.environ.get(self.accept_disclaimer):
-            self._ask_for_disclaimer_acceptance()
-        if os.environ.get(self.accept_disclaimer) == "False":
-            print("You have not accepted the disclaimer.")
+        self.accept_disclosure = accept_disclosure
+        if not os.environ.get(self.accept_disclosure):
+            self._ask_for_disclosure_acceptance()
+        if os.environ.get(self.accept_disclosure) == "False":
+            print("You have not accepted the disclosure.")
             print("No age, gender, race/ethnicity detection will be performed.")
             self.accepted = False
-        elif os.environ.get(self.accept_disclaimer) == "True":
+        elif os.environ.get(self.accept_disclosure) == "True":
             self.accepted = True
         else:
             print(
-                "Could not determine disclaimer - skipping \
+                "Could not determine disclosure - skipping \
                   race/ethnicity, gender and age detection."
             )
             self.accepted = False
 
-    def _ask_for_disclaimer_acceptance(self):
+    def _ask_for_disclosure_acceptance(self):
         """
-        Asks the user to accept the disclaimer.
+        Asks the user to accept the disclosure.
         """
         print("This analysis uses the DeepFace and RetinaFace libraries.")
         print(
@@ -153,7 +153,7 @@ class EmotionDetector(AnalysisMethod):
             emotion detection. Age, gender and race / ethnicity models were trained
             on the backbone of VGG-Face with transfer learning.
 
-            DISCLAIMER
+            ETHICAL DISCLOSURE STATEMENT:
             The Emotion Detector uses RetinaFace to probabilistically assess the gender, age and
             race of the detected faces. Such assessments may not reflect how the individuals
             identified by the tool view themselves. Additionally, the classification is carried
@@ -163,15 +163,15 @@ class EmotionDetector(AnalysisMethod):
             the results.
             """
         )
-        answer = input("Do you accept the disclaimer? (yes/no): ")
+        answer = input("Do you accept the disclosure? (yes/no): ")
         answer = answer.lower().strip()
         if answer == "yes":
-            os.environ[self.accept_disclaimer] = "True"
+            os.environ[self.accept_disclosure] = "True"
         elif answer == "no":
-            os.environ[self.accept_disclaimer] = "False"
+            os.environ[self.accept_disclosure] = "False"
         else:
             print("Please answer with yes or no.")
-            self._ask_for_disclaimer_acceptance()
+            self._ask_for_disclosure_acceptance()
 
     def set_keys(self) -> dict:
         """
@@ -205,7 +205,7 @@ class EmotionDetector(AnalysisMethod):
     def _define_actions(self, fresult: dict) -> list:
         # Adapt the features we are looking for depending on whether a mask is worn.
         # White masks screw race detection, emotion detection is useless.
-        # also, depending on the disclaimer, we might not want to run the analysis
+        # also, depending on the disclosure, we might not want to run the analysis
         # for gender, age, ethnicity/race
         conditional_actions = {
             "all": ["age", "gender", "race", "emotion"],
@@ -223,7 +223,7 @@ class EmotionDetector(AnalysisMethod):
             actions = conditional_actions["restricted_access"]
         else:
             raise ValueError(
-                "Invalid mask detection {} and disclaimer \
+                "Invalid mask detection {} and disclosure \
                              acceptance {} result.".format(
                     fresult["wears_mask"], self.accepted
                 )

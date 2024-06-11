@@ -206,7 +206,7 @@ class AnalysisExplorer:
                                 dbc.Col(
                                     [
                                         html.P(
-                                            "Select name of the environment variable to accept or reject the disclaimer*:"
+                                            "Select name of the environment variable to accept or reject the disclosure*:"
                                         ),
                                     ]
                                 ),
@@ -545,10 +545,10 @@ class AnalysisExplorer:
                 race_threshold=setting_emotion_race_threshold,
                 gender_threshold=setting_emotion_gender_threshold,
                 age_threshold=setting_emotion_age_threshold,
-                accept_disclaimer=(
+                accept_disclosure=(
                     setting_emotion_env_var
                     if setting_emotion_env_var
-                    else "DISCLAIMER_AMMICO"
+                    else "DISCLOSURE_AMMICO"
                 ),
             )
         elif detector_value == "ColorDetector":
