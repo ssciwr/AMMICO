@@ -24,7 +24,7 @@ Use pre-processed image files such as social media posts with comments and proce
     1. Question answering   
 1. Performing person and face recognition in images
     1. Face mask detection
-    1. Age, gender and race detection
+    1. Probabilistic detection of age, gender and race detection
     1. Emotion recognition
 1. Color analysis
     1. Analyse hue and percentage of color on image

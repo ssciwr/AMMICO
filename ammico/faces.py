@@ -149,8 +149,6 @@ class EmotionDetector(AnalysisMethod):
         subdict: dict,
         emotion_threshold: float = 50.0,
         race_threshold: float = 50.0,
-        gender_threshold: float = 50.0,
-        age_threshold: float = 50.0,
         accept_disclosure: str = "DISCLOSURE_AMMICO",
     ) -> None:
         """
@@ -160,8 +158,6 @@ class EmotionDetector(AnalysisMethod):
             subdict (dict): The dictionary to store the analysis results.
             emotion_threshold (float): The threshold for detecting emotions (default: 50.0).
             race_threshold (float): The threshold for detecting race (default: 50.0).
-            gender_threshold (float): The threshold for detecting gender (default: 50.0).
-            age_threshold (float): The threshold for detecting age (default: 50.0).
             accept_disclosure (str): The name of the disclosure variable, that is
                 set upon accepting the disclosure (default: "DISCLOSURE_AMMICO").
         """
@@ -172,14 +168,8 @@ class EmotionDetector(AnalysisMethod):
             raise ValueError("Emotion threshold must be between 0 and 100.")
         if race_threshold < 0 or race_threshold > 100:
             raise ValueError("Race threshold must be between 0 and 100.")
-        if gender_threshold < 0 or gender_threshold > 100:
-            raise ValueError("Gender threshold must be between 0 and 100.")
-        if age_threshold < 0 or age_threshold > 100:
-            raise ValueError("Age threshold must be between 0 and 100.")
         self.emotion_threshold = emotion_threshold
         self.race_threshold = race_threshold
-        self.gender_threshold = gender_threshold
-        self.age_threshold = age_threshold
         self.emotion_categories = {
             "angry": "Negative",
             "disgust": "Negative",
@@ -232,13 +222,13 @@ class EmotionDetector(AnalysisMethod):
             "restricted_access_with_mask": [],
         }
         if fresult["wears_mask"] and self.accepted:
-            actions = conditional_actions["all_with_mask"]
+            self.actions = conditional_actions["all_with_mask"]
         elif fresult["wears_mask"] and not self.accepted:
-            actions = conditional_actions["restricted_access_with_mask"]
+            self.actions = conditional_actions["restricted_access_with_mask"]
         elif not fresult["wears_mask"] and self.accepted:
-            actions = conditional_actions["all"]
+            self.actions = conditional_actions["all"]
         elif not fresult["wears_mask"] and not self.accepted:
-            actions = conditional_actions["restricted_access"]
+            self.actions = conditional_actions["restricted_access"]
         else:
             raise ValueError(
                 "Invalid mask detection {} and disclosure \
@@ -246,16 +236,15 @@ class EmotionDetector(AnalysisMethod):
                     fresult["wears_mask"], self.accepted
                 )
             )
-        return actions
 
-    def _ensure_deepface_models(self, actions: list):
+    def _ensure_deepface_models(self):
         # Ensure that all data has been fetched by pooch
         deepface_face_expression_model.get()
-        if "race" in actions:
+        if "race" in self.actions:
             deepface_race_model.get()
-        if "age" in actions:
+        if "age" in self.actions:
             deepface_age_model.get()
-        if "gender" in actions:
+        if "gender" in self.actions:
             deepface_gender_model.get()
 
     def analyze_single_face(self, face: np.ndarray) -> dict:
@@ -271,13 +260,13 @@ class EmotionDetector(AnalysisMethod):
         fresult = {}
         # Determine whether the face wears a mask
         fresult["wears_mask"] = self.wears_mask(face)
-        actions = self._define_actions(fresult)
-        self._ensure_deepface_models(actions)
+        self._define_actions(fresult)
+        self._ensure_deepface_models()
         # Run the full DeepFace analysis
         fresult.update(
             DeepFace.analyze(
                 img_path=face,
-                actions=actions,
+                actions=self.actions,
                 prog_bar=False,
                 detector_backend="skip",
             )
@@ -325,49 +314,47 @@ class EmotionDetector(AnalysisMethod):
         """
         # Each person subdict converted into list for keys
         self.subdict["wears_mask"] = []
-        self.subdict["age"] = []
-        self.subdict["gender"] = []
-        self.subdict["race"] = []
         self.subdict["emotion"] = []
         self.subdict["emotion (category)"] = []
+        for key in self.actions:
+            self.subdict[key] = []
+        # now iterate over the number of faces
+        # and check thresholds
+        # the results for each person are returned as a nested dict
+        # race and emotion are given as dict with confidence values
+        # gender and age are given as one value with no confidence
+        # being passed
         for i in range(result["number_faces"]):
             person = "person{}".format(i + 1)
-            self.subdict["wears_mask"].append(
-                "Yes" if result[person]["wears_mask"] else "No"
-            )
-            self.subdict["age"].append(result[person]["age"])
-            # Gender is now reported as a list of dictionaries.
-            # Each dict represents one face.
-            # Each dict contains probability for Woman and Man.
-            # We take only the higher probability result for each dict.
-            self.subdict["gender"].append(result[person]["gender"])
-            # Race and emotion are only detected if a person does not wear a mask
-            if result[person]["wears_mask"]:
-                self.subdict["race"].append(None)
-                self.subdict["emotion"].append(None)
-                self.subdict["emotion (category)"].append(None)
-            elif not result[person]["wears_mask"]:
-                # Check whether the race threshold was exceeded
-                if (
-                    result[person]["race"][result[person]["dominant_race"]]
-                    > self.race_threshold
-                ):
-                    self.subdict["race"].append(result[person]["dominant_race"])
-                else:
-                    self.subdict["race"].append(None)
-
-                # Check whether the emotion threshold was exceeded
-                if (
-                    result[person]["emotion"][result[person]["dominant_emotion"]]
-                    > self.emotion_threshold
-                ):
-                    self.subdict["emotion"].append(result[person]["dominant_emotion"])
-                    self.subdict["emotion (category)"].append(
-                        self.emotion_categories[result[person]["dominant_emotion"]]
+            wears_mask = result[person]["wears_mask"]
+            self.subdict["wears_mask"].append("Yes" if wears_mask else "No")
+            for key in self.actions:
+                if key == "emotion":
+                    classified_emotion = result[person]["dominant_emotion"]
+                    confidence_value = result[person][key][classified_emotion]
+                    outcome = (
+                        classified_emotion
+                        if confidence_value > self.emotion_threshold and not wears_mask
+                        else None
                     )
-                else:
-                    self.subdict["emotion"].append(None)
-                    self.subdict["emotion (category)"].append(None)
+                    # also set the emotion category
+                    self.emotion_categories[outcome]
+                    self.subdict["emotion (category)"].append(
+                        self.emotion_categories[outcome] if outcome else None
+                    )
+                elif key == "race":
+                    classified_race = result[person]["dominant_race"]
+                    confidence_value = result[person][key][classified_race]
+                    outcome = (
+                        classified_race
+                        if confidence_value > self.race_threshold and not wears_mask
+                        else None
+                    )
+                elif key == "age":
+                    outcome = result[person]["age"] if not wears_mask else None
+                elif key == "gender":
+                    outcome = result[person]["gender"] if not wears_mask else None
+                self.subdict[key].append(outcome)
         return self.subdict
 
     def wears_mask(self, face: np.ndarray) -> bool:
