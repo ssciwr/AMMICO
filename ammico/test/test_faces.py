@@ -14,36 +14,28 @@ def test_init_EmotionDetector(monkeypatch):
     assert ed.subdict["emotion"] == [None]
     assert ed.subdict["age"] == [None]
     assert ed.emotion_threshold == 50
-    assert ed.age_threshold == 50
-    assert ed.gender_threshold == 50
     assert ed.race_threshold == 50
     assert ed.emotion_categories["angry"] == "Negative"
     assert ed.emotion_categories["happy"] == "Positive"
     assert ed.emotion_categories["surprise"] == "Neutral"
-    assert ed.accept_disclosure == "OTHER_VAR"
-    assert os.environ.get(ed.accept_disclosure) == "True"
     assert ed.accepted
-    monkeypatch.delenv(ed.accept_disclosure, raising=False)
+    monkeypatch.delenv("OTHER_VAR", raising=False)
     # different thresholds
     ed = fc.EmotionDetector(
         {},
         emotion_threshold=80,
         race_threshold=30,
-        gender_threshold=70,
-        age_threshold=90,
         accept_disclosure="OTHER_VAR",
     )
     assert ed.emotion_threshold == 80
     assert ed.race_threshold == 30
-    assert ed.gender_threshold == 70
-    assert ed.age_threshold == 90
-    monkeypatch.delenv(ed.accept_disclosure, raising=False)
+    monkeypatch.delenv("OTHER_VAR", raising=False)
     # do not accept disclosure
     monkeypatch.setattr("builtins.input", lambda _: "no")
     ed = fc.EmotionDetector({}, accept_disclosure="OTHER_VAR")
-    assert os.environ.get(ed.accept_disclosure) == "False"
+    assert os.environ.get("OTHER_VAR") == "False"
     assert not ed.accepted
-    monkeypatch.delenv(ed.accept_disclosure, raising=False)
+    monkeypatch.delenv("OTHER_VAR", raising=False)
     # now test the exceptions: thresholds
     monkeypatch.setattr("builtins.input", lambda _: "yes")
     with pytest.raises(ValueError):
@@ -54,14 +46,6 @@ def test_init_EmotionDetector(monkeypatch):
         fc.EmotionDetector({}, race_threshold=150)
     with pytest.raises(ValueError):
         fc.EmotionDetector({}, race_threshold=-50)
-    with pytest.raises(ValueError):
-        fc.EmotionDetector({}, gender_threshold=150)
-    with pytest.raises(ValueError):
-        fc.EmotionDetector({}, gender_threshold=-50)
-    with pytest.raises(ValueError):
-        fc.EmotionDetector({}, age_threshold=150)
-    with pytest.raises(ValueError):
-        fc.EmotionDetector({}, age_threshold=-50)
     # test pre-set variables: disclosure
     monkeypatch.delattr("builtins.input", raising=False)
     monkeypatch.setenv("OTHER_VAR", "something")
@@ -78,22 +62,23 @@ def test_init_EmotionDetector(monkeypatch):
 def test_define_actions(monkeypatch):
     monkeypatch.setenv("OTHER_VAR", "True")
     ed = fc.EmotionDetector({}, accept_disclosure="OTHER_VAR")
-    actions = ed._define_actions({"wears_mask": True})
-    assert actions == ["age", "gender"]
-    actions = ed._define_actions({"wears_mask": False})
-    assert actions == ["age", "gender", "race", "emotion"]
+    ed._define_actions({"wears_mask": True})
+    assert ed.actions == ["age", "gender"]
+    ed._define_actions({"wears_mask": False})
+    assert ed.actions == ["age", "gender", "race", "emotion"]
     monkeypatch.setenv("OTHER_VAR", "False")
     ed = fc.EmotionDetector({}, accept_disclosure="OTHER_VAR")
-    actions = ed._define_actions({"wears_mask": True})
-    assert actions == []
-    actions = ed._define_actions({"wears_mask": False})
-    assert actions == ["emotion"]
+    ed._define_actions({"wears_mask": True})
+    assert ed.actions == []
+    ed._define_actions({"wears_mask": False})
+    assert ed.actions == ["emotion"]
 
 
 def test_ensure_deepface_models(monkeypatch):
     monkeypatch.setenv("OTHER_VAR", "True")
     ed = fc.EmotionDetector({}, accept_disclosure="OTHER_VAR")
-    ed._ensure_deepface_models(["age", "gender", "race", "emotion"])
+    ed.actions = ["age", "gender", "race", "emotion"]
+    ed._ensure_deepface_models()
 
 
 def test_analyse_faces(get_path, monkeypatch):
