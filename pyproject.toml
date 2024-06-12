@@ -43,7 +43,7 @@ dependencies = [
     "pytest-cov",
     "Requests",
     "retina_face",
-    "ammico-lavis@git+https://github.com/ssciwr/LAVIS.git@relaxe-requirements",
+    "ammico-lavis",
     "setuptools",
     "spacy",
     "tensorflow>=2.13.0",
