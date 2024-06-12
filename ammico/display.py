@@ -285,11 +285,18 @@ class AnalysisExplorer:
                                     align="start",
                                 ),
                                 dbc.Col(
-                                    dcc.Input(
-                                        type="text",
-                                        id="setting_Emotion_env_var",
-                                        style={"width": "100%"},
-                                    ),
+                                    [
+                                        html.P(
+                                            "Disclosure acceptance environment variable"
+                                        ),
+                                        dcc.Input(
+                                            type="text",
+                                            value="DISCLOSURE_AMMICO",
+                                            id="setting_Emotion_env_var",
+                                            style={"width": "100%"},
+                                        ),
+                                    ],
+                                    align="start",
                                 ),
                             ],
                             style={"width": "100%"},
