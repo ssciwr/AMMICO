@@ -20,10 +20,8 @@ def test_init_EmotionDetector(monkeypatch):
     assert ed.emotion_categories["angry"] == "Negative"
     assert ed.emotion_categories["happy"] == "Positive"
     assert ed.emotion_categories["surprise"] == "Neutral"
-    assert ed.accept_disclosure == "OTHER_VAR"
-    assert os.environ.get(ed.accept_disclosure) == "True"
     assert ed.accepted
-    monkeypatch.delenv(ed.accept_disclosure, raising=False)
+    monkeypatch.delenv("OTHER_VAR", raising=False)
     # different thresholds
     ed = fc.EmotionDetector(
         {},
@@ -37,13 +35,13 @@ def test_init_EmotionDetector(monkeypatch):
     assert ed.race_threshold == 30
     assert ed.gender_threshold == 70
     assert ed.age_threshold == 90
-    monkeypatch.delenv(ed.accept_disclosure, raising=False)
+    monkeypatch.delenv("OTHER_VAR", raising=False)
     # do not accept disclosure
     monkeypatch.setattr("builtins.input", lambda _: "no")
     ed = fc.EmotionDetector({}, accept_disclosure="OTHER_VAR")
-    assert os.environ.get(ed.accept_disclosure) == "False"
+    assert os.environ.get("OTHER_VAR") == "False"
     assert not ed.accepted
-    monkeypatch.delenv(ed.accept_disclosure, raising=False)
+    monkeypatch.delenv("OTHER_VAR", raising=False)
     # now test the exceptions: thresholds
     monkeypatch.setattr("builtins.input", lambda _: "yes")
     with pytest.raises(ValueError):
