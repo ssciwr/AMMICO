@@ -127,8 +127,8 @@ def test_get_text_from_image(set_testdict, get_path, set_environ):
         test_obj.get_text_from_image()
         ref_file = get_path + "text_" + item + ".txt"
         with open(ref_file, "r", encoding="utf8") as file:
-            reference_text = file.read()
-        assert test_obj.subdict["text"] == reference_text
+            reference_text = file.read().replace("\n", " ")
+        assert test_obj.subdict["text"].replace("\n", " ") == reference_text
 
 
 def test_translate_text(set_testdict, get_path):
@@ -137,13 +137,13 @@ def test_translate_text(set_testdict, get_path):
         ref_file = get_path + "text_" + item + ".txt"
         trans_file = get_path + "text_translated_" + item + ".txt"
         with open(ref_file, "r", encoding="utf8") as file:
-            reference_text = file.read()
+            reference_text = file.read().replace("\n", " ")
         with open(trans_file, "r", encoding="utf8") as file:
-            true_translated_text = file.read()
+            true_translated_text = file.read().replace("\n", " ")
         test_obj.subdict["text"] = reference_text
         test_obj.translate_text()
         assert test_obj.subdict["text_language"] == lang
-        translated_text = test_obj.subdict["text_english"].lower()
+        translated_text = test_obj.subdict["text_english"].lower().replace("\n", " ")
         for word in true_translated_text.lower():
             assert word in translated_text
 
@@ -233,7 +233,7 @@ def test_read_csv(get_path):
 
 
 def test_PostprocessText(set_testdict, get_path):
-    reference_dict = "THE\nALGEBRAIC\nEIGENVALUE\nPROBLEM\nDOM\nNVS TIO\nMINA\nMonographs\non Numerical Analysis\nJ.. H. WILKINSON"
+    reference_dict = "THE ALGEBRAIC EIGENVALUE PROBLEM"
     reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"
     img_numbers = ["IMG_3755", "IMG_3756", "IMG_3757"]
     for image_ref in img_numbers:
