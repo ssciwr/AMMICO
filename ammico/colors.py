@@ -120,7 +120,7 @@ class ColorDetector(AnalysisMethod):
             output_color = output_color.lower().replace("grey", "gray")
         except ValueError:
             delta_e_lst = []
-            filtered_colors = webcolors.CSS3_NAMES_TO_HEX
+            filtered_colors = webcolors._definitions._CSS3_NAMES_TO_HEX
 
             for _, img_hex in filtered_colors.items():
                 cur_clr = webcolors.hex_to_rgb(img_hex)

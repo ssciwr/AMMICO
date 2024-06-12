@@ -42,7 +42,8 @@ def test_AnalysisExplorer(get_AE, get_options):
     assert get_AE.update_picture(None) is None
 
 
-def test_right_output_analysis_summary(get_AE, get_options):
+def test_right_output_analysis_summary(get_AE, get_options, monkeypatch):
+    monkeypatch.setenv("OTHER_VAR", "True")
     get_AE._right_output_analysis(
         2,
         get_options[3],
@@ -53,6 +54,9 @@ def test_right_output_analysis_summary(get_AE, get_options):
         None,
         50,
         50,
+        50,
+        50,
+        "OTHER_VAR",
         "CIE 1976",
         "summary_and_questions",
         "base",
@@ -60,7 +64,8 @@ def test_right_output_analysis_summary(get_AE, get_options):
     )
 
 
-def test_right_output_analysis_emotions(get_AE, get_options):
+def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
+    monkeypatch.setenv("OTHER_VAR", "True")
     get_AE._right_output_analysis(
         2,
         get_options[3],
@@ -71,6 +76,9 @@ def test_right_output_analysis_emotions(get_AE, get_options):
         None,
         50,
         50,
+        50,
+        50,
+        "OTHER_VAR",
         "CIE 1976",
         "summary_and_questions",
         "base",

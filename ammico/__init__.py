@@ -5,7 +5,7 @@ except ImportError:
     import importlib_metadata as metadata  # type: ignore
 from ammico.cropposts import crop_media_posts, crop_posts_from_refs
 from ammico.display import AnalysisExplorer
-from ammico.faces import EmotionDetector
+from ammico.faces import EmotionDetector, ethical_disclosure
 from ammico.multimodal_search import MultimodalSearch
 from ammico.summary import SummaryDetector
 from ammico.text import TextDetector, TextAnalyzer, PostprocessText
@@ -27,4 +27,5 @@ __all__ = [
     "PostprocessText",
     "find_files",
     "get_dataframe",
+    "ethical_disclosure",
 ]

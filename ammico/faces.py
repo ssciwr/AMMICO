@@ -80,12 +80,78 @@ retinaface_model = DownloadResource(
 )
 
 
+def ethical_disclosure(accept_disclosure: str = "DISCLOSURE_AMMICO"):
+    """
+    Asks the user to accept the ethical disclosure.
+
+    Args:
+        accept_disclosure (str): The name of the disclosure variable (default: "DISCLOSURE_AMMICO").
+    """
+    if not os.environ.get(accept_disclosure):
+        accepted = _ask_for_disclosure_acceptance(accept_disclosure)
+    elif os.environ.get(accept_disclosure) == "False":
+        accepted = False
+    elif os.environ.get(accept_disclosure) == "True":
+        accepted = True
+    else:
+        print(
+            "Could not determine disclosure - skipping \
+              race/ethnicity, gender and age detection."
+        )
+        accepted = False
+    return accepted
+
+
+def _ask_for_disclosure_acceptance(accept_disclosure: str = "DISCLOSURE_AMMICO"):
+    """
+    Asks the user to accept the disclosure.
+    """
+    print("This analysis uses the DeepFace and RetinaFace libraries.")
+    print(
+        """
+        DeepFace and RetinaFace provide wrappers to trained models in face recognition and
+        emotion detection. Age, gender and race / ethnicity models were trained
+        on the backbone of VGG-Face with transfer learning.
+        ETHICAL DISCLOSURE STATEMENT:
+        The Emotion Detector uses RetinaFace to probabilistically assess the gender, age and
+        race of the detected faces. Such assessments may not reflect how the individuals
+        identified by the tool view themselves. Additionally, the classification is carried
+        out in simplistic categories and contains only the most basic classes, for example
+        “male” and “female” for gender. By continuing to use the tool, you certify that you
+        understand the ethical implications such assessments have for the interpretation of
+        the results.
+        """
+    )
+    answer = input("Do you accept the disclosure? (yes/no): ")
+    answer = answer.lower().strip()
+    if answer == "yes":
+        print("You have accepted the disclosure.")
+        print(
+            """Age, gender, race/ethnicity detection will be performed based on the provided
+            confidence thresholds."""
+        )
+        os.environ[accept_disclosure] = "True"
+        accepted = True
+    elif answer == "no":
+        print("You have not accepted the disclosure.")
+        print("No age, gender, race/ethnicity detection will be performed.")
+        os.environ[accept_disclosure] = "False"
+        accepted = False
+    else:
+        print("Please answer with yes or no.")
+        accepted = _ask_for_disclosure_acceptance()
+    return accepted
+
+
 class EmotionDetector(AnalysisMethod):
     def __init__(
         self,
         subdict: dict,
         emotion_threshold: float = 50.0,
         race_threshold: float = 50.0,
+        gender_threshold: float = 50.0,
+        age_threshold: float = 50.0,
+        accept_disclosure: str = "DISCLOSURE_AMMICO",
     ) -> None:
         """
         Initializes the EmotionDetector object.
@@ -94,6 +160,10 @@ class EmotionDetector(AnalysisMethod):
             subdict (dict): The dictionary to store the analysis results.
             emotion_threshold (float): The threshold for detecting emotions (default: 50.0).
             race_threshold (float): The threshold for detecting race (default: 50.0).
+            gender_threshold (float): The threshold for detecting gender (default: 50.0).
+            age_threshold (float): The threshold for detecting age (default: 50.0).
+            accept_disclosure (str): The name of the disclosure variable, that is
+                set upon accepting the disclosure (default: "DISCLOSURE_AMMICO").
         """
         super().__init__(subdict)
         self.subdict.update(self.set_keys())
@@ -102,8 +172,14 @@ class EmotionDetector(AnalysisMethod):
             raise ValueError("Emotion threshold must be between 0 and 100.")
         if race_threshold < 0 or race_threshold > 100:
             raise ValueError("Race threshold must be between 0 and 100.")
+        if gender_threshold < 0 or gender_threshold > 100:
+            raise ValueError("Gender threshold must be between 0 and 100.")
+        if age_threshold < 0 or age_threshold > 100:
+            raise ValueError("Age threshold must be between 0 and 100.")
         self.emotion_threshold = emotion_threshold
         self.race_threshold = race_threshold
+        self.gender_threshold = gender_threshold
+        self.age_threshold = age_threshold
         self.emotion_categories = {
             "angry": "Negative",
             "disgust": "Negative",
@@ -113,6 +189,7 @@ class EmotionDetector(AnalysisMethod):
             "surprise": "Neutral",
             "neutral": "Neutral",
         }
+        self.accepted = ethical_disclosure(accept_disclosure)
 
     def set_keys(self) -> dict:
         """
@@ -143,6 +220,44 @@ class EmotionDetector(AnalysisMethod):
         """
         return self.facial_expression_analysis()
 
+    def _define_actions(self, fresult: dict) -> list:
+        # Adapt the features we are looking for depending on whether a mask is worn.
+        # White masks screw race detection, emotion detection is useless.
+        # also, depending on the disclosure, we might not want to run the analysis
+        # for gender, age, ethnicity/race
+        conditional_actions = {
+            "all": ["age", "gender", "race", "emotion"],
+            "all_with_mask": ["age", "gender"],
+            "restricted_access": ["emotion"],
+            "restricted_access_with_mask": [],
+        }
+        if fresult["wears_mask"] and self.accepted:
+            actions = conditional_actions["all_with_mask"]
+        elif fresult["wears_mask"] and not self.accepted:
+            actions = conditional_actions["restricted_access_with_mask"]
+        elif not fresult["wears_mask"] and self.accepted:
+            actions = conditional_actions["all"]
+        elif not fresult["wears_mask"] and not self.accepted:
+            actions = conditional_actions["restricted_access"]
+        else:
+            raise ValueError(
+                "Invalid mask detection {} and disclosure \
+                             acceptance {} result.".format(
+                    fresult["wears_mask"], self.accepted
+                )
+            )
+        return actions
+
+    def _ensure_deepface_models(self, actions: list):
+        # Ensure that all data has been fetched by pooch
+        deepface_face_expression_model.get()
+        if "race" in actions:
+            deepface_race_model.get()
+        if "age" in actions:
+            deepface_age_model.get()
+        if "gender" in actions:
+            deepface_gender_model.get()
+
     def analyze_single_face(self, face: np.ndarray) -> dict:
         """
         Analyzes the features of a single face.
@@ -156,16 +271,8 @@ class EmotionDetector(AnalysisMethod):
         fresult = {}
         # Determine whether the face wears a mask
         fresult["wears_mask"] = self.wears_mask(face)
-        # Adapt the features we are looking for depending on whether a mask is worn.
-        # White masks screw race detection, emotion detection is useless.
-        actions = ["age", "gender"]
-        if not fresult["wears_mask"]:
-            actions = actions + ["race", "emotion"]
-        # Ensure that all data has been fetched by pooch
-        deepface_age_model.get()
-        deepface_face_expression_model.get()
-        deepface_gender_model.get()
-        deepface_race_model.get()
+        actions = self._define_actions(fresult)
+        self._ensure_deepface_models(actions)
         # Run the full DeepFace analysis
         fresult.update(
             DeepFace.analyze(
