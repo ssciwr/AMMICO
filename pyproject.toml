@@ -43,7 +43,7 @@ dependencies = [
     "pytest-cov",
     "Requests",
     "retina_face",
-    "ammico-lavis>1.0.2.2",
+    "ammico-lavis>=1.0.2.3",
     "setuptools",
     "spacy",
     "tensorflow>=2.13.0",
