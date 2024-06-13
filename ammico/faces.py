@@ -316,7 +316,6 @@ class EmotionDetector(AnalysisMethod):
         self.subdict["wears_mask"] = []
         if "emotion" in self.actions:
             self.subdict["emotion (category)"] = []
-        print("image, actions", self.subdict["filename"], self.actions)
         for key in self.actions:
             self.subdict[key] = []
         # now iterate over the number of faces
@@ -336,7 +335,6 @@ class EmotionDetector(AnalysisMethod):
                 if key == "emotion":
                     classified_emotion = resultdict["dominant_emotion"]
                     confidence_value = resultdict[key][classified_emotion]
-                    print("Emotion, confidence", classified_emotion, confidence_value)
                     outcome = (
                         classified_emotion
                         if confidence_value > self.emotion_threshold and not wears_mask
