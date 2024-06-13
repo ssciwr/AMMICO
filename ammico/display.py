@@ -101,6 +101,7 @@ class AnalysisExplorer:
             State("setting_Text_revision_numbers", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
+            State("setting_Emotion_gender_threshold", "value"),
             State("setting_Emotion_env_var", "value"),
             State("setting_Color_delta_e_method", "value"),
             State("setting_Summary_analysis_type", "value"),
@@ -202,13 +203,6 @@ class AnalysisExplorer:
                                     ),
                                 ),
                                 dbc.Col(
-                                    [
-                                        html.P(
-                                            "Select name of the environment variable to accept or reject the disclosure*:"
-                                        ),
-                                    ]
-                                ),
-                                dbc.Col(
                                     dcc.Input(
                                         type="text",
                                         id="setting_Text_revision_numbers",
@@ -249,6 +243,20 @@ class AnalysisExplorer:
                                             max=100,
                                             min=0,
                                             id="setting_Emotion_race_threshold",
+                                            style={"width": "100%"},
+                                        ),
+                                    ],
+                                    align="start",
+                                ),
+                                dbc.Col(
+                                    [
+                                        html.P("Gender threshold"),
+                                        dcc.Input(
+                                            type="number",
+                                            value=50,
+                                            max=100,
+                                            min=0,
+                                            id="setting_Emotion_gender_threshold",
                                             style={"width": "100%"},
                                         ),
                                     ],
@@ -463,6 +471,7 @@ class AnalysisExplorer:
         settings_text_revision_numbers: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
+        setting_emotion_gender_threshold: int,
         setting_emotion_env_var: str,
         setting_color_delta_e_method: str,
         setting_summary_analysis_type: str,
@@ -518,6 +527,7 @@ class AnalysisExplorer:
                 image_copy,
                 emotion_threshold=setting_emotion_emotion_threshold,
                 race_threshold=setting_emotion_race_threshold,
+                gender_threshold=setting_emotion_gender_threshold,
                 accept_disclosure=(
                     setting_emotion_env_var
                     if setting_emotion_env_var

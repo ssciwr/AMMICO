@@ -170,14 +170,18 @@ class TextDetector(AnalysisMethod):
         """
         if not self.skip_extraction:
             self.get_text_from_image()
-        self.translate_text()
-        self.remove_linebreaks()
-        if self.analyse_text:
-            self._run_spacy()
-            self.clean_text()
-            self.text_summary()
-            self.text_sentiment_transformers()
-            self.text_ner()
+        # check that text was found
+        if not self.subdict["text"]:
+            print("No text found - skipping analysis.")
+        else:
+            self.translate_text()
+            self.remove_linebreaks()
+            if self.analyse_text:
+                self._run_spacy()
+                self.clean_text()
+                self.text_summary()
+                self.text_sentiment_transformers()
+                self.text_ner()
         return self.subdict
 
     def get_text_from_image(self):
@@ -203,6 +207,9 @@ class TextDetector(AnalysisMethod):
         if response:
             texts = response.text_annotations[0].description
             self.subdict["text"] = texts
+        else:
+            print("No text found on image.")
+            self.subdict["text"] = None
         if response.error.message:
             print("Google Cloud Vision Error")
             raise ValueError(

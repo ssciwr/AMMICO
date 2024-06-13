@@ -149,6 +149,7 @@ class EmotionDetector(AnalysisMethod):
         subdict: dict,
         emotion_threshold: float = 50.0,
         race_threshold: float = 50.0,
+        gender_threshold: float = 50.0,
         accept_disclosure: str = "DISCLOSURE_AMMICO",
     ) -> None:
         """
@@ -158,6 +159,7 @@ class EmotionDetector(AnalysisMethod):
             subdict (dict): The dictionary to store the analysis results.
             emotion_threshold (float): The threshold for detecting emotions (default: 50.0).
             race_threshold (float): The threshold for detecting race (default: 50.0).
+            gender_threshold (float): The threshold for detecting gender (default: 50.0).
             accept_disclosure (str): The name of the disclosure variable, that is
                 set upon accepting the disclosure (default: "DISCLOSURE_AMMICO").
         """
@@ -168,8 +170,11 @@ class EmotionDetector(AnalysisMethod):
             raise ValueError("Emotion threshold must be between 0 and 100.")
         if race_threshold < 0 or race_threshold > 100:
             raise ValueError("Race threshold must be between 0 and 100.")
+        if gender_threshold < 0 or gender_threshold > 100:
+            raise ValueError("Gender threshold must be between 0 and 100.")
         self.emotion_threshold = emotion_threshold
         self.race_threshold = race_threshold
+        self.gender_threshold = gender_threshold
         self.emotion_categories = {
             "angry": "Negative",
             "disgust": "Negative",
@@ -193,11 +198,6 @@ class EmotionDetector(AnalysisMethod):
             "multiple_faces": "No",
             "no_faces": 0,
             "wears_mask": ["No"],
-            "age": [None],
-            "gender": [None],
-            "race": [None],
-            "emotion": [None],
-            "emotion (category)": [None],
         }
         return params
 
@@ -217,7 +217,7 @@ class EmotionDetector(AnalysisMethod):
         # for gender, age, ethnicity/race
         conditional_actions = {
             "all": ["age", "gender", "race", "emotion"],
-            "all_with_mask": ["age", "gender"],
+            "all_with_mask": ["age"],
             "restricted_access": ["emotion"],
             "restricted_access_with_mask": [],
         }
@@ -239,7 +239,8 @@ class EmotionDetector(AnalysisMethod):
 
     def _ensure_deepface_models(self):
         # Ensure that all data has been fetched by pooch
-        deepface_face_expression_model.get()
+        if "emotion" in self.actions:
+            deepface_face_expression_model.get()
         if "race" in self.actions:
             deepface_race_model.get()
         if "age" in self.actions:
@@ -249,7 +250,7 @@ class EmotionDetector(AnalysisMethod):
 
     def analyze_single_face(self, face: np.ndarray) -> dict:
         """
-        Analyzes the features of a single face.
+        Analyzes the features of a single face on the image.
 
         Args:
             face (np.ndarray): The face image array.
@@ -263,17 +264,15 @@ class EmotionDetector(AnalysisMethod):
         self._define_actions(fresult)
         self._ensure_deepface_models()
         # Run the full DeepFace analysis
-        fresult.update(
-            DeepFace.analyze(
-                img_path=face,
-                actions=self.actions,
-                prog_bar=False,
-                detector_backend="skip",
-            )
+        # this returns a list of dictionaries
+        # one dictionary per face that is detected in the image
+        # since we are only passing a subregion of the image
+        # that contains one face, the list will only contain one dict
+        fresult["result"] = DeepFace.analyze(
+            img_path=face,
+            actions=self.actions,
+            silent=True,
         )
-        # We remove the region, as the data is not correct - after all we are
-        # running the analysis on a subimage.
-        del fresult["region"]
         return fresult
 
     def facial_expression_analysis(self) -> dict:
@@ -294,10 +293,11 @@ class EmotionDetector(AnalysisMethod):
         faces = list(reversed(sorted(faces, key=lambda f: f.shape[0] * f.shape[1])))
         self.subdict["face"] = "Yes"
         self.subdict["multiple_faces"] = "Yes" if len(faces) > 1 else "No"
+        # number of faces only counted up to 15, after that set to 99
         self.subdict["no_faces"] = len(faces) if len(faces) <= 15 else 99
         # note number of faces being identified
+        # We limit ourselves to identify emotion on max three faces per image
         result = {"number_faces": len(faces) if len(faces) <= 3 else 3}
-        # We limit ourselves to three faces
         for i, face in enumerate(faces[:3]):
             result[f"person{i+1}"] = self.analyze_single_face(face)
         self.clean_subdict(result)
@@ -314,8 +314,8 @@ class EmotionDetector(AnalysisMethod):
         """
         # Each person subdict converted into list for keys
         self.subdict["wears_mask"] = []
-        self.subdict["emotion"] = []
-        self.subdict["emotion (category)"] = []
+        if "emotion" in self.actions:
+            self.subdict["emotion (category)"] = []
         for key in self.actions:
             self.subdict[key] = []
         # now iterate over the number of faces
@@ -328,32 +328,44 @@ class EmotionDetector(AnalysisMethod):
             person = "person{}".format(i + 1)
             wears_mask = result[person]["wears_mask"]
             self.subdict["wears_mask"].append("Yes" if wears_mask else "No")
+            # actually the actions dict should take care of
+            # the person wearing a mask or not
             for key in self.actions:
+                resultdict = result[person]["result"][0]
                 if key == "emotion":
-                    classified_emotion = result[person]["dominant_emotion"]
-                    confidence_value = result[person][key][classified_emotion]
+                    classified_emotion = resultdict["dominant_emotion"]
+                    confidence_value = resultdict[key][classified_emotion]
                     outcome = (
                         classified_emotion
                         if confidence_value > self.emotion_threshold and not wears_mask
                         else None
                     )
+                    print("emotion confidence", confidence_value, outcome)
                     # also set the emotion category
-                    self.emotion_categories[outcome]
-                    self.subdict["emotion (category)"].append(
-                        self.emotion_categories[outcome] if outcome else None
-                    )
+                    if outcome:
+                        self.subdict["emotion (category)"].append(
+                            self.emotion_categories[outcome]
+                        )
+                    else:
+                        self.subdict["emotion (category)"].append(None)
                 elif key == "race":
-                    classified_race = result[person]["dominant_race"]
-                    confidence_value = result[person][key][classified_race]
+                    classified_race = resultdict["dominant_race"]
+                    confidence_value = resultdict[key][classified_race]
                     outcome = (
                         classified_race
                         if confidence_value > self.race_threshold and not wears_mask
                         else None
                     )
                 elif key == "age":
-                    outcome = result[person]["age"] if not wears_mask else None
+                    outcome = resultdict[key]
                 elif key == "gender":
-                    outcome = result[person]["gender"] if not wears_mask else None
+                    classified_gender = resultdict["dominant_gender"]
+                    confidence_value = resultdict[key][classified_gender]
+                    outcome = (
+                        classified_gender
+                        if confidence_value > self.gender_threshold and not wears_mask
+                        else None
+                    )
                 self.subdict[key].append(outcome)
         return self.subdict
 
