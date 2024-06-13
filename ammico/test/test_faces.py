@@ -83,18 +83,30 @@ def test_ensure_deepface_models(monkeypatch):
 
 def test_analyse_faces(get_path, monkeypatch):
     mydict = {
-        "filename": get_path + "pexels-pixabay-415829.jpg",
+        # one face, no mask
+        "pexels-pixabay-415829": {"filename": get_path + "pexels-pixabay-415829.jpg"},
+        # two faces, no mask
+        "pexels-1000990-1954659": {"filename": get_path + "pexels-1000990-1954659.jpg"},
+        # one face, mask
+        "pexels-maksgelatin-4750169": {
+            "filename": get_path + "pexels-maksgelatin-4750169.jpg"
+        },
     }
     monkeypatch.setenv("OTHER_VAR", "True")
-    mydict.update(
-        fc.EmotionDetector(mydict, accept_disclosure="OTHER_VAR").analyse_image()
-    )
+    for key in mydict.keys():
+        mydict[key].update(
+            fc.EmotionDetector(
+                mydict[key], accept_disclosure="OTHER_VAR"
+            ).analyse_image()
+        )
 
     with open(get_path + "example_faces.json", "r") as file:
         out_dict = json.load(file)
-    # delete the filename key
-    mydict.pop("filename", None)
-    # do not test for age, as this is not a reliable metric
-    mydict.pop("age", None)
+
     for key in mydict.keys():
-        assert mydict[key] == out_dict[key]
+        # delete the filename key
+        mydict[key].pop("filename", None)
+        # do not test for age, as this is not a reliable metric
+        mydict[key].pop("age", None)
+        for subkey in mydict[key].keys():
+            assert mydict[key][subkey] == out_dict[key][subkey]

@@ -1,4 +1,6 @@
 {
+"pexels-pixabay-415829":
+        {
         "face": "Yes", 
         "multiple_faces": "No", 
         "no_faces": 1, 
@@ -7,4 +9,25 @@
         "race": ["asian"], 
         "emotion": ["happy"], 
         "emotion (category)": ["Positive"]
-}    
+        },
+"pexels-1000990-1954659":
+        {
+        "face": "Yes", 
+        "multiple_faces": "Yes", 
+        "no_faces": 2, 
+        "wears_mask": ["No", "No"],
+        "gender": ["Man", "Man"], 
+        "race": ["asian", "white"], 
+        "emotion": [null, "angry"], 
+        "emotion (category)": [null, "Negative"]
+        },
+"pexels-maksgelatin-4750169":
+        {
+        "face": "Yes", 
+        "multiple_faces": "No", 
+        "no_faces": 1, 
+        "wears_mask": ["Yes"]
+        }
+}
+
+  
