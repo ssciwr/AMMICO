@@ -156,7 +156,7 @@ def initialize_dict(filelist: list) -> dict:
     return mydict
 
 
-def check_for_missing_keys(mydict: dict) -> dict:
+def _check_for_missing_keys(mydict: dict) -> dict:
     """Check the nested dictionary for any missing keys in the subdicts.
 
     Args:
@@ -164,44 +164,23 @@ def check_for_missing_keys(mydict: dict) -> dict:
     Returns:
         dict: The dictionary with keys appended."""
     # check that we actually got a nested dict
-    if not isinstance(mydict[next(iter(mydict))], dict):
-        raise ValueError(
-            "Please provide a nested dictionary - you provided {}".format(
-                next(iter(mydict))
-            )
-        )
-    # gather all existing keys of first item in a list
-    subdict = mydict[next(iter(mydict))]
-    if len(list(subdict.keys())) < 1:
-        raise ValueError(
-            "Could not get any keys to compare to - please check if your nested dict is empty!"
-        )
+    # also get all keys for all items
+    # currently we go through the whole dictionary twice
+    # however, compared to the rest of the code this is negligible
+    keylist = []
     for key in mydict.keys():
-        # compare keys of next item with first item
-        if subdict.keys() != mydict[key].keys():
-            # print a warning if key is not found and set to None
-            keys_a = set(subdict.keys())
-            keys_b = set(mydict[key].keys())
-            missing_keys_in_b = keys_a - keys_b
-            if missing_keys_in_b:
-                print(
-                    "Found missing key(s) {} in subdict {} - setting to None.".format(
-                        missing_keys_in_b, key
-                    )
-                )
-                for missing_key in missing_keys_in_b:
-                    mydict[key][missing_key] = None
-            # check that there are no other keys in the subdicts -
-            # this would only happen if there is a key missing in the first subdict
-            # then we would need to start over so best to
-            # abort if this happens - this is a very unlikely case
-            missing_keys_in_a = keys_b - keys_a
-            if missing_keys_in_a:
-                raise ValueError(
-                    "Could not update missing keys - first item already missing {}".format(
-                        missing_keys_in_a
-                    )
-                )
+        if not isinstance(mydict[key], dict):
+            raise ValueError(
+                "Please provide a nested dictionary - you provided {}".format(key)
+            )
+        keylist.append(list(mydict[key].keys()))
+    # find the longest list of keys
+    max_keys = max(keylist, key=len)
+    # now generate missing keys
+    for key in mydict.keys():
+        for mkey in max_keys:
+            if mkey not in mydict[key].keys():
+                mydict[key][mkey] = None
     return mydict
 
 
@@ -223,7 +202,7 @@ def dump_df(mydict: dict) -> DataFrame:
 
 
 def get_dataframe(mydict: dict) -> DataFrame:
-    check_for_missing_keys(mydict)
+    _check_for_missing_keys(mydict)
     outdict = append_data_to_dict(mydict)
     return dump_df(outdict)
 

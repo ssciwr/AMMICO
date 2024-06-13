@@ -340,6 +340,7 @@ class EmotionDetector(AnalysisMethod):
                         if confidence_value > self.emotion_threshold and not wears_mask
                         else None
                     )
+                    print("emotion confidence", confidence_value, outcome)
                     # also set the emotion category
                     if outcome:
                         self.subdict["emotion (category)"].append(

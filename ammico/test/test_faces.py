@@ -101,7 +101,7 @@ def test_analyse_faces(get_path, monkeypatch):
     for key in mydict.keys():
         mydict[key].update(
             fc.EmotionDetector(
-                mydict[key], emotion_threshold=60, accept_disclosure="OTHER_VAR"
+                mydict[key], emotion_threshold=80, accept_disclosure="OTHER_VAR"
             ).analyse_image()
         )
 

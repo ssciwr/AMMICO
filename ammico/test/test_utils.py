@@ -90,30 +90,19 @@ def test_check_for_missing_keys():
         "file2": {"faces": "No", "text_english": "Otherthing"},
     }
     # check that dict is not changed
-    mydict2 = ut.check_for_missing_keys(mydict)
+    mydict2 = ut._check_for_missing_keys(mydict)
     assert mydict2 == mydict
     # check that dict is updated if key is missing
     mydict = {
         "file1": {"faces": "Yes", "text_english": "Something"},
         "file2": {"faces": "No"},
     }
-    mydict2 = ut.check_for_missing_keys(mydict)
+    mydict2 = ut._check_for_missing_keys(mydict)
     assert mydict2["file2"] == {"faces": "No", "text_english": None}
     # check that dict is updated if more than one key is missing
     mydict = {"file1": {"faces": "Yes", "text_english": "Something"}, "file2": {}}
-    mydict2 = ut.check_for_missing_keys(mydict)
+    mydict2 = ut._check_for_missing_keys(mydict)
     assert mydict2["file2"] == {"faces": None, "text_english": None}
-    # now test the exceptions
-    with pytest.raises(ValueError):
-        ut.check_for_missing_keys({"File": "path"})
-    with pytest.raises(ValueError):
-        ut.check_for_missing_keys({"File": {}})
-    mydict = {
-        "file1": {"faces": "Yes"},
-        "file2": {"faces": "No", "text_english": "Something"},
-    }
-    with pytest.raises(ValueError):
-        ut.check_for_missing_keys(mydict)
 
 
 def test_append_data_to_dict(get_path):

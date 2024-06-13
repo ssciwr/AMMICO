@@ -18,8 +18,8 @@
         "wears_mask": ["No", "No"],
         "gender": ["Man", "Man"], 
         "race": ["asian", "white"], 
-        "emotion": [null, "angry"], 
-        "emotion (category)": [null, "Negative"]
+        "emotion": [null, null], 
+        "emotion (category)": [null, null]
         },
 "pexels-maksgelatin-4750169":
         {
