@@ -47,7 +47,7 @@ dependencies = [
     "setuptools",
     "spacy",
     "tensorflow>=2.13.0",
-    "torch<2.4.0",
+    "torch<2.5.0",
     "transformers",
     "google-cloud-vision",
     "dash_bootstrap_components",
