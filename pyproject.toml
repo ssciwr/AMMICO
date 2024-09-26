@@ -32,6 +32,7 @@ dependencies = [
     "importlib_metadata",
     "importlib_resources",
     "ipython",
+    "jupyter",
     "jupyter_dash",
     "matplotlib",
     "numpy<=1.23.4",
