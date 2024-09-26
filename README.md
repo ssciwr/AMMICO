@@ -5,6 +5,7 @@
 ![codecov](https://img.shields.io/codecov/c/github/ssciwr/AMMICO)
 ![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ssciwr_ammico&metric=alert_status)
 ![Language](https://img.shields.io/github/languages/top/ssciwr/AMMICO)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb)
 
 This package extracts data from images such as social media posts that contain an image part and a text part. The analysis can generate a very large number of features, depending on the user input. See [our paper](https://dx.doi.org/10.31235/osf.io/v8txj) for a more in-depth description.
 
@@ -104,14 +105,14 @@ Be careful, it requires around 7 GB of disk space.
 
 ## Usage
 
-The main demonstration notebook can be found in the `notebooks` folder and also on [google colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb).
+The main demonstration notebook can be found in the `notebooks` folder and also on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)].
 
 There are further sample notebooks in the `notebooks` folder for the more experimental features:
 1. Topic analysis: Use the notebook `get-text-from-image.ipynb` to analyse the topics of the extraced text.\
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/get-text-from-image.ipynb)**  
+**You can run this notebook on google colab: [![Open In Colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.
 1. To crop social media posts use the `cropposts.ipynb` notebook. 
-**You can run this notebook on google colab: [Here](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/cropposts.ipynb)**
+**You can run this notebook on google colab: [![Open In Colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/cropposts.ipynb)**
 
 ## Features
 ### Text extraction
