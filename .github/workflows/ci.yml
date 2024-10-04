@@ -36,9 +36,9 @@ jobs:
         sudo apt-get install libopenblas-dev meson
     - name: Install dependencies
       run: |
-        # pip install -e .
-        python -m pip install uv
-        uv pip install --system -e .
+        pip install -e .
+        # python -m pip install uv
+        # uv pip install --system -e .
     - name: Run pytest test_colors
       run: |
         cd ammico
