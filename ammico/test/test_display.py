@@ -43,6 +43,7 @@ def test_AnalysisExplorer(get_AE, get_options):
 
 
 def test_right_output_analysis_summary(get_AE, get_options, monkeypatch):
+    monkeypatch.setenv("SOME_VAR", "True")
     monkeypatch.setenv("OTHER_VAR", "True")
     get_AE._right_output_analysis(
         2,
@@ -52,6 +53,7 @@ def test_right_output_analysis_summary(get_AE, get_options, monkeypatch):
         True,
         None,
         None,
+        "SOME_VAR",
         50,
         50,
         50,
@@ -64,6 +66,7 @@ def test_right_output_analysis_summary(get_AE, get_options, monkeypatch):
 
 
 def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
+    monkeypatch.setenv("SOME_VAR", "True")
     monkeypatch.setenv("OTHER_VAR", "True")
     get_AE._right_output_analysis(
         2,
@@ -73,6 +76,7 @@ def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
         True,
         None,
         None,
+        "SOME_VAR",
         50,
         50,
         50,

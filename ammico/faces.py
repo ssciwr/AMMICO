@@ -79,6 +79,19 @@ retinaface_model = DownloadResource(
     ),
 )
 
+ETHICAL_STATEMENT = """This analysis uses the DeepFace and RetinaFace libraries.
+    DeepFace and RetinaFace provide wrappers to trained models in face recognition and
+    emotion detection. Age, gender and race / ethnicity models were trained
+    on the backbone of VGG-Face with transfer learning.
+    ETHICAL DISCLOSURE STATEMENT:
+    The Emotion Detector uses RetinaFace to probabilistically assess the gender, age and
+    race of the detected faces. Such assessments may not reflect how the individuals
+    identify. Additionally, the classification is carried
+    out in simplistic categories and contains only the most basic classes, for example
+    “male” and “female” for gender. By continuing to use the tool, you certify that you
+    understand the ethical implications such assessments have for the interpretation of
+    the results."""
+
 
 def ethical_disclosure(accept_disclosure: str = "DISCLOSURE_AMMICO"):
     """
@@ -106,22 +119,7 @@ def _ask_for_disclosure_acceptance(accept_disclosure: str = "DISCLOSURE_AMMICO")
     """
     Asks the user to accept the disclosure.
     """
-    print("This analysis uses the DeepFace and RetinaFace libraries.")
-    print(
-        """
-        DeepFace and RetinaFace provide wrappers to trained models in face recognition and
-        emotion detection. Age, gender and race / ethnicity models were trained
-        on the backbone of VGG-Face with transfer learning.
-        ETHICAL DISCLOSURE STATEMENT:
-        The Emotion Detector uses RetinaFace to probabilistically assess the gender, age and
-        race of the detected faces. Such assessments may not reflect how the individuals
-        identified by the tool view themselves. Additionally, the classification is carried
-        out in simplistic categories and contains only the most basic classes, for example
-        “male” and “female” for gender. By continuing to use the tool, you certify that you
-        understand the ethical implications such assessments have for the interpretation of
-        the results.
-        """
-    )
+    print(ETHICAL_STATEMENT)
     answer = input("Do you accept the disclosure? (yes/no): ")
     answer = answer.lower().strip()
     if answer == "yes":
