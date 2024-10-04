@@ -33,7 +33,7 @@ jobs:
       if: matrix.os == 'ubuntu-22.04'
       run: |
         sudo apt-get install libopenblas-dev
-    - name: install openblas on windows:
+    - name: install openblas on windows
       if: matrix.os == 'windows-latest'
       run: |
         choco install openblas
