@@ -28,9 +28,17 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install ffmpeg
+        brew install openblas
+    - name: install openblas on linux
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        sudo apt-get install libopenblas-dev
+    - name: install openblas on windows:
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install openblas
     - name: Install dependencies
       run: |
-        apt install libopenblas-dev  # for scipy
         pip install -e .
     - name: Run pytest test_colors
       run: |
