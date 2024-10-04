@@ -30,6 +30,7 @@ jobs:
         brew install ffmpeg
     - name: Install dependencies
       run: |
+        apt install libopenblas-dev  # for scipy
         pip install -e .
     - name: Run pytest test_colors
       run: |
