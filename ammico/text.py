@@ -10,15 +10,13 @@ import pandas as pd
 from bertopic import BERTopic
 from transformers import pipeline
 
-PRIVACY_STATEMENT = """PRIVACY STATEMENT: The Text Detector uses Google Services
-    for text extraction and translation, and requires a Google Cloud Vision API Key
-    to work. Instructions about how to get such a key are provided here:
-    https://ssciwr.github.io/AMMICO/build/html/notebooks/DemoNotebook_
-    ammico.html#Step-0:-Create-and-set-a-Google-Cloud-Vision-Key.
-    Google's privacy policy can be read here:
-    https://policies.google.com/privacy. By continuing to use this Detector,
-    you agree to send the data you want analyzed to the Google servers for
-    extraction and translation. """
+PRIVACY_STATEMENT = """The Text Detector uses Google Cloud Vision
+    and Google Translate. Detailed information about how information
+    is being processed is provided here:
+    https://ssciwr.github.io/AMMICO/build/html/readme_link.html#faq.
+    Google’s privacy policy can be read here: https://policies.google.com/privacy.
+    By continuing to use this Detector, you agree to send the data you want analyzed
+    to the Google servers for extraction and translation."""
 
 
 def privacy_disclosure(accept_privacy: str = "PRIVACY_AMMICO"):
