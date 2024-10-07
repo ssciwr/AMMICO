@@ -22,41 +22,19 @@ classifiers = [
 ]
 
 dependencies = [
-    "bertopic<=0.14.1",
-    "dash>=2.11.0",
-    "datasets",
-    "deepface<=0.0.92",
-    "googletrans==4.0.0rc1",
-    "google-cloud-vision",
-    "grpcio",
-    "importlib_metadata",
-    "importlib_resources",
     "ipython",
     "jupyter",
-    "jupyter_dash",
     "matplotlib",
     "numpy<=1.23.4",
     "pandas",
-    "Pillow",
-    "pooch",
-    "protobuf",
     "pytest",
     "pytest-cov",
-    "Requests",
-    "retina_face",
     "ammico-lavis>=1.0.2.3",
     "setuptools",
-    "spacy",
     "tensorflow>=2.13.0",
     "torch<2.4.0",
     "transformers",
-    "google-cloud-vision",
-    "dash_bootstrap_components",
-    "colorgram.py",
-    "webcolors>1.13",
-    "colour-science",
     "scikit-learn>1.3.0",
-    "tqdm"
 ]
 
 [project.scripts]
