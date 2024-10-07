@@ -1,8 +1,6 @@
 [build-system]
-requires = [
-    "setuptools>=61",
-]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "ammico"
@@ -30,7 +28,6 @@ dependencies = [
     "pytest",
     "pytest-cov",
     "ammico-lavis>=1.0.2.3",
-    "setuptools",
     "tensorflow>=2.13.0",
     "torch<2.4.0",
     "transformers",
