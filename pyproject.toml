@@ -47,6 +47,7 @@ dependencies = [
     "setuptools",
     "spacy<=3.7.5",
     "tensorflow>=2.13.0",
+    "tf-keras",
     "torch<2.4.0",
     "transformers",
     "google-cloud-vision",
