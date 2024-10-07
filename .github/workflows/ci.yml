@@ -32,6 +32,7 @@ jobs:
       run: |
         # python -m pip install uv
         pip install -e .
+        pip install tf-keras
         # uv pip install --system -e .
     - name: Run pytest test_colors
       run: |
