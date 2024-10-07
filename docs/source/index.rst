@@ -11,6 +11,7 @@ Welcome to AMMICO's documentation!
    :caption: Contents:
 
    readme_link
+   faq_link
    create_API_key_link
    notebooks/DemoNotebook_ammico
    notebooks/Example cropposts
