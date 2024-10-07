@@ -8,7 +8,7 @@ from ammico.display import AnalysisExplorer
 from ammico.faces import EmotionDetector, ethical_disclosure
 from ammico.multimodal_search import MultimodalSearch
 from ammico.summary import SummaryDetector
-from ammico.text import TextDetector, TextAnalyzer, PostprocessText
+from ammico.text import TextDetector, TextAnalyzer, PostprocessText, privacy_disclosure
 from ammico.utils import find_files, get_dataframe
 
 # Export the version defined in project metadata
@@ -28,4 +28,5 @@ __all__ = [
     "find_files",
     "get_dataframe",
     "ethical_disclosure",
+    "privacy_disclosure",
 ]

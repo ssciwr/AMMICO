@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04,windows-latest,macos-latest]
+        os: [ubuntu-24.04,windows-latest,macos-latest]
         python-version: [3.11]
     steps:
     - name: Checkout repository
@@ -30,8 +30,8 @@ jobs:
         brew install ffmpeg
     - name: Install dependencies
       run: |
-        # python -m pip install uv
         pip install -e .
+        # python -m pip install uv
         # uv pip install --system -e .
     - name: Run pytest test_colors
       run: |
@@ -62,7 +62,7 @@ jobs:
         cd ammico
         python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
     - name: Clear cache ubuntu 2
-      if: matrix.os == 'ubuntu-22.04'
+      if: matrix.os == 'ubuntu-24.04'
       run: |
           rm -rf ~/.cache/*
     - name: Run pytest test_text
@@ -74,7 +74,7 @@ jobs:
         cd ammico
         python -m pytest test/test_utils.py -svv --cov=. --cov-report=xml --cov-append
     - name: Upload coverage
-      if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.9'
+      if: matrix.os == 'ubuntu-24.04' && matrix.python-version == '3.11'
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
