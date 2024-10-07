@@ -44,7 +44,7 @@ dependencies = [
     "retina_face",
     "ammico-lavis>=1.0.2.3",
     "setuptools",
-    "spacy",
+    "spacy<=3.7.5",
     "tensorflow>=2.13.0",
     "torch<2.4.0",
     "transformers",
