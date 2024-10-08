@@ -98,7 +98,9 @@ Some features of ammico require internet access; a general answer to this questi
 Due to well documented biases in the detection of minorities with computer vision tools, and to the ethical implications of such detection, these parts of the tool are not directly made available to users. To access these capabilities, users must first agree with a ethical disclosure statement that reads: 
 
 "DeepFace and RetinaFace provide wrappers to trained models in face recognition and emotion detection. Age, gender and race/ethnicity models were trained on the backbone of VGG-Face with transfer learning.
+  
 ETHICAL DISCLOSURE STATEMENT:
+  
 The Emotion Detector uses DeepFace and RetinaFace to probabilistically assess the gender, age and race of the detected faces. Such assessments may not reflect how the individuals identify. Additionally, the classification is carried out in simplistic categories and contains only the most basic classes (for example, “male” and “female” for gender, and seven non-overlapping categories for ethnicity). To access these probabilistic assessments, you must therefore agree with the following statement: “I understand the ethical and privacy implications such assessments have for the interpretation of the results and that this analysis may result in personal and possibly sensitive data, and I wish to proceed.” 
 
 This disclosure statement is included as a separate line of code early in the flow of the Emotion Detector. Once the user has agreed with the statement, further data analyses will also include these assessments. 

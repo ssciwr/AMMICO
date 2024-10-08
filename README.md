@@ -39,22 +39,22 @@ The `AMMICO` package can be installed using pip:
 ```
 pip install ammico
 ```
-This will install the package and its dependencies locally. If after installation you get some errors when running some modules, please follow the instructions in the [FAQ](FAQ.md). 
+This will install the package and its dependencies locally. If after installation you get some errors when running some modules, please follow the instructions in the [FAQ](https://ssciwr.github.io/AMMICO/build/html/faq_link.html). 
 
 ## Usage
 
-The main demonstration notebook can be found in the `notebooks` folder and also on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)].
+The main demonstration notebook can be found in the `notebooks` folder and also on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb).
 
 There are further sample notebooks in the `notebooks` folder for the more experimental features:
 1. Topic analysis: Use the notebook `get-text-from-image.ipynb` to analyse the topics of the extraced text.\
-**You can run this notebook on google colab: [![Open In Colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/get-text-from-image.ipynb)**  
+**You can run this notebook on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/get-text-from-image.ipynb)**  
 Place the data files and google cloud vision API key in your google drive to access the data.
 1. To crop social media posts use the `cropposts.ipynb` notebook. 
-**You can run this notebook on google colab: [![Open In Colab](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/cropposts.ipynb)**
+**You can run this notebook on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/cropposts.ipynb)**
 
 ## Features
 ### Text extraction
-The text is extracted from the images using [google-cloud-vision](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website or as described [here](docs/source/set_up_credentials.md).
+The text is extracted from the images using [google-cloud-vision](https://cloud.google.com/vision). For this, you need an API key. Set up your google account following the instructions on the google Vision AI website or as described [here](https://ssciwr.github.io/AMMICO/build/html/create_API_key_link.html).
 You then need to export the location of the API key as an environment variable:
 ```
 export GOOGLE_APPLICATION_CREDENTIALS="location of your .json"
