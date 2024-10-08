@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath("../../ammico/"))
 project = "AMMICO"
 copyright = "2022, Scientific Software Center, Heidelberg University"
 author = "Scientific Software Center, Heidelberg University"
-release = "0.0.1"
+release = "0.2.2"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -31,7 +31,7 @@ html_context = {
     "github_user": "ssciwr",  # Username
     "github_repo": "AMMICO",  # Repo name
     "github_version": "main",  # Version
-    "conf_py_path": "/source/",  # Path in the checkout to the docs root
+    "conf_py_path": "/docs/source/",  # Path in the checkout to the docs root
 }
 
 templates_path = ["_templates"]
