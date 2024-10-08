@@ -13,8 +13,6 @@ from IPython.display import display
 from lavis.models import load_model_and_preprocess, load_model, BlipBase
 from lavis.processors import load_processor
 
-# import safetensors
-
 
 class MultimodalSearch(AnalysisMethod):
     def __init__(self, subdict: dict) -> None:
@@ -289,7 +287,6 @@ class MultimodalSearch(AnalysisMethod):
         Returns:
             features_image_stacked (torch.Tensor): tensors of images features.
         """
-        # features_image_stacked = safetensors.torch.load_model(name, weights_only=True)
         features_image_stacked = torch.load(name, weights_only=True)
         return features_image_stacked
 
