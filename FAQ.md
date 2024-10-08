@@ -99,7 +99,7 @@ Due to well documented biases in the detection of minorities with computer visio
 
 "DeepFace and RetinaFace provide wrappers to trained models in face recognition and emotion detection. Age, gender and race/ethnicity models were trained on the backbone of VGG-Face with transfer learning.
   
-ETHICAL DISCLOSURE STATEMENT:
+ETHICAL DISCLOSURE STATEMENT:  
   
 The Emotion Detector uses DeepFace and RetinaFace to probabilistically assess the gender, age and race of the detected faces. Such assessments may not reflect how the individuals identify. Additionally, the classification is carried out in simplistic categories and contains only the most basic classes (for example, “male” and “female” for gender, and seven non-overlapping categories for ethnicity). To access these probabilistic assessments, you must therefore agree with the following statement: “I understand the ethical and privacy implications such assessments have for the interpretation of the results and that this analysis may result in personal and possibly sensitive data, and I wish to proceed.” 
 
