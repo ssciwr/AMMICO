@@ -287,7 +287,7 @@ class MultimodalSearch(AnalysisMethod):
         Returns:
             features_image_stacked (torch.Tensor): tensors of images features.
         """
-        features_image_stacked = torch.load(name)
+        features_image_stacked = torch.load(name, weights_only=True)
         return features_image_stacked
 
     def extract_text_features(self, model, text_input: str) -> torch.Tensor:

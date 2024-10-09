@@ -24,9 +24,34 @@ def set_testdict(get_path):
 LANGUAGES = ["de", "en", "en"]
 
 
-def test_TextDetector(set_testdict):
+@pytest.fixture
+def accepted(monkeypatch):
+    monkeypatch.setenv("OTHER_VAR", "True")
+    tt.TextDetector({}, accept_privacy="OTHER_VAR")
+    return "OTHER_VAR"
+
+
+def test_privacy_statement(monkeypatch):
+    # test pre-set variables: privacy
+    monkeypatch.delattr("builtins.input", raising=False)
+    monkeypatch.setenv("OTHER_VAR", "something")
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, accept_privacy="OTHER_VAR")
+    monkeypatch.setenv("OTHER_VAR", "False")
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, accept_privacy="OTHER_VAR")
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, accept_privacy="OTHER_VAR").get_text_from_image()
+    with pytest.raises(ValueError):
+        tt.TextDetector({}, accept_privacy="OTHER_VAR").translate_text()
+    monkeypatch.setenv("OTHER_VAR", "True")
+    pd = tt.TextDetector({}, accept_privacy="OTHER_VAR")
+    assert pd.accepted
+
+
+def test_TextDetector(set_testdict, accepted):
     for item in set_testdict:
-        test_obj = tt.TextDetector(set_testdict[item])
+        test_obj = tt.TextDetector(set_testdict[item], accept_privacy=accepted)
         assert not test_obj.analyse_text
         assert not test_obj.skip_extraction
         assert test_obj.subdict["filename"] == set_testdict[item]["filename"]
@@ -39,17 +64,21 @@ def test_TextDetector(set_testdict):
         assert test_obj.revision_summary == "a4f8f3e"
         assert test_obj.revision_sentiment == "af0f99b"
         assert test_obj.revision_ner == "f2482bf"
-    test_obj = tt.TextDetector({}, analyse_text=True, skip_extraction=True)
+    test_obj = tt.TextDetector(
+        {}, analyse_text=True, skip_extraction=True, accept_privacy=accepted
+    )
     assert test_obj.analyse_text
     assert test_obj.skip_extraction
     with pytest.raises(ValueError):
-        tt.TextDetector({}, analyse_text=1.0)
+        tt.TextDetector({}, analyse_text=1.0, accept_privacy=accepted)
     with pytest.raises(ValueError):
-        tt.TextDetector({}, skip_extraction=1.0)
+        tt.TextDetector({}, skip_extraction=1.0, accept_privacy=accepted)
 
 
-def test_run_spacy(set_testdict, get_path):
-    test_obj = tt.TextDetector(set_testdict["IMG_3755"], analyse_text=True)
+def test_run_spacy(set_testdict, get_path, accepted):
+    test_obj = tt.TextDetector(
+        set_testdict["IMG_3755"], analyse_text=True, accept_privacy=accepted
+    )
     ref_file = get_path + "text_IMG_3755.txt"
     with open(ref_file, "r") as file:
         reference_text = file.read()
@@ -58,18 +87,18 @@ def test_run_spacy(set_testdict, get_path):
     assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
 
 
-def test_clean_text(set_testdict):
+def test_clean_text(set_testdict, accepted):
     nlp = spacy.load("en_core_web_md")
     doc = nlp("I like cats and fjejg")
-    test_obj = tt.TextDetector(set_testdict["IMG_3755"])
+    test_obj = tt.TextDetector(set_testdict["IMG_3755"], accept_privacy=accepted)
     test_obj.doc = doc
     test_obj.clean_text()
     result = "I like cats and"
     assert test_obj.subdict["text_clean"] == result
 
 
-def test_init_revision_numbers_and_models():
-    test_obj = tt.TextDetector({})
+def test_init_revision_numbers_and_models(accepted):
+    test_obj = tt.TextDetector({}, accept_privacy=accepted)
     # check the default options
     assert test_obj.model_summary == "sshleifer/distilbart-cnn-12-6"
     assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
@@ -79,7 +108,7 @@ def test_init_revision_numbers_and_models():
     assert test_obj.revision_ner == "f2482bf"
     # provide non-default options
     model_names = ["facebook/bart-large-cnn", None, None]
-    test_obj = tt.TextDetector({}, model_names=model_names)
+    test_obj = tt.TextDetector({}, model_names=model_names, accept_privacy=accepted)
     assert test_obj.model_summary == "facebook/bart-large-cnn"
     assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
     assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
@@ -91,6 +120,7 @@ def test_init_revision_numbers_and_models():
         {},
         model_names=model_names,
         revision_numbers=revision_numbers,
+        accept_privacy=accepted,
     )
     assert test_obj.model_summary == "facebook/bart-large-cnn"
     assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
@@ -100,30 +130,32 @@ def test_init_revision_numbers_and_models():
     assert test_obj.revision_ner == "f2482bf"
     # now test the exceptions
     with pytest.raises(ValueError):
-        tt.TextDetector({}, analyse_text=1.0)
+        tt.TextDetector({}, analyse_text=1.0, accept_privacy=accepted)
     with pytest.raises(ValueError):
-        tt.TextDetector({}, model_names=1.0)
+        tt.TextDetector({}, model_names=1.0, accept_privacy=accepted)
     with pytest.raises(ValueError):
-        tt.TextDetector({}, revision_numbers=1.0)
+        tt.TextDetector({}, revision_numbers=1.0, accept_privacy=accepted)
     with pytest.raises(ValueError):
-        tt.TextDetector({}, model_names=["something"])
+        tt.TextDetector({}, model_names=["something"], accept_privacy=accepted)
     with pytest.raises(ValueError):
-        tt.TextDetector({}, revision_numbers=["something"])
+        tt.TextDetector({}, revision_numbers=["something"], accept_privacy=accepted)
 
 
 @pytest.mark.gcv
-def test_analyse_image(set_testdict, set_environ):
+def test_analyse_image(set_testdict, set_environ, accepted):
     for item in set_testdict:
-        test_obj = tt.TextDetector(set_testdict[item])
+        test_obj = tt.TextDetector(set_testdict[item], accept_privacy=accepted)
         test_obj.analyse_image()
-        test_obj = tt.TextDetector(set_testdict[item], analyse_text=True)
+        test_obj = tt.TextDetector(
+            set_testdict[item], analyse_text=True, accept_privacy=accepted
+        )
         test_obj.analyse_image()
 
 
 @pytest.mark.gcv
-def test_get_text_from_image(set_testdict, get_path, set_environ):
+def test_get_text_from_image(set_testdict, get_path, set_environ, accepted):
     for item in set_testdict:
-        test_obj = tt.TextDetector(set_testdict[item])
+        test_obj = tt.TextDetector(set_testdict[item], accept_privacy=accepted)
         test_obj.get_text_from_image()
         ref_file = get_path + "text_" + item + ".txt"
         with open(ref_file, "r", encoding="utf8") as file:
@@ -131,9 +163,9 @@ def test_get_text_from_image(set_testdict, get_path, set_environ):
         assert test_obj.subdict["text"].replace("\n", " ") == reference_text
 
 
-def test_translate_text(set_testdict, get_path):
+def test_translate_text(set_testdict, get_path, accepted):
     for item, lang in zip(set_testdict, LANGUAGES):
-        test_obj = tt.TextDetector(set_testdict[item])
+        test_obj = tt.TextDetector(set_testdict[item], accept_privacy=accepted)
         ref_file = get_path + "text_" + item + ".txt"
         trans_file = get_path + "text_translated_" + item + ".txt"
         with open(ref_file, "r", encoding="utf8") as file:
@@ -148,8 +180,8 @@ def test_translate_text(set_testdict, get_path):
             assert word in translated_text
 
 
-def test_remove_linebreaks():
-    test_obj = tt.TextDetector({})
+def test_remove_linebreaks(accepted):
+    test_obj = tt.TextDetector({}, accept_privacy=accepted)
     test_obj.subdict["text"] = "This is \n a test."
     test_obj.subdict["text_english"] = "This is \n another\n test."
     test_obj.remove_linebreaks()
@@ -157,9 +189,9 @@ def test_remove_linebreaks():
     assert test_obj.subdict["text_english"] == "This is   another  test."
 
 
-def test_text_summary(get_path):
+def test_text_summary(get_path, accepted):
     mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True)
+    test_obj = tt.TextDetector(mydict, analyse_text=True, accept_privacy=accepted)
     ref_file = get_path + "example_summary.txt"
     with open(ref_file, "r", encoding="utf8") as file:
         reference_text = file.read()
@@ -169,18 +201,18 @@ def test_text_summary(get_path):
     assert mydict["text_summary"] == reference_summary
 
 
-def test_text_sentiment_transformers():
+def test_text_sentiment_transformers(accepted):
     mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True)
+    test_obj = tt.TextDetector(mydict, analyse_text=True, accept_privacy=accepted)
     mydict["text_english"] = "I am happy that the CI is working again."
     test_obj.text_sentiment_transformers()
     assert mydict["sentiment"] == "POSITIVE"
     assert mydict["sentiment_score"] == pytest.approx(0.99, 0.02)
 
 
-def test_text_ner():
+def test_text_ner(accepted):
     mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True)
+    test_obj = tt.TextDetector(mydict, analyse_text=True, accept_privacy=accepted)
     mydict["text_english"] = "Bill Gates was born in Seattle."
     test_obj.text_ner()
     assert mydict["entity"] == ["Bill Gates", "Seattle"]

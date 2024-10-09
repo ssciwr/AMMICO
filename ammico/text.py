@@ -3,11 +3,65 @@ from google.auth.exceptions import DefaultCredentialsError
 from googletrans import Translator
 import spacy
 import io
+import os
 from ammico.utils import AnalysisMethod
 import grpc
 import pandas as pd
 from bertopic import BERTopic
 from transformers import pipeline
+
+PRIVACY_STATEMENT = """The Text Detector uses Google Cloud Vision
+    and Google Translate. Detailed information about how information
+    is being processed is provided here:
+    https://ssciwr.github.io/AMMICO/build/html/faq_link.html.
+    Google’s privacy policy can be read here: https://policies.google.com/privacy.
+    By continuing to use this Detector, you agree to send the data you want analyzed
+    to the Google servers for extraction and translation."""
+
+
+def privacy_disclosure(accept_privacy: str = "PRIVACY_AMMICO"):
+    """
+    Asks the user to accept the privacy statement.
+
+    Args:
+        accept_privacy (str): The name of the disclosure variable (default: "PRIVACY_AMMICO").
+    """
+    if not os.environ.get(accept_privacy):
+        accepted = _ask_for_privacy_acceptance(accept_privacy)
+    elif os.environ.get(accept_privacy) == "False":
+        accepted = False
+    elif os.environ.get(accept_privacy) == "True":
+        accepted = True
+    else:
+        print(
+            "Could not determine privacy disclosure - skipping \
+              text detection and translation."
+        )
+        accepted = False
+    return accepted
+
+
+def _ask_for_privacy_acceptance(accept_privacy: str = "PRIVACY_AMMICO"):
+    """
+    Asks the user to accept the disclosure.
+    """
+    print(PRIVACY_STATEMENT)
+    answer = input("Do you accept the privacy disclosure? (yes/no): ")
+    answer = answer.lower().strip()
+    if answer == "yes":
+        print("You have accepted the privacy disclosure.")
+        print("""Text detection and translation will be performed.""")
+        os.environ[accept_privacy] = "True"
+        accepted = True
+    elif answer == "no":
+        print("You have not accepted the privacy disclosure.")
+        print("No text detection and translation will be performed.")
+        os.environ[accept_privacy] = "False"
+        accepted = False
+    else:
+        print("Please answer with yes or no.")
+        accepted = _ask_for_privacy_acceptance()
+    return accepted
 
 
 class TextDetector(AnalysisMethod):
@@ -18,6 +72,7 @@ class TextDetector(AnalysisMethod):
         skip_extraction: bool = False,
         model_names: list = None,
         revision_numbers: list = None,
+        accept_privacy: str = "PRIVACY_AMMICO",
     ) -> None:
         """Init text detection class.
 
@@ -41,6 +96,9 @@ class TextDetector(AnalysisMethod):
                 Defaults to None, except if the default models are used; then it defaults to
                 "a4f8f3e" (summary, distilbart), "af0f99b" (sentiment, distilbert),
                 "f2482bf" (NER, bert).
+            accept_privacy (str, optional): Environment variable to accept the privacy
+                statement for the Google Cloud processing of the data. Defaults to
+                "PRIVACY_AMMICO".
         """
         super().__init__(subdict)
         # disable this for now
@@ -48,6 +106,11 @@ class TextDetector(AnalysisMethod):
         # the reason is that they are inconsistent depending on the selected
         # options, and also this may not be really necessary and rather restrictive
         # self.subdict.update(self.set_keys())
+        self.accepted = privacy_disclosure(accept_privacy)
+        if not self.accepted:
+            raise ValueError(
+                "Privacy disclosure not accepted - skipping text detection."
+            )
         self.translator = Translator()
         if not isinstance(analyse_text, bool):
             raise ValueError("analyse_text needs to be set to true or false")
@@ -186,6 +249,10 @@ class TextDetector(AnalysisMethod):
 
     def get_text_from_image(self):
         """Detect text on the image using Google Cloud Vision API."""
+        if not self.accepted:
+            raise ValueError(
+                "Privacy disclosure not accepted - skipping text detection."
+            )
         path = self.subdict["filename"]
         try:
             client = vision.ImageAnnotatorClient()
@@ -221,6 +288,10 @@ class TextDetector(AnalysisMethod):
 
     def translate_text(self):
         """Translate the detected text to English using the Translator object."""
+        if not self.accepted:
+            raise ValueError(
+                "Privacy disclosure not accepted - skipping text translation."
+            )
         translated = self.translator.translate(self.subdict["text"])
         self.subdict["text_language"] = translated.src
         self.subdict["text_english"] = translated.text

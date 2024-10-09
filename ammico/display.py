@@ -99,6 +99,7 @@ class AnalysisExplorer:
             State("setting_Text_analyse_text", "value"),
             State("setting_Text_model_names", "value"),
             State("setting_Text_revision_numbers", "value"),
+            State("setting_privacy_env_var", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
             State("setting_Emotion_gender_threshold", "value"),
@@ -171,7 +172,24 @@ class AnalysisExplorer:
                                 id="setting_Text_analyse_text",
                                 style={"margin-bottom": "10px"},
                             ),
-                        ),  # row 1
+                        ),
+                        # row 1
+                        dbc.Row(
+                            dbc.Col(
+                                [
+                                    html.P(
+                                        "Privacy disclosure acceptance environment variable"
+                                    ),
+                                    dcc.Input(
+                                        type="text",
+                                        value="PRIVACY_AMMICO",
+                                        id="setting_privacy_env_var",
+                                        style={"width": "100%"},
+                                    ),
+                                ],
+                                align="start",
+                            ),
+                        ),
                         # text row 2
                         dbc.Row(
                             [
@@ -469,6 +487,7 @@ class AnalysisExplorer:
         settings_text_analyse_text: list,
         settings_text_model_names: str,
         settings_text_revision_numbers: str,
+        setting_privacy_env_var: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
         setting_emotion_gender_threshold: int,
@@ -520,6 +539,11 @@ class AnalysisExplorer:
                     [settings_text_revision_numbers]
                     if (settings_text_revision_numbers is not None)
                     else None
+                ),
+                accept_privacy=(
+                    setting_privacy_env_var
+                    if setting_privacy_env_var
+                    else "PRIVACY_AMMICO"
                 ),
             )
         elif detector_value == "EmotionDetector":
