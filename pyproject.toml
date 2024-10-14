@@ -23,7 +23,7 @@ dependencies = [
     "bertopic<=0.14.1",
     "dash>=2.11.0",
     "datasets",
-    "deepface<=0.0.92",
+    "deepface<=0.0.93",
     "googletrans==4.0.0rc1",
     "google-cloud-vision",
     "grpcio",
