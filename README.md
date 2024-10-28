@@ -1,4 +1,4 @@
-# AMMICO - AI Media and Misinformation Content Analysis Tool
+# AMMICO - AI-based Media and Misinformation Content Analysis Tool
 
 ![License: MIT](https://img.shields.io/github/license/ssciwr/AMMICO)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ssciwr/AMMICO/ci.yml?branch=main)
