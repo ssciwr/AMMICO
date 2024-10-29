@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "bertopic<=0.14.1",
+    "bertopic<=0.16.4",
     "dash>=2.11.0",
     "datasets",
     "deepface<=0.0.93",
