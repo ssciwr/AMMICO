@@ -233,10 +233,21 @@ class TextDetector(AnalysisMethod):
         """
         if not self.skip_extraction:
             self.get_text_from_image()
+        if self.subdict["text"]:
+            print("Found text: {}".format(self.subdict["text"]))
         # check that text was found
         if not self.subdict["text"]:
             print("No text found - skipping analysis.")
         else:
+            # make sure all full stops are followed by whitespace
+            # otherwise googletrans breaks
+            index_stop = self.subdict["text"].find(".")
+            if self.subdict["text"][index_stop + 1] != " ":
+                self.subdict["text"] = (
+                    self.subdict["text"][: index_stop + 1]
+                    + " "
+                    + self.subdict["text"][index_stop + 1 :]
+                )
             self.translate_text()
             self.remove_linebreaks()
             if self.analyse_text:
