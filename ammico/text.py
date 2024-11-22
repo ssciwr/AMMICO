@@ -233,8 +233,6 @@ class TextDetector(AnalysisMethod):
         """
         if not self.skip_extraction:
             self.get_text_from_image()
-        if self.subdict["text"]:
-            print("Found text: {}".format(self.subdict["text"]))
         # check that text was found
         if not self.subdict["text"]:
             print("No text found - skipping analysis.")
