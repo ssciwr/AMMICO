@@ -43,7 +43,7 @@ This will install the package and its dependencies locally. If after installatio
 
 ## Usage
 
-The main demonstration notebook can be found in the `notebooks` folder and also on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb).
+The main demonstration notebook can be found in the `notebooks` folder and also on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb)
 
 There are further sample notebooks in the `notebooks` folder for the more experimental features:
 1. Topic analysis: Use the notebook `get-text-from-image.ipynb` to analyse the topics of the extraced text.\
