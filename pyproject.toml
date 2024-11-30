@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ammico"
-version = "0.2.2"
+version = "0.2.3"
 description = "AI Media and Misinformation Content Analysis Tool"
 readme = "README.md"
 maintainers = [
