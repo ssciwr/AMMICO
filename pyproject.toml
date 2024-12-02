@@ -45,7 +45,7 @@ dependencies = [
     "ammico-lavis>=1.0.2.3",
     "huggingface-hub<=0.25.2",
     "setuptools",
-    "spacy<=3.7.5",
+    "spacy<=3.8.2",
     "tensorflow>=2.13.0",
     "torch<2.6.0",
     "transformers",
