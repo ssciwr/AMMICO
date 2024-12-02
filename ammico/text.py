@@ -243,15 +243,6 @@ class TextDetector(AnalysisMethod):
                 end_of_list = True
             else:
                 index_stop.pop()
-        print(
-            "End of list",
-            end_of_list,
-            len(self.subdict["text"]),
-            index_stop,
-            index_stop[-1] + 1,
-            "text",
-            self.subdict["text"],
-        )
         if end_of_list:  # only one full stop at end of string
             return
         # if this is not the end of the list, check if there is a space after the full stop
