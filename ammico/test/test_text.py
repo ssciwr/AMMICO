@@ -141,6 +141,19 @@ def test_init_revision_numbers_and_models(accepted):
         tt.TextDetector({}, revision_numbers=["something"], accept_privacy=accepted)
 
 
+def test_check_add_space_after_full_stop(accepted):
+    test_obj = tt.TextDetector({}, accept_privacy=accepted)
+    test_obj.subdict["text"] = "I like cats. I like dogs."
+    test_obj._check_add_space_after_full_stop()
+    assert test_obj.subdict["text"] == "I like cats. I like dogs."
+    test_obj.subdict["text"] = "I like cats."
+    test_obj._check_add_space_after_full_stop()
+    assert test_obj.subdict["text"] == "I like cats."
+    test_obj.subdict["text"] = "www.icanhascheezburger.com"
+    test_obj._check_add_space_after_full_stop()
+    assert test_obj.subdict["text"] == "www. icanhascheezburger. com"
+
+
 @pytest.mark.gcv
 def test_analyse_image(set_testdict, set_environ, accepted):
     for item in set_testdict:

@@ -4,6 +4,7 @@ from googletrans import Translator
 import spacy
 import io
 import os
+import re
 from ammico.utils import AnalysisMethod
 import grpc
 import pandas as pd
@@ -225,6 +226,48 @@ class TextDetector(AnalysisMethod):
             spacy.cli.download("en_core_web_md")
             self.nlp = spacy.load("en_core_web_md")
 
+    def _check_add_space_after_full_stop(self):
+        """Add a space after a full stop. Required by googletrans."""
+        # we have found text, now we check for full stops
+        index_stop = [
+            i.start() for i in re.finditer("\.", self.subdict["text"])  # noqa
+        ]
+        if not index_stop:  # no full stops found
+            return
+        # check if this includes the last string item
+        end_of_list = False
+        if len(self.subdict["text"]) <= (index_stop[-1] + 1):
+            # the last found full stop is at the end of the string
+            # but we can include all others
+            if len(index_stop) == 1:
+                end_of_list = True
+            else:
+                index_stop.pop()
+        print(
+            "End of list",
+            end_of_list,
+            len(self.subdict["text"]),
+            index_stop,
+            index_stop[-1] + 1,
+            "text",
+            self.subdict["text"],
+        )
+        if end_of_list:  # only one full stop at end of string
+            return
+        # if this is not the end of the list, check if there is a space after the full stop
+        no_space = [i for i in index_stop if self.subdict["text"][i + 1] != " "]
+        if not no_space:  # all full stops have a space after them
+            return
+        # else, amend the text
+        add_one = 1
+        for i in no_space:
+            self.subdict["text"] = (
+                self.subdict["text"][: i + add_one]
+                + " "
+                + self.subdict["text"][i + add_one :]
+            )
+            add_one += 1
+
     def analyse_image(self) -> dict:
         """Perform text extraction and analysis of the text.
 
@@ -239,13 +282,7 @@ class TextDetector(AnalysisMethod):
         else:
             # make sure all full stops are followed by whitespace
             # otherwise googletrans breaks
-            index_stop = self.subdict["text"].find(".")
-            if self.subdict["text"][index_stop + 1] != " ":
-                self.subdict["text"] = (
-                    self.subdict["text"][: index_stop + 1]
-                    + " "
-                    + self.subdict["text"][index_stop + 1 :]
-                )
+            self._check_add_space_after_full_stop()
             self.translate_text()
             self.remove_linebreaks()
             if self.analyse_text:
