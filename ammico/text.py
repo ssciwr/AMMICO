@@ -261,12 +261,9 @@ class TextDetector(AnalysisMethod):
 
     def _truncate_text(self, max_length: int = 5000) -> str:
         """Truncate the text if it is too long for googletrans."""
-        if self.subdict["text"]:
-            if len(self.subdict["text"]) > max_length:
-                print(
-                    "Text is too long - truncating to {} characters.".format(max_length)
-                )
-                self.subdict["text"] = self.subdict["text"][:max_length]
+        if self.subdict["text"] and len(self.subdict["text"]) > max_length:
+            print("Text is too long - truncating to {} characters.".format(max_length))
+            self.subdict["text"] = self.subdict["text"][:max_length]
 
     def analyse_image(self) -> dict:
         """Perform text extraction and analysis of the text.
