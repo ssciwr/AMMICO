@@ -112,7 +112,7 @@ class TextDetector(AnalysisMethod):
             raise ValueError(
                 "Privacy disclosure not accepted - skipping text detection."
             )
-        self.translator = Translator()
+        self.translator = Translator(raise_exception=True)
         if not isinstance(analyse_text, bool):
             raise ValueError("analyse_text needs to be set to true or false")
         self.analyse_text = analyse_text
@@ -259,6 +259,15 @@ class TextDetector(AnalysisMethod):
             )
             add_one += 1
 
+    def _truncate_text(self, max_length: int = 5000) -> str:
+        """Truncate the text if it is too long for googletrans."""
+        if self.subdict["text"]:
+            if len(self.subdict["text"]) > max_length:
+                print(
+                    "Text is too long - truncating to {} characters.".format(max_length)
+                )
+                self.subdict["text"] = self.subdict["text"][:max_length]
+
     def analyse_image(self) -> dict:
         """Perform text extraction and analysis of the text.
 
@@ -274,6 +283,7 @@ class TextDetector(AnalysisMethod):
             # make sure all full stops are followed by whitespace
             # otherwise googletrans breaks
             self._check_add_space_after_full_stop()
+            self._truncate_text()
             self.translate_text()
             self.remove_linebreaks()
             if self.analyse_text:
@@ -329,13 +339,18 @@ class TextDetector(AnalysisMethod):
             raise ValueError(
                 "Privacy disclosure not accepted - skipping text translation."
             )
-        translated = self.translator.translate(self.subdict["text"])
-        self.subdict["text_language"] = translated.src
-        self.subdict["text_english"] = translated.text
+        try:
+            translated = self.translator.translate(self.subdict["text"])
+        except Exception:
+            print("Could not translate the text with error {}.".format(Exception))
+            translated = None
+            print("Skipping translation for this text.")
+        self.subdict["text_language"] = translated.src if translated else None
+        self.subdict["text_english"] = translated.text if translated else None
 
     def remove_linebreaks(self):
         """Remove linebreaks from original and translated text."""
-        if self.subdict["text"]:
+        if self.subdict["text"] and self.subdict["text_english"]:
             self.subdict["text"] = self.subdict["text"].replace("\n", " ")
             self.subdict["text_english"] = self.subdict["text_english"].replace(
                 "\n", " "
