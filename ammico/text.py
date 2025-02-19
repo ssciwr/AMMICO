@@ -263,7 +263,7 @@ class TextDetector(AnalysisMethod):
         """Truncate the text if it is too long for googletrans."""
         if self.subdict["text"] and len(self.subdict["text"]) > max_length:
             print("Text is too long - truncating to {} characters.".format(max_length))
-            self.subdict["text"] = self.subdict["text"][:max_length]
+            self.subdict["text_truncated"] = self.subdict["text"][:max_length]
 
     def analyse_image(self) -> dict:
         """Perform text extraction and analysis of the text.
@@ -283,7 +283,7 @@ class TextDetector(AnalysisMethod):
             self._truncate_text()
             self.translate_text()
             self.remove_linebreaks()
-            if self.analyse_text:
+            if self.analyse_text and self.subdict["text_english"]:
                 self._run_spacy()
                 self.clean_text()
                 self.text_summary()
@@ -336,8 +336,13 @@ class TextDetector(AnalysisMethod):
             raise ValueError(
                 "Privacy disclosure not accepted - skipping text translation."
             )
+        text_to_translate = (
+            self.subdict["text_truncated"]
+            if "text_truncated" in self.subdict
+            else self.subdict["text"]
+        )
         try:
-            translated = self.translator.translate(self.subdict["text"])
+            translated = self.translator.translate(text_to_translate)
         except Exception:
             print("Could not translate the text with error {}.".format(Exception))
             translated = None
