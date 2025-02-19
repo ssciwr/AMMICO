@@ -183,7 +183,6 @@ def test_analyse_image(set_testdict, set_environ, accepted):
     test_obj.analyse_image()
     assert test_obj.subdict["text_truncated"] == 5000 * "m"
     assert test_obj.subdict["text"] == 20000 * "m"
-    print(test_obj.subdict["text_english"])
 
 
 @pytest.mark.gcv
