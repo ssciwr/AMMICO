@@ -159,9 +159,11 @@ def test_truncate_text(accepted):
     test_obj.subdict["text"] = "I like cats and dogs."
     test_obj._truncate_text()
     assert test_obj.subdict["text"] == "I like cats and dogs."
+    assert "text_truncated" not in test_obj.subdict
     test_obj.subdict["text"] = 20000 * "m"
     test_obj._truncate_text()
-    assert test_obj.subdict["text"] == 5000 * "m"
+    assert test_obj.subdict["text_truncated"] == 5000 * "m"
+    assert test_obj.subdict["text"] == 20000 * "m"
 
 
 @pytest.mark.gcv
@@ -173,6 +175,14 @@ def test_analyse_image(set_testdict, set_environ, accepted):
             set_testdict[item], analyse_text=True, accept_privacy=accepted
         )
         test_obj.analyse_image()
+    testdict = {}
+    testdict["text"] = 20000 * "m"
+    test_obj = tt.TextDetector(
+        testdict, skip_extraction=True, analyse_text=True, accept_privacy=accepted
+    )
+    test_obj.analyse_image()
+    assert test_obj.subdict["text_truncated"] == 5000 * "m"
+    assert test_obj.subdict["text"] == 20000 * "m"
 
 
 @pytest.mark.gcv
