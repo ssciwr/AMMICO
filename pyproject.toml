@@ -33,6 +33,7 @@ dependencies = [
     "jupyter",
     "jupyter_dash",
     "matplotlib",
+    "nbval",
     "numpy<=1.23.4",
     "pandas",
     "peft<=0.13.0",
