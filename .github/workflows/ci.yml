@@ -73,6 +73,11 @@ jobs:
       run: |
         cd ammico
         python -m pytest test/test_utils.py -svv --cov=. --cov-report=xml --cov-append
+    - name: Run Python tests
+      run: |
+        cd ammico/notebooks
+        python -m pytest --nbval DemoNotebook_ammico_MultimodalSearch.ipynb
+        
     - name: Upload coverage
       if: matrix.os == 'ubuntu-24.04' && matrix.python-version == '3.11'
       uses: codecov/codecov-action@v3
