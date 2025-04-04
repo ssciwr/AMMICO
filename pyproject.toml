@@ -51,7 +51,7 @@ dependencies = [
     "tensorflow>=2.13.0",
     "torch<2.6.0",
     "transformers",
-    "typing_extensions=4.13.0",
+    "typing_extensions==4.13.0",
     "google-cloud-vision",
     "dash_bootstrap_components",
     "colorgram.py",
