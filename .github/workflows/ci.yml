@@ -31,6 +31,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e .
+        pip install typing_extensions=4.13.0
         # python -m pip install uv
         # uv pip install --system -e .
     - name: Run pytest test_colors
