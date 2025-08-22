@@ -1,5 +1,6 @@
 from ammico.display import AnalysisExplorer
 from ammico.faces import EmotionDetector, ethical_disclosure
+from ammico.model import MultimodalSummaryModel
 from ammico.text import TextDetector, TextAnalyzer, privacy_disclosure
 from ammico.utils import find_files, get_dataframe
 
@@ -14,6 +15,7 @@ except ImportError:
 __all__ = [
     "AnalysisExplorer",
     "EmotionDetector",
+    "MultimodalSummaryModel",
     "TextDetector",
     "TextAnalyzer",
     "find_files",
