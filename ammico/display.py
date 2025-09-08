@@ -97,8 +97,6 @@ class AnalysisExplorer:
             State("left_select_id", "value"),
             State("Dropdown_select_Detector", "value"),
             State("setting_Text_analyse_text", "value"),
-            State("setting_Text_model_names", "value"),
-            State("setting_Text_revision_numbers", "value"),
             State("setting_privacy_env_var", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
@@ -190,45 +188,6 @@ class AnalysisExplorer:
                                 align="start",
                             ),
                         ),
-                        # text row 2
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        html.P(
-                                            "Select models for text_summary, text_sentiment, text_NER or leave blank for default:",
-                                            # style={"width": "45%"},
-                                        ),
-                                    ]
-                                ),  #
-                                dbc.Col(
-                                    [
-                                        html.P(
-                                            "Select model revision number for text_summary, text_sentiment, text_NER or leave blank for default:"
-                                        ),
-                                    ]
-                                ),
-                            ]
-                        ),  # row 2
-                        #  input row 3
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    dcc.Input(
-                                        type="text",
-                                        id="setting_Text_model_names",
-                                        style={"width": "100%"},
-                                    ),
-                                ),
-                                dbc.Col(
-                                    dcc.Input(
-                                        type="text",
-                                        id="setting_Text_revision_numbers",
-                                        style={"width": "100%"},
-                                    ),
-                                ),
-                            ]
-                        ),  # row 3
                     ],
                 ),  # text summary end
                 # start emotion detector
@@ -485,8 +444,6 @@ class AnalysisExplorer:
         current_img_value: str,
         detector_value: str,
         settings_text_analyse_text: list,
-        settings_text_model_names: str,
-        settings_text_revision_numbers: str,
         setting_privacy_env_var: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
@@ -530,16 +487,6 @@ class AnalysisExplorer:
             detector_class = identify_function(
                 image_copy,
                 analyse_text=analyse_text,
-                model_names=(
-                    [settings_text_model_names]
-                    if (settings_text_model_names is not None)
-                    else None
-                ),
-                revision_numbers=(
-                    [settings_text_revision_numbers]
-                    if (settings_text_revision_numbers is not None)
-                    else None
-                ),
                 accept_privacy=(
                     setting_privacy_env_var
                     if setting_privacy_env_var
