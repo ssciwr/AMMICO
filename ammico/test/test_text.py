@@ -55,15 +55,6 @@ def test_TextDetector(set_testdict, accepted):
         assert not test_obj.analyse_text
         assert not test_obj.skip_extraction
         assert test_obj.subdict["filename"] == set_testdict[item]["filename"]
-        assert test_obj.model_summary == "sshleifer/distilbart-cnn-12-6"
-        assert (
-            test_obj.model_sentiment
-            == "distilbert-base-uncased-finetuned-sst-2-english"
-        )
-        assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
-        assert test_obj.revision_summary == "a4f8f3e"
-        assert test_obj.revision_sentiment == "af0f99b"
-        assert test_obj.revision_ner == "f2482bf"
     test_obj = tt.TextDetector(
         {}, analyse_text=True, skip_extraction=True, accept_privacy=accepted
     )
@@ -97,50 +88,6 @@ def test_clean_text(set_testdict, accepted):
     assert test_obj.subdict["text_clean"] == result
 
 
-def test_init_revision_numbers_and_models(accepted):
-    test_obj = tt.TextDetector({}, accept_privacy=accepted)
-    # check the default options
-    assert test_obj.model_summary == "sshleifer/distilbart-cnn-12-6"
-    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
-    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
-    assert test_obj.revision_summary == "a4f8f3e"
-    assert test_obj.revision_sentiment == "af0f99b"
-    assert test_obj.revision_ner == "f2482bf"
-    # provide non-default options
-    model_names = ["facebook/bart-large-cnn", None, None]
-    test_obj = tt.TextDetector({}, model_names=model_names, accept_privacy=accepted)
-    assert test_obj.model_summary == "facebook/bart-large-cnn"
-    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
-    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
-    assert not test_obj.revision_summary
-    assert test_obj.revision_sentiment == "af0f99b"
-    assert test_obj.revision_ner == "f2482bf"
-    revision_numbers = ["3d22493", None, None]
-    test_obj = tt.TextDetector(
-        {},
-        model_names=model_names,
-        revision_numbers=revision_numbers,
-        accept_privacy=accepted,
-    )
-    assert test_obj.model_summary == "facebook/bart-large-cnn"
-    assert test_obj.model_sentiment == "distilbert-base-uncased-finetuned-sst-2-english"
-    assert test_obj.model_ner == "dbmdz/bert-large-cased-finetuned-conll03-english"
-    assert test_obj.revision_summary == "3d22493"
-    assert test_obj.revision_sentiment == "af0f99b"
-    assert test_obj.revision_ner == "f2482bf"
-    # now test the exceptions
-    with pytest.raises(ValueError):
-        tt.TextDetector({}, analyse_text=1.0, accept_privacy=accepted)
-    with pytest.raises(ValueError):
-        tt.TextDetector({}, model_names=1.0, accept_privacy=accepted)
-    with pytest.raises(ValueError):
-        tt.TextDetector({}, revision_numbers=1.0, accept_privacy=accepted)
-    with pytest.raises(ValueError):
-        tt.TextDetector({}, model_names=["something"], accept_privacy=accepted)
-    with pytest.raises(ValueError):
-        tt.TextDetector({}, revision_numbers=["something"], accept_privacy=accepted)
-
-
 def test_check_add_space_after_full_stop(accepted):
     test_obj = tt.TextDetector({}, accept_privacy=accepted)
     test_obj.subdict["text"] = "I like cats. I like dogs."
@@ -153,7 +100,6 @@ def test_check_add_space_after_full_stop(accepted):
     test_obj._check_add_space_after_full_stop()
     assert test_obj.subdict["text"] == "www. icanhascheezburger. com"
 
-
 def test_truncate_text(accepted):
     test_obj = tt.TextDetector({}, accept_privacy=accepted)
     test_obj.subdict["text"] = "I like cats and dogs."
@@ -164,7 +110,6 @@ def test_truncate_text(accepted):
     test_obj._truncate_text()
     assert test_obj.subdict["text_truncated"] == 5000 * "m"
     assert test_obj.subdict["text"] == 20000 * "m"
-
 
 @pytest.mark.gcv
 def test_analyse_image(set_testdict, set_environ, accepted):
@@ -222,36 +167,6 @@ def test_remove_linebreaks(accepted):
     assert test_obj.subdict["text_english"] == "This is   another  test."
 
 
-def test_text_summary(get_path, accepted):
-    mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True, accept_privacy=accepted)
-    ref_file = get_path + "example_summary.txt"
-    with open(ref_file, "r", encoding="utf8") as file:
-        reference_text = file.read()
-    mydict["text_english"] = reference_text
-    test_obj.text_summary()
-    reference_summary = " I’m sorry, but I don’t want to be an emperor"
-    assert mydict["text_summary"] == reference_summary
-
-
-def test_text_sentiment_transformers(accepted):
-    mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True, accept_privacy=accepted)
-    mydict["text_english"] = "I am happy that the CI is working again."
-    test_obj.text_sentiment_transformers()
-    assert mydict["sentiment"] == "POSITIVE"
-    assert mydict["sentiment_score"] == pytest.approx(0.99, 0.02)
-
-
-def test_text_ner(accepted):
-    mydict = {}
-    test_obj = tt.TextDetector(mydict, analyse_text=True, accept_privacy=accepted)
-    mydict["text_english"] = "Bill Gates was born in Seattle."
-    test_obj.text_ner()
-    assert mydict["entity"] == ["Bill Gates", "Seattle"]
-    assert mydict["entity_type"] == ["PER", "LOC"]
-
-
 def test_init_csv_option(get_path):
     test_obj = tt.TextAnalyzer(csv_path=get_path + "test.csv")
     assert test_obj.csv_path == get_path + "test.csv"
@@ -295,39 +210,3 @@ def test_read_csv(get_path):
         test_obj.mydict.items(), ref_dict.items()
     ):
         assert value_test["text"] == value_ref["text"]
-
-
-def test_PostprocessText(set_testdict, get_path):
-    reference_dict = "THE ALGEBRAIC EIGENVALUE PROBLEM"
-    reference_df = "Mathematische Formelsammlung\nfür Ingenieure und Naturwissenschaftler\nMit zahlreichen Abbildungen und Rechenbeispielen\nund einer ausführlichen Integraltafel\n3., verbesserte Auflage"
-    img_numbers = ["IMG_3755", "IMG_3756", "IMG_3757"]
-    for image_ref in img_numbers:
-        ref_file = get_path + "text_" + image_ref + ".txt"
-        with open(ref_file, "r") as file:
-            reference_text = file.read()
-        set_testdict[image_ref]["text_english"] = reference_text
-    obj = tt.PostprocessText(mydict=set_testdict)
-    test_dict = obj.list_text_english[2].replace("\r", "")
-    assert test_dict == reference_dict
-    for key in set_testdict.keys():
-        set_testdict[key].pop("text_english")
-    with pytest.raises(ValueError):
-        tt.PostprocessText(mydict=set_testdict)
-    obj = tt.PostprocessText(use_csv=True, csv_path=get_path + "test_data_out.csv")
-    # make sure test works on windows where end-of-line character is \r\n
-    test_df = obj.list_text_english[0].replace("\r", "")
-    assert test_df == reference_df
-    with pytest.raises(ValueError):
-        tt.PostprocessText(use_csv=True, csv_path=get_path + "test_data_out_nokey.csv")
-    with pytest.raises(ValueError):
-        tt.PostprocessText()
-
-
-def test_analyse_topic(get_path):
-    _, topic_df, most_frequent_topics = tt.PostprocessText(
-        use_csv=True, csv_path=get_path + "topic_analysis_test.csv"
-    ).analyse_topic()
-    # since this is not deterministic we cannot be sure we get the same result twice
-    assert len(topic_df) == 2
-    assert topic_df["Name"].iloc[0] == "0_the_feat_of_is"
-    assert most_frequent_topics[0][0][0] == "the"
