@@ -33,27 +33,10 @@ jobs:
         pip install -e .
         # python -m pip install uv
         # uv pip install --system -e .
-    - name: Run pytest test_colors
+    - name: Run pytest 
       run: |
         cd ammico
-        python -m pytest test/test_colors.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_display
-      run: |
-        cd ammico
-        python -m pytest test/test_display.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_faces
-      run: |
-        cd ammico
-        python -m pytest test/test_faces.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_text
-      run: |
-        cd ammico
-        python -m pytest test/test_text.py -m "not gcv" -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_utils
-      run: |
-        cd ammico
-        python -m pytest test/test_utils.py -svv --cov=. --cov-report=xml --cov-append
-        
+        python -m pytest -svv --cov=. --cov-report=xml
     - name: Upload coverage
       if: matrix.os == 'ubuntu-24.04' && matrix.python-version == '3.11'
       uses: codecov/codecov-action@v3
