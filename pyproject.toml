@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "ammico"
@@ -21,6 +21,7 @@ classifiers = [
 
 dependencies = [
     "dash>=2.11.0",
+    "dash-bootstrap-components",
     "datasets",
     "deepface<=0.0.93",
     "googletrans==4.0.0rc1",
@@ -34,7 +35,7 @@ dependencies = [
     "matplotlib",
     "nbval",
     "numpy<=1.23.4",
-    "opencv",
+    "opencv-python",
     "pandas",
     "Pillow",
     "pooch",

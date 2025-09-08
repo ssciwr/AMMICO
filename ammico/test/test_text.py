@@ -78,16 +78,6 @@ def test_run_spacy(set_testdict, get_path, accepted):
     assert isinstance(test_obj.doc, spacy.tokens.doc.Doc)
 
 
-def test_clean_text(set_testdict, accepted):
-    nlp = spacy.load("en_core_web_md")
-    doc = nlp("I like cats and fjejg")
-    test_obj = tt.TextDetector(set_testdict["IMG_3755"], accept_privacy=accepted)
-    test_obj.doc = doc
-    test_obj.clean_text()
-    result = "I like cats and"
-    assert test_obj.subdict["text_clean"] == result
-
-
 def test_check_add_space_after_full_stop(accepted):
     test_obj = tt.TextDetector({}, accept_privacy=accepted)
     test_obj.subdict["text"] = "I like cats. I like dogs."
@@ -100,6 +90,7 @@ def test_check_add_space_after_full_stop(accepted):
     test_obj._check_add_space_after_full_stop()
     assert test_obj.subdict["text"] == "www. icanhascheezburger. com"
 
+
 def test_truncate_text(accepted):
     test_obj = tt.TextDetector({}, accept_privacy=accepted)
     test_obj.subdict["text"] = "I like cats and dogs."
@@ -110,6 +101,7 @@ def test_truncate_text(accepted):
     test_obj._truncate_text()
     assert test_obj.subdict["text_truncated"] == 5000 * "m"
     assert test_obj.subdict["text"] == 20000 * "m"
+
 
 @pytest.mark.gcv
 def test_analyse_image(set_testdict, set_environ, accepted):

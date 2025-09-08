@@ -2,7 +2,6 @@ import ammico.faces as faces
 import ammico.text as text
 import ammico.colors as colors
 from ammico.utils import is_interactive
-import ammico.summary as summary
 import pandas as pd
 from dash import html, Input, Output, dcc, State, Dash
 from PIL import Image
@@ -103,9 +102,6 @@ class AnalysisExplorer:
             State("setting_Emotion_gender_threshold", "value"),
             State("setting_Emotion_env_var", "value"),
             State("setting_Color_delta_e_method", "value"),
-            State("setting_Summary_analysis_type", "value"),
-            State("setting_Summary_model", "value"),
-            State("setting_Summary_list_of_questions", "value"),
             prevent_initial_call=True,
         )(self._right_output_analysis)
 
@@ -113,7 +109,6 @@ class AnalysisExplorer:
             Output("settings_TextDetector", "style"),
             Output("settings_EmotionDetector", "style"),
             Output("settings_ColorDetector", "style"),
-            Output("settings_Summary_Detector", "style"),
             Input("Dropdown_select_Detector", "value"),
         )(self._update_detector_setting)
 
@@ -278,47 +273,6 @@ class AnalysisExplorer:
                         )
                     ],
                 ),
-                html.Div(
-                    id="settings_Summary_Detector",
-                    style={"display": "none"},
-                    children=[
-                        dbc.Col(
-                            [
-                                dbc.Row([html.P("Analysis type:")]),
-                                dbc.Row([html.P("Model type:")]),
-                                dbc.Row([html.P("Analysis question:")]),
-                            ],
-                        ),
-                        dbc.Col(
-                            [
-                                dbc.Row(
-                                    dcc.Dropdown(
-                                        options=SUMMARY_ANALYSIS_TYPE,
-                                        value="summary_and_questions",
-                                        id="setting_Summary_analysis_type",
-                                    )
-                                ),
-                                dbc.Row(
-                                    dcc.Dropdown(
-                                        options=SUMMARY_MODEL,
-                                        value="base",
-                                        id="setting_Summary_model",
-                                    )
-                                ),
-                                dbc.Row(
-                                    dcc.Input(
-                                        type="text",
-                                        id="setting_Summary_list_of_questions",
-                                        style={
-                                            "height": "auto",
-                                            "margin-left": "11px",
-                                        },
-                                    ),
-                                ),
-                            ]
-                        ),
-                    ],
-                ),
             ],
             style={"width": "100%", "display": "inline-block"},
         )
@@ -339,7 +293,6 @@ class AnalysisExplorer:
                                 options=[
                                     "TextDetector",
                                     "EmotionDetector",
-                                    "SummaryDetector",
                                     "ColorDetector",
                                 ],
                                 value="TextDetector",
@@ -431,9 +384,6 @@ class AnalysisExplorer:
         if setting_input == "ColorDetector":
             return display_none, display_none, display_flex, display_none
 
-        if setting_input == "SummaryDetector":
-            return display_none, display_none, display_none, display_flex
-
         else:
             return display_none, display_none, display_none, display_none
 
@@ -450,9 +400,6 @@ class AnalysisExplorer:
         setting_emotion_gender_threshold: int,
         setting_emotion_env_var: str,
         setting_color_delta_e_method: str,
-        setting_summary_analysis_type: str,
-        setting_summary_model: str,
-        setting_summary_list_of_questions: str,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
@@ -466,7 +413,6 @@ class AnalysisExplorer:
         identify_dict = {
             "EmotionDetector": faces.EmotionDetector,
             "TextDetector": text.TextDetector,
-            "SummaryDetector": summary.SummaryDetector,
             "ColorDetector": colors.ColorDetector,
         }
 
@@ -509,17 +455,6 @@ class AnalysisExplorer:
             detector_class = identify_function(
                 image_copy,
                 delta_e_method=setting_color_delta_e_method,
-            )
-        elif detector_value == "SummaryDetector":
-            detector_class = identify_function(
-                image_copy,
-                analysis_type=setting_summary_analysis_type,
-                model_type=setting_summary_model,
-                list_of_questions=(
-                    [setting_summary_list_of_questions]
-                    if (setting_summary_list_of_questions is not None)
-                    else None
-                ),
             )
         else:
             detector_class = identify_function(image_copy)
