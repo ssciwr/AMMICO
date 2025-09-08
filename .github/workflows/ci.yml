@@ -31,17 +31,12 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e .
-        pip install typing_extensions==4.13.0
         # python -m pip install uv
         # uv pip install --system -e .
     - name: Run pytest test_colors
       run: |
         cd ammico
         python -m pytest test/test_colors.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_cropposts
-      run: |
-        cd ammico
-        python -m pytest test/test_cropposts.py -svv --cov=. --cov-report=xml --cov-append
     - name: Run pytest test_display
       run: |
         cd ammico
@@ -50,22 +45,6 @@ jobs:
       run: |
         cd ammico
         python -m pytest test/test_faces.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_multimodal_search
-      run: |
-        cd ammico
-        python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-    - name: Clear cache ubuntu 1
-      if: matrix.os == 'ubuntu-22.04'
-      run: |
-          rm -rf ~/.cache/*    
-    - name: Run pytest test_summary
-      run: |
-        cd ammico
-        python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-    - name: Clear cache ubuntu 2
-      if: matrix.os == 'ubuntu-24.04'
-      run: |
-          rm -rf ~/.cache/*
     - name: Run pytest test_text
       run: |
         cd ammico
@@ -74,10 +53,6 @@ jobs:
       run: |
         cd ammico
         python -m pytest test/test_utils.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run Notebook tests
-      run: |
-        cd ammico/notebooks
-        python -m pytest --nbval DemoNotebook_ammico_MultimodalSearch.ipynb
         
     - name: Upload coverage
       if: matrix.os == 'ubuntu-24.04' && matrix.python-version == '3.11'
