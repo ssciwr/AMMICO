@@ -32,7 +32,7 @@ jobs:
     - name: Run pytest 
       run: |
         cd ammico
-        python -m pytest -svv --cov=. --cov-report=xml
+        python -m pytest -svv -m "not gcv" --cov=. --cov-report=xml
     - name: Upload coverage
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: codecov/codecov-action@v3
