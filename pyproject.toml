@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ammico"
-version = "0.2.6"
+dynamic = ["version"]
 description = "AI Media and Misinformation Content Analysis Tool"
 readme = "README.md"
 maintainers = [
     { name = "Inga Ulusoy", email = "ssc@iwr.uni-heidelberg.de" },
-    { name = "Petr Andriushchenko", email = "ssc@iwr.uni-heidelberg.de" },
+    { name = "Dmitrii Kapitan", email = "ssc@iwr.uni-heidelberg.de" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -20,42 +20,52 @@ classifiers = [
 ]
 
 dependencies = [
+    "colorgram.py",
+    "colour-science",
     "dash",
     "dash-bootstrap-components",
-    "datasets",
     "deepface",
-    "googletrans==4.0.0rc1",
     "google-cloud-vision",
+    "googletrans==4.0.0rc1",
     "grpcio",
     "importlib_metadata",
     "importlib_resources",
-    "ipython",
-    "jupyter",
-    "jupyter_dash",
     "matplotlib",
-    "nbval",
     "numpy",
     "opencv-python",
     "pandas",
     "Pillow",
     "pooch",
-    "pytest",
-    "pytest-cov",
     "retina_face",
-    "huggingface-hub",
     "setuptools",
     "spacy",
-    "tensorflow<=2.16.2",
+    "tensorflow<=2.16.0",
     "tf-keras",
-    "google-cloud-vision",
-    "colorgram.py",
+    "tqdm",
     "webcolors",
-    "colour-science",
-    "tqdm"
 ]
 
-[project.scripts]
-ammico_prefetch_models = "ammico.utils:ammico_prefetch_models"
+[project.optional-dependencies]
+dev = [
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "sphinx",
+    "myst-parser",
+    "sphinx_rtd_theme",
+    "sphinxcontrib-napoleon",
+    "nbsphinx",
+]
+
+nb = [
+    "datasets",
+    "huggingface-hub",
+    "ipython",
+    "jupyter",
+    "jupyter_dash",
+]
+
 
 [project.urls]
 homepage = "https://github.com/ssciwr/AMMICO"  # FIXME not shown by pip
@@ -63,8 +73,3 @@ documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 
 [tool.setuptools]
 packages = ["ammico","ammico.data"]
-
-[tool.setuptools.package-data]
-# Include any png and csv files found in the "data" subdirectory of "ammico"
-"ammico.data" = ["*.png", "*.csv"]
-
