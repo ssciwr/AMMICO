@@ -2,7 +2,8 @@ FROM jupyter/base-notebook
 
 # Install system dependencies for computer vision packages
 USER root
-RUN apt update && apt install -y build-essential libgl1 libglib2.0-0 libsm6 libxrender1 libxext6
+RUN apt update && apt install -y build-essential libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 \
+	&& rm -rf /var/lib/apt/lists/*
 USER $NB_USER
 
 # Copy the repository into the container
@@ -18,12 +19,5 @@ ENV JUPYTER_ENABLE_LAB=yes
 ENV XDG_DATA_HOME=/opt/ammico/data
 
 # Copy notebooks into the home directory
-RUN rm -rf $HOME/work
-RUN cp /opt/ammico/notebooks/*.ipynb $HOME
-
-ARG GOOGLE_CREDS
-ENV GOOGLE_APPLICATION_CREDENTIALS=credentials.json
-RUN echo ${GOOGLE_CREDS} > $GOOGLE_APPLICATION_CREDENTIALS
-# Bundle the pre-built models (that are downloaded on demand) into the
-# Docker image.
-RUN ammico_prefetch_models
+RUN rm -rf "$HOME"/work && \
+	cp /opt/ammico/notebooks/*.ipynb "$HOME" 
