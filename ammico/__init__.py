@@ -1,4 +1,3 @@
-from importlib import metadata
 from ammico.display import AnalysisExplorer
 from ammico.faces import EmotionDetector, ethical_disclosure
 from ammico.text import TextDetector, TextAnalyzer, privacy_disclosure

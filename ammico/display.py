@@ -1,7 +1,6 @@
 import ammico.faces as faces
 import ammico.text as text
 import ammico.colors as colors
-from ammico.utils import is_interactive
 import pandas as pd
 from dash import html, Input, Output, dcc, State, Dash
 from PIL import Image
