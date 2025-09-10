@@ -308,7 +308,7 @@ class EmotionDetector(AnalysisMethod):
         # We limit ourselves to identify emotion on max three faces per image
         result = {"number_faces": len(faces) if len(faces) <= 3 else 3}
         for i, face in enumerate(faces[:3]):
-            result[f"person{i+1}"] = self.analyze_single_face(face)
+            result[f"person{i + 1}"] = self.analyze_single_face(face)
         self.clean_subdict(result)
         # release memory
         K.clear_session()
