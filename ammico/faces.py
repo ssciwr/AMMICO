@@ -6,12 +6,17 @@ import pathlib
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
+import keras.backend as K
 from deepface import DeepFace
 from retinaface import RetinaFace
 from ammico.utils import DownloadResource, AnalysisMethod
 
 
 DEEPFACE_PATH = ".deepface"
+# alternative solution to the memory leaks
+# cfg = K.tf.compat.v1.ConfigProto()
+# cfg.gpu_options.allow_growth = True
+# K.set_session(K.tf.compat.v1.Session(config=cfg))
 
 
 def deepface_symlink_processor(name):
@@ -305,6 +310,8 @@ class EmotionDetector(AnalysisMethod):
         for i, face in enumerate(faces[:3]):
             result[f"person{i+1}"] = self.analyze_single_face(face)
         self.clean_subdict(result)
+        # release memory
+        K.clear_session()
         return self.subdict
 
     def clean_subdict(self, result: dict) -> dict:
