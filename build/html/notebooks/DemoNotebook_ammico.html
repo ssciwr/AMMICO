@@ -15,15 +15,13 @@
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=000c92bf"></script>
-      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Crop posts module" href="Example%20cropposts.html" />
+    <link rel="next" title="AMMICO package modules" href="../modules.html" />
     <link rel="prev" title="Instructions how to generate and enable a google Cloud Vision API key" href="../create_API_key_link.html" /> 
 </head>
 
@@ -85,7 +83,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#Further-detector-modules">Further detector modules</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Example%20cropposts.html">Crop posts module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">AMMICO package modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license_link.html">License</a></li>
 </ul>
@@ -128,25 +125,25 @@ google colab comes with pre-installed libraries that can lead to dependency conf
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># if running on google colab\</span>
-<span class="c1"># PLEASE RUN THIS ONLY AS CPU RUNTIME</span>
-<span class="c1"># for a GPU runtime, there are conflicts with pre-installed packages -</span>
-<span class="c1"># you first need to uninstall them (prepare a clean environment with no pre-installs) and then install ammico</span>
-<span class="c1"># flake8-noqa-cell</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># if running on google colab\
+# PLEASE RUN THIS ONLY AS CPU RUNTIME
+# for a GPU runtime, there are conflicts with pre-installed packages -
+# you first need to uninstall them (prepare a clean environment with no pre-installs) and then install ammico
+# flake8-noqa-cell
 
-<span class="k">if</span> <span class="s2">&quot;google.colab&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_ipython</span><span class="p">()):</span>
-    <span class="c1"># update python version</span>
-    <span class="c1"># install setuptools</span>
-    <span class="c1"># %pip install setuptools==61 -qqq</span>
-    <span class="c1"># uninstall some pre-installed packages due to incompatibility</span>
-    <span class="o">%</span><span class="k">pip</span> uninstall --yes tensorflow-probability dopamine-rl lida pandas-gbq torchaudio torchdata torchtext orbax-checkpoint flex-y jax jaxlib -qqq
-    <span class="c1"># install ammico</span>
-    <span class="o">%</span><span class="k">pip</span> install git+https://github.com/ssciwr/ammico.git -qqq
-    <span class="c1"># install older version of jax to support transformers use of diffusers</span>
-    <span class="c1"># mount google drive for data and API key</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">drive</span>
+if &quot;google.colab&quot; in str(get_ipython()):
+    # update python version
+    # install setuptools
+    # %pip install setuptools==61 -qqq
+    # uninstall some pre-installed packages due to incompatibility
+    %pip uninstall --yes tensorflow-probability dopamine-rl lida pandas-gbq torchaudio torchdata torchtext orbax-checkpoint flex-y jax jaxlib -qqq
+    # install ammico
+    %pip install git+https://github.com/ssciwr/ammico.git -qqq
+    # install older version of jax to support transformers use of diffusers
+    # mount google drive for data and API key
+    from google.colab import drive
 
-    <span class="n">drive</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;/content/drive&quot;</span><span class="p">)</span>
+    drive.mount(&quot;/content/drive&quot;)
 </pre></div>
 </div>
 </div>
@@ -157,11 +154,11 @@ google colab comes with pre-installed libraries that can lead to dependency conf
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from datasets import load_dataset
+from pathlib import Path
 
-<span class="c1"># If the dataset is gated/private, make sure you have run huggingface-cli login</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;iulusoy/test-images&quot;</span><span class="p">)</span>
+# If the dataset is gated/private, make sure you have run huggingface-cli login
+dataset = load_dataset(&quot;iulusoy/test-images&quot;)
 </pre></div>
 </div>
 </div>
@@ -170,13 +167,13 @@ google colab comes with pre-installed libraries that can lead to dependency conf
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_path</span> <span class="o">=</span> <span class="s2">&quot;./data-test&quot;</span>
-<span class="n">data_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
-<span class="n">data_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="c1"># now save the files from the Huggingface dataset as images into the data_path folder</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="s2">&quot;image&quot;</span><span class="p">]):</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;img&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span>
-    <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">data_path</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>data_path = &quot;./data-test&quot;
+data_path = Path(data_path)
+data_path.mkdir(parents=True, exist_ok=True)
+# now save the files from the Huggingface dataset as images into the data_path folder
+for i, image in enumerate(dataset[&quot;train&quot;][&quot;image&quot;]):
+    filename = &quot;img&quot; + str(i) + &quot;.png&quot;
+    image.save(data_path / filename)
 </pre></div>
 </div>
 </div>
@@ -187,13 +184,13 @@ google colab comes with pre-installed libraries that can lead to dependency conf
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="c1"># jax also sometimes leads to problems on google colab</span>
-<span class="c1"># if this is the case, try restarting the kernel and executing this</span>
-<span class="c1"># and the above two code cells again</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">ammico</span>
-<span class="c1"># for displaying a progress bar</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># jax also sometimes leads to problems on google colab
+# if this is the case, try restarting the kernel and executing this
+# and the above two code cells again
+import ammico
+
+# for displaying a progress bar
+from tqdm import tqdm
 </pre></div>
 </div>
 </div>
@@ -218,7 +215,7 @@ tf.ones([2, 2])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># os.environ[&quot;GOOGLE_APPLICATION_CREDENTIALS&quot;] = &quot;/content/drive/MyDrive/misinformation-data/misinformation-campaign-981aa55a3b13.json&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># os.environ[&quot;GOOGLE_APPLICATION_CREDENTIALS&quot;] = &quot;/content/drive/MyDrive/misinformation-data/misinformation-campaign-981aa55a3b13.json&quot;
 </pre></div>
 </div>
 </div>
@@ -263,11 +260,11 @@ tf.ones([2, 2])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_dict</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">find_files</span><span class="p">(</span>
-    <span class="c1"># path=&quot;/content/drive/MyDrive/misinformation-data/&quot;,</span>
-    <span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_path</span><span class="p">),</span>
-    <span class="n">limit</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_dict = ammico.find_files(
+    # path=&quot;/content/drive/MyDrive/misinformation-data/&quot;,
+    path=str(data_path),
+    limit=15,
+)
 </pre></div>
 </div>
 </div>
@@ -285,13 +282,13 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># respond to the disclosure statement</span>
-<span class="c1"># this will set an environment variable for you</span>
-<span class="c1"># if you do not want to re-accept the disclosure every time, you can set this environment variable in your shell</span>
-<span class="c1"># to re-set the environment variable, uncomment the below line</span>
-<span class="n">accept_disclosure</span> <span class="o">=</span> <span class="s2">&quot;DISCLOSURE_AMMICO&quot;</span>
-<span class="c1"># os.environ.pop(accept_disclosure, None)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">ethical_disclosure</span><span class="p">(</span><span class="n">accept_disclosure</span><span class="o">=</span><span class="n">accept_disclosure</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># respond to the disclosure statement
+# this will set an environment variable for you
+# if you do not want to re-accept the disclosure every time, you can set this environment variable in your shell
+# to re-set the environment variable, uncomment the below line
+accept_disclosure = &quot;DISCLOSURE_AMMICO&quot;
+# os.environ.pop(accept_disclosure, None)
+_ = ammico.ethical_disclosure(accept_disclosure=accept_disclosure)
 </pre></div>
 </div>
 </div>
@@ -305,13 +302,13 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># respond to the privacy disclosure statement</span>
-<span class="c1"># this will set an environment variable for you</span>
-<span class="c1"># if you do not want to re-accept the privacy disclosure every time, you can set this environment variable in your shell</span>
-<span class="c1"># to re-set the environment variable, uncomment the below line</span>
-<span class="n">accept_privacy</span> <span class="o">=</span> <span class="s2">&quot;PRIVACY_AMMICO&quot;</span>
-<span class="c1"># os.environ.pop(accept_privacy, None)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">privacy_disclosure</span><span class="p">(</span><span class="n">accept_privacy</span><span class="o">=</span><span class="n">accept_privacy</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># respond to the privacy disclosure statement
+# this will set an environment variable for you
+# if you do not want to re-accept the privacy disclosure every time, you can set this environment variable in your shell
+# to re-set the environment variable, uncomment the below line
+accept_privacy = &quot;PRIVACY_AMMICO&quot;
+# os.environ.pop(accept_privacy, None)
+_ = ammico.privacy_disclosure(accept_privacy=accept_privacy)
 </pre></div>
 </div>
 </div>
@@ -319,8 +316,8 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analysis_explorer</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">AnalysisExplorer</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-<span class="n">analysis_explorer</span><span class="o">.</span><span class="n">run_server</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">8055</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>analysis_explorer = ammico.AnalysisExplorer(image_dict)
+analysis_explorer.run_server(port=8055)
 </pre></div>
 </div>
 </div>
@@ -334,10 +331,10 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># dump file name</span>
-<span class="n">dump_file</span> <span class="o">=</span> <span class="s2">&quot;dump_file.csv&quot;</span>
-<span class="c1"># dump every N images</span>
-<span class="n">dump_every</span> <span class="o">=</span> <span class="mi">10</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># dump file name
+dump_file = &quot;dump_file.csv&quot;
+# dump every N images
+dump_every = 10
 </pre></div>
 </div>
 </div>
@@ -346,20 +343,26 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set the thresholds for the emotion detection</span>
-<span class="n">emotion_threshold</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># this is the default value for the detection confidence</span>
-<span class="c1"># the lowest possible value is 0</span>
-<span class="c1"># the highest possible value is 100</span>
-<span class="n">race_threshold</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="n">gender_threshold</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>    <span class="c1"># loop through all images</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">EmotionDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
-                                             <span class="n">emotion_threshold</span><span class="o">=</span><span class="n">emotion_threshold</span><span class="p">,</span>
-                                             <span class="n">race_threshold</span><span class="o">=</span><span class="n">race_threshold</span><span class="p">,</span>
-                                             <span class="n">gender_threshold</span><span class="o">=</span><span class="n">gender_threshold</span><span class="p">)</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span> <span class="c1"># analyse image with EmotionDetector and update dict</span>
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>      <span class="c1"># save results every dump_every to dump_file</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># set the thresholds for the emotion detection
+emotion_threshold = 50  # this is the default value for the detection confidence
+# the lowest possible value is 0
+# the highest possible value is 100
+race_threshold = 50
+gender_threshold = 50
+for num, key in tqdm(
+    enumerate(image_dict.keys()), total=len(image_dict)
+):  # loop through all images
+    image_dict[key] = ammico.EmotionDetector(
+        image_dict[key],
+        emotion_threshold=emotion_threshold,
+        race_threshold=race_threshold,
+        gender_threshold=gender_threshold,
+    ).analyse_image()  # analyse image with EmotionDetector and update dict
+    if (
+        num % dump_every == 0 or num == len(image_dict) - 1
+    ):  # save results every dump_every to dump_file
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -368,12 +371,18 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>  <span class="c1"># loop through all images</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">TextDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analyse_text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span> <span class="c1"># analyse image with EmotionDetector and update dict</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for num, key in tqdm(
+    enumerate(image_dict.keys()), total=len(image_dict)
+):  # loop through all images
+    image_dict[key] = ammico.TextDetector(
+        image_dict[key], analyse_text=True
+    ).analyse_image()  # analyse image with EmotionDetector and update dict
 
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>     <span class="c1"># save results every dump_every to dump_file</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+    if (
+        num % dump_every == 0 | num == len(image_dict) - 1
+    ):  # save results every dump_every to dump_file
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -382,16 +391,24 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize the models</span>
-<span class="n">image_summary_detector</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">SummaryDetector</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">,</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary&quot;</span><span class="p">,</span> <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;base&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># initialize the models
+image_summary_detector = ammico.SummaryDetector(
+    subdict=image_dict, analysis_type=&quot;summary&quot;, model_type=&quot;base&quot;
+)
 
-<span class="c1"># run the analysis without having to re-iniatialize the model</span>
-<span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>   <span class="c1"># loop through all images</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_summary_detector</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary&quot;</span><span class="p">)</span>  <span class="c1"># analyse image with SummaryDetector and update dict</span>
+# run the analysis without having to re-iniatialize the model
+for num, key in tqdm(
+    enumerate(image_dict.keys()), total=len(image_dict)
+):  # loop through all images
+    image_dict[key] = image_summary_detector.analyse_image(
+        subdict=image_dict[key], analysis_type=&quot;summary&quot;
+    )  # analyse image with SummaryDetector and update dict
 
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>    <span class="c1"># save results every dump_every to dump_file</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+    if (
+        num % dump_every == 0 | num == len(image_dict) - 1
+    ):  # save results every dump_every to dump_file
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -400,17 +417,29 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize the models</span>
-<span class="n">image_summary_detector</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">SummaryDetector</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">,</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary&quot;</span><span class="p">,</span> <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;base&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># initialize the models
+image_summary_detector = ammico.SummaryDetector(
+    subdict=image_dict, analysis_type=&quot;summary&quot;, model_type=&quot;base&quot;
+)
 
-<span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>   <span class="c1"># loop through all images</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">EmotionDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span>   <span class="c1"># analyse image with EmotionDetector and update dict</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">TextDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analyse_text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span>   <span class="c1"># analyse image with TextDetector and update dict</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_summary_detector</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary&quot;</span><span class="p">)</span>  <span class="c1"># analyse image with SummaryDetector and update dict</span>
+for num, key in tqdm(
+    enumerate(image_dict.keys()), total=len(image_dict)
+):  # loop through all images
+    image_dict[key] = ammico.EmotionDetector(
+        image_dict[key]
+    ).analyse_image()  # analyse image with EmotionDetector and update dict
+    image_dict[key] = ammico.TextDetector(
+        image_dict[key], analyse_text=True
+    ).analyse_image()  # analyse image with TextDetector and update dict
+    image_dict[key] = image_summary_detector.analyse_image(
+        subdict=image_dict[key], analysis_type=&quot;summary&quot;
+    )  # analyse image with SummaryDetector and update dict
 
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># save results every dump_every to dump_file</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+    if (
+        num % dump_every == 0 | num == len(image_dict) - 1
+    ):  # save results every dump_every to dump_file
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -423,7 +452,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_df = ammico.get_dataframe(image_dict)
 </pre></div>
 </div>
 </div>
@@ -432,7 +461,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_df.head(3)
 </pre></div>
 </div>
 </div>
@@ -441,7 +470,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_df.to_csv(&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -453,7 +482,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ta</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">TextAnalyzer</span><span class="p">(</span><span class="n">csv_path</span><span class="o">=</span><span class="s2">&quot;../data/ref/test.csv&quot;</span><span class="p">,</span> <span class="n">column_key</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>ta = ammico.TextAnalyzer(csv_path=&quot;../data/ref/test.csv&quot;, column_key=&quot;text&quot;)
 </pre></div>
 </div>
 </div>
@@ -461,10 +490,10 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read the csv file</span>
-<span class="n">ta</span><span class="o">.</span><span class="n">read_csv</span><span class="p">()</span>
-<span class="c1"># set up the dict containing all text entries</span>
-<span class="n">text_dict</span> <span class="o">=</span> <span class="n">ta</span><span class="o">.</span><span class="n">mydict</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># read the csv file
+ta.read_csv()
+# set up the dict containing all text entries
+text_dict = ta.mydict
 </pre></div>
 </div>
 </div>
@@ -472,11 +501,11 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set the dump file</span>
-<span class="c1"># dump file name</span>
-<span class="n">dump_file</span> <span class="o">=</span> <span class="s2">&quot;dump_file.csv&quot;</span>
-<span class="c1"># dump every N images</span>
-<span class="n">dump_every</span> <span class="o">=</span> <span class="mi">10</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># set the dump file
+# dump file name
+dump_file = &quot;dump_file.csv&quot;
+# dump every N images
+dump_every = 10
 </pre></div>
 </div>
 </div>
@@ -484,12 +513,18 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># analyze the csv file</span>
-<span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">text_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">text_dict</span><span class="p">)):</span>  <span class="c1"># loop through all text entries</span>
-    <span class="n">ammico</span><span class="o">.</span><span class="n">TextDetector</span><span class="p">(</span><span class="n">text_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analyse_text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skip_extraction</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span> <span class="c1"># analyse text with TextDetector and update dict</span>
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>     <span class="c1"># save results every dump_every to dump_file</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">text_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># analyze the csv file
+for num, key in tqdm(
+    enumerate(text_dict.keys()), total=len(text_dict)
+):  # loop through all text entries
+    ammico.TextDetector(
+        text_dict[key], analyse_text=True, skip_extraction=True
+    ).analyse_image()  # analyse text with TextDetector and update dict
+    if (
+        num % dump_every == 0 | num == len(text_dict) - 1
+    ):  # save results every dump_every to dump_file
+        image_df = ammico.get_dataframe(text_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -497,8 +532,8 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># save the results to a csv file</span>
-<span class="n">text_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">text_dict</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># save the results to a csv file
+text_df = ammico.get_dataframe(text_dict)
 </pre></div>
 </div>
 </div>
@@ -506,8 +541,8 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># inspect</span>
-<span class="n">text_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># inspect
+text_df.head(3)
 </pre></div>
 </div>
 </div>
@@ -515,8 +550,8 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># write to csv</span>
-<span class="n">text_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_out.csv&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># write to csv
+text_df.to_csv(&quot;data_out.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -525,7 +560,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <section id="The-detector-modules">
 <h1>The detector modules<a class="headerlink" href="#The-detector-modules" title="Link to this heading"></a></h1>
 <p>The different detector modules with their options are explained in more detail in this section. ## Text detector Text on the images can be extracted using the <code class="docutils literal notranslate"><span class="pre">TextDetector</span></code> class (<code class="docutils literal notranslate"><span class="pre">text</span></code> module). The text is initally extracted using the Google Cloud Vision API and then translated into English with googletrans. The translated text is cleaned of whitespace, linebreaks, and numbers using Python syntax and spaCy.</p>
-<p><img alt="6533bc572b3440f4bd6993055cd4e14b" class="no-scaled-link" src="../_images/text_detector.png" style="width: 800px;" /></p>
+<p><img alt="96ef38c32c264a8f92ececbbbc61dd96" class="no-scaled-link" src="../_images/text_detector.png" style="width: 800px;" /></p>
 <p>The user can set if the text should be further summarized, and analyzed for sentiment and named entity recognition, by setting the keyword <code class="docutils literal notranslate"><span class="pre">analyse_text</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> (the default is <code class="docutils literal notranslate"><span class="pre">False</span></code>). If set, the transformers pipeline is used for each of these tasks, with the default models as of 03/2023. Other models can be selected by setting the optional keyword <code class="docutils literal notranslate"><span class="pre">model_names</span></code> to a list of selected models, on for each task:
 <code class="docutils literal notranslate"><span class="pre">model_names=[&quot;sshleifer/distilbart-cnn-12-6&quot;,</span> <span class="pre">&quot;distilbert-base-uncased-finetuned-sst-2-english&quot;,</span> <span class="pre">&quot;dbmdz/bert-large-cased-finetuned-conll03-english&quot;]</span></code> for summary, sentiment, and ner. To be even more specific, revision numbers can also be selected by specifying the optional keyword <code class="docutils literal notranslate"><span class="pre">revision_numbers</span></code> to a list of revision numbers for each model, for example <code class="docutils literal notranslate"><span class="pre">revision_numbers=[&quot;a4f8f3e&quot;,</span> <span class="pre">&quot;af0f99b&quot;,</span> <span class="pre">&quot;f2482bf&quot;]</span></code>.</p>
 <p>Please note that for the Google Cloud Vision API (the TextDetector class) you need to set a key in order to process the images. This key is ideally set as an environment variable using for example</p>
@@ -533,7 +568,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># os.environ[&quot;GOOGLE_APPLICATION_CREDENTIALS&quot;] = &quot;/content/drive/MyDrive/misinformation-data/misinformation-campaign-981aa55a3b13.json&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># os.environ[&quot;GOOGLE_APPLICATION_CREDENTIALS&quot;] = &quot;/content/drive/MyDrive/misinformation-data/misinformation-campaign-981aa55a3b13.json&quot;
 <br/></pre></div>
 </div>
 </div>
@@ -543,16 +578,25 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>  <span class="c1"># loop through all images</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">TextDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>                  <span class="c1"># analyse image with TextDetector and update dict</span>
-    <span class="n">analyse_text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">model_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sshleifer/distilbart-cnn-12-6&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;distilbert-base-uncased-finetuned-sst-2-english&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;dbmdz/bert-large-cased-finetuned-conll03-english&quot;</span><span class="p">],</span>
-    <span class="n">revision_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a4f8f3e&quot;</span><span class="p">,</span> <span class="s2">&quot;af0f99b&quot;</span><span class="p">,</span> <span class="s2">&quot;f2482bf&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for num, key in tqdm(
+    enumerate(image_dict.keys()), total=len(image_dict)
+):  # loop through all images
+    image_dict[key] = ammico.TextDetector(
+        image_dict[key],  # analyse image with TextDetector and update dict
+        analyse_text=True,
+        model_names=[
+            &quot;sshleifer/distilbart-cnn-12-6&quot;,
+            &quot;distilbert-base-uncased-finetuned-sst-2-english&quot;,
+            &quot;dbmdz/bert-large-cased-finetuned-conll03-english&quot;,
+        ],
+        revision_numbers=[&quot;a4f8f3e&quot;, &quot;af0f99b&quot;, &quot;f2482bf&quot;],
+    ).analyse_image()
 
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>   <span class="c1"># save results every dump_every to dump_file</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+    if (
+        num % dump_every == 0 | num == len(image_dict) - 1
+    ):  # save results every dump_every to dump_file
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -560,9 +604,9 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># write output to csv</span>
-<span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-<span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># write output to csv
+image_df = ammico.get_dataframe(image_dict)
+image_df.to_csv(&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -617,7 +661,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <section id="Image-summary-and-query">
 <h2>Image summary and query<a class="headerlink" href="#Image-summary-and-query" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">SummaryDetector</span></code> can be used to generate image captions (<code class="docutils literal notranslate"><span class="pre">summary</span></code>) as well as visual question answering (<code class="docutils literal notranslate"><span class="pre">VQA</span></code>).</p>
-<p><img alt="75bdd327eac04e4c98c28c0cf24f23de" class="no-scaled-link" src="../_images/summary_detector.png" style="width: 800px;" /></p>
+<p><img alt="caa083c550474cfe92f335ccb4ea32c6" class="no-scaled-link" src="../_images/summary_detector.png" style="width: 800px;" /></p>
 <p>This module is based on the <a class="reference external" href="https://github.com/salesforce/LAVIS">LAVIS</a> library. Since the models can be quite large, an initial object is created which will load the necessary models into RAM/VRAM and then use them in the analysis. The user can specify the type of analysis to be performed using the <code class="docutils literal notranslate"><span class="pre">analysis_type</span></code> keyword. Setting it to <code class="docutils literal notranslate"><span class="pre">summary</span></code> will generate a caption (summary), <code class="docutils literal notranslate"><span class="pre">questions</span></code> will prepare answers (VQA) to a list of questions as set by the user,
 <code class="docutils literal notranslate"><span class="pre">summary_and_questions</span></code> will do both. Note that the desired analysis type needs to be set here in the initialization of the detector object, and not when running the analysis for each image; the same holds true for the selected model.</p>
 <p>The implemented models are listed below.</p>
@@ -666,7 +710,9 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_summary_detector</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">SummaryDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">,</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary&quot;</span><span class="p">,</span> <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;base&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_summary_detector = ammico.SummaryDetector(
+    image_dict, analysis_type=&quot;summary&quot;, model_type=&quot;base&quot;
+)
 </pre></div>
 </div>
 </div>
@@ -674,12 +720,14 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_summary_detector</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for num, key in tqdm(enumerate(image_dict.keys()), total=len(image_dict)):
+    image_dict[key] = image_summary_detector.analyse_image(
+        subdict=image_dict[key], analysis_type=&quot;summary&quot;
+    )
 
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+    if num % dump_every == 0 | num == len(image_dict) - 1:
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -688,11 +736,11 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_questions</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;How many persons on the picture?&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Are there any politicians in the picture?&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Does the picture show something from medicine?&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>list_of_questions = [
+    &quot;How many persons on the picture?&quot;,
+    &quot;Are there any politicians in the picture?&quot;,
+    &quot;Does the picture show something from medicine?&quot;,
+]
 </pre></div>
 </div>
 </div>
@@ -701,16 +749,19 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_summary_vqa_detector</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">SummaryDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">,</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;questions&quot;</span><span class="p">,</span>
-                                                    <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;vqa&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_summary_vqa_detector = ammico.SummaryDetector(
+    image_dict, analysis_type=&quot;questions&quot;, model_type=&quot;vqa&quot;
+)
 
-<span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_summary_vqa_detector</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span><span class="o">=</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
-                                                               <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;questions&quot;</span><span class="p">,</span>
-                                                               <span class="n">list_of_questions</span> <span class="o">=</span> <span class="n">list_of_questions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+for num, key in tqdm(enumerate(image_dict.keys()), total=len(image_dict)):
+    image_dict[key] = image_summary_vqa_detector.analyse_image(
+        subdict=image_dict[key],
+        analysis_type=&quot;questions&quot;,
+        list_of_questions=list_of_questions,
+    )
+    if num % dump_every == 0 | num == len(image_dict) - 1:
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -719,15 +770,18 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_summary_vqa_detector</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">SummaryDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">,</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary_and_questions&quot;</span><span class="p">,</span>
-                                                    <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;base&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)):</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_summary_vqa_detector</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span><span class="o">=</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
-                                                               <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;summary_and_questions&quot;</span><span class="p">,</span>
-                                                               <span class="n">list_of_questions</span> <span class="o">=</span> <span class="n">list_of_questions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">num</span> <span class="o">%</span> <span class="n">dump_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="n">num</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-        <span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dump_file</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_summary_vqa_detector = ammico.SummaryDetector(
+    image_dict, analysis_type=&quot;summary_and_questions&quot;, model_type=&quot;base&quot;
+)
+for num, key in tqdm(enumerate(image_dict.keys()), total=len(image_dict)):
+    image_dict[key] = image_summary_vqa_detector.analyse_image(
+        subdict=image_dict[key],
+        analysis_type=&quot;summary_and_questions&quot;,
+        list_of_questions=list_of_questions,
+    )
+    if num % dump_every == 0 | num == len(image_dict) - 1:
+        image_df = ammico.get_dataframe(image_dict)
+        image_df.to_csv(dump_file)
 </pre></div>
 </div>
 </div>
@@ -761,21 +815,25 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obj</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">SummaryDetector</span><span class="p">(</span><span class="n">subdict</span><span class="o">=</span><span class="n">image_dict</span><span class="p">,</span> <span class="n">analysis_type</span> <span class="o">=</span> <span class="s2">&quot;summary_and_questions&quot;</span><span class="p">,</span> <span class="n">model_type</span> <span class="o">=</span> <span class="s2">&quot;blip2_t5_caption_coco_flant5xl&quot;</span><span class="p">)</span>
-<span class="c1"># list of the new models that can be used:</span>
-<span class="c1"># &quot;blip2_t5_pretrain_flant5xxl&quot;,</span>
-<span class="c1"># &quot;blip2_t5_pretrain_flant5xl&quot;,</span>
-<span class="c1"># &quot;blip2_t5_caption_coco_flant5xl&quot;,</span>
-<span class="c1"># &quot;blip2_opt_pretrain_opt2.7b&quot;,</span>
-<span class="c1"># &quot;blip2_opt_pretrain_opt6.7b&quot;,</span>
-<span class="c1"># &quot;blip2_opt_caption_coco_opt2.7b&quot;,</span>
-<span class="c1"># &quot;blip2_opt_caption_coco_opt6.7b&quot;,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>obj = ammico.SummaryDetector(
+    subdict=image_dict,
+    analysis_type=&quot;summary_and_questions&quot;,
+    model_type=&quot;blip2_t5_caption_coco_flant5xl&quot;,
+)
+# list of the new models that can be used:
+# &quot;blip2_t5_pretrain_flant5xxl&quot;,
+# &quot;blip2_t5_pretrain_flant5xl&quot;,
+# &quot;blip2_t5_caption_coco_flant5xl&quot;,
+# &quot;blip2_opt_pretrain_opt2.7b&quot;,
+# &quot;blip2_opt_pretrain_opt6.7b&quot;,
+# &quot;blip2_opt_caption_coco_opt2.7b&quot;,
+# &quot;blip2_opt_caption_coco_opt6.7b&quot;,
 
-<span class="c1"># You can use `pretrain_` model types for zero-shot image-to-text generation with prompts.</span>
-<span class="c1"># Or you can use `caption_coco_`` model types to generate coco-style captions.</span>
-<span class="c1"># `flant5` and `opt` means that the model equipped with FlanT5 and OPT LLMs respectively.</span>
+# You can use `pretrain_` model types for zero-shot image-to-text generation with prompts.
+# Or you can use `caption_coco_`` model types to generate coco-style captions.
+# `flant5` and `opt` means that the model equipped with FlanT5 and OPT LLMs respectively.
 
-<span class="c1">#also you can perform all calculation on cpu if you set device_type= &quot;cpu&quot; or gpu if you set device_type= &quot;cuda&quot;</span>
+# also you can perform all calculation on cpu if you set device_type= &quot;cpu&quot; or gpu if you set device_type= &quot;cuda&quot;
 </pre></div>
 </div>
 </div>
@@ -785,10 +843,10 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_questions</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;Question: Are there people in the image? Answer:&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Question: What is this picture about? Answer:&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>list_of_questions = [
+    &quot;Question: Are there people in the image? Answer:&quot;,
+    &quot;Question: What is this picture about? Answer:&quot;,
+]
 </pre></div>
 </div>
 </div>
@@ -796,13 +854,17 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">image_dict</span><span class="p">:</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;questions&quot;</span><span class="p">,</span> <span class="n">list_of_questions</span><span class="o">=</span><span class="n">list_of_questions</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for key in image_dict:
+    image_dict[key] = obj.analyse_image(
+        subdict=image_dict[key],
+        analysis_type=&quot;questions&quot;,
+        list_of_questions=list_of_questions,
+    )
 
-<span class="c1"># analysis_type can be</span>
-<span class="c1"># &quot;summary&quot;,</span>
-<span class="c1"># &quot;questions&quot;,</span>
-<span class="c1"># &quot;summary_and_questions&quot;.</span>
+# analysis_type can be
+# &quot;summary&quot;,
+# &quot;questions&quot;,
+# &quot;summary_and_questions&quot;.
 </pre></div>
 </div>
 </div>
@@ -812,10 +874,10 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_questions</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;Question: What country is in the picture? Answer: USA. Question: Why? Answer: Because there is an American flag in the background . Question: Where it comes from? Answer:&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Question: Which city is this? Answer: Frankfurt. Question: Why?&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>list_of_questions = [
+    &quot;Question: What country is in the picture? Answer: USA. Question: Why? Answer: Because there is an American flag in the background . Question: Where it comes from? Answer:&quot;,
+    &quot;Question: Which city is this? Answer: Frankfurt. Question: Why?&quot;,
+]
 </pre></div>
 </div>
 </div>
@@ -823,8 +885,12 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">image_dict</span><span class="p">:</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;questions&quot;</span><span class="p">,</span> <span class="n">list_of_questions</span><span class="o">=</span><span class="n">list_of_questions</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for key in image_dict:
+    image_dict[key] = obj.analyse_image(
+        subdict=image_dict[key],
+        analysis_type=&quot;questions&quot;,
+        list_of_questions=list_of_questions,
+    )
 </pre></div>
 </div>
 </div>
@@ -832,7 +898,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_dict</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_dict
 </pre></div>
 </div>
 </div>
@@ -841,10 +907,10 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_questions</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;Question: Is this picture taken inside or outside? Answer:&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Question: Why? Answer:&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>list_of_questions = [
+    &quot;Question: Is this picture taken inside or outside? Answer:&quot;,
+    &quot;Question: Why? Answer:&quot;,
+]
 </pre></div>
 </div>
 </div>
@@ -852,8 +918,13 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">image_dict</span><span class="p">:</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">(</span><span class="n">subdict</span> <span class="o">=</span> <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">analysis_type</span><span class="o">=</span><span class="s2">&quot;questions&quot;</span><span class="p">,</span> <span class="n">list_of_questions</span><span class="o">=</span><span class="n">list_of_questions</span><span class="p">,</span> <span class="n">consequential_questions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for key in image_dict:
+    image_dict[key] = obj.analyse_image(
+        subdict=image_dict[key],
+        analysis_type=&quot;questions&quot;,
+        list_of_questions=list_of_questions,
+        consequential_questions=True,
+    )
 </pre></div>
 </div>
 </div>
@@ -861,7 +932,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_dict</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_dict
 </pre></div>
 </div>
 </div>
@@ -869,9 +940,9 @@ directly on the right next to the image. This way, the user can directly inspect
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># write output to csv</span>
-<span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-<span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># write output to csv
+image_df = ammico.get_dataframe(image_dict)
+image_df.to_csv(&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -880,7 +951,7 @@ directly on the right next to the image. This way, the user can directly inspect
 <section id="Detection-of-faces-and-facial-expression-analysis">
 <h2>Detection of faces and facial expression analysis<a class="headerlink" href="#Detection-of-faces-and-facial-expression-analysis" title="Link to this heading"></a></h2>
 <p>Faces and facial expressions are detected and analyzed using the <code class="docutils literal notranslate"><span class="pre">EmotionDetector</span></code> class from the <code class="docutils literal notranslate"><span class="pre">faces</span></code> module. Initially, it is detected if faces are present on the image using RetinaFace, followed by analysis if face masks are worn (Face-Mask-Detection). The probabilistic detection of age, gender, race, and emotions is carried out with deepface, but only if the disclosure statement has been accepted (see above).</p>
-<p><img alt="fa3aebcfc94e45588bcfc17b53fcaf60" class="no-scaled-link" src="../_images/emotion_detector.png" style="width: 800px;" /></p>
+<p><img alt="4f1efe8e931d4755b83bd849c2703dc1" class="no-scaled-link" src="../_images/emotion_detector.png" style="width: 800px;" /></p>
 <p>Depending on the features found on the image, the face detection module returns a different analysis content: If no faces are found on the image, all further steps are skipped and the result <code class="docutils literal notranslate"><span class="pre">&quot;face&quot;:</span> <span class="pre">&quot;No&quot;,</span> <span class="pre">&quot;multiple_faces&quot;:</span> <span class="pre">&quot;No&quot;,</span> <span class="pre">&quot;no_faces&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;wears_mask&quot;:</span> <span class="pre">[&quot;No&quot;],</span> <span class="pre">&quot;age&quot;:</span> <span class="pre">[None],</span> <span class="pre">&quot;gender&quot;:</span> <span class="pre">[None],</span> <span class="pre">&quot;race&quot;:</span> <span class="pre">[None],</span> <span class="pre">&quot;emotion&quot;:</span> <span class="pre">[None],</span> <span class="pre">&quot;emotion</span> <span class="pre">(category)&quot;:</span> <span class="pre">[None]</span></code> is returned. If one or several faces are found, up to three faces are analyzed if they are partially concealed by a face mask. If
 yes, only age and gender are detected; if no, also race, emotion, and dominant emotion are detected. In case of the latter, the output could look like this: <code class="docutils literal notranslate"><span class="pre">&quot;face&quot;:</span> <span class="pre">&quot;Yes&quot;,</span> <span class="pre">&quot;multiple_faces&quot;:</span> <span class="pre">&quot;Yes&quot;,</span> <span class="pre">&quot;no_faces&quot;:</span> <span class="pre">2,</span> <span class="pre">&quot;wears_mask&quot;:</span> <span class="pre">[&quot;No&quot;,</span> <span class="pre">&quot;No&quot;],</span> <span class="pre">&quot;age&quot;:</span> <span class="pre">[27,</span> <span class="pre">28],</span> <span class="pre">&quot;gender&quot;:</span> <span class="pre">[&quot;Man&quot;,</span> <span class="pre">&quot;Man&quot;],</span> <span class="pre">&quot;race&quot;:</span> <span class="pre">[&quot;asian&quot;,</span> <span class="pre">None],</span> <span class="pre">&quot;emotion&quot;:</span> <span class="pre">[&quot;angry&quot;,</span> <span class="pre">&quot;neutral&quot;],</span> <span class="pre">&quot;emotion</span> <span class="pre">(category)&quot;:</span> <span class="pre">[&quot;Negative&quot;,</span> <span class="pre">&quot;Neutral&quot;]</span></code>, where for the two faces that are detected (given by <code class="docutils literal notranslate"><span class="pre">no_faces</span></code>), some of the values are returned as a list
 with the first item for the first (largest) face and the second item for the second (smaller) face (for example, <code class="docutils literal notranslate"><span class="pre">&quot;emotion&quot;</span></code> returns a list <code class="docutils literal notranslate"><span class="pre">[&quot;angry&quot;,</span> <span class="pre">&quot;neutral&quot;]</span></code> signifying the first face expressing anger, and the second face having a neutral expression).</p>
@@ -895,10 +966,14 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">EmotionDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">emotion_threshold</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">race_threshold</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-                                             <span class="n">gender_threshold</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-                                             <span class="n">accept_disclosure</span><span class="o">=</span><span class="s2">&quot;DISCLOSURE_AMMICO&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for key in image_dict.keys():
+    image_dict[key] = ammico.EmotionDetector(
+        image_dict[key],
+        emotion_threshold=50,
+        race_threshold=50,
+        gender_threshold=50,
+        accept_disclosure=&quot;DISCLOSURE_AMMICO&quot;,
+    ).analyse_image()
 </pre></div>
 </div>
 </div>
@@ -906,9 +981,9 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># write output to csv</span>
-<span class="n">image_df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-<span class="n">image_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># write output to csv
+image_df = ammico.get_dataframe(image_dict)
+image_df.to_csv(&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -979,12 +1054,12 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_type</span> <span class="o">=</span> <span class="s2">&quot;blip&quot;</span>
-<span class="c1"># model_type = &quot;blip2&quot;</span>
-<span class="c1"># model_type = &quot;albef&quot;</span>
-<span class="c1"># model_type = &quot;clip_base&quot;</span>
-<span class="c1"># model_type = &quot;clip_vitl14&quot;</span>
-<span class="c1"># model_type = &quot;clip_vitl14_336&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model_type = &quot;blip&quot;
+# model_type = &quot;blip2&quot;
+# model_type = &quot;albef&quot;
+# model_type = &quot;clip_base&quot;
+# model_type = &quot;clip_vitl14&quot;
+# model_type = &quot;clip_vitl14_336&quot;
 </pre></div>
 </div>
 </div>
@@ -993,7 +1068,7 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_obj</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">MultimodalSearch</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>my_obj = ammico.MultimodalSearch(image_dict)
 </pre></div>
 </div>
 </div>
@@ -1001,17 +1076,17 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
-    <span class="n">model</span><span class="p">,</span>
-    <span class="n">vis_processors</span><span class="p">,</span>
-    <span class="n">txt_processors</span><span class="p">,</span>
-    <span class="n">image_keys</span><span class="p">,</span>
-    <span class="n">image_names</span><span class="p">,</span>
-    <span class="n">features_image_stacked</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">=</span> <span class="n">my_obj</span><span class="o">.</span><span class="n">parsing_images</span><span class="p">(</span>
-    <span class="n">model_type</span><span class="p">,</span>
-    <span class="n">path_to_save_tensors</span><span class="o">=</span><span class="s2">&quot;/content/drive/MyDrive/misinformation-data/&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>(
+    model,
+    vis_processors,
+    txt_processors,
+    image_keys,
+    image_names,
+    features_image_stacked,
+) = my_obj.parsing_images(
+    model_type,
+    path_to_save_tensors=&quot;/content/drive/MyDrive/misinformation-data/&quot;,
+)
 </pre></div>
 </div>
 </div>
@@ -1021,19 +1096,19 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># uncomment the code below if you want to load the tensors from the drive</span>
-<span class="c1"># and just want to ask different questions for the same set of images</span>
-<span class="c1"># (</span>
-<span class="c1">#     model,</span>
-<span class="c1">#     vis_processors,</span>
-<span class="c1">#     txt_processors,</span>
-<span class="c1">#     image_keys,</span>
-<span class="c1">#     image_names,</span>
-<span class="c1">#     features_image_stacked,</span>
-<span class="c1"># ) = my_obj.parsing_images(</span>
-<span class="c1">#     model_type,</span>
-<span class="c1">#     path_to_load_tensors=&quot;/content/drive/MyDrive/misinformation-data/5_clip_base_saved_features_image.pt&quot;,</span>
-<span class="c1"># )</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># uncomment the code below if you want to load the tensors from the drive
+# and just want to ask different questions for the same set of images
+# (
+#     model,
+#     vis_processors,
+#     txt_processors,
+#     image_keys,
+#     image_names,
+#     features_image_stacked,
+# ) = my_obj.parsing_images(
+#     model_type,
+#     path_to_load_tensors=&quot;/content/drive/MyDrive/misinformation-data/5_clip_base_saved_features_image.pt&quot;,
+# )
 </pre></div>
 </div>
 </div>
@@ -1046,15 +1121,20 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">importlib_resources</span>                                                                       <span class="c1"># only require for image query example</span>
-<span class="n">image_example_query</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">importlib_resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;ammico&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;test-crop-image.png&quot;</span><span class="p">)</span>   <span class="c1"># creating the path to the image for the image query example</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import importlib_resources  # only require for image query example
 
-<span class="n">search_query</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s2">&quot;text_input&quot;</span><span class="p">:</span> <span class="s2">&quot;politician press conference&quot;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;text_input&quot;</span><span class="p">:</span> <span class="s2">&quot;a world map&quot;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;text_input&quot;</span><span class="p">:</span> <span class="s2">&quot;a dog&quot;</span><span class="p">},</span>            <span class="c1"># This is how looks text query</span>
-    <span class="p">{</span><span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">image_example_query</span><span class="p">},</span>      <span class="c1"># This is how looks image query, here `image_example_path` is the path to query image like &quot;data/test-crop-image.png&quot;</span>
-<span class="p">]</span>
+image_example_query = str(
+    importlib_resources.files(&quot;ammico&quot;) / &quot;data&quot; / &quot;test-crop-image.png&quot;
+)  # creating the path to the image for the image query example
+
+search_query = [
+    {&quot;text_input&quot;: &quot;politician press conference&quot;},
+    {&quot;text_input&quot;: &quot;a world map&quot;},
+    {&quot;text_input&quot;: &quot;a dog&quot;},  # This is how looks text query
+    {
+        &quot;image&quot;: image_example_query
+    },  # This is how looks image query, here `image_example_path` is the path to query image like &quot;data/test-crop-image.png&quot;
+]
 </pre></div>
 </div>
 </div>
@@ -1068,16 +1148,16 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">similarity</span><span class="p">,</span> <span class="n">sorted_lists</span> <span class="o">=</span> <span class="n">my_obj</span><span class="o">.</span><span class="n">multimodal_search</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">,</span>
-    <span class="n">vis_processors</span><span class="p">,</span>
-    <span class="n">txt_processors</span><span class="p">,</span>
-    <span class="n">model_type</span><span class="p">,</span>
-    <span class="n">image_keys</span><span class="p">,</span>
-    <span class="n">features_image_stacked</span><span class="p">,</span>
-    <span class="n">search_query</span><span class="p">,</span>
-    <span class="n">filter_number_of_images</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>similarity, sorted_lists = my_obj.multimodal_search(
+    model,
+    vis_processors,
+    txt_processors,
+    model_type,
+    image_keys,
+    features_image_stacked,
+    search_query,
+    filter_number_of_images=20,
+)
 </pre></div>
 </div>
 </div>
@@ -1085,7 +1165,7 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">similarity</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>similarity
 </pre></div>
 </div>
 </div>
@@ -1093,7 +1173,7 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sorted_lists</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>sorted_lists
 </pre></div>
 </div>
 </div>
@@ -1102,7 +1182,7 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">image_dict</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>image_dict
 </pre></div>
 </div>
 </div>
@@ -1111,9 +1191,9 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_obj</span><span class="o">.</span><span class="n">show_results</span><span class="p">(</span>
-    <span class="n">search_query</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="c1"># you can change the index to see the results for other queries</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>my_obj.show_results(
+    search_query[0],  # you can change the index to see the results for other queries
+)
 </pre></div>
 </div>
 </div>
@@ -1121,9 +1201,9 @@ default is set to 50%, so that a confidence above 0.5 results in an emotion bein
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_obj</span><span class="o">.</span><span class="n">show_results</span><span class="p">(</span>
-    <span class="n">search_query</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># you can change the index to see the results for other queries</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>my_obj.show_results(
+    search_query[3],  # you can change the index to see the results for other queries
+)
 </pre></div>
 </div>
 </div>
@@ -1136,9 +1216,9 @@ images being processed simultaneously. With the parameter <code class="docutils 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">itm_model</span> <span class="o">=</span> <span class="s2">&quot;blip_base&quot;</span>
-<span class="c1"># itm_model = &quot;blip_large&quot;</span>
-<span class="c1"># itm_model = &quot;blip2_coco&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>itm_model = &quot;blip_base&quot;
+# itm_model = &quot;blip_large&quot;
+# itm_model = &quot;blip2_coco&quot;
 </pre></div>
 </div>
 </div>
@@ -1146,14 +1226,14 @@ images being processed simultaneously. With the parameter <code class="docutils 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">itm_scores</span><span class="p">,</span> <span class="n">image_gradcam_with_itm</span> <span class="o">=</span> <span class="n">my_obj</span><span class="o">.</span><span class="n">image_text_match_reordering</span><span class="p">(</span>
-    <span class="n">search_query</span><span class="p">,</span>
-    <span class="n">itm_model</span><span class="p">,</span>
-    <span class="n">image_keys</span><span class="p">,</span>
-    <span class="n">sorted_lists</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">need_grad_cam</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>itm_scores, image_gradcam_with_itm = my_obj.image_text_match_reordering(
+    search_query,
+    itm_model,
+    image_keys,
+    sorted_lists,
+    batch_size=1,
+    need_grad_cam=True,
+)
 </pre></div>
 </div>
 </div>
@@ -1162,9 +1242,9 @@ images being processed simultaneously. With the parameter <code class="docutils 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_obj</span><span class="o">.</span><span class="n">show_results</span><span class="p">(</span>
-    <span class="n">search_query</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">itm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">image_gradcam_with_itm</span><span class="o">=</span><span class="n">image_gradcam_with_itm</span>
-<span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>my_obj.show_results(
+    search_query[0], itm=True, image_gradcam_with_itm=image_gradcam_with_itm
+)
 </pre></div>
 </div>
 </div>
@@ -1176,8 +1256,8 @@ images being processed simultaneously. With the parameter <code class="docutils 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outdict</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">append_data_to_dict</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">dump_df</span><span class="p">(</span><span class="n">outdict</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>outdict = ammico.append_data_to_dict(image_dict)
+df = ammico.dump_df(outdict)
 </pre></div>
 </div>
 </div>
@@ -1186,7 +1266,7 @@ images being processed simultaneously. With the parameter <code class="docutils 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df.head(10)
 </pre></div>
 </div>
 </div>
@@ -1195,7 +1275,7 @@ images being processed simultaneously. With the parameter <code class="docutils 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df.to_csv(&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -1210,8 +1290,8 @@ server.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analysis_explorer</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">AnalysisExplorer</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
-<span class="n">analysis_explorer</span><span class="o">.</span><span class="n">run_server</span><span class="p">(</span><span class="n">port</span> <span class="o">=</span> <span class="mi">8057</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>analysis_explorer = ammico.AnalysisExplorer(image_dict)
+analysis_explorer.run_server(port=8057)
 </pre></div>
 </div>
 </div>
@@ -1220,8 +1300,8 @@ server.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">image_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-    <span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ColorDetector</span><span class="p">(</span><span class="n">image_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">analyse_image</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for key in image_dict.keys():
+    image_dict[key] = ammico.colors.ColorDetector(image_dict[key]).analyse_image()
 </pre></div>
 </div>
 </div>
@@ -1230,7 +1310,7 @@ server.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">ammico</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">(</span><span class="n">image_dict</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df = ammico.get_dataframe(image_dict)
 </pre></div>
 </div>
 </div>
@@ -1239,7 +1319,7 @@ server.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df.head(10)
 </pre></div>
 </div>
 </div>
@@ -1248,7 +1328,7 @@ server.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>df.to_csv(&quot;/content/drive/MyDrive/misinformation-data/data_out.csv&quot;)
 </pre></div>
 </div>
 </div>
@@ -1264,7 +1344,7 @@ server.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../create_API_key_link.html" class="btn btn-neutral float-left" title="Instructions how to generate and enable a google Cloud Vision API key" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Example%20cropposts.html" class="btn btn-neutral float-right" title="Crop posts module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../modules.html" class="btn btn-neutral float-right" title="AMMICO package modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
