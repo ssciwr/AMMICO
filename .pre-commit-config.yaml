@@ -4,15 +4,11 @@ repos:
     hooks:
     - id: nbstripout
       files: ".ipynb"
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+    rev: v0.12.10
     hooks:
-    - id: black
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.1.2 
-    hooks:
-    - id: flake8
-  - repo: https://github.com/s-weigand/flake8-nb
-    rev: v0.5.3
-    hooks:
-    - id: flake8-nb
+      # Run the linter.
+      - id: ruff-check
+      # Run the formatter.
+      - id: ruff-format

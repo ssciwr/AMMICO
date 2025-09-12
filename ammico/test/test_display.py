@@ -42,29 +42,6 @@ def test_AnalysisExplorer(get_AE, get_options):
     assert get_AE.update_picture(None) is None
 
 
-def test_right_output_analysis_summary(get_AE, get_options, monkeypatch):
-    monkeypatch.setenv("SOME_VAR", "True")
-    monkeypatch.setenv("OTHER_VAR", "True")
-    get_AE._right_output_analysis(
-        2,
-        get_options[3],
-        get_options[0],
-        "SummaryDetector",
-        True,
-        None,
-        None,
-        "SOME_VAR",
-        50,
-        50,
-        50,
-        "OTHER_VAR",
-        "CIE 1976",
-        "summary_and_questions",
-        "base",
-        "How many people are in the picture?",
-    )
-
-
 def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
     monkeypatch.setenv("SOME_VAR", "True")
     monkeypatch.setenv("OTHER_VAR", "True")
@@ -74,15 +51,10 @@ def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
         get_options[0],
         "EmotionDetector",
         True,
-        None,
-        None,
         "SOME_VAR",
         50,
         50,
         50,
         "OTHER_VAR",
         "CIE 1976",
-        "summary_and_questions",
-        "base",
-        "How many people are in the picture?",
     )

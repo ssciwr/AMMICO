@@ -9,16 +9,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
-    - uses: actions/checkout@v3
+        python-version: '3.11'
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
     - name: install ammico
       run: |
-        pip install -e .
-        python -m pip install -r requirements-dev.txt
+        python -m pip install uv
+        uv pip install --system -e .[dev]
     - name: set google auth
       uses: 'google-github-actions/auth@v0.4.0'
       with:

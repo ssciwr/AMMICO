@@ -15,8 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04,windows-latest,macos-latest]
-        python-version: [3.11]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11']
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -24,63 +24,16 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: install ffmpeg on macos
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install ffmpeg
     - name: Install dependencies
       run: |
-        pip install -e .
-        pip install typing_extensions==4.13.0
-        # python -m pip install uv
-        # uv pip install --system -e .
-    - name: Run pytest test_colors
+        pip install spacy --no-binary blis # do not compile blis from source
+        pip install -e .[dev]
+    - name: Run pytest 
       run: |
         cd ammico
-        python -m pytest test/test_colors.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_cropposts
-      run: |
-        cd ammico
-        python -m pytest test/test_cropposts.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_display
-      run: |
-        cd ammico
-        python -m pytest test/test_display.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_faces
-      run: |
-        cd ammico
-        python -m pytest test/test_faces.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_multimodal_search
-      run: |
-        cd ammico
-        python -m pytest test/test_multimodal_search.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-    - name: Clear cache ubuntu 1
-      if: matrix.os == 'ubuntu-22.04'
-      run: |
-          rm -rf ~/.cache/*    
-    - name: Run pytest test_summary
-      run: |
-        cd ammico
-        python -m pytest test/test_summary.py -m "not long" -svv --cov=. --cov-report=xml --cov-append
-    - name: Clear cache ubuntu 2
-      if: matrix.os == 'ubuntu-24.04'
-      run: |
-          rm -rf ~/.cache/*
-    - name: Run pytest test_text
-      run: |
-        cd ammico
-        python -m pytest test/test_text.py -m "not gcv" -svv --cov=. --cov-report=xml --cov-append
-    - name: Run pytest test_utils
-      run: |
-        cd ammico
-        python -m pytest test/test_utils.py -svv --cov=. --cov-report=xml --cov-append
-    - name: Run Notebook tests
-      run: |
-        cd ammico/notebooks
-        python -m pytest --nbval DemoNotebook_ammico_MultimodalSearch.ipynb
-        
+        python -m pytest -svv -m "not gcv" --cov=. --cov-report=xml
     - name: Upload coverage
-      if: matrix.os == 'ubuntu-24.04' && matrix.python-version == '3.11'
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

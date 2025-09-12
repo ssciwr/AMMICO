@@ -1,8 +1,6 @@
 import ammico.faces as faces
 import ammico.text as text
 import ammico.colors as colors
-from ammico.utils import is_interactive
-import ammico.summary as summary
 import pandas as pd
 from dash import html, Input, Output, dcc, State, Dash
 from PIL import Image
@@ -97,17 +95,12 @@ class AnalysisExplorer:
             State("left_select_id", "value"),
             State("Dropdown_select_Detector", "value"),
             State("setting_Text_analyse_text", "value"),
-            State("setting_Text_model_names", "value"),
-            State("setting_Text_revision_numbers", "value"),
             State("setting_privacy_env_var", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
             State("setting_Emotion_gender_threshold", "value"),
             State("setting_Emotion_env_var", "value"),
             State("setting_Color_delta_e_method", "value"),
-            State("setting_Summary_analysis_type", "value"),
-            State("setting_Summary_model", "value"),
-            State("setting_Summary_list_of_questions", "value"),
             prevent_initial_call=True,
         )(self._right_output_analysis)
 
@@ -115,7 +108,6 @@ class AnalysisExplorer:
             Output("settings_TextDetector", "style"),
             Output("settings_EmotionDetector", "style"),
             Output("settings_ColorDetector", "style"),
-            Output("settings_Summary_Detector", "style"),
             Input("Dropdown_select_Detector", "value"),
         )(self._update_detector_setting)
 
@@ -190,45 +182,6 @@ class AnalysisExplorer:
                                 align="start",
                             ),
                         ),
-                        # text row 2
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        html.P(
-                                            "Select models for text_summary, text_sentiment, text_NER or leave blank for default:",
-                                            # style={"width": "45%"},
-                                        ),
-                                    ]
-                                ),  #
-                                dbc.Col(
-                                    [
-                                        html.P(
-                                            "Select model revision number for text_summary, text_sentiment, text_NER or leave blank for default:"
-                                        ),
-                                    ]
-                                ),
-                            ]
-                        ),  # row 2
-                        #  input row 3
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    dcc.Input(
-                                        type="text",
-                                        id="setting_Text_model_names",
-                                        style={"width": "100%"},
-                                    ),
-                                ),
-                                dbc.Col(
-                                    dcc.Input(
-                                        type="text",
-                                        id="setting_Text_revision_numbers",
-                                        style={"width": "100%"},
-                                    ),
-                                ),
-                            ]
-                        ),  # row 3
                     ],
                 ),  # text summary end
                 # start emotion detector
@@ -319,47 +272,6 @@ class AnalysisExplorer:
                         )
                     ],
                 ),
-                html.Div(
-                    id="settings_Summary_Detector",
-                    style={"display": "none"},
-                    children=[
-                        dbc.Col(
-                            [
-                                dbc.Row([html.P("Analysis type:")]),
-                                dbc.Row([html.P("Model type:")]),
-                                dbc.Row([html.P("Analysis question:")]),
-                            ],
-                        ),
-                        dbc.Col(
-                            [
-                                dbc.Row(
-                                    dcc.Dropdown(
-                                        options=SUMMARY_ANALYSIS_TYPE,
-                                        value="summary_and_questions",
-                                        id="setting_Summary_analysis_type",
-                                    )
-                                ),
-                                dbc.Row(
-                                    dcc.Dropdown(
-                                        options=SUMMARY_MODEL,
-                                        value="base",
-                                        id="setting_Summary_model",
-                                    )
-                                ),
-                                dbc.Row(
-                                    dcc.Input(
-                                        type="text",
-                                        id="setting_Summary_list_of_questions",
-                                        style={
-                                            "height": "auto",
-                                            "margin-left": "11px",
-                                        },
-                                    ),
-                                ),
-                            ]
-                        ),
-                    ],
-                ),
             ],
             style={"width": "100%", "display": "inline-block"},
         )
@@ -380,7 +292,6 @@ class AnalysisExplorer:
                                 options=[
                                     "TextDetector",
                                     "EmotionDetector",
-                                    "SummaryDetector",
                                     "ColorDetector",
                                 ],
                                 value="TextDetector",
@@ -472,9 +383,6 @@ class AnalysisExplorer:
         if setting_input == "ColorDetector":
             return display_none, display_none, display_flex, display_none
 
-        if setting_input == "SummaryDetector":
-            return display_none, display_none, display_none, display_flex
-
         else:
             return display_none, display_none, display_none, display_none
 
@@ -485,17 +393,12 @@ class AnalysisExplorer:
         current_img_value: str,
         detector_value: str,
         settings_text_analyse_text: list,
-        settings_text_model_names: str,
-        settings_text_revision_numbers: str,
         setting_privacy_env_var: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
         setting_emotion_gender_threshold: int,
         setting_emotion_env_var: str,
         setting_color_delta_e_method: str,
-        setting_summary_analysis_type: str,
-        setting_summary_model: str,
-        setting_summary_list_of_questions: str,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
 
@@ -509,7 +412,6 @@ class AnalysisExplorer:
         identify_dict = {
             "EmotionDetector": faces.EmotionDetector,
             "TextDetector": text.TextDetector,
-            "SummaryDetector": summary.SummaryDetector,
             "ColorDetector": colors.ColorDetector,
         }
 
@@ -530,16 +432,6 @@ class AnalysisExplorer:
             detector_class = identify_function(
                 image_copy,
                 analyse_text=analyse_text,
-                model_names=(
-                    [settings_text_model_names]
-                    if (settings_text_model_names is not None)
-                    else None
-                ),
-                revision_numbers=(
-                    [settings_text_revision_numbers]
-                    if (settings_text_revision_numbers is not None)
-                    else None
-                ),
                 accept_privacy=(
                     setting_privacy_env_var
                     if setting_privacy_env_var
@@ -562,17 +454,6 @@ class AnalysisExplorer:
             detector_class = identify_function(
                 image_copy,
                 delta_e_method=setting_color_delta_e_method,
-            )
-        elif detector_value == "SummaryDetector":
-            detector_class = identify_function(
-                image_copy,
-                analysis_type=setting_summary_analysis_type,
-                model_type=setting_summary_model,
-                list_of_questions=(
-                    [setting_summary_list_of_questions]
-                    if (setting_summary_list_of_questions is not None)
-                    else None
-                ),
             )
         else:
             detector_class = identify_function(image_copy)

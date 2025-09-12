@@ -1,7 +1,5 @@
 import numpy as np
 import webcolors
-import pandas as pd
-from collections import defaultdict
 import colorgram
 import colour
 from ammico.utils import get_color_table, AnalysisMethod
