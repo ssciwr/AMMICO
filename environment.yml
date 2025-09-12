@@ -1,0 +1,19 @@
+name: ammico-dev
+channels:
+  - pytorch
+  - nvidia
+  - rapidsai
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - cudatoolkit=11.8
+  - pytorch=2.3.1 
+  - pytorch-cuda=11.8 
+  - torchvision=0.18.1
+  - torchaudio=2.3.1
+  - faiss-gpu-raft=1.8.0
+  - ipykernel
+  - jupyterlab
+  - jupyterlab_widgets
