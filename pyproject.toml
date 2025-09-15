@@ -39,7 +39,7 @@ dependencies = [
     "retina_face",
     "setuptools",
     "spacy",
-    "tensorflow<=2.16.0",
+    "tensorflow<=2.20.0",
     "tf-keras",
     "tqdm",
     "webcolors",
