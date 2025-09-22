@@ -9,7 +9,6 @@ import warnings
 from typing import List, Optional, Union, Dict, Any
 from collections.abc import Sequence as _Sequence
 from transformers import GenerationConfig
-import re
 from qwen_vl_utils import process_vision_info
 
 

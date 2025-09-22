@@ -7,6 +7,9 @@ import collections
 import random
 
 
+from enum import Enum
+
+
 pkg = importlib_resources.files("ammico")
 
 
@@ -38,6 +41,12 @@ def ammico_prefetch_models():
     """Prefetch all the download resources"""
     for res in DownloadResource.resources:
         res.get()
+
+
+class AnalysisType(str, Enum):
+    SUMMARY = "summary"
+    QUESTIONS = "questions"
+    SUMMARY_AND_QUESTIONS = "summary_and_questions"
 
 
 class AnalysisMethod:
