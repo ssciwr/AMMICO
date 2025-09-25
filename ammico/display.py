@@ -94,7 +94,6 @@ class AnalysisExplorer:
             State("left_select_id", "options"),
             State("left_select_id", "value"),
             State("Dropdown_select_Detector", "value"),
-            State("setting_Text_analyse_text", "value"),
             State("setting_privacy_env_var", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
@@ -157,14 +156,6 @@ class AnalysisExplorer:
                     id="settings_TextDetector",
                     style={"display": "none"},
                     children=[
-                        dbc.Row(
-                            dcc.Checklist(
-                                ["Analyse text"],
-                                ["Analyse text"],
-                                id="setting_Text_analyse_text",
-                                style={"margin-bottom": "10px"},
-                            ),
-                        ),
                         # row 1
                         dbc.Row(
                             dbc.Col(
@@ -344,7 +335,7 @@ class AnalysisExplorer:
             port (int, optional): The port number to run the server on (default: 8050).
         """
 
-        self.app.run_server(debug=True, port=port)
+        self.app.run(debug=True, port=port)
 
     # Dash callbacks
     def update_picture(self, img_path: str):
@@ -375,16 +366,15 @@ class AnalysisExplorer:
         }
 
         if setting_input == "TextDetector":
-            return display_flex, display_none, display_none, display_none
+            return display_flex, display_none, display_none
 
         if setting_input == "EmotionDetector":
-            return display_none, display_flex, display_none, display_none
-
+            return display_none, display_flex, display_none
         if setting_input == "ColorDetector":
-            return display_none, display_none, display_flex, display_none
+            return display_none, display_none, display_flex
 
         else:
-            return display_none, display_none, display_none, display_none
+            return display_none, display_none, display_none
 
     def _right_output_analysis(
         self,
@@ -392,7 +382,6 @@ class AnalysisExplorer:
         all_img_options: dict,
         current_img_value: str,
         detector_value: str,
-        settings_text_analyse_text: list,
         setting_privacy_env_var: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
@@ -426,12 +415,8 @@ class AnalysisExplorer:
         identify_function = identify_dict[detector_value]
 
         if detector_value == "TextDetector":
-            analyse_text = (
-                True if settings_text_analyse_text == ["Analyse text"] else False
-            )
             detector_class = identify_function(
                 image_copy,
-                analyse_text=analyse_text,
                 accept_privacy=(
                     setting_privacy_env_var
                     if setting_privacy_env_var

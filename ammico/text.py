@@ -67,7 +67,6 @@ class TextDetector(AnalysisMethod):
     def __init__(
         self,
         subdict: dict,
-        analyse_text: bool = False,
         skip_extraction: bool = False,
         accept_privacy: str = "PRIVACY_AMMICO",
     ) -> None:
@@ -76,8 +75,6 @@ class TextDetector(AnalysisMethod):
         Args:
             subdict (dict): Dictionary containing file name/path, and possibly previous
                 analysis results from other modules.
-            analyse_text (bool, optional): Decide if extracted text will be further subject
-                to analysis. Defaults to False.
             skip_extraction (bool, optional): Decide if text will be extracted from images or
                 is already provided via a csv. Defaults to False.
             accept_privacy (str, optional): Environment variable to accept the privacy
@@ -96,17 +93,13 @@ class TextDetector(AnalysisMethod):
                 "Privacy disclosure not accepted - skipping text detection."
             )
         self.translator = Translator(raise_exception=True)
-        if not isinstance(analyse_text, bool):
-            raise ValueError("analyse_text needs to be set to true or false")
-        self.analyse_text = analyse_text
         self.skip_extraction = skip_extraction
         if not isinstance(skip_extraction, bool):
             raise ValueError("skip_extraction needs to be set to true or false")
         if self.skip_extraction:
             print("Skipping text extraction from image.")
             print("Reading text directly from provided dictionary.")
-        if self.analyse_text:
-            self._initialize_spacy()
+        self._initialize_spacy()
 
     def set_keys(self) -> dict:
         """Set the default keys for text analysis.
@@ -183,7 +176,7 @@ class TextDetector(AnalysisMethod):
             self._truncate_text()
             self.translate_text()
             self.remove_linebreaks()
-            if self.analyse_text and self.subdict["text_english"]:
+            if self.subdict["text_english"]:
                 self._run_spacy()
         return self.subdict
 
