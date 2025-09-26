@@ -50,7 +50,6 @@ def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
         get_options[3],
         get_options[0],
         "EmotionDetector",
-        True,
         "SOME_VAR",
         50,
         50,
