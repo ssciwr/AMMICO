@@ -5,6 +5,8 @@ import pandas as pd
 from dash import html, Input, Output, dcc, State, Dash
 from PIL import Image
 import dash_bootstrap_components as dbc
+import warnings
+from typing import Dict, Any, List
 
 
 COLOR_SCHEMES = [
@@ -94,6 +96,9 @@ class AnalysisExplorer:
             State("left_select_id", "options"),
             State("left_select_id", "value"),
             State("Dropdown_select_Detector", "value"),
+            State("Dropdown_analysis_type", "value"),
+            State("checkbox_enable_image_tasks", "value"),
+            State("textarea_questions", "value"),
             State("setting_privacy_env_var", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
@@ -291,6 +296,37 @@ class AnalysisExplorer:
                             ),
                             justify="start",
                         ),
+                        # NEW: Analysis-type selector (summary/questions/summary_and_questions)
+                        dbc.Row(
+                            dcc.Dropdown(
+                                id="Dropdown_analysis_type",
+                                options=[{"label": v, "value": v} for v in SUMMARY_ANALYSIS_TYPE],
+                                value="summary_and_questions",
+                                style={"width": "60%", "margin-top": "8px"},
+                            ),
+                            justify="start",
+                        ),
+                        # NEW: Enable image-level tasks (VQA / caption) checkbox
+                        dbc.Row(
+                            dcc.Checklist(
+                                id="checkbox_enable_image_tasks",
+                                options=[{"label": "Enable Image Tasks (Caption / VQA)", "value": "enabled"}],
+                                value=["enabled"],  # default enabled
+                                inline=True,
+                                style={"margin-top": "8px"},
+                            ),
+                            justify="start",
+                        ),
+                        # NEW: Questions textarea (newline-separated). Only used if analysis_type includes "questions".
+                        dbc.Row(
+                            dcc.Textarea(
+                                id="textarea_questions",
+                                value="Are there people in the image?\nWhat is this picture about?",
+                                placeholder="One question per line...",
+                                style={"width": "60%", "height": "120px", "margin-top": "8px"},
+                            ),
+                            justify="start",
+                        ),
                         dbc.Row(
                             children=[self._create_setting_layout()],
                             id="div_detector_args",
@@ -383,6 +419,7 @@ class AnalysisExplorer:
         current_img_value: str,
         detector_value: str,
         setting_privacy_env_var: str,
+        checkbox_enable_image_tasks_value: List[str],
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
         setting_emotion_gender_threshold: int,
@@ -414,6 +451,10 @@ class AnalysisExplorer:
         # detector value is the string name of the chosen detector
         identify_function = identify_dict[detector_value]
 
+        identify_function = identify_dict.get(detector_value)
+        if identify_function is None:
+            detector_class = None
+
         if detector_value == "TextDetector":
             detector_class = identify_function(
                 image_copy,
@@ -442,8 +483,32 @@ class AnalysisExplorer:
             )
         else:
             detector_class = identify_function(image_copy)
-        analysis_dict = detector_class.analyse_image()
+        
+        if detector_class is not None:
+            analysis_dict = detector_class.analyse_image()
+        else:
+            analysis_dict = {}
 
+        image_tasks_result: Dict[str, Any] = {}
+        enable_image_tasks = "enabled" in (checkbox_enable_image_tasks_value or [])
+        if enable_image_tasks:
+            # parse questions textarea: newline separated
+            if textarea_questions_value:
+                questions_list = [q.strip() for q in textarea_questions_value.splitlines() if q.strip()]
+            else:
+                questions_list = None
+
+            try:
+                image_tasks_result = self.analyse_image(
+                    image_copy,
+                    analysis_type=analysis_type_value,
+                    list_of_questions=questions_list,
+                    is_concise_summary=True,
+                    is_concise_answer=True,
+                )
+            except Exception as e:
+                warnings.warn(f"Image tasks failed: {e}")
+                image_tasks_result = {"image_tasks_error": str(e)}
         # Initialize an empty dictionary
         new_analysis_dict = {}
 
@@ -459,6 +524,18 @@ class AnalysisExplorer:
 
             # Add the new key-value pair to the new dictionary
             new_analysis_dict[k] = new_value
+        if "caption" in image_tasks_result:
+            new_analysis_dict["caption"] = image_tasks_result.get("caption", "")
+        if "vqa" in image_tasks_result:
+            # vqa is expected to be a dict; convert to readable string
+            vqa_entries = image_tasks_result["vqa"]
+            if isinstance(vqa_entries, dict):
+                new_analysis_dict["vqa"] = "; ".join([f"{q}: {a}" for q, a in vqa_entries.items()])
+            else:
+                new_analysis_dict["vqa"] = str(vqa_entries)
+        for err_key in ("caption_error", "vqa_error", "image_tasks_error"):
+            if err_key in image_tasks_result:
+                new_analysis_dict[err_key] = image_tasks_result[err_key]
 
         df = pd.DataFrame([new_analysis_dict]).set_index("filename").T
         df.index.rename("filename", inplace=True)
