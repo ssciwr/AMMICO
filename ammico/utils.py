@@ -5,8 +5,6 @@ import pooch
 import importlib_resources
 import collections
 import random
-
-
 from enum import Enum
 
 
@@ -101,6 +99,30 @@ def _limit_results(results, limit):
         )
 
     return results
+
+
+def find_videos(
+    path: str = None,
+    pattern=["mp4"],  # TODO: test with more video formats
+    recursive: bool = True,
+    limit=5,
+    random_seed: int = None,
+) -> dict:
+    """Find video files on the file system."""
+    if path is None:
+        path = os.environ.get("AMMICO_DATA_HOME", ".")
+    if isinstance(pattern, str):
+        pattern = [pattern]
+    results = []
+    for p in pattern:
+        results.extend(_match_pattern(path, p, recursive=recursive))
+    if len(results) == 0:
+        raise FileNotFoundError(f"No files found in {path} with pattern '{pattern}'")
+    if random_seed is not None:
+        random.seed(random_seed)
+        random.shuffle(results)
+    videos = _limit_results(results, limit)
+    return initialize_dict(videos)
 
 
 def find_files(
