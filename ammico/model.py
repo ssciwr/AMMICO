@@ -27,6 +27,15 @@ class MultimodalSummaryModel:
             cache_dir: huggingface cache dir (optional).
         """
         self.device = self._resolve_device(device)
+
+        if model_id is not None and model_id not in (
+            self.DEFAULT_CUDA_MODEL,
+            self.DEFAULT_CPU_MODEL,
+        ):
+            raise ValueError(
+                f"model_id must be one of {self.DEFAULT_CUDA_MODEL} or {self.DEFAULT_CPU_MODEL}"
+            )
+
         self.model_id = model_id or (
             self.DEFAULT_CUDA_MODEL if self.device == "cuda" else self.DEFAULT_CPU_MODEL
         )
@@ -94,6 +103,12 @@ class MultimodalSummaryModel:
             if self.model is not None:
                 del self.model
                 self.model = None
+            if self.processor is not None:
+                del self.processor
+                self.processor = None
+            if self.tokenizer is not None:
+                del self.tokenizer
+                self.tokenizer = None
         finally:
             try:
                 if torch.cuda.is_available():

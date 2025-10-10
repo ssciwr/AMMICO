@@ -26,10 +26,9 @@ dependencies = [
     "colour-science",
     "dash",
     "dash-bootstrap-components",
-    "decord",
     "deepface",
     "google-cloud-vision",
-    "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due the incompatibility with jupyterlab
+    "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",
     "huggingface-hub>=0.34.0",
     "importlib_metadata",

@@ -1,5 +1,6 @@
 import os
 import pytest
+from ammico.model import MultimodalSummaryModel
 
 
 @pytest.fixture
@@ -46,3 +47,12 @@ def get_test_my_dict(get_path):
         },
     }
     return test_my_dict
+
+
+@pytest.fixture(scope="session")
+def model():
+    m = MultimodalSummaryModel(device="cpu")
+    try:
+        yield m
+    finally:
+        m.close()
