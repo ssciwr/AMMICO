@@ -52,7 +52,6 @@ def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
         "EmotionDetector",
         "summary",
         "Some question",
-        True,
         "SOME_VAR",
         50,
         50,

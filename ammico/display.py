@@ -100,7 +100,6 @@ class AnalysisExplorer:
             State("Dropdown_select_Detector", "value"),
             State("Dropdown_analysis_type", "value"),
             State("textarea_questions", "value"),
-            State("setting_Text_analyse_text", "value"),
             State("setting_privacy_env_var", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
@@ -466,7 +465,6 @@ class AnalysisExplorer:
         detector_value: str,
         analysis_type_value: str,
         textarea_questions_value: str,
-        settings_text_analyse_text: list,
         setting_privacy_env_var: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
@@ -521,12 +519,8 @@ class AnalysisExplorer:
             identify_function = identify_dict[detector_value]
 
             if detector_value == "TextDetector":
-                analyse_text = (
-                    True if settings_text_analyse_text == ["Analyse text"] else False
-                )
                 detector_class = identify_function(
                     image_copy,
-                    analyse_text=analyse_text,
                     accept_privacy=(
                         setting_privacy_env_var
                         if setting_privacy_env_var
