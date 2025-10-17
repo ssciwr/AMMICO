@@ -1,9 +1,9 @@
-import decord
 import re
 import math
 import torch
 import warnings
 from PIL import Image
+from torchcodec.decoders import VideoDecoder
 
 from ammico.model import MultimodalSummaryModel
 from ammico.utils import AnalysisMethod
@@ -35,44 +35,38 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def _frame_batch_generator(
         self,
-        indices: torch.Tensor,
         timestamps: torch.Tensor,
         batch_size: int,
-        vr,
+        video_decoder: VideoDecoder,
     ) -> Generator[Tuple[torch.Tensor, torch.Tensor], None, None]:
         """
         Yield batches of (frames, timestamps) for given frame indices.
         - frames are returned as a torch.Tensor with shape (B, C, H, W).
         - timestamps is a 1D torch.Tensor with B elements.
         """
-        total = int(indices.numel())
-        device = torch.device("cpu")
+        total = int(timestamps.numel())
 
         for start in range(0, total, batch_size):
-            batch_idx_tensor = indices[start : start + batch_size]
-            # convert to python ints for decord API
-            batch_idx_list = [int(x.item()) for x in batch_idx_tensor]
+            batch_secs = timestamps[start : start + batch_size].tolist()
+            fb = video_decoder.get_frames_played_at(batch_secs)
+            frames = fb.data
 
-            # decord returns ndarray-like object; keep memory layout minimal and convert once
-            batch_frames_np = vr.get_batch(batch_idx_list).asnumpy()
-
-            # convert to CHW torch layout
-            batch_frames = (
-                torch.from_numpy(batch_frames_np).permute(0, 3, 1, 2).contiguous()
-            ).to(device, non_blocking=True)
-
-            batch_times = timestamps[start : start + batch_size].to(
-                device, non_blocking=True
+            if not frames.is_contiguous():
+                frames = frames.contiguous()
+            pts = fb.pts_seconds
+            pts_out = (
+                pts.cpu().to(dtype=torch.float32)
+                if isinstance(pts, torch.Tensor)
+                else torch.tensor(pts, dtype=torch.float32)
             )
-
-            yield batch_frames, batch_times
+            yield frames, pts_out
 
     def _extract_video_frames(
         self,
-        entry: Optional[Dict[str, Any]],
-        frame_rate_per_second: float = 2,
+        entry: Dict[str, Any],
+        frame_rate_per_second: float = 2.0,
         batch_size: int = 32,
-    ) -> Dict[str, Any]:
+    ) -> Generator[Tuple[torch.Tensor, torch.Tensor], None, None]:
         """
         Extract frames from a video at a specified frame rate and return them as a generator of batches.
         Args:
@@ -80,41 +74,57 @@ class VideoSummaryDetector(AnalysisMethod):
             frame_rate_per_second (float, optional): Frame extraction rate in frames per second. Default is 2.
             batch_size (int, optional): Number of frames to include in each batch. Default is 32.
         Returns:
-            Dict[str, Any]: A dictionary containing a generator that yields batches of frames and their timestamps
-                            and the total number of extracted frames.
+            Generator[Tuple[torch.Tensor, torch.Tensor], None, None]: A generator yielding tuples of
+            (frames, timestamps), where frames is a tensor of shape (B, C, H, W) and timestamps is a 1D tensor of length B.
         """
 
         filename = entry.get("filename")
         if not filename:
             raise ValueError("entry must contain key 'filename'")
 
-        # TODO: consider using torchcodec for video decoding, since decord is no longer actively maintained
-        vr = decord.VideoReader(filename)
+        video_decoder = VideoDecoder(filename)
+        meta = video_decoder.metadata
 
-        nframes = len(vr)
-        video_fps = vr.get_avg_fps()
-        if video_fps is None or video_fps <= 0:
+        video_fps = getattr(meta, "average_fps", None)
+        if video_fps is None or not (
+            isinstance(video_fps, (int, float)) and video_fps > 0
+        ):
             video_fps = 30.0
 
-        duration = nframes / float(video_fps)
+        begin_stream_seconds = getattr(meta, "begin_stream_seconds", None)
+        end_stream_seconds = getattr(meta, "end_stream_seconds", None)
+        nframes = len(video_decoder)
+        if getattr(meta, "duration_seconds", None) is not None:
+            duration = float(meta.duration_seconds)
+        elif begin_stream_seconds is not None and end_stream_seconds is not None:
+            duration = float(end_stream_seconds) - float(begin_stream_seconds)
+        elif nframes:
+            duration = float(nframes) / float(video_fps)
+        else:
+            duration = 0.0
 
         if frame_rate_per_second <= 0:
             raise ValueError("frame_rate_per_second must be > 0")
 
         n_samples = max(1, int(math.floor(duration * frame_rate_per_second)))
-        sample_times = (
-            torch.linspace(0, duration, steps=n_samples)
-            if n_samples > 1
-            else torch.tensor([0.0])
-        )
-        indices = (sample_times * video_fps).round().long()
-        indices = torch.clamp(indices, 0, nframes - 1).unique(sorted=True)
-        timestamps = indices.to(torch.float32) / float(video_fps)
 
-        total_samples = int(indices.numel())
-        generator = self._frame_batch_generator(indices, timestamps, batch_size, vr)
+        if begin_stream_seconds is not None and end_stream_seconds is not None:
+            sample_times = torch.linspace(
+                float(begin_stream_seconds), float(end_stream_seconds), steps=n_samples
+            )
+            if sample_times.numel() > 1:
+                sample_times = torch.clamp(
+                    sample_times,
+                    min=float(begin_stream_seconds),
+                    max=float(end_stream_seconds) - 1e-6,
+                )
+        else:
+            sample_times = torch.linspace(0.0, max(0.0, duration), steps=n_samples)
 
-        return {"generator": generator, "n_frames": total_samples}
+        sample_times = sample_times.to(dtype=torch.float32, device="cpu")
+        generator = self._frame_batch_generator(sample_times, batch_size, video_decoder)
+
+        return generator
 
     def _normalize_whitespace(self, s: str) -> str:
         return re.sub(r"\s+", " ", s).strip()
@@ -273,8 +283,8 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def brute_force_summary(
         self,
-        extracted_video_dict: Dict[str, Any],
-        summary_instruction: str = "Summarize the following frame captions into a concise paragraph (1-3 sentences):",
+        extracted_video_gen: Generator[Tuple[torch.Tensor, torch.Tensor], None, None],
+        summary_instruction: str = "Analyze the following captions from multiple frames of the same video and summarize the overall content of the video in one concise paragraph (1-3 sentences). Focus on the key themes, actions, or events across the video, not just the individual frames.",
     ) -> Dict[str, Any]:
         """
         Generate captions for all extracted frames and then produce a concise summary of the video.
@@ -285,12 +295,11 @@ class VideoSummaryDetector(AnalysisMethod):
             Dict[str, Any]: A dictionary containing the list of captions with timestamps and the final summary.
         """
 
-        gen = extracted_video_dict["generator"]
         caption_instruction = "Describe this image in one concise caption."
         collected: List[Tuple[float, str]] = []
         proc = self.summary_model.processor
 
-        for batch_frames, batch_times in gen:
+        for batch_frames, batch_times in extracted_video_gen:
             pil_list = self._tensor_batch_to_pil_list(batch_frames.cpu())
 
             prompt_texts = []
@@ -320,7 +329,6 @@ class VideoSummaryDetector(AnalysisMethod):
                 self.summary_model.tokenizer,
             )
 
-            # normalize batch_times to Python floats
             if isinstance(batch_times, torch.Tensor):
                 batch_times_list = batch_times.cpu().tolist()
             else:
@@ -329,7 +337,7 @@ class VideoSummaryDetector(AnalysisMethod):
                 collected.append((float(t), c))
 
         collected.sort(key=lambda x: x[0])
-        gen.close()
+        extracted_video_gen.close()
 
         MAX_CAPTIONS_FOR_SUMMARY = 200
         caps_for_summary = (
@@ -383,7 +391,9 @@ class VideoSummaryDetector(AnalysisMethod):
             "summary": final_summary,
         }
 
-    def analyse_video(self, frame_rate_per_second: float = 2.0) -> Dict[str, Any]:
+    def analyse_videos_from_dict(
+        self, frame_rate_per_second: float = 2.0
+    ) -> Dict[str, Any]:
         """
         Analyse the video specified in self.subdict using frame extraction and captioning.
         For short videos (<=100 frames at the specified frame rate), it uses brute-force captioning.
@@ -395,24 +405,15 @@ class VideoSummaryDetector(AnalysisMethod):
             Dict[str, Any]: A dictionary containing the analysis results, including captions and summary.
         """
 
-        minimal_edge_of_frames = 100
         all_answers = {}
         # TODO: add support for answering questions about videos
         for video_key in list(self.subdict.keys()):
             entry = self.subdict[video_key]
-            extracted_video_dict = self._extract_video_frames(
+            extracted_video_gen = self._extract_video_frames(
                 entry, frame_rate_per_second=frame_rate_per_second
             )
-            if extracted_video_dict["n_frames"] <= minimal_edge_of_frames:
-                answer = self.brute_force_summary(extracted_video_dict)
 
-            else:
-                # TODO: implement processing for long videos
-                summary_instruction = "Describe this image in a single caption, including all important details."
-                answer = self.brute_force_summary(
-                    extracted_video_dict, summary_instruction=summary_instruction
-                )
-
+            answer = self.brute_force_summary(extracted_video_gen)
             all_answers[video_key] = {"summary": answer["summary"]}
             # TODO: captions has to be post-processed with foreseeing audio analysis
 
