@@ -52,24 +52,16 @@ def test_privacy_statement(monkeypatch):
 def test_TextDetector(set_testdict, accepted):
     for item in set_testdict:
         test_obj = tt.TextDetector(set_testdict[item], accept_privacy=accepted)
-        assert not test_obj.analyse_text
         assert not test_obj.skip_extraction
         assert test_obj.subdict["filename"] == set_testdict[item]["filename"]
-    test_obj = tt.TextDetector(
-        {}, analyse_text=True, skip_extraction=True, accept_privacy=accepted
-    )
-    assert test_obj.analyse_text
+    test_obj = tt.TextDetector({}, skip_extraction=True, accept_privacy=accepted)
     assert test_obj.skip_extraction
-    with pytest.raises(ValueError):
-        tt.TextDetector({}, analyse_text=1.0, accept_privacy=accepted)
     with pytest.raises(ValueError):
         tt.TextDetector({}, skip_extraction=1.0, accept_privacy=accepted)
 
 
 def test_run_spacy(set_testdict, get_path, accepted):
-    test_obj = tt.TextDetector(
-        set_testdict["IMG_3755"], analyse_text=True, accept_privacy=accepted
-    )
+    test_obj = tt.TextDetector(set_testdict["IMG_3755"], accept_privacy=accepted)
     ref_file = get_path + "text_IMG_3755.txt"
     with open(ref_file, "r") as file:
         reference_text = file.read()
@@ -108,15 +100,11 @@ def test_analyse_image(set_testdict, set_environ, accepted):
     for item in set_testdict:
         test_obj = tt.TextDetector(set_testdict[item], accept_privacy=accepted)
         test_obj.analyse_image()
-        test_obj = tt.TextDetector(
-            set_testdict[item], analyse_text=True, accept_privacy=accepted
-        )
+        test_obj = tt.TextDetector(set_testdict[item], accept_privacy=accepted)
         test_obj.analyse_image()
     testdict = {}
     testdict["text"] = 20000 * "m"
-    test_obj = tt.TextDetector(
-        testdict, skip_extraction=True, analyse_text=True, accept_privacy=accepted
-    )
+    test_obj = tt.TextDetector(testdict, skip_extraction=True, accept_privacy=accepted)
     test_obj.analyse_image()
     assert test_obj.subdict["text_truncated"] == 5000 * "m"
     assert test_obj.subdict["text"] == 20000 * "m"
