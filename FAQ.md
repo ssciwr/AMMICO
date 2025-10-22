@@ -62,6 +62,10 @@ Be careful, it requires around 7 GB of disk space.
 
 ![Screenshot 2023-06-01 165712](https://github.com/ssciwr/AMMICO/assets/8105097/3dfb302f-c390-46a7-a700-4e044f56c30f)
 
+### Version clashes between tensorflow and numpy
+
+Due to the `faces` module, the tensorflow version is currently fixed to at most `2.14.0`. This requires that `numpy` is restricted to `numpy==1.23.5`. If you experience issues with compatibility between tensorflow and numpy, you can try fixing the numpy version to this version.
+
 ## What happens to the images that are sent to google Cloud Vision?
 
 You have to accept the privacy statement of ammico to run this type of analyis.
