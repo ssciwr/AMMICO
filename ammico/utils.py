@@ -6,6 +6,8 @@ import importlib_resources
 import collections
 import random
 from enum import Enum
+from typing import List, Tuple, Optional, Union
+import re
 
 
 pkg = importlib_resources.files("ammico")
@@ -45,6 +47,35 @@ class AnalysisType(str, Enum):
     SUMMARY = "summary"
     QUESTIONS = "questions"
     SUMMARY_AND_QUESTIONS = "summary_and_questions"
+
+    @classmethod
+    def _validate_analysis_type(
+        cls,
+        analysis_type: Union["AnalysisType", str],
+        list_of_questions: Optional[List[str]],
+    ) -> Tuple[str, bool, bool]:
+        max_questions_per_image = 15  # safety cap to avoid too many questions
+        if isinstance(analysis_type, AnalysisType):
+            analysis_type = analysis_type.value
+
+        allowed = {item.value for item in AnalysisType}
+        if analysis_type not in allowed:
+            raise ValueError(f"analysis_type must be one of {allowed}")
+
+        if analysis_type in ("questions", "summary_and_questions"):
+            if not list_of_questions:
+                raise ValueError(
+                    "list_of_questions must be provided for QUESTIONS analysis type."
+                )
+
+            if len(list_of_questions) > max_questions_per_image:
+                raise ValueError(
+                    f"Number of questions per image ({len(list_of_questions)}) exceeds safety cap ({max_questions_per_image}). Reduce questions or increase max_questions_per_image."
+                )
+
+        is_summary = analysis_type in ("summary", "summary_and_questions")
+        is_questions = analysis_type in ("questions", "summary_and_questions")
+        return analysis_type, is_summary, is_questions
 
 
 class AnalysisMethod:
@@ -99,6 +130,89 @@ def _limit_results(results, limit):
         )
 
     return results
+
+
+def _categorize_outputs(
+    collected: List[Tuple[float, str]],
+    include_questions: bool = False,
+) -> Tuple[List[str], List[str]]:
+    """
+    Categorize collected outputs into summary bullets and VQA bullets.
+    Args:
+        collected (List[Tuple[float, str]]): List of tuples containing timestamps and generated texts.
+    Returns:
+        Tuple[List[str], List[str]]: A tuple containing two lists - summary bullets and VQA bullets.
+    """
+    MAX_CAPTIONS_FOR_SUMMARY = 600  # TODO For now, this is a constant value, but later we need to make it adjustable, with the idea of cutting out the most similar frames to reduce the load on the system.
+    caps_for_summary_vqa = (
+        collected[-MAX_CAPTIONS_FOR_SUMMARY:]
+        if len(collected) > MAX_CAPTIONS_FOR_SUMMARY
+        else collected
+    )
+    bullets_summary = []
+    bullets_vqa = []
+
+    for t, c in caps_for_summary_vqa:
+        if include_questions:
+            result_sections = c.strip()
+            m = re.search(
+                r"Summary\s*:\s*(.*?)\s*(?:VQA\s+Answers\s*:\s*(.*))?$",
+                result_sections,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            if m:
+                summary_text = (
+                    m.group(1).replace("\n", " ").strip() if m.group(1) else None
+                )
+                vqa_text = m.group(2).strip() if m.group(2) else None
+                if not summary_text or not vqa_text:
+                    raise ValueError(
+                        f"Model output is missing either summary or VQA answers: {c}"
+                    )
+                bullets_summary.append(f"- [{t:.3f}s] {summary_text}")
+                bullets_vqa.append(f"- [{t:.3f}s] {vqa_text}")
+            else:
+                raise ValueError(
+                    f"Failed to parse summary and VQA answers from model output: {c}"
+                )
+        else:
+            snippet = c.replace("\n", " ").strip()
+            bullets_summary.append(f"- [{t:.3f}s] {snippet}")
+    return bullets_summary, bullets_vqa
+
+
+def _normalize_whitespace(s: str) -> str:
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _strip_prompt_prefix_literal(decoded: str, prompt: str) -> str:
+    """
+    Remove any literal prompt prefix from decoded text using a normalized-substring match.
+    Guarantees no prompt text remains at the start of returned string (best-effort).
+    """
+    if not decoded:
+        return ""
+    if not prompt:
+        return decoded.strip()
+
+    d_norm = _normalize_whitespace(decoded)
+    p_norm = _normalize_whitespace(prompt)
+
+    idx = d_norm.find(p_norm)
+    if idx != -1:
+        running = []
+        for i, ch in enumerate(decoded):
+            running.append(ch if not ch.isspace() else " ")
+            cur_norm = _normalize_whitespace("".join(running))
+            if cur_norm.endswith(p_norm):
+                return decoded[i + 1 :].lstrip() if i + 1 < len(decoded) else ""
+    m = re.match(
+        r"^(?:\s*(system|user|assistant)[:\s-]*\n?)+", decoded, flags=re.IGNORECASE
+    )
+    if m:
+        return decoded[m.end() :].lstrip()
+
+    return decoded.lstrip("\n\r ").lstrip(":;- ").strip()
 
 
 def find_videos(
