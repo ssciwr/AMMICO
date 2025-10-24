@@ -35,3 +35,24 @@ def test_image_summary_detector_questions(model, get_testdict):
             assert (
                 "two" in results[key]["vqa"][1].lower() or "2" in results[key]["vqa"][1]
             )
+
+
+def test_clean_list_of_questions(model):
+    list_of_questions = [
+        "What is happening in the image?",
+        "",
+        "   ",
+        None,
+        "How many cars are in the image in total",
+    ]
+    detector = ImageSummaryDetector(summary_model=model, subdict={})
+    prompt = detector.token_prompt_config["default"]["questions"]["prompt"]
+    cleaned_questions = detector._clean_list_of_questions(list_of_questions, prompt)
+    assert len(cleaned_questions) == 2
+    assert cleaned_questions[0] == "What is happening in the image?"
+    assert cleaned_questions[1] == "How many cars are in the image in total?"
+    prompt = detector.token_prompt_config["concise"]["questions"]["prompt"]
+    cleaned_questions = detector._clean_list_of_questions(list_of_questions, prompt)
+    assert len(cleaned_questions) == 2
+    assert cleaned_questions[0] == prompt + "What is happening in the image?"
+    assert cleaned_questions[1] == prompt + "How many cars are in the image in total?"
