@@ -97,7 +97,7 @@ class MultimodalSummaryModel:
         )
         self.model.eval()
 
-    def _close(self) -> None:
+    def close(self) -> None:
         """Free model resources (helpful in long-running processes)."""
         try:
             if self.model is not None:
@@ -120,7 +120,3 @@ class MultimodalSummaryModel:
                     RuntimeWarning,
                     stacklevel=2,
                 )
-
-    def close(self) -> None:
-        """Free model resources (helpful in long-running processes)."""
-        self._close()
