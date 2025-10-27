@@ -1,5 +1,6 @@
 from ammico.image_summary import ImageSummaryDetector
-
+import os
+from PIL import Image
 import pytest
 
 
@@ -70,13 +71,9 @@ def test_load_pil_if_needed_string(mock_model):
     """Test loading image from file path."""
     detector = ImageSummaryDetector(summary_model=mock_model)
     # This will try to actually load a file, so we'll use a test image
-    import os
-
     test_image_path = os.path.join(os.path.dirname(__file__), "data", "IMG_2746.png")
     if os.path.exists(test_image_path):
         img = detector._load_pil_if_needed(test_image_path)
-        from PIL import Image
-
         assert isinstance(img, Image.Image)
         assert img.mode == "RGB"
 
