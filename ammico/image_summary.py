@@ -289,7 +289,7 @@ class ImageSummaryDetector(AnalysisMethod):
         max_new_tokens = self.token_prompt_config[
             "concise" if is_concise_summary else "default"
         ]["summary"]["max_new_tokens"]
-        inputs = self._prepare_inputs(prompt, entry)
+        inputs = self._prepare_inputs([prompt], entry)
 
         gen_conf = GenerationConfig(
             max_new_tokens=max_new_tokens,
@@ -384,10 +384,10 @@ class ImageSummaryDetector(AnalysisMethod):
         """
         prompt = self.token_prompt_config[
             "concise" if is_concise_answer else "default"
-        ]["answer"]["prompt"]
+        ]["questions"]["prompt"]
         max_new_tokens = self.token_prompt_config[
             "concise" if is_concise_answer else "default"
-        ]["answer"]["max_new_tokens"]
+        ]["questions"]["max_new_tokens"]
 
         list_of_questions = self._clean_list_of_questions(list_of_questions, prompt)
         gen_conf = GenerationConfig(max_new_tokens=max_new_tokens, do_sample=False)
