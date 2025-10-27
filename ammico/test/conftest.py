@@ -1,5 +1,6 @@
 import os
 import pytest
+from unittest.mock import Mock, MagicMock
 from ammico.model import MultimodalSummaryModel
 
 
@@ -56,3 +57,50 @@ def model():
         yield m
     finally:
         m.close()
+
+
+@pytest.fixture
+def mock_model():
+    """
+    Mock model fixture that doesn't load the actual model.
+    Useful for faster unit tests that don't need actual model inference.
+    """
+    import torch
+
+    # Create a mock model object
+    mock_model_obj = MagicMock(spec=["generate", "eval"])
+    mock_model_obj.device = "cpu"
+    mock_model_obj.eval = MagicMock(return_value=mock_model_obj)
+
+    # Create mock processor with necessary methods
+    mock_processor = MagicMock()
+    mock_processor.apply_chat_template = MagicMock(
+        side_effect=lambda messages, **kwargs: "processed_text"
+    )
+
+    # Mock processor to return tensor-like inputs
+    def mock_processor_call(text, images, **kwargs):
+        batch_size = len(text) if isinstance(text, list) else 1
+        return {
+            "input_ids": torch.randint(0, 1000, (batch_size, 10)),
+            "pixel_values": torch.randn(batch_size, 3, 224, 224),
+            "attention_mask": torch.ones(batch_size, 10),
+        }
+
+    mock_processor.__call__ = MagicMock(side_effect=mock_processor_call)
+
+    # Create mock tokenizer
+    mock_tokenizer = MagicMock()
+    mock_tokenizer.batch_decode = MagicMock(
+        side_effect=lambda ids, **kwargs: ["mock caption" for _ in range(len(ids))]
+    )
+
+    # Create the mock model instance
+    mock_m = Mock()
+    mock_m.model = mock_model_obj
+    mock_m.processor = mock_processor
+    mock_m.tokenizer = mock_tokenizer
+    mock_m.device = "cpu"
+    mock_m.close = MagicMock()
+
+    return mock_m
