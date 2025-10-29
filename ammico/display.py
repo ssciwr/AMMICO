@@ -1,10 +1,14 @@
 import ammico.faces as faces
 import ammico.text as text
 import ammico.colors as colors
+import ammico.image_summary as image_summary
+from ammico.model import MultimodalSummaryModel
 import pandas as pd
 from dash import html, Input, Output, dcc, State, Dash
 from PIL import Image
 import dash_bootstrap_components as dbc
+import warnings
+from typing import Dict, Any, List, Optional
 
 
 COLOR_SCHEMES = [
@@ -94,7 +98,8 @@ class AnalysisExplorer:
             State("left_select_id", "options"),
             State("left_select_id", "value"),
             State("Dropdown_select_Detector", "value"),
-            State("setting_Text_analyse_text", "value"),
+            State("Dropdown_analysis_type", "value"),
+            State("textarea_questions", "value"),
             State("setting_privacy_env_var", "value"),
             State("setting_Emotion_emotion_threshold", "value"),
             State("setting_Emotion_race_threshold", "value"),
@@ -108,8 +113,14 @@ class AnalysisExplorer:
             Output("settings_TextDetector", "style"),
             Output("settings_EmotionDetector", "style"),
             Output("settings_ColorDetector", "style"),
+            Output("settings_VQA", "style"),
             Input("Dropdown_select_Detector", "value"),
         )(self._update_detector_setting)
+
+        self.app.callback(
+            Output("textarea_questions", "style"),
+            Input("Dropdown_analysis_type", "value"),
+        )(self._show_questions_textarea_on_demand)
 
     # I split the different sections into subfunctions for better clarity
     def _top_file_explorer(self, mydict: dict) -> html.Div:
@@ -157,14 +168,6 @@ class AnalysisExplorer:
                     id="settings_TextDetector",
                     style={"display": "none"},
                     children=[
-                        dbc.Row(
-                            dcc.Checklist(
-                                ["Analyse text"],
-                                ["Analyse text"],
-                                id="setting_Text_analyse_text",
-                                style={"margin-bottom": "10px"},
-                            ),
-                        ),
                         # row 1
                         dbc.Row(
                             dbc.Col(
@@ -272,8 +275,69 @@ class AnalysisExplorer:
                         )
                     ],
                 ),
+                # start VQA settings
+                html.Div(
+                    id="settings_VQA",
+                    style={"display": "none"},
+                    children=[
+                        dbc.Card(
+                            [
+                                dbc.CardBody(
+                                    [
+                                        dbc.Row(
+                                            dbc.Col(
+                                                dcc.Dropdown(
+                                                    id="Dropdown_analysis_type",
+                                                    options=[
+                                                        {"label": v, "value": v}
+                                                        for v in SUMMARY_ANALYSIS_TYPE
+                                                    ],
+                                                    value="summary_and_questions",
+                                                    clearable=False,
+                                                    style={
+                                                        "width": "100%",
+                                                        "minWidth": "240px",
+                                                        "maxWidth": "520px",
+                                                    },
+                                                ),
+                                            ),
+                                            justify="start",
+                                        ),
+                                        html.Div(style={"height": "8px"}),
+                                        dbc.Row(
+                                            [
+                                                dbc.Col(
+                                                    dcc.Textarea(
+                                                        id="textarea_questions",
+                                                        value="Are there people in the image?\nWhat is this picture about?",
+                                                        placeholder="One question per line...",
+                                                        style={
+                                                            "width": "100%",
+                                                            "minHeight": "160px",
+                                                            "height": "220px",
+                                                            "resize": "vertical",
+                                                            "overflow": "auto",
+                                                        },
+                                                        rows=8,
+                                                    ),
+                                                    width=12,
+                                                ),
+                                            ],
+                                            justify="start",
+                                        ),
+                                    ]
+                                )
+                            ],
+                            style={
+                                "width": "100%",
+                                "marginTop": "10px",
+                                "zIndex": 2000,
+                            },
+                        )
+                    ],
+                ),
             ],
-            style={"width": "100%", "display": "inline-block"},
+            style={"width": "100%", "display": "inline-block", "overflow": "visible"},
         )
         return settings_layout
 
@@ -293,6 +357,7 @@ class AnalysisExplorer:
                                     "TextDetector",
                                     "EmotionDetector",
                                     "ColorDetector",
+                                    "VQA",
                                 ],
                                 value="TextDetector",
                                 id="Dropdown_select_Detector",
@@ -344,7 +409,7 @@ class AnalysisExplorer:
             port (int, optional): The port number to run the server on (default: 8050).
         """
 
-        self.app.run_server(debug=True, port=port)
+        self.app.run(debug=True, port=port)
 
     # Dash callbacks
     def update_picture(self, img_path: str):
@@ -379,12 +444,18 @@ class AnalysisExplorer:
 
         if setting_input == "EmotionDetector":
             return display_none, display_flex, display_none, display_none
-
         if setting_input == "ColorDetector":
             return display_none, display_none, display_flex, display_none
-
+        if setting_input == "VQA":
+            return display_none, display_none, display_none, display_flex
         else:
             return display_none, display_none, display_none, display_none
+
+    def _parse_questions(self, text: Optional[str]) -> Optional[List[str]]:
+        if not text:
+            return None
+        qs = [q.strip() for q in text.splitlines() if q.strip()]
+        return qs if qs else None
 
     def _right_output_analysis(
         self,
@@ -392,7 +463,8 @@ class AnalysisExplorer:
         all_img_options: dict,
         current_img_value: str,
         detector_value: str,
-        settings_text_analyse_text: list,
+        analysis_type_value: str,
+        textarea_questions_value: str,
         setting_privacy_env_var: str,
         setting_emotion_emotion_threshold: int,
         setting_emotion_race_threshold: int,
@@ -413,54 +485,71 @@ class AnalysisExplorer:
             "EmotionDetector": faces.EmotionDetector,
             "TextDetector": text.TextDetector,
             "ColorDetector": colors.ColorDetector,
+            "VQA": image_summary.ImageSummaryDetector,
         }
 
         # Get image ID from dropdown value, which is the filepath
         if current_img_value is None:
             return {}
         image_id = all_img_options[current_img_value]
-        # copy image so prvious runs don't leave their default values in the dict
-        image_copy = self.mydict[image_id].copy()
+        image_copy = self.mydict.get(image_id, {}).copy()
 
-        # detector value is the string name of the chosen detector
-        identify_function = identify_dict[detector_value]
-
-        if detector_value == "TextDetector":
-            analyse_text = (
-                True if settings_text_analyse_text == ["Analyse text"] else False
-            )
-            detector_class = identify_function(
-                image_copy,
-                analyse_text=analyse_text,
-                accept_privacy=(
-                    setting_privacy_env_var
-                    if setting_privacy_env_var
-                    else "PRIVACY_AMMICO"
-                ),
-            )
-        elif detector_value == "EmotionDetector":
-            detector_class = identify_function(
-                image_copy,
-                emotion_threshold=setting_emotion_emotion_threshold,
-                race_threshold=setting_emotion_race_threshold,
-                gender_threshold=setting_emotion_gender_threshold,
-                accept_disclosure=(
-                    setting_emotion_env_var
-                    if setting_emotion_env_var
-                    else "DISCLOSURE_AMMICO"
-                ),
-            )
-        elif detector_value == "ColorDetector":
-            detector_class = identify_function(
-                image_copy,
-                delta_e_method=setting_color_delta_e_method,
-            )
+        analysis_dict: Dict[str, Any] = {}
+        if detector_value == "VQA":
+            try:
+                qwen_model = MultimodalSummaryModel(
+                    model_id="Qwen/Qwen2.5-VL-3B-Instruct"
+                )  # TODO: allow user to specify model
+                vqa_cls = identify_dict.get("VQA")
+                vqa_detector = vqa_cls(qwen_model, subdict={})
+                questions_list = self._parse_questions(textarea_questions_value)
+                analysis_result = vqa_detector.analyse_image(
+                    image_copy,
+                    analysis_type=analysis_type_value,
+                    list_of_questions=questions_list,
+                    is_concise_summary=True,
+                    is_concise_answer=True,
+                )
+                analysis_dict = analysis_result or {}
+            except Exception as e:
+                warnings.warn(f"VQA/Image tasks failed: {e}")
+                analysis_dict = {"image_tasks_error": str(e)}
         else:
-            detector_class = identify_function(image_copy)
-        analysis_dict = detector_class.analyse_image()
+            # detector value is the string name of the chosen detector
+            identify_function = identify_dict[detector_value]
 
-        # Initialize an empty dictionary
-        new_analysis_dict = {}
+            if detector_value == "TextDetector":
+                detector_class = identify_function(
+                    image_copy,
+                    accept_privacy=(
+                        setting_privacy_env_var
+                        if setting_privacy_env_var
+                        else "PRIVACY_AMMICO"
+                    ),
+                )
+            elif detector_value == "EmotionDetector":
+                detector_class = identify_function(
+                    image_copy,
+                    emotion_threshold=setting_emotion_emotion_threshold,
+                    race_threshold=setting_emotion_race_threshold,
+                    gender_threshold=setting_emotion_gender_threshold,
+                    accept_disclosure=(
+                        setting_emotion_env_var
+                        if setting_emotion_env_var
+                        else "DISCLOSURE_AMMICO"
+                    ),
+                )
+            elif detector_value == "ColorDetector":
+                detector_class = identify_function(
+                    image_copy,
+                    delta_e_method=setting_color_delta_e_method,
+                )
+            else:
+                detector_class = identify_function(image_copy)
+
+            analysis_dict = detector_class.analyse_image()
+
+        new_analysis_dict: Dict[str, Any] = {}
 
         # Iterate over the items in the original dictionary
         for k, v in analysis_dict.items():
@@ -480,3 +569,9 @@ class AnalysisExplorer:
         return dbc.Table.from_dataframe(
             df, striped=True, bordered=True, hover=True, index=True
         )
+
+    def _show_questions_textarea_on_demand(self, analysis_type_value: str) -> dict:
+        if analysis_type_value in ("questions", "summary_and_questions"):
+            return {"display": "block", "width": "100%"}
+        else:
+            return {"display": "none"}

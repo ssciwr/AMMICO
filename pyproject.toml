@@ -18,30 +18,37 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License",
 ]
-
+ 
 dependencies = [
+    "accelerate>=0.22",
+    "bitsandbytes",
     "colorgram.py",
     "colour-science",
     "dash",
     "dash-bootstrap-components",
     "deepface",
     "google-cloud-vision",
-    "googletrans==4.0.0rc1",
+    "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",
+    "huggingface-hub>=0.34.0",
     "importlib_metadata",
     "importlib_resources",
     "matplotlib",
-    "numpy",
+    "numpy==1.23.5",
     "opencv-python",
     "pandas",
     "Pillow",
     "pooch",
+    "qwen-vl-utils",
     "retina_face",
+    "safetensors>=0.6.2",
     "setuptools",
     "spacy",
-    "tensorflow<=2.16.0",
+    "tensorflow<2.15", # instead of <=2.16.0 to make it compatible with CUDA 11.8, may change after updating CUDA version.
     "tf-keras",
+    "torchvision",
     "tqdm",
+    "transformers>=4.54",
     "webcolors",
 ]
 
@@ -62,6 +69,7 @@ nb = [
     "datasets",
     "huggingface-hub",
     "ipython",
+    "ipykernel<=6.30.1",
     "jupyter",
     "jupyter_dash",
 ]

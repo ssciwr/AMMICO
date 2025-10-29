@@ -1,6 +1,8 @@
 from ammico.display import AnalysisExplorer
 from ammico.faces import EmotionDetector, ethical_disclosure
+from ammico.model import MultimodalSummaryModel
 from ammico.text import TextDetector, TextAnalyzer, privacy_disclosure
+from ammico.image_summary import ImageSummaryDetector
 from ammico.utils import find_files, get_dataframe
 
 # Export the version defined in project metadata
@@ -14,8 +16,10 @@ except ImportError:
 __all__ = [
     "AnalysisExplorer",
     "EmotionDetector",
+    "MultimodalSummaryModel",
     "TextDetector",
     "TextAnalyzer",
+    "ImageSummaryDetector",
     "find_files",
     "get_dataframe",
     "ethical_disclosure",
