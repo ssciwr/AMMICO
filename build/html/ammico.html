@@ -101,6 +101,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#utils.AnalysisMethod.set_keys"><code class="docutils literal notranslate"><span class="pre">AnalysisMethod.set_keys()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#utils.AnalysisType"><code class="docutils literal notranslate"><span class="pre">AnalysisType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#utils.AnalysisType.QUESTIONS"><code class="docutils literal notranslate"><span class="pre">AnalysisType.QUESTIONS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.AnalysisType.SUMMARY"><code class="docutils literal notranslate"><span class="pre">AnalysisType.SUMMARY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#utils.AnalysisType.SUMMARY_AND_QUESTIONS"><code class="docutils literal notranslate"><span class="pre">AnalysisType.SUMMARY_AND_QUESTIONS</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.DownloadResource"><code class="docutils literal notranslate"><span class="pre">DownloadResource</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#utils.DownloadResource.get"><code class="docutils literal notranslate"><span class="pre">DownloadResource.get()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#utils.DownloadResource.resources"><code class="docutils literal notranslate"><span class="pre">DownloadResource.resources</span></code></a></li>
@@ -177,7 +183,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="text.TextDetector">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">text.</span></span><span class="sig-name descname"><span class="pre">TextDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analyse_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_extraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accept_privacy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'PRIVACY_AMMICO'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#text.TextDetector" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">text.</span></span><span class="sig-name descname"><span class="pre">TextDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_extraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accept_privacy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'PRIVACY_AMMICO'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#text.TextDetector" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisMethod</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="text.TextDetector.analyse_image">
@@ -406,6 +412,27 @@ These colors are: “red”, “green”, “blue”, “yellow”,”cyan”, �
 <dl class="py method">
 <dt class="sig sig-object py" id="utils.AnalysisMethod.set_keys">
 <span class="sig-name descname"><span class="pre">set_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.AnalysisMethod.set_keys" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="utils.AnalysisType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">AnalysisType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.AnalysisType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.AnalysisType.QUESTIONS">
+<span class="sig-name descname"><span class="pre">QUESTIONS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'questions'</span></em><a class="headerlink" href="#utils.AnalysisType.QUESTIONS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.AnalysisType.SUMMARY">
+<span class="sig-name descname"><span class="pre">SUMMARY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'summary'</span></em><a class="headerlink" href="#utils.AnalysisType.SUMMARY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="utils.AnalysisType.SUMMARY_AND_QUESTIONS">
+<span class="sig-name descname"><span class="pre">SUMMARY_AND_QUESTIONS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'summary_and_questions'</span></em><a class="headerlink" href="#utils.AnalysisType.SUMMARY_AND_QUESTIONS" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

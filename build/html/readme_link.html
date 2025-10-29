@@ -118,7 +118,13 @@
 <ol class="arabic simple">
 <li><p>Textual summary of the image content (“image caption”) that can be analyzed further using the above tools</p></li>
 <li><p>Feature extraction from the images: User inputs query and images are matched to that query (both text and image query)</p></li>
-<li><p>Question answering</p></li>
+<li><p>Question answering about image content</p></li>
+</ol>
+</li>
+<li><p>Content extractioni from the videos</p>
+<ol class="arabic simple">
+<li><p>Textual summary of the video content that can be analyzed further</p></li>
+<li><p>Question answering about video content</p></li>
 </ol>
 </li>
 <li><p>Performing person and face recognition in images</p>
@@ -176,7 +182,8 @@ You then need to export the location of the API key as an environment variable:<
 </section>
 <section id="content-extraction">
 <h3>Content extraction<a class="headerlink" href="#content-extraction" title="Link to this heading"></a></h3>
-<p>The image content (“caption”) is extracted using the <a class="reference external" href="https://github.com/salesforce/LAVIS">LAVIS</a> library. This library enables vision intelligence extraction using several state-of-the-art models such as BLIP and BLIP2, depending on the task and user selection. Further, it allows feature extraction from the images, where users can input textual and image queries, and the images in the database are matched to that query (multimodal search). Another option is question answering, where the user inputs a text question and the library finds the images that match the query.</p>
+<p>The image and video content (“caption”) is now extracted using the Qwen2.5-VL
+model. Qwen2.5-VL is a multimodal large language model capable of understanding and generating content from both images and videos. With its help, AMMMICO supports tasks such as image/video summarization and image/video visual question answering, where the model answers users’ questions about the context of a media file.</p>
 </section>
 <section id="emotion-recognition">
 <h3>Emotion recognition<a class="headerlink" href="#emotion-recognition" title="Link to this heading"></a></h3>

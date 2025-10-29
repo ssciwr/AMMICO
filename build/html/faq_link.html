@@ -53,6 +53,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#after-we-prepared-right-environment-we-can-install-the-ammico-package">3. After we prepared right environment we can install the <code class="docutils literal notranslate"><span class="pre">ammico</span></code> package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#micromamba">Micromamba</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#version-clashes-between-tensorflow-and-numpy">Version clashes between tensorflow and numpy</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#what-happens-to-the-images-that-are-sent-to-google-cloud-vision">What happens to the images that are sent to google Cloud Vision?</a></li>
@@ -159,6 +160,10 @@ source $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
 </ul>
 <p>Be careful, it requires around 7 GB of disk space.</p>
 <p><img alt="Screenshot 2023-06-01 165712" src="https://github.com/ssciwr/AMMICO/assets/8105097/3dfb302f-c390-46a7-a700-4e044f56c30f" /></p>
+</section>
+<section id="version-clashes-between-tensorflow-and-numpy">
+<h3>Version clashes between tensorflow and numpy<a class="headerlink" href="#version-clashes-between-tensorflow-and-numpy" title="Link to this heading"></a></h3>
+<p>Due to the <code class="docutils literal notranslate"><span class="pre">faces</span></code> module, the tensorflow version is currently fixed to at most <code class="docutils literal notranslate"><span class="pre">2.14.0</span></code>. This requires that <code class="docutils literal notranslate"><span class="pre">numpy</span></code> is restricted to <code class="docutils literal notranslate"><span class="pre">numpy==1.23.5</span></code>. If you experience issues with compatibility between tensorflow and numpy, you can try fixing the numpy version to this version.</p>
 </section>
 </section>
 <section id="what-happens-to-the-images-that-are-sent-to-google-cloud-vision">
