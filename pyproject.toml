@@ -34,7 +34,7 @@ dependencies = [
     "importlib_metadata",
     "importlib_resources",
     "matplotlib",
-    "numpy==1.23.5",
+    "numpy==2.0.2",
     "opencv-python",
     "pandas",
     "Pillow",
