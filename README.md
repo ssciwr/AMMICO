@@ -22,7 +22,10 @@ Use pre-processed image files such as social media posts with comments and proce
 1. Content extraction from the images
     1. Textual summary of the image content ("image caption") that can be analyzed further using the above tools
     1. Feature extraction from the images: User inputs query and images are matched to that query (both text and image query)
-    1. Question answering   
+    1. Question answering about image content
+1. Content extractioni from the videos
+    1. Textual summary of the video content that can be analyzed further
+    1. Question answering about video content
 1. Performing person and face recognition in images
     1. Face mask detection
     1. Probabilistic detection of age, gender and race
@@ -69,7 +72,8 @@ The [Hugging Face transformers library](https://huggingface.co/) is used to perf
 
 ### Content extraction
 
-The image content ("caption") is extracted using the [LAVIS](https://github.com/salesforce/LAVIS) library. This library enables vision intelligence extraction using several state-of-the-art models such as BLIP and BLIP2, depending on the task and user selection. Further, it allows feature extraction from the images, where users can input textual and image queries, and the images in the database are matched to that query (multimodal search). Another option is question answering, where the user inputs a text question and the library finds the images that match the query.
+The image and video content ("caption") is now extracted using the Qwen2.5-VL
+model. Qwen2.5-VL is a multimodal large language model capable of understanding and generating content from both images and videos. With its help, AMMMICO supports tasks such as image/video summarization and image/video visual question answering, where the model answers users' questions about the context of a media file.
 
 ### Emotion recognition
 

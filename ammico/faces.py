@@ -275,7 +275,6 @@ class EmotionDetector(AnalysisMethod):
         # one dictionary per face that is detected in the image
         # since we are only passing a subregion of the image
         # that contains one face, the list will only contain one dict
-        print("actions are:", self.actions)
         if self.actions != []:
             fresult["result"] = DeepFace.analyze(
                 img_path=face,
