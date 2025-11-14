@@ -46,10 +46,11 @@ dependencies = [
     "spacy",
     "tensorflow<2.15", # instead of <=2.16.0 to make it compatible with CUDA 11.8, may change after updating CUDA version.
     "tf-keras",
+    "torch<2.9",
     "torchvision",
     "tqdm",
     "transformers>=4.54",
-    "torchcodec<0.2",
+    "torchcodec<0.5",
     "webcolors",
 ]
 

@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 import warnings
 
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional, Union, Dict, Any, Tuple
 from collections.abc import Sequence as _Sequence
 from transformers import GenerationConfig
 from qwen_vl_utils import process_vision_info
@@ -136,10 +136,40 @@ class ImageSummaryDetector(AnalysisMethod):
 
         return inputs
 
+    def _validate_analysis_type(
+        self,
+        analysis_type: Union["AnalysisType", str],
+        list_of_questions: Optional[List[str]],
+        max_questions_per_image: int,
+    ) -> Tuple[str, List[str], bool, bool]:
+        if isinstance(analysis_type, AnalysisType):
+            analysis_type = analysis_type.value
+
+        allowed = {"summary", "questions", "summary_and_questions"}
+        if analysis_type not in allowed:
+            raise ValueError(f"analysis_type must be one of {allowed}")
+
+        if list_of_questions is None:
+            list_of_questions = [
+                "Are there people in the image?",
+                "What is this picture about?",
+            ]
+
+        if analysis_type in ("questions", "summary_and_questions"):
+            if len(list_of_questions) > max_questions_per_image:
+                raise ValueError(
+                    f"Number of questions per image ({len(list_of_questions)}) exceeds safety cap ({max_questions_per_image}). Reduce questions or increase max_questions_per_image."
+                )
+
+        is_summary = analysis_type in ("summary", "summary_and_questions")
+        is_questions = analysis_type in ("questions", "summary_and_questions")
+
+        return analysis_type, list_of_questions, is_summary, is_questions
+
     def analyse_image(
         self,
         entry: dict,
-        analysis_type: Union[str, AnalysisType] = AnalysisType.SUMMARY,
+        analysis_type: Union[str, AnalysisType] = AnalysisType.SUMMARY_AND_QUESTIONS,
         list_of_questions: Optional[List[str]] = None,
         max_questions_per_image: int = MAX_QUESTIONS_PER_IMAGE,
         is_concise_summary: bool = True,
@@ -151,8 +181,10 @@ class ImageSummaryDetector(AnalysisMethod):
             - 'vqa' (dict) if questions requested
         """
         self.subdict = entry
-        analysis_type, is_summary, is_questions = AnalysisType._validate_analysis_type(
-            analysis_type, list_of_questions
+        analysis_type, list_of_questions, is_summary, is_questions = (
+            self._validate_analysis_type(
+                analysis_type, list_of_questions, max_questions_per_image
+            )
         )
 
         if is_summary:
@@ -179,7 +211,7 @@ class ImageSummaryDetector(AnalysisMethod):
 
     def analyse_images_from_dict(
         self,
-        analysis_type: Union[AnalysisType, str] = AnalysisType.SUMMARY,
+        analysis_type: Union[AnalysisType, str] = AnalysisType.SUMMARY_AND_QUESTIONS,
         list_of_questions: Optional[List[str]] = None,
         max_questions_per_image: int = MAX_QUESTIONS_PER_IMAGE,
         keys_batch_size: int = KEYS_BATCH_SIZE,
@@ -192,6 +224,8 @@ class ImageSummaryDetector(AnalysisMethod):
         Args:
             analysis_type (str): type of the analysis.
             list_of_questions (list[str]): list of questions.
+            max_questions_per_image (int): maximum number of questions per image.
+                We recommend to keep it low to avoid long processing times and high memory usage.
             keys_batch_size (int): number of images to process in a batch.
             is_concise_summary (bool): whether to generate concise summary.
             is_concise_answer (bool): whether to generate concise answers.
@@ -199,8 +233,10 @@ class ImageSummaryDetector(AnalysisMethod):
             self.subdict (dict): dictionary with analysis results.
         """
         # TODO: add option to ask multiple questions per image as one batch.
-        analysis_type, is_summary, is_questions = AnalysisType._validate_analysis_type(
-            analysis_type, list_of_questions
+        analysis_type, list_of_questions, is_summary, is_questions = (
+            self._validate_analysis_type(
+                analysis_type, list_of_questions, max_questions_per_image
+            )
         )
 
         keys = list(self.subdict.keys())

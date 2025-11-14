@@ -26,6 +26,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        sudo apt install ffmpeg
         pip install spacy --no-binary blis # do not compile blis from source
         pip install -e .[dev]
     - name: Run pytest 

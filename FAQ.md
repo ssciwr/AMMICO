@@ -7,7 +7,7 @@ Some ammico components require `tensorflow` (e.g. Emotion detector), some `pytor
 ### 1. First, install tensorflow (https://www.tensorflow.org/install/pip)
 - create a new environment with python and activate it
 
-    ```conda create -n ammico_env python=3.10```
+    ```conda create -n ammico_env python=3.13```
 
     ```conda activate ammico_env```
 - install cudatoolkit from conda-forge
@@ -32,7 +32,7 @@ Some ammico components require `tensorflow` (e.g. Emotion detector), some `pytor
 
 - install tensorflow
 
-    ```python -m pip install tensorflow==2.12.1```
+    ```python -m pip install tensorflow==2.15```
 
 ### 2. Second, install pytorch
 
