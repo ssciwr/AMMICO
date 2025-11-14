@@ -50,7 +50,6 @@ dependencies = [
     "torchvision",
     "tqdm",
     "transformers>=4.54",
-    "torchcodec<0.5",
     "webcolors",
     "whisperx<3.3.1",
 ]

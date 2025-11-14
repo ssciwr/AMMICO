@@ -5,6 +5,7 @@ from ammico.utils import (
     _categorize_outputs,
     _strip_prompt_prefix_literal,
 )
+from ammico.prompt_builder import PromptBuilder
 
 import os
 import re
@@ -58,6 +59,7 @@ class VideoSummaryDetector(AnalysisMethod):
         super().__init__(subdict)
         self.summary_model = summary_model or None
         self.audio_model = audio_model
+        self.prompt_builder = PromptBuilder()
 
     def _decode_trimmed_outputs(
         self,
@@ -190,7 +192,7 @@ class VideoSummaryDetector(AnalysisMethod):
         Args:
             audio_path (str): Path to the audio file.
         Returns:
-            List[str]: List of transcribed text segments from the audio.
+            List[Dict[str, Any]]: List of transcribed audio segments with start_time, end_time, text, and duration.
         """
 
         if not os.path.exists(audio_path):
@@ -233,7 +235,7 @@ class VideoSummaryDetector(AnalysisMethod):
         """
         Extract audio part from the video file and generate captions using an audio whisperx model.
         Args:
-            entry (Dict[str, Any]): Dictionary containing the video file information.
+            filename (str): Path to the video file.
         Returns:
             List[Dict[str, Any]]: List of transcribed audio segments with start_time, end_time, text, and duration.
         """
@@ -716,8 +718,9 @@ class VideoSummaryDetector(AnalysisMethod):
         """
         Generate captions for all extracted frames and then produce a concise summary of the video.
         Args:
-            extracted_video_dict (Dict[str, Any]): Dictionary containing the frame generator and number of frames.
-            summary_instruction (str, optional): Instruction for summarizing the captions. Defaults to a concise paragraph.
+            filename (str): Path to the video file.
+            merged_segments (List[Dict[str, Any]]): List of merged segments with frame timestamps.
+            list_of_questions (Optional[List[str]]): List of questions for VQA.
         Returns:
             None. Modifies merged_segments in place to add 'summary_bullets' and 'vqa_bullets'.
         """
@@ -729,30 +732,16 @@ class VideoSummaryDetector(AnalysisMethod):
                 raise ValueError(
                     f"No frame timestamps found for segment {seg['start_time']:.2f}s to {seg['end_time']:.2f}s"
                 )
-
-            caption_instruction = f"You are a precise, non-hallucinating video analysis assistant. Describe the single provided image (a frame) consisely. The image belongs to a video clip with absolute timestamps from {seg['start_time']:.2f}s to {seg['end_time']:.2f}s. "
-            "Use only the visual content of the image. Do NOT use any outside knowledge or context."
             include_questions = bool(list_of_questions)
-            if include_questions:
-                q_block = "\n".join(
-                    [f"{i + 1}. {q.strip()}" for i, q in enumerate(list_of_questions)]
-                )
-                caption_instruction += (
-                    " In addition to the concise caption, also answer the following questions based ONLY on information visible in the frames."
-                    "Answers must be brief and concise."
-                    " Produce exactly two labeled sections: \n\n"
-                    "Summary: <concise summary>\n\n"
-                    "VQA Answers: \n1. <answer to question 1>\n2. <answer to question 2>\n etc."
-                    "\nReturn only those two sections for each image from a clip (do not add extra commentary)."
-                    "\nIf the answer cannot be determined based on the provided answer blocks,"
-                    ' reply with the line "The answer cannot be determined based on the information provided."'
-                    f"\n\nQuestions:\n{q_block}"
-                )
+            caption_instruction = self.prompt_builder.build_frame_prompt(
+                include_vqa=include_questions,
+                questions=list_of_questions,
+            )
             pairs = self._extract_frames_ffmpeg(
                 filename,
                 frame_timestamps,
-                out_w=320,  # TODO at first use auto module where frame would be used as it is, since it may be vertical or horizontal. Later it should have some crop
-                out_h=240,
+                out_w=1280,  # TODO at first use auto module where frame would be used as it is, since it may be vertical or horizontal. Later it should have some crop
+                out_h=720,
                 workers=min(8, (os.cpu_count() or 1) // 2),
             )
             prompt_texts = []
@@ -839,43 +828,20 @@ class VideoSummaryDetector(AnalysisMethod):
             frame_timestamps = seg.get("video_frame_timestamps", [])
 
             collected: List[Tuple[float, str]] = []
-            caption_instruction = (
-                "You are a precise, non-hallucinating video analysis assistant."
-            )
-            "You need to give a concise summary for the video segment based on the summary bullets for frames of this segment."
-
+            include_audio = False
             audio_lines = seg["audio_phrases"]
             if audio_lines:
-                caption_instruction += "Also, there is an audio transcription for the same video segment. Therefore you need to combine both visual and audio information to produce the final concise summary."
-                audio_block = "Audio transcription of a video segment with timestamps for each audio piece:\n"
-                for a_line in audio_lines:
-                    audio_block += f"[{a_line['start_time']:.2f}s - {a_line['end_time']:.2f}s]: {a_line['text'].strip()}\n"
-                caption_instruction += "\n\n" + audio_block
+                include_audio = True
 
-            caption_instruction += (
-                "\n\nHere are the summary bullets for frames in the video segment:\n"
-            )
-            caption_instruction += "\n".join(seg["summary_bullets"])
             include_questions = bool(list_of_questions)
-            if include_questions:
-                q_block = "\n".join(
-                    [f"{i + 1}. {q.strip()}" for i, q in enumerate(list_of_questions)]
-                )
-                caption_instruction += (
-                    "\n\n In addition to the concise caption, also answer the following questions based ONLY on the same sourses as for summary task plus on the vqa bullets - which are the answers that were given on the same questions for each frame from a video segment."
-                    "Answers must be brief and concise."
-                    " Produce exactly two labeled sections: \n\n"
-                    "Summary: <concise summary>\n\n"
-                    "VQA Answers: \n1. <answer to question 1>\n2. <answer to question 2>\n etc."
-                    "\nReturn only those two sections for each image from a clip (do not add extra commentary)."
-                    "\nIf the answer cannot be determined based on the provided answer blocks,"
-                    ' reply with the line "The answer cannot be determined based on the information provided."'
-                    f"\n\nQuestions:\n{q_block}"
-                )
-                caption_instruction += (
-                    "\n\nVQA bullets for frames in the video segment:\n"
-                )
-                caption_instruction += "\n".join(seg["vqa_bullets"])
+            caption_instruction = self.prompt_builder.build_clip_prompt(
+                frame_bullets=seg.get("summary_bullets", []),
+                include_audio=include_audio,
+                audio_transcription=seg.get("audio_phrases", []),
+                include_vqa=include_questions,
+                questions=list_of_questions,
+                vqa_bullets=seg.get("vqa_bullets", []),
+            )
             messages = [
                 {
                     "role": "user",
@@ -921,10 +887,6 @@ class VideoSummaryDetector(AnalysisMethod):
         Returns:
             Dict[str, Any]: A dictionary containing the list of captions with timestamps and the final summary.
         """
-        summary_instruction = (
-            "Analyze the following captions from multiple frames of the same video and summarize the overall content of the video in one concise paragraph (1-3 sentences). "
-            "Focus on the key themes, actions, or events across the video, not just the individual frames."
-        )
         proc = self.summary_model.processor
 
         bullets = []
@@ -934,13 +896,15 @@ class VideoSummaryDetector(AnalysisMethod):
         if not bullets:
             raise ValueError("No captions available for summary generation.")
 
-        combined_captions_text = "\n".join(bullets)
-        summary_user_text = summary_instruction + "\n\n" + combined_captions_text + "\n"
-
+        summary_user_prompt = self.prompt_builder.build_video_prompt(
+            summary_only=True,
+            include_vqa=False,
+            clip_summaries=bullets,
+        )
         messages = [
             {
                 "role": "user",
-                "content": [{"type": "text", "text": summary_user_text}],
+                "content": [{"type": "text", "text": summary_user_prompt}],
             }
         ]
 
@@ -991,22 +955,11 @@ class VideoSummaryDetector(AnalysisMethod):
 
         include_questions = bool(list_of_questions)
         if include_questions:
-            q_block = "\n".join(
-                [f"{i + 1}. {q.strip()}" for i, q in enumerate(list_of_questions)]
-            )
-            prompt = (
-                "You are provided with a set of short VQA-captions, each of which is a block of short answer(s)"
-                " extracted from sequential subclips of the same video.\n\n"
-                "VQA-captions (use ONLY these to answer):\n"
-                f"{vqa_bullets}\n\n"
-                "Answer the following questions briefly, by generalising information based ONLY on the lists of answers provided above. The VQA-captions above contain answer(s)"
-                " to the same question(s) you are about to answer. If the answer cannot be determined based on the provided answer blocks,"
-                ' reply with the line "The answer cannot be determined based on the information provided."'
-                "Questions:\n"
-                f"{q_block}\n\n"
-                "Produce an ordered list with answer(s) in the same order as the questions.The main rule - for one question you should give one concise answer. You must have this structure of your output: "
-                "Answers: \n1. <answer to question 1>\n2. <answer to question 2>\n etc."
-                "Return ONLY the ordered list with answer(s) and NOTHING else — no commentary, no explanation, no surrounding markdown."
+            prompt = self.prompt_builder.build_video_prompt(
+                summary_only=False,
+                include_vqa=include_questions,
+                questions=list_of_questions,
+                vqa_bullets=vqa_bullets,
             )
         else:
             raise ValueError(
@@ -1057,7 +1010,6 @@ class VideoSummaryDetector(AnalysisMethod):
         Analyse the video specified in self.subdict using frame extraction and captioning.
         Args:
             analysis_type (Union[AnalysisType, str], optional): Type of analysis to perform. Defaults to AnalysisType.SUMMARY.
-            frame_rate_per_second (float): Frame extraction rate in frames per second. Default is 2.0.
             list_of_questions (List[str], optional): List of questions to answer about the video. Required if analysis_type includes questions.
         Returns:
             Dict[str, Any]: A dictionary containing the analysis results, including summary and answers for provided questions(if any).
