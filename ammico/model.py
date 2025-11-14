@@ -1,5 +1,8 @@
+from ammico.utils import resolve_model_device, resolve_model_size
+
 import torch
 import warnings
+import whisperx
 from transformers import (
     Qwen2_5_VLForConditionalGeneration,
     AutoProcessor,
@@ -26,7 +29,7 @@ class MultimodalSummaryModel:
             device: "cuda" or "cpu" (auto-detected when None).
             cache_dir: huggingface cache dir (optional).
         """
-        self.device = self._resolve_device(device)
+        self.device = resolve_model_device(device)
 
         if model_id is not None and model_id not in (
             self.DEFAULT_CUDA_MODEL,
@@ -49,21 +52,6 @@ class MultimodalSummaryModel:
         self.tokenizer = None
 
         self._load_model_and_processor()
-
-    @staticmethod
-    def _resolve_device(device: Optional[str]) -> str:
-        if device is None:
-            return "cuda" if torch.cuda.is_available() else "cpu"
-        if device.lower() not in ("cuda", "cpu"):
-            raise ValueError("device must be 'cuda' or 'cpu'")
-        if device.lower() == "cuda" and not torch.cuda.is_available():
-            warnings.warn(
-                "Although 'cuda' was requested, no CUDA device is available. Using CPU instead.",
-                RuntimeWarning,
-                stacklevel=2,
-            )
-            return "cpu"
-        return device.lower()
 
     def _load_model_and_processor(self):
         load_kwargs = {"trust_remote_code": self._trust_remote_code, "use_cache": True}
@@ -109,6 +97,56 @@ class MultimodalSummaryModel:
             if self.tokenizer is not None:
                 del self.tokenizer
                 self.tokenizer = None
+        finally:
+            try:
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except Exception as e:
+                warnings.warn(
+                    "Failed to empty CUDA cache. This is not critical, but may lead to memory lingering: "
+                    f"{e!r}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+
+
+class AudioToTextModel:
+    def __init__(
+        self,
+        model_size: str = "small",
+        device: Optional[str] = None,
+    ) -> None:
+        """
+        Class for WhisperX model loading and inference.
+        Args:
+            model_name: Type of model to load.
+            device: "cuda" or "cpu" (auto-detected when None).
+            cache_dir: huggingface cache dir (optional).
+        """
+        self.device = resolve_model_device(device)
+
+        self.model_size = resolve_model_size(model_size)
+
+        self.model = None
+
+        self._load_model()
+
+    def _load_model(self):
+        if self.device == "cuda":
+            self.model = whisperx.load_model(
+                self.model_size, device=self.device, compute_type="float16"
+            )
+        else:
+            self.model = whisperx.load_model(
+                self.model_size, device=self.device, compute_type="int8"
+            )
+
+    def close(self) -> None:
+        """Free model resources (helpful in long-running processes)."""
+        try:
+            if self.model is not None:
+                del self.model
+                self.model = None
         finally:
             try:
                 if torch.cuda.is_available():
