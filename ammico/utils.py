@@ -2,12 +2,14 @@ import glob
 import os
 from pandas import DataFrame, read_csv
 import pooch
+import torch
 import importlib_resources
 import collections
 import random
 from enum import Enum
 from typing import List, Tuple, Optional, Union
 import re
+import warnings
 
 
 pkg = importlib_resources.files("ammico")
@@ -213,6 +215,35 @@ def _strip_prompt_prefix_literal(decoded: str, prompt: str) -> str:
         return decoded[m.end() :].lstrip()
 
     return decoded.lstrip("\n\r ").lstrip(":;- ").strip()
+
+
+@staticmethod
+def resolve_model_device(
+    device: Optional[str] = None,
+) -> str:
+    if device is None:
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    if device.lower() not in ("cuda", "cpu"):
+        raise ValueError("device must be 'cuda' or 'cpu'")
+    if device.lower() == "cuda" and not torch.cuda.is_available():
+        warnings.warn(
+            "Although 'cuda' was requested, no CUDA device is available. Using CPU instead.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return "cpu"
+    return device.lower()
+
+
+@staticmethod
+def resolve_model_size(
+    model_size: str = "small",
+) -> str:
+    allowed_sizes = ("small", "base", "large")
+    if model_size not in allowed_sizes:
+        raise ValueError(f"model_size must be one of {allowed_sizes}")
+    model_size = "large-v3" if model_size == "large" else model_size
+    return model_size
 
 
 def find_videos(
