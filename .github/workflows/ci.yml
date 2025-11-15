@@ -18,6 +18,11 @@ jobs:
         os: [ubuntu-latest]
         python-version: ['3.13']
     steps:
+    - name: cleanup disk space
+      uses: mathio/gha-cleanup@v1
+      with:
+        remove-browsers: true
+        verbose: true
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -28,7 +33,8 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get install -y ffmpeg
         pip install spacy --no-binary blis # do not compile blis from source
-        pip install -e .[dev]
+        pip install uv
+        uv pip install --system --no-cache-dir -e .[dev]
     - name: Run pytest 
       run: |
         cd ammico
