@@ -11,7 +11,7 @@ maintainers = [
     { name = "Inga Ulusoy", email = "ssc@iwr.uni-heidelberg.de" },
     { name = "Dmitrii Kapitan", email = "ssc@iwr.uni-heidelberg.de" },
 ]
-requires-python = ">=3.9, <3.12"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -20,39 +20,35 @@ classifiers = [
 ]
  
 dependencies = [
-    "accelerate>=0.22",
+    "accelerate",
     "bitsandbytes",
     "colorgram.py",
     "colour-science",
+    "ctranslate2",
     "dash",
     "dash-bootstrap-components",
-    "deepface",
     "google-cloud-vision",
     "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",
-    "huggingface-hub>=0.34.0",
-    "importlib_metadata",
     "importlib_resources",
     "matplotlib",
     "numpy",
     "opencv-python",
     "pandas",
-    "Pillow",
     "pooch",
+    "Pillow",
     "qwen-vl-utils",
-    "retina_face",
-    "safetensors>=0.6.2",
-    "setuptools",
+    "safetensors",
+    "scipy",
     "spacy",
-    "tensorflow<2.15", # instead of <=2.16.0 to make it compatible with CUDA 11.8, may change after updating CUDA version.
     "tf-keras",
     "torch<2.9",
     "torchvision",
     "tqdm",
-    "transformers>=4.54",
-    "torchcodec<0.5",
+    "transformers",
+    "torchcodec",
     "webcolors",
-    "whisperx<3.3.1",
+    "whisperx",
 ]
 
 [project.optional-dependencies]
