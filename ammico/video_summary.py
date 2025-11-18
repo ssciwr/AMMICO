@@ -806,7 +806,10 @@ class VideoSummaryDetector(AnalysisMethod):
         filename = entry.get("filename")
         if not filename:
             raise ValueError("entry must contain key 'filename'")
-
+            
+        if not os.path.exists(filename):
+            raise ValueError(f"Video file {filename} does not exist.")
+        
         audio_generated_captions = []
         if self.audio_model is not None:
             audio_generated_captions = self._extract_transcribe_audio_part(filename)
