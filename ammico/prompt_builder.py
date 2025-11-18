@@ -90,7 +90,7 @@ class PromptBuilder:
         str_to_return = f"""## Task: Generate Concise Summary
 
         Based on the {sources} provided, generate a brief summary that:
-        - Captures the main events and themes
+        - Captures and summarizes the main events and themes
         - Uses clear, accessible language
         - Is between 1-3 sentences
         - Contains no unsupported claims
@@ -121,7 +121,7 @@ class PromptBuilder:
         You have two sub-tasks:
 
         ### Sub-task 1: Concise Summary
-        Generate a brief summary that captures main events and themes from the visual information (1-3 sentences).
+        Generate a brief summary that captures and summarizes main events and themes from the visual information (1-3 sentences).
 
         ### Sub-task 2: Question Answering
         Answer the provided questions based ONLY on {vqa_source}. Answers must be brief and direct.
