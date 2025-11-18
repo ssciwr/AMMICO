@@ -301,7 +301,7 @@ class VideoSummaryDetector(AnalysisMethod):
             ret, frame = cap.read()
             if not ret:
                 break
-            
+
             img_height, img_width = frame.shape[:2]
             # Resize and gray img for faster processing # TODO make size configurable, since it may be vertical video as well
             frame_small = cv2.resize(frame, (320, 240))
@@ -312,7 +312,9 @@ class VideoSummaryDetector(AnalysisMethod):
 
         cap.release()
         if img_height is None or img_width is None:
-            raise ValueError("Failed to read frames from video for scene cut detection.")
+            raise ValueError(
+                "Failed to read frames from video for scene cut detection."
+            )
 
         # Compute frame differences to keep memory usage low
         frame_diffs = []
@@ -355,7 +357,7 @@ class VideoSummaryDetector(AnalysisMethod):
         if last_segment["end_time"] < last_segment["start_time"]:
             last_segment["end_time"] = last_segment["start_time"]
 
-        #add frame dimensions for future use
+        # add frame dimensions for future use
         video_segments[-1]["frame_width"] = img_width
         video_segments[-1]["frame_height"] = img_height
         return video_segments
@@ -814,7 +816,7 @@ class VideoSummaryDetector(AnalysisMethod):
         filename = entry.get("filename")
         if not filename:
             raise ValueError("entry must contain key 'filename'")
-        
+
         if not os.path.exists(filename):
             raise ValueError(f"Video file {filename} does not exist.")
 
