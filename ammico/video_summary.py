@@ -283,7 +283,7 @@ class VideoSummaryDetector(AnalysisMethod):
     def _detect_scene_cuts(
         self,
         filename: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         """
         Detect scene cuts in the video using frame differencing method.
         Args:
@@ -357,15 +357,18 @@ class VideoSummaryDetector(AnalysisMethod):
         if last_segment["end_time"] < last_segment["start_time"]:
             last_segment["end_time"] = last_segment["start_time"]
 
-        # add frame dimensions for future use
-        video_segments[-1]["frame_width"] = img_width
-        video_segments[-1]["frame_height"] = img_height
-        return video_segments
+        return {
+            "segments": video_segments,
+            "video_meta": {
+                "width": img_width,
+                "height": img_height,
+            },
+        }
 
     def _extract_frame_timestamps_from_clip(
         self,
         filename: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         """
         Extract frame timestamps for each detected video segment.
         Args:
@@ -375,7 +378,9 @@ class VideoSummaryDetector(AnalysisMethod):
             List of segments with 'start_time', 'end_time', and 'frame_timestamps'
         """
         base_frames_per_clip = 4.0
-        segments = self._detect_scene_cuts(filename)
+        result = self._detect_scene_cuts(filename)
+        segments = result["segments"]
+        video_meta = result["video_meta"]
         for seg in segments:
             if seg["duration"] < 2.0:
                 frame_rate_per_clip = 2.0
@@ -391,7 +396,11 @@ class VideoSummaryDetector(AnalysisMethod):
                 start_time, end_time, steps=n_samples, dtype=torch.float32
             )
             seg["frame_timestamps"] = sample_times.tolist()
-        return segments
+
+        return {
+            "segments": segments,
+            "video_meta": video_meta,
+        }
 
     def _reassign_video_timestamps_to_segments(
         self,
@@ -621,8 +630,8 @@ class VideoSummaryDetector(AnalysisMethod):
         self,
         filename: str,
         timestamp: float,
-        out_w: Optional[int] = None,
-        out_h: Optional[int] = None,
+        out_w: int,
+        out_h: int,
         timeout: Optional[float] = 30.0,
     ) -> Image.Image:
         """
@@ -658,11 +667,7 @@ class VideoSummaryDetector(AnalysisMethod):
 
                 if proc.returncode == 0 and proc.stdout:
                     img = Image.open(BytesIO(proc.stdout)).convert("RGB")
-
-                    # Resize if dimensions specified
-                    if out_w and out_h:
-                        img = img.resize((out_w, out_h), resample=Image.BILINEAR)
-
+                    img = img.resize((out_w, out_h), resample=Image.BILINEAR)
                     return img
                 else:
                     last_error = proc.stderr.decode("utf-8", errors="replace")
@@ -680,12 +685,38 @@ class VideoSummaryDetector(AnalysisMethod):
             f"Last error: {last_error[:500]}"
         )
 
+    def _calculate_output_dimensions(
+        self, original_w: int, original_h: int
+    ) -> Tuple[int, int]:
+        """
+        Calculate output dimensions in a fully adaptive way, preserving aspect ratio, but decreasing size.
+        It works both for landscape and portrait videos.
+        Args:
+            original_w: Original width
+            original_h: Original height
+        Returns:
+            Tuple of (out_w, out_h)
+        """
+        aspect_ratio = original_w / original_h
+        max_dimension = 720
+
+        if aspect_ratio > 1.2:
+            out_w = max_dimension
+            out_h = int(max_dimension / aspect_ratio)
+        elif aspect_ratio < 0.8:
+            out_h = max_dimension
+            out_w = int(max_dimension * aspect_ratio)
+        else:
+            out_w = max_dimension
+            out_h = max_dimension
+        return out_w, out_h
+
     def _extract_frames_ffmpeg(
         self,
         filename: str,
         timestamps: List[float],
-        out_w: Optional[int] = None,
-        out_h: Optional[int] = None,
+        original_w: int,
+        original_h: int,
         workers: int = 4,
     ) -> List[
         Tuple[float, Image.Image]
@@ -695,13 +726,14 @@ class VideoSummaryDetector(AnalysisMethod):
         Args:
             filename: Path to video file
             timestamps: List of times in seconds
-            out_w: Optional output width
-            out_h: Optional output height
+            out_w: Frame width
+            out_h: Frame height
             workers: Number of parallel threads
         Returns:
           List of (timestamp, PIL.Image) preserving order of timestamps.
         """
         results = {}
+        out_w, out_h = self._calculate_output_dimensions(original_w, original_h)
         with ThreadPoolExecutor(max_workers=workers) as ex:
             futures = {
                 ex.submit(self._run_ffmpeg_extraction, filename, t, out_w, out_h): i
@@ -723,6 +755,7 @@ class VideoSummaryDetector(AnalysisMethod):
         self,
         filename: str,
         merged_segments: List[Tuple[float, Image.Image]],
+        vudeo_meta: Dict[str, Any],
         list_of_questions: Optional[List[str]] = None,
     ) -> None:
         """
@@ -735,6 +768,14 @@ class VideoSummaryDetector(AnalysisMethod):
             None. Modifies merged_segments in place to add 'summary_bullets' and 'vqa_bullets'.
         """
         proc = self.summary_model.processor
+
+        img_width = vudeo_meta.get("width")
+        img_height = vudeo_meta.get("height")
+        if img_width is None or img_height is None:
+            raise ValueError(
+                "Frame dimensions not found in the last segment for extraction."
+            )
+
         for seg in merged_segments:  # TODO might be generator faster, so changes to ffmmpeg extraction may be needed
             collected: List[Tuple[float, str]] = []
             frame_timestamps = seg.get("video_frame_timestamps", [])
@@ -750,8 +791,8 @@ class VideoSummaryDetector(AnalysisMethod):
             pairs = self._extract_frames_ffmpeg(
                 filename,
                 frame_timestamps,
-                out_w=1280,  # TODO at first use auto module where frame would be used as it is, since it may be vertical or horizontal. Later it should have some crop
-                out_h=720,
+                original_w=img_width,
+                original_h=img_height,
                 workers=min(8, (os.cpu_count() or 1) // 2),
             )
             prompt_texts = []
@@ -824,19 +865,22 @@ class VideoSummaryDetector(AnalysisMethod):
         if self.audio_model is not None:
             audio_generated_captions = self._extract_transcribe_audio_part(filename)
 
-        video_segments_w_timestamps = self._extract_frame_timestamps_from_clip(filename)
+        video_result_segments = self._extract_frame_timestamps_from_clip(filename)
+        video_segments_w_timestamps = video_result_segments["segments"]
+        video_meta = video_result_segments["video_meta"]
         merged_segments = self.merge_audio_visual_boundaries(
             audio_generated_captions,
             video_segments_w_timestamps,
         )
+
         self._make_captions_from_extracted_frames(
             filename,
             merged_segments,
+            video_meta,
             list_of_questions=list_of_questions,
         )
         results = []
         proc = self.summary_model.processor
-        print("Generating captions for subclips...")
         for seg in merged_segments:
             frame_timestamps = seg.get("video_frame_timestamps", [])
 
@@ -855,7 +899,6 @@ class VideoSummaryDetector(AnalysisMethod):
                 questions=list_of_questions,
                 vqa_bullets=seg.get("vqa_bullets", []),
             )
-            print("Caption instruction:", caption_instruction)
             messages = [
                 {
                     "role": "user",
