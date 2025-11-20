@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from enum import Enum
 
 
@@ -67,7 +67,7 @@ class PromptBuilder:
         return str_to_return
 
     @staticmethod
-    def audio_module(audio_transcription: List[Dict[str, any]]) -> str:
+    def audio_module(audio_transcription: List[Dict[str, Any]]) -> str:
         """Audio transcription with timestamps."""
         audio_text = "\n".join(
             [

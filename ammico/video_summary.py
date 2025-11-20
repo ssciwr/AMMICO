@@ -34,8 +34,6 @@ from transformers import GenerationConfig
 
 
 class VideoSummaryDetector(AnalysisMethod):
-    MAX_SAMPLES_CAP = 1000  # safety cap for total extracted frames
-
     def __init__(
         self,
         summary_model: MultimodalSummaryModel = None,
@@ -342,8 +340,19 @@ class VideoSummaryDetector(AnalysisMethod):
                 break
 
             img_height, img_width = frame.shape[:2]
-            # Resize and gray img for faster processing # TODO make size configurable, since it may be vertical video as well
-            frame_small = cv2.resize(frame, (320, 240))
+
+            try:
+                if img_width / img_height > 1.2:
+                    frame_small = cv2.resize(frame, (320, 240))
+                elif img_width / img_height < 0.8:
+                    frame_small = cv2.resize(frame, (240, 320))
+                else:
+                    frame_small = cv2.resize(frame, (320, 320))
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to resize frame for scene cut detection: {e}"
+                )
+
             gray = cv2.cvtColor(
                 frame_small, cv2.COLOR_BGR2GRAY
             )  # TODO check if it is ok, maybe we can use color info as well
