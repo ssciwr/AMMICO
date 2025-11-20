@@ -144,7 +144,7 @@ class VideoSummaryDetector(AnalysisMethod):
             num_return_sequences=1,
         )
 
-        for k, v in list(processor_inputs.items()):
+        for k, v in processor_inputs.items():
             if isinstance(v, torch.Tensor):
                 processor_inputs[k] = v.to(self.summary_model.device)
 
@@ -228,6 +228,39 @@ class VideoSummaryDetector(AnalysisMethod):
         except Exception as e:
             raise RuntimeError(f"Failed to transcribe audio: {e}")
 
+    def _check_audio_stream(self, filename: str) -> bool:
+        """
+        Check if the video file has an audio stream.
+        Args:
+            filename (str): Path to the video file.
+        Returns:
+            bool: True if audio stream exists, False otherwise.
+        """
+        try:
+            cmd = [
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "a",
+                "-show_entries",
+                "stream=codec_type",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                filename,
+            ]
+            result = subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
+            output = result.stdout.strip()
+            return bool(output)
+        except Exception as e:
+            warnings.warn(
+                f"Failed to check audio stream in video {filename}: {e}",
+                RuntimeWarning,
+            )
+            return False
+
     def _extract_transcribe_audio_part(
         self,
         filename: str,
@@ -239,6 +272,12 @@ class VideoSummaryDetector(AnalysisMethod):
         Returns:
             List[Dict[str, Any]]: List of transcribed audio segments with start_time, end_time, text, and duration.
         """
+
+        has_audio = self._check_audio_stream(filename)
+        if not has_audio:
+            self.audio_model.close()
+            self.audio_model = None
+            return []
 
         audio_output_path = "/tmp/audio_extracted.wav"
         try:
@@ -755,7 +794,7 @@ class VideoSummaryDetector(AnalysisMethod):
         self,
         filename: str,
         merged_segments: List[Tuple[float, Image.Image]],
-        vudeo_meta: Dict[str, Any],
+        video_meta: Dict[str, Any],
         list_of_questions: Optional[List[str]] = None,
     ) -> None:
         """
@@ -769,8 +808,8 @@ class VideoSummaryDetector(AnalysisMethod):
         """
         proc = self.summary_model.processor
 
-        img_width = vudeo_meta.get("width")
-        img_height = vudeo_meta.get("height")
+        img_width = video_meta.get("width")
+        img_height = video_meta.get("height")
         if img_width is None or img_height is None:
             raise ValueError(
                 "Frame dimensions not found in the last segment for extraction."
@@ -1050,7 +1089,7 @@ class VideoSummaryDetector(AnalysisMethod):
         final_vqa_output = final_vqa_list[0].strip() if final_vqa_list else ""
         vqa_answers = []
         answer_matches = re.findall(
-            r"\d+\.\s*(.*?)(?=\n\d+\.|$)", final_vqa_output, flags=re.DOTALL
+            r"\d+\.\s*(.+?)(?=\n\d+\.|$)", final_vqa_output, flags=re.DOTALL
         )
         for answer in answer_matches:
             vqa_answers.append(answer.strip())

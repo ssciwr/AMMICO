@@ -190,7 +190,6 @@ def _normalize_whitespace(s: str) -> str:
 def _strip_prompt_prefix_literal(decoded: str, prompt: str) -> str:
     """
     Remove any literal prompt prefix from decoded text using a normalized-substring match.
-    Guarantees no prompt text remains at the start of returned string (best-effort).
     """
     if not decoded:
         return ""
@@ -235,7 +234,6 @@ def resolve_model_device(
     return device.lower()
 
 
-@staticmethod
 def resolve_model_size(
     model_size: str = "small",
 ) -> str:
