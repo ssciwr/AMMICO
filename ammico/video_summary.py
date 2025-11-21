@@ -560,12 +560,9 @@ class VideoSummaryDetector(AnalysisMethod):
             new_vid = self._combine_visual_frames_by_time(video_segs)
             return new_vid
 
-        events = []
-        for seg in audio_segs:
-            events.append(("audio", seg["start_time"], seg["end_time"], seg))
-
-        for seg in video_segs:
-            events.append(("video", seg["start_time"], seg["end_time"], seg))
+        events = [
+            ("audio", seg["start_time"], seg["end_time"], seg) for seg in audio_segs
+        ] + [("video", seg["start_time"], seg["end_time"], seg) for seg in video_segs]
 
         if not events:
             raise ValueError("No audio and video segments to merge.")
@@ -766,9 +763,7 @@ class VideoSummaryDetector(AnalysisMethod):
         original_w: int,
         original_h: int,
         workers: int = 4,
-    ) -> List[
-        Tuple[float, Image.Image]
-    ]:  # TODO check performance, generator might be faster
+    ) -> List[Tuple[float, Image.Image]]:
         """
         Extract multiple frames using a thread pool (parallel ffmpeg processes).
         Args:
@@ -1098,7 +1093,7 @@ class VideoSummaryDetector(AnalysisMethod):
         final_vqa_output = final_vqa_list[0].strip() if final_vqa_list else ""
         vqa_answers = []
         answer_matches = re.findall(
-            r"\d+\.\s*(.+?)(?=\n\d+\.|$)", final_vqa_output, flags=re.DOTALL
+            r"\d+\.\s+(.+?)(?=\n\d+\.|$)", final_vqa_output, flags=re.DOTALL
         )
         for answer in answer_matches:
             vqa_answers.append(answer.strip())

@@ -134,6 +134,24 @@ def _limit_results(results, limit):
     return results
 
 
+def _extract_summary_vqa(content: str, pattern: re.Pattern) -> Tuple[str, str]:
+    m = pattern.search(content)
+    if not m:
+        raise ValueError(
+            f"Failed to parse summary and VQA answers from model output: {content}"
+        )
+
+    summary_text = m.group(1).replace("\n", " ").strip() if m.group(1) else None
+    vqa_text = m.group(2).strip() if m.group(2) else None
+
+    if not summary_text or not vqa_text:
+        raise ValueError(
+            f"Model output is missing either summary or VQA answers: {content}"
+        )
+
+    return summary_text, vqa_text
+
+
 def _categorize_outputs(
     collected: List[Tuple[float, str]],
     include_questions: bool = False,
@@ -154,37 +172,45 @@ def _categorize_outputs(
     bullets_summary = []
     bullets_vqa = []
 
-    for t, c in caps_for_summary_vqa:
-        if include_questions:
-            result_sections = c.strip()
-            m = re.search(
-                r"Summary\s*:\s*(.*?)\s*(?:VQA\s+Answers\s*:\s*(.*))?$",
-                result_sections,
-                flags=re.IGNORECASE | re.DOTALL,
-            )
-            if m:
-                summary_text = (
-                    m.group(1).replace("\n", " ").strip() if m.group(1) else None
-                )
-                vqa_text = m.group(2).strip() if m.group(2) else None
-                if not summary_text or not vqa_text:
-                    raise ValueError(
-                        f"Model output is missing either summary or VQA answers: {c}"
-                    )
-                bullets_summary.append(f"- [{t:.3f}s] {summary_text}")
-                bullets_vqa.append(f"- [{t:.3f}s] {vqa_text}")
-            else:
-                raise ValueError(
-                    f"Failed to parse summary and VQA answers from model output: {c}"
-                )
-        else:
+    if include_questions:
+        pattern = re.compile(
+            r"Summary\s*:\s*(.*?)(?:\s*VQA\s+Answers\s*:\s*(.*))?$",
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+
+        for t, c in caps_for_summary_vqa:
+            summary_text, vqa_text = _extract_summary_vqa(c.strip(), pattern)
+            bullets_summary.append(f"- [{t:.3f}s] {summary_text}")
+            bullets_vqa.append(f"- [{t:.3f}s] {vqa_text}")
+    else:
+        for t, c in caps_for_summary_vqa:
             snippet = c.replace("\n", " ").strip()
             bullets_summary.append(f"- [{t:.3f}s] {snippet}")
+
     return bullets_summary, bullets_vqa
 
 
 def _normalize_whitespace(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
+
+
+def _remove_prefix_by_normalized_search(decoded: str, p_norm: str):
+    running: list[str] = []
+    for i, ch in enumerate(decoded):
+        running.append(ch if not ch.isspace() else " ")
+        cur_norm = _normalize_whitespace("".join(running))
+        if cur_norm.endswith(p_norm):
+            return decoded[i + 1 :].lstrip() if i + 1 < len(decoded) else ""
+    return None
+
+
+def _strip_role_prefix(decoded: str):
+    m = re.match(
+        r"^(?:\s*(system|user|assistant)[:\s-]*\n?)+", decoded, flags=re.IGNORECASE
+    )
+    if m:
+        return decoded[m.end() :].lstrip()
+    return None
 
 
 def _strip_prompt_prefix_literal(decoded: str, prompt: str) -> str:
@@ -193,25 +219,21 @@ def _strip_prompt_prefix_literal(decoded: str, prompt: str) -> str:
     """
     if not decoded:
         return ""
+
     if not prompt:
         return decoded.strip()
 
     d_norm = _normalize_whitespace(decoded)
     p_norm = _normalize_whitespace(prompt)
 
-    idx = d_norm.find(p_norm)
-    if idx != -1:
-        running = []
-        for i, ch in enumerate(decoded):
-            running.append(ch if not ch.isspace() else " ")
-            cur_norm = _normalize_whitespace("".join(running))
-            if cur_norm.endswith(p_norm):
-                return decoded[i + 1 :].lstrip() if i + 1 < len(decoded) else ""
-    m = re.match(
-        r"^(?:\s*(system|user|assistant)[:\s-]*\n?)+", decoded, flags=re.IGNORECASE
-    )
-    if m:
-        return decoded[m.end() :].lstrip()
+    if d_norm.find(p_norm) != -1:
+        remainder = _remove_prefix_by_normalized_search(decoded, p_norm)
+        if remainder is not None:
+            return remainder
+
+    role_stripped = _strip_role_prefix(decoded)
+    if role_stripped is not None:
+        return role_stripped.lstrip()
 
     return decoded.lstrip("\n\r ").lstrip(":;- ").strip()
 
@@ -246,7 +268,7 @@ def resolve_model_size(
 
 def find_videos(
     path: str = None,
-    pattern=["mp4"],  # TODO: test with more video formats
+    pattern=["mp4", "mov", "avi", "mkv", "webm"],
     recursive: bool = True,
     limit=5,
     random_seed: int = None,
