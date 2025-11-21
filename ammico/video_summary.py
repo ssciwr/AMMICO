@@ -12,8 +12,8 @@ import re
 import cv2
 import math
 import numpy as np
-import shutil
 import subprocess
+import tempfile
 import torch
 import warnings
 import whisperx
@@ -271,45 +271,37 @@ class VideoSummaryDetector(AnalysisMethod):
             List[Dict[str, Any]]: List of transcribed audio segments with start_time, end_time, text, and duration.
         """
 
-        has_audio = self._check_audio_stream(filename)
-        if not has_audio:
+        if not self._check_audio_stream(filename):
             self.audio_model.close()
             self.audio_model = None
             return []
 
-        audio_output_path = "/tmp/audio_extracted.wav"
-        try:
-            subprocess.run(
-                [
-                    "ffmpeg",
-                    "-i",
-                    filename,
-                    "-vn",
-                    "-acodec",
-                    "pcm_s16le",
-                    "-ar",
-                    "16000",
-                    "-ac",
-                    "1",
-                    "-y",
-                    audio_output_path,
-                ],
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Failed to extract audio from video: {e}")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            audio_output_path = os.path.join(tmpdir, "audio_extracted.wav")
+            try:
+                subprocess.run(
+                    [
+                        "ffmpeg",
+                        "-i",
+                        filename,
+                        "-vn",
+                        "-acodec",
+                        "pcm_s16le",
+                        "-ar",
+                        "16000",
+                        "-ac",
+                        "1",
+                        "-y",
+                        audio_output_path,
+                    ],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"Failed to extract audio from video: {e}")
 
-        audio_descriptions = self._audio_to_text(audio_output_path)
-
-        # delete temporary audio file
-        if os.path.exists(audio_output_path):
-            os.remove(audio_output_path)
-
-        tmp_dir = os.path.dirname(audio_output_path)
-        if os.path.exists(tmp_dir) and not os.listdir(tmp_dir):
-            shutil.rmdir(tmp_dir)
+            audio_descriptions = self._audio_to_text(audio_output_path)
 
         # and close the audio model to free up resources
         self.audio_model.close()
