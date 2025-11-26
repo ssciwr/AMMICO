@@ -105,17 +105,34 @@ class PromptBuilder:
         level: ProcessingLevel,
         has_audio: bool = False,
     ) -> str:
-        """Generate summary+VQA task (adapts based on level and audio)."""
+        """Generate summary+VQA task (adapts based on level and audio). For Frame and Clip levels."""
 
         if level == ProcessingLevel.FRAME:
-            vqa_source = "information from the visual information"
+            vqa_task = """Answer the provided questions based ONLY on information from the visual information. Answers must be brief and direct.
+
+            **Critical Rule:** If you cannot answer a question from the provided sources,
+            respond with: "Cannot be determined from provided information."
+            """
         elif level == ProcessingLevel.CLIP:
-            audio_part = " and information from the audio sources" if has_audio else ""
-            vqa_source = (
-                f"provided answers for each frame from the video segment{audio_part}"
-            )
-        else:
-            vqa_source = "provided answers for each segment of the video"
+            if has_audio:
+                priority_list = """
+                    1. **Frame-Level Answers** - Pre-computed per-frame answers (auxiliary reference only)
+                    2. **Audio Information** - Spoken content from audio transcription
+                    3. **Visual Information** - Direct visual content from video frames"""
+            else:
+                priority_list = """1. **Frame-Level Answers** - Pre-computed per-frame answers (auxiliary reference only)
+                    2. **Visual Information** - Direct visual content from video frames"""
+            vqa_task = f"""For each question, use the BEST available source in this priority:
+                {priority_list}
+
+                **Critical Logic:**
+                - If frame-level answer is a REAL answer (not "Cannot be determined from provided information.") → use it
+                - If frame-level answer is "Cannot be determined" → SKIP IT and check audio/visual instead
+                - If answer is found in visual OR audio information → use that
+                - ONLY respond "Cannot be determined" if truly no information exists anywhere
+
+                """
+
         str_to_return = f"""## Task: Generate Summary and Answer Questions
 
         You have two sub-tasks:
@@ -124,10 +141,7 @@ class PromptBuilder:
         Generate a brief summary that captures and summarizes main events and themes from the visual information (1-3 sentences).
 
         ### Sub-task 2: Question Answering
-        Answer the provided questions based ONLY on {vqa_source}. Answers must be brief and direct.
-
-        **Critical Rule:** If you cannot answer a question from the provided sources,
-        respond with: "Cannot be determined from provided information."
+        {vqa_task}
 
         Return ONLY this format:
 
@@ -145,11 +159,15 @@ class PromptBuilder:
         """VQA-only task for video-level processing."""
         str_to_return = """## Task: Answer Questions
 
-        Using ONLY the provided answers for each segment of the video, answer the following questions.
-        Answers must be brief and direct.
+        For each question, use the BEST available source in this priority:
+            1. **Segment-Level Answers** - Pre-computed per-frame answers (auxiliary reference only)
+            2. **Visual Information** - Direct visual content from video frames
 
-        **Critical Rule:** If you cannot answer a question from the provided sources,
-        respond with: "Cannot be determined from provided information."
+        **Critical Logic:**
+                - If segment-level answer is a REAL answer (not "Cannot be determined from provided information.") → use it
+                - If frame-level answer is "Cannot be determined" → SKIP IT and check visual information instead
+                - If answer is found in visual information → use that
+                - ONLY respond "Cannot be determined" if truly no information exists anywhere
 
         Return ONLY this format:
 
@@ -176,14 +194,16 @@ class PromptBuilder:
     def vqa_context_module(vqa_bullets: List[str], is_final: bool = False) -> str:
         """VQA context (frame-level or clip-level answers)."""
         if is_final:
-            header = """## Question-Specific Answer Context
+            header = """## SEGMENT-Level Answer Context (Reference Only)
 
             The following are answers to above questions obtained for each segment of the video.
             These answers are associated with the timestamp of each segment's beginning:"""
         else:
-            header = """## Question-Specific Answer Context
+            header = """## FRAME-Level Answer Context (Reference Only)
 
-            For each question above, here are the frame-level VQA answers provided:"""
+            For each question, the following are frame-level answers provided as reference.
+            If these answers are "Cannot be determined", do not accept that as final—instead, 
+            use visual and audio information to answer the question:"""
 
         bullets_text = "\n".join(vqa_bullets)
         return f"{header}\n\n{bullets_text}"
@@ -250,6 +270,7 @@ class PromptBuilder:
             modules.append(cls.summary_task())
         elif include_vqa and questions:
             if vqa_bullets:
+                modules.append(cls.visual_captions_final_module(clip_summaries))
                 modules.append(cls.vqa_context_module(vqa_bullets, is_final=True))
                 modules.append(cls.vqa_only_task())
                 modules.append(cls.questions_module(questions))

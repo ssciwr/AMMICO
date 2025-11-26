@@ -4,6 +4,7 @@ from ammico.utils import (
     AnalysisType,
     _categorize_outputs,
     _strip_prompt_prefix_literal,
+    _validate_subdict,
 )
 from ammico.prompt_builder import PromptBuilder
 
@@ -55,6 +56,7 @@ class VideoSummaryDetector(AnalysisMethod):
             subdict = {}
 
         super().__init__(subdict)
+        _validate_subdict(subdict)
         self.summary_model = summary_model or None
         self.audio_model = audio_model
         self.prompt_builder = PromptBuilder()
@@ -969,6 +971,7 @@ class VideoSummaryDetector(AnalysisMethod):
                     "vqa_bullets": bullets_vqa,
                 }
             )
+
         return results
 
     def final_summary(self, summary_dict: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -1106,6 +1109,10 @@ class VideoSummaryDetector(AnalysisMethod):
         Returns:
             Dict[str, Any]: A dictionary containing the analysis results, including summary and answers for provided questions(if any).
         """
+        if list_of_questions is not None and not isinstance(list_of_questions, list):
+            raise TypeError("Expected list_of_questions to be a list of strings.")
+        if list_of_questions and any(not isinstance(q, str) for q in list_of_questions):
+            raise ValueError("All items in list_of_questions must be strings.")
 
         all_answers = {}
         analysis_type, is_summary, is_questions = AnalysisType._validate_analysis_type(

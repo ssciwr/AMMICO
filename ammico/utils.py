@@ -94,6 +94,30 @@ class AnalysisMethod:
         raise NotImplementedError()
 
 
+def _validate_subdict(mydict: dict) -> None:
+    """Validate the nested dictionary for analysis.
+
+    Args:
+        mydict(dict): The nested dictionary to validate.
+    Returns:
+        dict: The validated dictionary.
+    """
+    if not isinstance(mydict, dict):
+        raise TypeError(
+            f"Please provide a nested dictionary - you provided {type(mydict)}"
+        )
+    # check that we actually got a nested dict with filenames
+    for key in mydict.keys():
+        if not isinstance(mydict[key], dict):
+            raise ValueError(
+                "Please provide a nested dictionary - you provided {}".format(key)
+            )
+        if "filename" not in mydict[key].keys():
+            raise ValueError(
+                f"Each sub-dictionary must contain a 'filename' key - missing in {key}"
+            )
+
+
 def _match_pattern(path, pattern, recursive):
     # helper function for find_files
     # find all matches for a single pattern.

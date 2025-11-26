@@ -113,7 +113,7 @@ class MultimodalSummaryModel:
 class AudioToTextModel:
     def __init__(
         self,
-        model_size: str = "small",
+        model_size: str = "large",
         device: Optional[str] = None,
     ) -> None:
         """
