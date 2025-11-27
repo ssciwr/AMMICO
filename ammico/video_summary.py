@@ -415,7 +415,6 @@ class VideoSummaryDetector(AnalysisMethod):
         Extract frame timestamps for each detected video segment.
         Args:
             filename: Path to the video file
-            frame_rate_per_clip: Number of frames to sample per second within each segment
         Returns:
             List of segments with 'start_time', 'end_time', and 'frame_timestamps'
         """
@@ -763,8 +762,8 @@ class VideoSummaryDetector(AnalysisMethod):
         Args:
             filename: Path to video file
             timestamps: List of times in seconds
-            out_w: Frame width
-            out_h: Frame height
+            original_w: Original width of the video
+            original_h: Original height of the video
             workers: Number of parallel threads
         Returns:
           List of (timestamp, PIL.Image) preserving order of timestamps.
@@ -791,7 +790,7 @@ class VideoSummaryDetector(AnalysisMethod):
     def _make_captions_from_extracted_frames(
         self,
         filename: str,
-        merged_segments: List[Tuple[float, Image.Image]],
+        merged_segments: List[Dict[str, Any]],
         video_meta: Dict[str, Any],
         list_of_questions: Optional[List[str]] = None,
     ) -> None:
@@ -813,7 +812,7 @@ class VideoSummaryDetector(AnalysisMethod):
                 "Frame dimensions not found in the last segment for extraction."
             )
 
-        for seg in merged_segments:  # TODO might be generator faster, so changes to ffmmpeg extraction may be needed
+        for seg in merged_segments:  # TODO might be generator faster, so changes to ffmpeg extraction may be needed
             collected: List[Tuple[float, str]] = []
             frame_timestamps = seg.get("video_frame_timestamps", [])
             if not frame_timestamps:

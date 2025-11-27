@@ -119,9 +119,8 @@ class AudioToTextModel:
         """
         Class for WhisperX model loading and inference.
         Args:
-            model_name: Type of model to load.
+            model_size: Size of Whisper model to load (small, base, large).
             device: "cuda" or "cpu" (auto-detected when None).
-            cache_dir: huggingface cache dir (optional).
         """
         self.device = resolve_model_device(device)
 

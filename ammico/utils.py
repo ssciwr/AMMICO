@@ -262,7 +262,6 @@ def _strip_prompt_prefix_literal(decoded: str, prompt: str) -> str:
     return decoded.lstrip("\n\r ").lstrip(":;- ").strip()
 
 
-@staticmethod
 def resolve_model_device(
     device: Optional[str] = None,
 ) -> str:
