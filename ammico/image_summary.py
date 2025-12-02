@@ -17,6 +17,7 @@ class ImageSummaryDetector(AnalysisMethod):
         "default": {
             "summary": {"prompt": "Describe this image.", "max_new_tokens": 256},
             "questions": {"prompt": "", "max_new_tokens": 128},
+            "person": {"prompt": "", "max_new_tokens": 128},
         },
         "concise": {
             "summary": {
@@ -24,6 +25,7 @@ class ImageSummaryDetector(AnalysisMethod):
                 "max_new_tokens": 64,
             },
             "questions": {"prompt": "Answer concisely: ", "max_new_tokens": 128},
+            "person": {"prompt": "Answer concisely: ", "max_new_tokens": 128}
         },
     }
     MAX_QUESTIONS_PER_IMAGE = 32
@@ -140,12 +142,13 @@ class ImageSummaryDetector(AnalysisMethod):
         self,
         analysis_type: Union["AnalysisType", str],
         list_of_questions: Optional[List[str]],
+        list_of_person_questions: Optional[List[str]],
         max_questions_per_image: int,
     ) -> Tuple[str, List[str], bool, bool]:
         if isinstance(analysis_type, AnalysisType):
             analysis_type = analysis_type.value
 
-        allowed = {"summary", "questions", "summary_and_questions"}
+        allowed = {"summary", "questions", "summary_and_questions", "person"}
         if analysis_type not in allowed:
             raise ValueError(f"analysis_type must be one of {allowed}")
 
@@ -155,22 +158,35 @@ class ImageSummaryDetector(AnalysisMethod):
                 "What is this picture about?",
             ]
 
-        if analysis_type in ("questions", "summary_and_questions"):
+        if list_of_person_questions is None:
+            list_of_person_questions = [
+                "Are there multiple people in the image?",
+                "Is the persons face visible?",
+                "How many faces are visible?"
+            ]
+
+        if analysis_type in ("questions", "summary_and_questions", "person"):
             if len(list_of_questions) > max_questions_per_image:
                 raise ValueError(
                     f"Number of questions per image ({len(list_of_questions)}) exceeds safety cap ({max_questions_per_image}). Reduce questions or increase max_questions_per_image."
                 )
+            if len(list_of_person_questions) > max_questions_per_image:
+                raise ValueError(
+                    f"Number of questions per image ({len(list_of_person_questions)}) exceeds safety cap ({max_questions_per_image}). Reduce questions or increase max_questions_per_image."
+                )
 
         is_summary = analysis_type in ("summary", "summary_and_questions")
         is_questions = analysis_type in ("questions", "summary_and_questions")
+        is_person = analysis_type in ("person")
 
-        return analysis_type, list_of_questions, is_summary, is_questions
+        return analysis_type, list_of_questions, list_of_person_questions, is_summary, is_questions, is_person
 
     def analyse_image(
         self,
         entry: dict,
         analysis_type: Union[str, AnalysisType] = AnalysisType.SUMMARY_AND_QUESTIONS,
         list_of_questions: Optional[List[str]] = None,
+        list_of_person_questions: Optional[List[str]] = None,
         max_questions_per_image: int = MAX_QUESTIONS_PER_IMAGE,
         is_concise_summary: bool = True,
         is_concise_answer: bool = True,
@@ -181,9 +197,9 @@ class ImageSummaryDetector(AnalysisMethod):
             - 'vqa' (dict) if questions requested
         """
         self.subdict = entry
-        analysis_type, list_of_questions, is_summary, is_questions = (
+        analysis_type, list_of_questions, list_of_person_questions, is_summary, is_questions, is_person = (
             self._validate_analysis_type(
-                analysis_type, list_of_questions, max_questions_per_image
+                analysis_type, list_of_questions, list_of_person_questions, max_questions_per_image
             )
         )
 
@@ -203,6 +219,13 @@ class ImageSummaryDetector(AnalysisMethod):
                 vqa_map = self.answer_questions(
                     list_of_questions, entry, is_concise_answer
                 )
+                self.subdict["vqa"] = vqa_map
+            except Exception as e:
+                warnings.warn(f"VQA failed: {e}")
+
+        if is_person:
+            try:
+                vqa_map = self.answer_questions(list_of_person_questions, entry, is_concise_answer)
                 self.subdict["vqa"] = vqa_map
             except Exception as e:
                 warnings.warn(f"VQA failed: {e}")
@@ -233,9 +256,9 @@ class ImageSummaryDetector(AnalysisMethod):
             self.subdict (dict): dictionary with analysis results.
         """
         # TODO: add option to ask multiple questions per image as one batch.
-        analysis_type, list_of_questions, is_summary, is_questions = (
+        analysis_type, list_of_questions, is_summary, is_questions, is_person = (
             self._validate_analysis_type(
-                analysis_type, list_of_questions, max_questions_per_image
+                analysis_type, list_of_questions, list_of_questions, max_questions_per_image
             )
         )
 

@@ -51,6 +51,7 @@ class AnalysisType(str, Enum):
     SUMMARY = "summary"
     QUESTIONS = "questions"
     SUMMARY_AND_QUESTIONS = "summary_and_questions"
+    PERSON = "person"
 
     @classmethod
     def _validate_analysis_type(
