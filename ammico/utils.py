@@ -47,6 +47,7 @@ class AnalysisType(str, Enum):
     SUMMARY = "summary"
     QUESTIONS = "questions"
     SUMMARY_AND_QUESTIONS = "summary_and_questions"
+    PERSON = "person"
 
 
 class AnalysisMethod:
