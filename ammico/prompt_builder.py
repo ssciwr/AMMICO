@@ -213,7 +213,10 @@ class PromptBuilder:
         """Build prompt for frame-level analysis."""
         modules = [cls.ROLE_MODULE, cls.visual_frames_module()]
 
-        if include_vqa and questions:
+        if include_vqa and not questions:
+            raise ValueError("Questions must be provided when VQA should be included.")
+
+        if include_vqa:
             modules.append(cls.summary_vqa_task(ProcessingLevel.FRAME))
             modules.append(cls.questions_module(questions))
         else:
