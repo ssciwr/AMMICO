@@ -1,5 +1,5 @@
 from ammico.display import AnalysisExplorer
-from ammico.model import MultimodalSummaryModel
+from ammico.model import MultimodalSummaryModel, AudioToTextModel
 from ammico.text import TextDetector, TextAnalyzer, privacy_disclosure
 from ammico.image_summary import ImageSummaryDetector
 from ammico.utils import find_files, get_dataframe, AnalysisType, find_videos
@@ -21,6 +21,7 @@ __all__ = [
     "TextAnalyzer",
     "ImageSummaryDetector",
     "VideoSummaryDetector",
+    "AudioToTextModel",
     "find_files",
     "find_videos",
     "get_dataframe",
