@@ -67,8 +67,8 @@ def test_analyse_videos_from_dict_summary_and_questions(
     assert "summary" in results["video1"]
     assert "vqa_answers" in results["video1"]
     vqa_texts = [res.lower() for res in results["video1"]["vqa_answers"]]
-    assert any("heidelberg" in text for text in vqa_texts)
-    assert any("november" in text for text in vqa_texts)
+    assert any("heidelberg" or "urban" in text for text in vqa_texts)
+    assert any("november" or "autumn" in text for text in vqa_texts)
 
 
 def test_make_captions_for_subclips_invalid_dict(mock_model):

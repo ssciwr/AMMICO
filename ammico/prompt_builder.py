@@ -133,14 +133,12 @@ class PromptBuilder:
 
                 """
 
-        str_to_return = f"""## Task: Generate Summary and Answer Questions
+        str_to_return = f"""## You have two tasks:
 
-        You have two sub-tasks:
-
-        ### Sub-task 1: Concise Summary
+        ### task 1: Concise Summary
         Generate a brief summary that captures and summarizes main events and themes from the visual information (1-3 sentences).
 
-        ### Sub-task 2: Question Answering
+        ### task 2: Question Answering
         {vqa_task}
 
         Return ONLY this format:
