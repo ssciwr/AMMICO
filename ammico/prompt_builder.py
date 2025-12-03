@@ -241,7 +241,10 @@ class PromptBuilder:
         if include_audio and audio_transcription:
             modules.append(cls.audio_module(audio_transcription))
 
-        if include_vqa and questions:
+        if include_vqa and not questions:
+            raise ValueError("Questions must be provided when VQA should be included.")
+
+        if include_vqa:
             modules.append(
                 cls.summary_vqa_task(ProcessingLevel.CLIP, has_audio=include_audio)
             )

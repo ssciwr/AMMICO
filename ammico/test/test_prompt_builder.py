@@ -19,6 +19,14 @@ def sample_audio_transcription():
 
 
 @pytest.fixture
+def sample_frame_bullets():
+    return [
+        "Frame shows a cat sitting on a windowsill.",
+        "There is a sunny day outside.",
+    ]
+
+
+@pytest.fixture
 def sample_vqa_bullets():
     return ["Answer 1", "Answer 2"]
 
@@ -135,12 +143,15 @@ def test_vqa_context_module(setup_prompt_builder, sample_vqa_bullets):
 
 
 def test_build_frame_prompt(setup_prompt_builder, sample_questions):
+    # summary only
     returned_string = setup_prompt_builder.build_frame_prompt()
     assert "precise" in returned_string
     assert "Accuracy" in returned_string
     assert "Task: Generate Concise Summary" in returned_string
+    # VQA but no questions
     with pytest.raises(ValueError):
         setup_prompt_builder.build_frame_prompt(include_vqa=True)
+    # VQA
     returned_string = setup_prompt_builder.build_frame_prompt(
         include_vqa=True, questions=sample_questions
     )
@@ -150,9 +161,81 @@ def test_build_frame_prompt(setup_prompt_builder, sample_questions):
     assert "You have two tasks:" in returned_string
 
 
-def test_build_clip_prompt(setup_prompt_builder):
-    pass
+def test_build_clip_prompt(
+    setup_prompt_builder,
+    sample_frame_bullets,
+    sample_vqa_bullets,
+    sample_audio_transcription,
+    sample_questions,
+):
+    # summary only
+    returned_string = setup_prompt_builder.build_clip_prompt(sample_frame_bullets)
+    assert "precise" in returned_string
+    assert "Visual Information" in returned_string
+    assert "frames" in returned_string
+    assert sample_frame_bullets[0] in returned_string
+    assert sample_frame_bullets[1] in returned_string
+    assert "Task: Generate Concise Summary" in returned_string
+    # summary with audio
+    returned_string = setup_prompt_builder.build_clip_prompt(
+        sample_frame_bullets,
+        include_audio=True,
+        audio_transcription=sample_audio_transcription,
+    )
+    assert "precise" in returned_string
+    assert "Visual Information" in returned_string
+    assert "frames" in returned_string
+    assert sample_frame_bullets[0] in returned_string
+    assert sample_frame_bullets[1] in returned_string
+    assert "Audio Information" in returned_string
+    assert "audio" in returned_string
+    assert "[0.00s - 2.50s]: Knock knock" in returned_string
+    # summary with VQA but no questions
+    with pytest.raises(ValueError):
+        setup_prompt_builder.build_clip_prompt(sample_frame_bullets, include_vqa=True)
+    # summary with VQA
+    returned_string = setup_prompt_builder.build_clip_prompt(
+        sample_frame_bullets, include_vqa=True, questions=sample_questions
+    )
+    assert "precise" in returned_string
+    assert "Visual Information" in returned_string
+    assert "frames" in returned_string
+    assert sample_frame_bullets[0] in returned_string
+    assert sample_frame_bullets[1] in returned_string
+    assert "Frame-Level Answers" in returned_string
+    assert "You have two tasks:" in returned_string
+    assert "Questions to Answer" in returned_string
+    assert "1. " + sample_questions[0] in returned_string
+    assert "2. " + sample_questions[1] in returned_string
+    # summary with VQA and audio
+    returned_string = setup_prompt_builder.build_clip_prompt(
+        sample_frame_bullets,
+        include_vqa=True,
+        questions=sample_questions,
+        include_audio=True,
+        audio_transcription=sample_audio_transcription,
+    )
+    assert "precise" in returned_string
+    assert "Visual Information" in returned_string
+    assert "frames" in returned_string
+    assert sample_frame_bullets[0] in returned_string
+    assert sample_frame_bullets[1] in returned_string
+    assert "Audio Information" in returned_string
+    assert "audio" in returned_string
+    assert "[0.00s - 2.50s]: Knock knock" in returned_string
+    assert "Frame-Level Answers" in returned_string
+    assert "Audio Information" in returned_string
+    assert "You have two tasks:" in returned_string
+    assert "Questions to Answer" in returned_string
+    assert "1. " + sample_questions[0] in returned_string
+    assert "2. " + sample_questions[1] in returned_string
 
 
-def test_build_video_prompt(setup_prompt_builder):
-    pass
+def test_build_video_prompt(
+    setup_prompt_builder, sample_frame_bullets, sample_questions, sample_vqa_bullets
+):
+    # summary only
+    returned_string = setup_prompt_builder.build_video_prompt(summary_only=True)
+    assert "precise" in returned_string
+    assert "Accuracy" in returned_string
+    assert "Task: Generate Concise Summary" in returned_string
