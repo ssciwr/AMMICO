@@ -260,7 +260,6 @@ class PromptBuilder:
     @classmethod
     def build_video_prompt(
         cls,
-        summary_only: bool = False,
         include_vqa: bool = False,
         clip_summaries: Optional[List[str]] = None,
         questions: Optional[List[str]] = None,
@@ -269,19 +268,21 @@ class PromptBuilder:
         """Build prompt for video-level analysis."""
         modules = [cls.ROLE_MODULE]
 
-        if summary_only:
+        if not include_vqa:
             modules.append(cls.visual_captions_final_module(clip_summaries))
             modules.append(cls.summary_task())
-        elif include_vqa and questions:
-            if vqa_bullets:
-                modules.append(cls.visual_captions_final_module(clip_summaries))
-                modules.append(cls.vqa_context_module(vqa_bullets, is_final=True))
-                modules.append(cls.vqa_only_task())
-                modules.append(cls.questions_module(questions))
-            else:
+        else:
+            if not questions:
                 raise ValueError(
-                    "vqa_bullets must be provided for VQA-only video prompt."
+                    "Questions must be provided when VQA should be included."
                 )
+            if not vqa_bullets:
+                raise ValueError("Vqa_bullets must be provided for video-level VQA.")
+
+            modules.append(cls.visual_captions_final_module(clip_summaries))
+            modules.append(cls.vqa_context_module(vqa_bullets, is_final=True))
+            modules.append(cls.vqa_only_task())
+            modules.append(cls.questions_module(questions))
 
         modules.append(cls.CONSTRAINTS_MODULE)
         return "\n\n".join(modules)

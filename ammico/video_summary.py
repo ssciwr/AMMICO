@@ -991,7 +991,6 @@ class VideoSummaryDetector(AnalysisMethod):
             raise ValueError("No captions available for summary generation.")
 
         summary_user_prompt = self.prompt_builder.build_video_prompt(
-            summary_only=True,
             include_vqa=False,
             clip_summaries=bullets,
         )
@@ -1038,7 +1037,9 @@ class VideoSummaryDetector(AnalysisMethod):
             Dict[str, Any]: A dictionary containing the list of answers to the questions.
         """
         vqa_bullets = []
+        summary_bullets = []
         for seg in answers_dict:
+            summary_bullets.extend(seg.get("summary_bullets", []))
             seg_bullets = seg.get("vqa_bullets", [])
             vqa_bullets.extend(seg_bullets)
 
@@ -1050,10 +1051,10 @@ class VideoSummaryDetector(AnalysisMethod):
         include_questions = bool(list_of_questions)
         if include_questions:
             prompt = self.prompt_builder.build_video_prompt(
-                summary_only=False,
                 include_vqa=include_questions,
                 questions=list_of_questions,
                 vqa_bullets=vqa_bullets,
+                clip_summaries=summary_bullets,
             )
         else:
             raise ValueError(

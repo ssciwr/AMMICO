@@ -235,7 +235,7 @@ def test_build_video_prompt(
     setup_prompt_builder, sample_frame_bullets, sample_questions, sample_vqa_bullets
 ):
     # summary only
-    returned_string = setup_prompt_builder.build_video_prompt(summary_only=True)
+    returned_string = setup_prompt_builder.build_video_prompt()
     assert "precise" in returned_string
     assert "Accuracy" in returned_string
     assert "Task: Generate Concise Summary" in returned_string
