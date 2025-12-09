@@ -115,12 +115,16 @@ class AudioToTextModel:
         self,
         model_size: str = "large",
         device: Optional[str] = None,
+        language: Optional[str] = None,
     ) -> None:
         """
         Class for WhisperX model loading and inference.
         Args:
             model_size: Size of Whisper model to load (small, base, large).
             device: "cuda" or "cpu" (auto-detected when None).
+            language: ISO-639-1 language code (e.g., "en", "fr", "de").
+                     If None, language will be detected automatically.
+                     Set this to avoid unreliable detection on small clips.
         """
         self.device = resolve_model_device(device)
 
@@ -128,16 +132,60 @@ class AudioToTextModel:
 
         self.model = None
 
+        self.language = self._validate_language(language)
+
         self._load_model()
+
+    def _validate_language(self, language: Optional[str]) -> Optional[str]:
+        """
+
+        Validate the provided language code against whisperx's supported languages.
+        Args:
+            language: ISO-639-1 language code (e.g., "en", "fr", "de").
+        Returns:
+            Validated language code or None.
+        Raises:
+            ValueError: If the language code is invalid or unsupported.
+        """
+
+        if not language:
+            return None
+
+        language = language.strip().lower()
+
+        if len(language) != 2:
+            raise ValueError(
+                f"Invalid language code: '{language}'. Language codes must be 2 letters."
+            )
+
+        if not language.isalpha():
+            raise ValueError(
+                f"Invalid language code: '{language}'. Language codes must contain only alphabetic characters."
+            )
+
+        if (
+            language not in whisperx.alignment.DEFAULT_ALIGN_MODELS_TORCH.keys()
+            and language not in whisperx.alignment.DEFAULT_ALIGN_MODELS_HF.keys()
+        ):
+            raise ValueError(
+                f"Unsupported language code: '{language}'. Supported languages are: {list(whisperx.alignment.DEFAULT_ALIGN_MODELS_TORCH.keys()) + list(whisperx.alignment.DEFAULT_ALIGN_MODELS_HF.keys())}"
+            )
+        return language
 
     def _load_model(self):
         if self.device == "cuda":
             self.model = whisperx.load_model(
-                self.model_size, device=self.device, compute_type="float16"
+                self.model_size,
+                device=self.device,
+                compute_type="float16",
+                language=self.language,
             )
         else:
             self.model = whisperx.load_model(
-                self.model_size, device=self.device, compute_type="int8"
+                self.model_size,
+                device=self.device,
+                compute_type="int8",
+                language=self.language,
             )
 
     def close(self) -> None:
