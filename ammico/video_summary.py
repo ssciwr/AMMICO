@@ -900,6 +900,7 @@ class VideoSummaryDetector(AnalysisMethod):
         audio_generated_captions = []
         if self.audio_model is not None:
             audio_generated_captions = self._extract_transcribe_audio_part(filename)
+            entry["audio_descriptions"] = audio_generated_captions
 
         video_result_segments = self._extract_frame_timestamps_from_clip(filename)
         video_segments_w_timestamps = video_result_segments["segments"]
@@ -1114,24 +1115,22 @@ class VideoSummaryDetector(AnalysisMethod):
         if list_of_questions and any(not isinstance(q, str) for q in list_of_questions):
             raise ValueError("All items in list_of_questions must be strings.")
 
-        all_answers = {}
         analysis_type, is_summary, is_questions = AnalysisType._validate_analysis_type(
             analysis_type, list_of_questions
         )
 
         for video_key, entry in self.subdict.items():
-            summary_and_vqa = {}
             answers_dict = self.make_captions_for_subclips(
                 entry,
                 list_of_questions=list_of_questions,
             )
             if is_summary:
                 answer = self.final_summary(answers_dict)
-                summary_and_vqa["summary"] = answer["summary"]
+                entry["summary"] = answer["summary"]
             if is_questions:
                 answer = self.final_answers(answers_dict, list_of_questions)
-                summary_and_vqa["vqa_answers"] = answer["vqa_answers"]
+                entry["vqa_answers"] = answer["vqa_answers"]
 
-            all_answers[video_key] = summary_and_vqa
+            self.subdict[video_key] = entry
 
-        return all_answers
+        return self.subdict
