@@ -1,4 +1,8 @@
-from ammico.utils import resolve_model_device, resolve_model_size
+from ammico.utils import (
+    resolve_model_device,
+    resolve_model_size,
+    get_supported_whisperx_languages,
+)
 
 import torch
 import warnings
@@ -152,6 +156,7 @@ class AudioToTextModel:
             return None
 
         language = language.strip().lower()
+        supported_languages = get_supported_whisperx_languages()
 
         if len(language) != 2:
             raise ValueError(
@@ -163,13 +168,11 @@ class AudioToTextModel:
                 f"Invalid language code: '{language}'. Language codes must contain only alphabetic characters."
             )
 
-        if (
-            language not in whisperx.alignment.DEFAULT_ALIGN_MODELS_TORCH.keys()
-            and language not in whisperx.alignment.DEFAULT_ALIGN_MODELS_HF.keys()
-        ):
+        if language not in supported_languages:
             raise ValueError(
-                f"Unsupported language code: '{language}'. Supported languages are: {list(whisperx.alignment.DEFAULT_ALIGN_MODELS_TORCH.keys()) + list(whisperx.alignment.DEFAULT_ALIGN_MODELS_HF.keys())}"
+                f"Unsupported language code: '{language}'. Supported: {sorted(supported_languages)}"
             )
+
         return language
 
     def _load_model(self):

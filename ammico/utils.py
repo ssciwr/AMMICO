@@ -10,7 +10,7 @@ from enum import Enum
 from typing import List, Tuple, Optional, Union
 import re
 import warnings
-
+from whisperx.alignment import DEFAULT_ALIGN_MODELS_HF, DEFAULT_ALIGN_MODELS_TORCH
 
 pkg = importlib_resources.files("ammico")
 
@@ -446,3 +446,11 @@ def get_color_table():
         col_key: df_colors[col_key].dropna().to_dict("list")
         for col_key in df_colors.columns.levels[0]
     }
+
+
+def get_supported_whisperx_languages() -> List[str]:
+    """Get the list of supported whisperx languages."""
+    supported_languages = set(DEFAULT_ALIGN_MODELS_TORCH.keys()) | set(
+        DEFAULT_ALIGN_MODELS_HF.keys()
+    )
+    return sorted(supported_languages)
