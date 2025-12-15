@@ -44,6 +44,7 @@ dependencies = [
     "tf-keras",
     "torch<2.9",
     "pytorch-lightning<=2.5.6",
+    "sentence-transformers<5.2",
     "torchvision",
     "tqdm",
     "transformers<4.52",
