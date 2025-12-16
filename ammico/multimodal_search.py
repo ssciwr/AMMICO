@@ -2,12 +2,13 @@ from ammico.model import MultimodalEmbeddingsModel
 from ammico.utils import AnalysisMethod, load_image, prepare_image, find_files
 import torch
 import faiss
-from faiss.contrib import torch_utils
+import faiss.contrib.torch_utils
 from typing import Optional, List, Union, Tuple, Any, Dict
 from PIL import Image
 import numpy as np
 from pathlib import Path
 import json
+import warnings
 
 
 class MultimodalSearch(AnalysisMethod):
@@ -53,6 +54,23 @@ class MultimodalSearch(AnalysisMethod):
         pil_images = [prepare_image(load_image(p)) for p in paths]
 
         return pil_images, [str(p) for p in paths]
+
+    def _prepare_query_image(
+        self,
+        query_image: Union[str, Path, Image.Image],
+    ) -> Image.Image:
+        """
+        Load and prepare a single query image.
+        Args:
+            query_image: Image file path or PIL Image.
+        Returns:
+            PIL Image.
+        """
+        if isinstance(query_image, Image.Image):
+            pil_image = prepare_image(query_image)
+        else:
+            pil_image = prepare_image(load_image(query_image))
+        return pil_image
 
     def _save_embeddings(
         self,
@@ -160,6 +178,12 @@ class MultimodalSearch(AnalysisMethod):
             try:
                 flat_config.device = torch.cuda.current_device()
             except Exception as e:
+                warnings.warn(
+                    "Failed to get current CUDA device. Defaulting to device 0. "
+                    f"This may lead to unexpected behavior: {e!r}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
                 flat_config.device = 0
             faiss_index = faiss.GpuIndexFlatIP(res, embeddings.shape[1], flat_config)
             faiss_index.add(embeddings.float().contiguous())
@@ -301,6 +325,12 @@ class MultimodalSearch(AnalysisMethod):
             try:
                 flat_config.device = torch.cuda.current_device()
             except Exception as e:
+                warnings.warn(
+                    "Failed to get current CUDA device. Defaulting to device 0. "
+                    f"This may lead to unexpected behavior: {e!r}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
                 flat_config.device = 0
             cpu_index = faiss.read_index(str(path))
             self.faiss_index = faiss.index_cpu_to_gpu(
@@ -347,7 +377,7 @@ class MultimodalSearch(AnalysisMethod):
         if query_type == "text":
             emb = self.model.encode_text(query, batch_size=batch_size)
         elif query_type == "image":
-            pil_images, _ = self._prepare_images(query)
+            pil_images = self._prepare_query_image(query)
             emb = self.model.encode_image(pil_images, batch_size=batch_size)
         else:
             raise ValueError("query_type must be either 'text' or 'image'")
@@ -444,9 +474,100 @@ class MultimodalSearch(AnalysisMethod):
             batch_size=batch_size,
         )
 
-        return self._search_embeddings(
+        results = self._search_embeddings(
             q_emb,
             top_k=top_k,
             score_threshold=score_threshold,
             return_paths=return_paths,
         )
+        items, scores = results
+        return items[0], scores[0]
+
+    # TODO: add tests for multimodal search; add batch queries
+
+    def multimodal_batch_search(
+        self,
+        queries: List[Dict[str, Union[str, Path, Image.Image]]],
+        top_k: int = 10,
+        batch_size: int = 64,
+        score_threshold: Optional[float] = None,
+        load_indexes: bool = False,
+        load_path: Optional[Union[str, Path]] = None,
+        return_paths: bool = True,
+    ) -> List[Union[Tuple[List[int], List[float]], Tuple[List[str], List[float]]]]:
+        """
+        Perform multimodal search for a batch of queries.
+        Args:
+            queries: List of text strings or image file paths or PIL Images.
+            query_type: "text" or "image".
+            top_k: Number of top matches to return.
+            batch_size: Batch size for encoding the queries.
+            score_threshold: Minimum score threshold for matches.
+            load_indexes: Whether to load precomputed indexes from disk.
+            load_path: Path to load indexes from.
+            return_paths: Whether to return image paths instead of indices.
+        Returns:
+            List of tuples of (list of indices or paths, list of scores) for each query.
+        """
+        if not isinstance(queries, list):
+            raise TypeError(
+                "queries must be a list of dicts with 'text' or 'image' keys"
+            )
+        if load_indexes:
+            self._load_indexes(load_path)
+
+        if self.faiss_index is None:
+            raise RuntimeError(
+                "No image faiss_indexes found. Call index_images first or set load_indexes to True."
+            )
+
+        text_queries = []
+        text_positions = []
+        image_queries = []
+        image_positions = []
+
+        for idx, qdict in enumerate(queries):
+            if "text" in qdict:
+                text_queries.append(qdict["text"])
+                text_positions.append(idx)
+            elif "image" in qdict:
+                pil_img = self._prepare_query_image(qdict["image"])
+                image_queries.append(pil_img)
+                image_positions.append(idx)
+            else:
+                raise ValueError("Each query must have 'text' or 'image'")
+
+        final_embeddings = [None] * len(queries)
+
+        if text_queries:
+            text_emb = self.model.encode_text(
+                texts=text_queries,
+                batch_size=batch_size,
+            )
+            for i, pos in enumerate(text_positions):
+                final_embeddings[pos] = text_emb[i]
+
+        if image_queries:
+            image_emb = self.model.encode_image(
+                images=image_queries,
+                batch_size=batch_size,
+            )
+            for i, pos in enumerate(image_positions):
+                final_embeddings[pos] = image_emb[i]
+
+        if any(e is None for e in final_embeddings):
+            raise RuntimeError("Some query embeddings were not assigned")
+
+        if isinstance(final_embeddings[0], torch.Tensor):
+            query_embeddings = torch.stack(final_embeddings, dim=0)
+        else:
+            query_embeddings = np.stack(final_embeddings, axis=0)
+
+        items_list, scores_list = self._search_embeddings(
+            query_embeddings,
+            top_k=top_k,
+            score_threshold=score_threshold,
+            return_paths=return_paths,
+        )
+
+        return [(items_list[i], scores_list[i]) for i in range(len(queries))]
