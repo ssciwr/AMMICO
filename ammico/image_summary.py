@@ -144,7 +144,7 @@ class ImageSummaryDetector(AnalysisMethod):
         list_of_questions: Optional[List[str]],
         list_of_person_questions: Optional[List[str]],
         max_questions_per_image: int,
-    ) -> Tuple[str, List[str], bool, bool]:
+    ) -> Tuple[str, List[str], List[str], bool, bool, bool]:
         if isinstance(analysis_type, AnalysisType):
             analysis_type = analysis_type.value
 
@@ -236,6 +236,7 @@ class ImageSummaryDetector(AnalysisMethod):
         self,
         analysis_type: Union[AnalysisType, str] = AnalysisType.SUMMARY_AND_QUESTIONS,
         list_of_questions: Optional[List[str]] = None,
+        list_of_person_questions: Optional[List[str]] = None,
         max_questions_per_image: int = MAX_QUESTIONS_PER_IMAGE,
         keys_batch_size: int = KEYS_BATCH_SIZE,
         is_concise_summary: bool = True,
@@ -256,9 +257,9 @@ class ImageSummaryDetector(AnalysisMethod):
             self.subdict (dict): dictionary with analysis results.
         """
         # TODO: add option to ask multiple questions per image as one batch.
-        analysis_type, list_of_questions, is_summary, is_questions, is_person = (
+        analysis_type, list_of_questions, list_of_person_questions, is_summary, is_questions, is_person = (
             self._validate_analysis_type(
-                analysis_type, list_of_questions, list_of_questions, max_questions_per_image
+                analysis_type, list_of_questions, list_of_person_questions, max_questions_per_image
             )
         )
 
@@ -282,6 +283,15 @@ class ImageSummaryDetector(AnalysisMethod):
                     try:
                         vqa_map = self.answer_questions(
                             list_of_questions, entry, is_concise_answer
+                        )
+                        entry["vqa"] = vqa_map
+                    except Exception as e:
+                        warnings.warn(f"VQA failed: {e}")
+
+                if is_person:
+                    try:
+                        vqa_map = self.answer_questions(
+                            list_of_person_questions, entry, is_concise_answer
                         )
                         entry["vqa"] = vqa_map
                     except Exception as e:
