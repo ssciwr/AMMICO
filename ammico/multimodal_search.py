@@ -1,5 +1,11 @@
 from ammico.model import MultimodalEmbeddingsModel
-from ammico.utils import AnalysisMethod, load_image, prepare_image, find_files
+from ammico.utils import (
+    AnalysisMethod,
+    load_image,
+    prepare_image,
+    find_files,
+    _resolve_embedding_path,
+)
 import torch
 import faiss
 import faiss.contrib.torch_utils
@@ -265,40 +271,29 @@ class MultimodalSearch(AnalysisMethod):
     ) -> Union[torch.Tensor, np.ndarray]:
         """
         Load precomputed image embeddings from a .npy or .pt file.
-        - returns image_embeddings
+        Returns a 2D numpy array or torch tensor.
         """
         path = Path(embedding_path)
         if not path.exists():
             raise FileNotFoundError(f"Embeddings file not found: {path}")
 
+        path = _resolve_embedding_path(path, str(self.model.device))
+
+        # Load file based on suffix
         if path.suffix == ".npy":
             emb = np.load(str(path))
             if not isinstance(emb, np.ndarray) or emb.ndim != 2:
                 raise ValueError("Loaded embeddings should be a 2D numpy array.")
             return emb
+
         elif path.suffix == ".pt":
-            emb = torch.load(str(path))
+            emb = torch.load(
+                str(path), map_location=self.model.device, weights_only=True
+            )
             if not isinstance(emb, torch.Tensor) or emb.ndim != 2:
                 raise ValueError("Loaded embeddings should be a 2D torch tensor.")
             return emb
-        elif path.is_dir():
-            np_path = path / "image_embeddings.npy"
-            pt_path = path / "image_embeddings.pt"
-            # We consider .npy only for cpu and .pt only for cuda because of logic of other parts of code
-            if np_path.exists() and self.model.device == "cpu":
-                emb = np.load(str(np_path))
-                if not isinstance(emb, np.ndarray) or emb.ndim != 2:
-                    raise ValueError("Loaded embeddings should be a 2D numpy array.")
-                return emb
-            elif pt_path.exists() and self.model.device == "cuda":
-                emb = torch.load(str(pt_path))
-                if not isinstance(emb, torch.Tensor) or emb.ndim != 2:
-                    raise ValueError("Loaded embeddings should be a 2D torch tensor.")
-                return emb
-            else:
-                raise FileNotFoundError(
-                    f"No embeddings file found in directory: {path}"
-                )
+
         else:
             raise ValueError(
                 "Unsupported embedding file format. Use .npy or .pt files."
@@ -356,7 +351,7 @@ class MultimodalSearch(AnalysisMethod):
             raise FileNotFoundError(f"Load path does not exist: {path}")
 
         self._load_image_paths(path)
-        # self.image_embeddings = self._load_embeddings(path) # since we have FAISS index, no need to load embeddings, it is possible to load it directly if needed
+        # since we have FAISS index, no need to load embeddings, it is possible to load it directly if needed via `self._load_embeddings(path)`
         self._load_faiss_index(path)
 
     def _encode_query(
@@ -483,7 +478,36 @@ class MultimodalSearch(AnalysisMethod):
         items, scores = results
         return items[0], scores[0]
 
-    # TODO: add tests for multimodal search; add batch queries
+    def _split_queries(
+        self,
+        queries: List[Dict[str, Union[str, Path, Image.Image]]],
+    ) -> Tuple[List[str], List[int], List[Union[str, Path, Image.Image]], List[int]]:
+        """
+        Parse queries and return:
+        (text_queries, text_positions, image_queries, image_positions)
+        """
+        text_queries: List[str] = []
+        text_positions: List[int] = []
+        image_queries: List[Union[str, Path, Image.Image]] = []
+        image_positions: List[int] = []
+
+        for idx, qdict in enumerate(queries):
+            if not isinstance(qdict, dict):
+                raise ValueError(
+                    "Each query must be a dict with a single key 'text' or 'image'"
+                )
+            if "text" in qdict:
+                text_queries.append(qdict["text"])
+                text_positions.append(idx)
+            elif "image" in qdict:
+                image_queries.append(qdict["image"])
+                image_positions.append(idx)
+            else:
+                raise ValueError(
+                    "Each query dict must contain exactly one of 'text' or 'image'"
+                )
+
+        return text_queries, text_positions, image_queries, image_positions
 
     def multimodal_batch_search(
         self,
@@ -521,22 +545,9 @@ class MultimodalSearch(AnalysisMethod):
                 "No image faiss_indexes found. Call index_images first or set load_indexes to True."
             )
 
-        text_queries = []
-        text_positions = []
-        image_queries = []
-        image_positions = []
-
-        for idx, qdict in enumerate(queries):
-            if "text" in qdict:
-                text_queries.append(qdict["text"])
-                text_positions.append(idx)
-            elif "image" in qdict:
-                pil_img = self._prepare_query_image(qdict["image"])
-                image_queries.append(pil_img)
-                image_positions.append(idx)
-            else:
-                raise ValueError("Each query must have 'text' or 'image'")
-
+        text_queries, text_positions, image_queries, image_positions = (
+            self._split_queries(queries)
+        )
         final_embeddings = [None] * len(queries)
 
         if text_queries:

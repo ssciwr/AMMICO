@@ -27,6 +27,7 @@ dependencies = [
     "ctranslate2",
     "dash",
     "dash-bootstrap-components",
+    "faiss-gpu-cu11>=1.8.0",
     "google-cloud-vision",
     "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",

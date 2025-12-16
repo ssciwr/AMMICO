@@ -9,7 +9,7 @@ import random
 from enum import Enum
 from pathlib import Path
 from PIL import Image
-from typing import List, Tuple, Optional, Union
+from typing import List, Tuple, Optional, Union, Iterable
 import re
 import warnings
 from whisperx.alignment import DEFAULT_ALIGN_MODELS_HF, DEFAULT_ALIGN_MODELS_TORCH
@@ -316,8 +316,8 @@ def find_videos(
 
 
 def find_files(
-    path: str = None,
-    pattern=["png", "jpg", "jpeg", "gif", "webp", "avif", "tiff"],
+    path: Optional[Union[str, Path, None]] = None,
+    pattern: Optional[Iterable[str]] = None,
     recursive: bool = True,
     limit=20,
     random_seed: int = None,
@@ -349,6 +349,8 @@ def find_files(
 
     if path is None:
         path = os.environ.get("AMMICO_DATA_HOME", ".")
+    if pattern is None:
+        pattern = ["png", "jpg", "jpeg", "gif", "webp", "avif", "tiff"]
 
     if isinstance(pattern, str):
         pattern = [pattern]
@@ -411,6 +413,26 @@ def _check_for_missing_keys(mydict: dict) -> dict:
             if mkey not in mydict[key].keys():
                 mydict[key][mkey] = None
     return mydict
+
+
+def _resolve_embedding_path(path: Path, device: str) -> Path:
+    """
+    Resolve the actual embedding file path.
+    Handles both directory and direct file inputs.
+    """
+    if path.is_dir():
+        np_path = path / "image_embeddings.npy"
+        pt_path = path / "image_embeddings.pt"
+
+        if device == "cpu" and np_path.exists():
+            return np_path
+        if device == "cuda" and pt_path.exists():
+            return pt_path
+
+        raise FileNotFoundError(
+            f"No suitable embeddings file found in directory: {path}"
+        )
+    return path
 
 
 def append_data_to_dict(mydict: dict) -> dict:
