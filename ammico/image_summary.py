@@ -224,7 +224,8 @@ class ImageSummaryDetector(AnalysisMethod):
         Args:
             analysis_type (str): type of the analysis.
             list_of_questions (list[str]): list of questions.
-            max_questions_per_image (int): maximum number of questions per image. We recommend to keep it low to avoid long processing times and high memory usage.
+            max_questions_per_image (int): maximum number of questions per image.
+                We recommend to keep it low to avoid long processing times and high memory usage.
             keys_batch_size (int): number of images to process in a batch.
             is_concise_summary (bool): whether to generate concise summary.
             is_concise_answer (bool): whether to generate concise answers.
@@ -300,7 +301,7 @@ class ImageSummaryDetector(AnalysisMethod):
         with torch.inference_mode():
             try:
                 if self.summary_model.device == "cuda":
-                    with torch.cuda.amp.autocast(enabled=True):
+                    with torch.amp.autocast("cuda", enabled=True):
                         generated_ids = self.summary_model.model.generate(
                             **inputs, generation_config=gen_conf
                         )
@@ -400,7 +401,7 @@ class ImageSummaryDetector(AnalysisMethod):
             inputs = self._prepare_inputs(chunk, entry)
             with torch.inference_mode():
                 if self.summary_model.device == "cuda":
-                    with torch.cuda.amp.autocast(enabled=True):
+                    with torch.amp.autocast("cuda", enabled=True):
                         out_ids = self.summary_model.model.generate(
                             **inputs, generation_config=gen_conf
                         )

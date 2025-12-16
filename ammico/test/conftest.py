@@ -1,6 +1,8 @@
 import os
 import pytest
 from ammico.model import MultimodalSummaryModel
+from ammico.video_summary import VideoSummaryDetector
+
 import torch
 
 
@@ -25,6 +27,14 @@ def get_testdict(get_path):
     testdict = {
         "IMG_2746": {"filename": get_path + "IMG_2746.png"},
         "IMG_2809": {"filename": get_path + "IMG_2809.png"},
+    }
+    return testdict
+
+
+@pytest.fixture
+def get_video_testdict(get_path):
+    testdict = {
+        "video1": {"filename": get_path + "video1.mp4"},
     }
     return testdict
 
@@ -117,3 +127,12 @@ def mock_model():
             pass
 
     return MockMultimodalSummaryModel()
+
+
+@pytest.fixture(scope="session")
+def video_summary_model(model):
+    vsm = VideoSummaryDetector(summary_model=model)
+    try:
+        yield vsm
+    finally:
+        vsm.summary_model.close()

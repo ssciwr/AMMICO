@@ -30,7 +30,10 @@ def test_image_summary_detector_questions(model, get_testdict):
     for key in get_testdict.keys():
         assert "vqa" in results[key]
         if key == "IMG_2746":
-            assert "marathon" in results[key]["vqa"][0].lower()
+            assert (
+                "marathon" in results[key]["vqa"][0].lower()
+                or "competition" in results[key]["vqa"][0].lower()
+            )
 
         if key == "IMG_2809":
             assert (

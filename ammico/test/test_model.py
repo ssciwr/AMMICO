@@ -1,5 +1,5 @@
 import pytest
-from ammico.model import MultimodalSummaryModel
+from ammico.model import MultimodalSummaryModel, AudioToTextModel
 
 
 @pytest.mark.long
@@ -28,3 +28,14 @@ def test_free_resources():
     model.close()
     assert model.model is None
     assert model.processor is None
+
+
+def test_audio_to_text_model_invalid_language():
+    with pytest.raises(ValueError):
+        AudioToTextModel(language="xyz")
+
+    with pytest.raises(ValueError):
+        AudioToTextModel(language="e4")
+
+    with pytest.raises(ValueError):
+        AudioToTextModel(language="ha")  # not supported by whisperx align model
