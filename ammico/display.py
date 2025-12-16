@@ -1,4 +1,3 @@
-import ammico.faces as faces
 import ammico.text as text
 import ammico.colors as colors
 import ammico.image_summary as image_summary
@@ -101,17 +100,12 @@ class AnalysisExplorer:
             State("Dropdown_analysis_type", "value"),
             State("textarea_questions", "value"),
             State("setting_privacy_env_var", "value"),
-            State("setting_Emotion_emotion_threshold", "value"),
-            State("setting_Emotion_race_threshold", "value"),
-            State("setting_Emotion_gender_threshold", "value"),
-            State("setting_Emotion_env_var", "value"),
             State("setting_Color_delta_e_method", "value"),
             prevent_initial_call=True,
         )(self._right_output_analysis)
 
         self.app.callback(
             Output("settings_TextDetector", "style"),
-            Output("settings_EmotionDetector", "style"),
             Output("settings_ColorDetector", "style"),
             Output("settings_VQA", "style"),
             Input("Dropdown_select_Detector", "value"),
@@ -187,74 +181,6 @@ class AnalysisExplorer:
                         ),
                     ],
                 ),  # text summary end
-                # start emotion detector
-                html.Div(
-                    id="settings_EmotionDetector",
-                    style={"display": "none"},
-                    children=[
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        html.P("Emotion threshold"),
-                                        dcc.Input(
-                                            value=50,
-                                            type="number",
-                                            max=100,
-                                            min=0,
-                                            id="setting_Emotion_emotion_threshold",
-                                            style={"width": "100%"},
-                                        ),
-                                    ],
-                                    align="start",
-                                ),
-                                dbc.Col(
-                                    [
-                                        html.P("Race threshold"),
-                                        dcc.Input(
-                                            type="number",
-                                            value=50,
-                                            max=100,
-                                            min=0,
-                                            id="setting_Emotion_race_threshold",
-                                            style={"width": "100%"},
-                                        ),
-                                    ],
-                                    align="start",
-                                ),
-                                dbc.Col(
-                                    [
-                                        html.P("Gender threshold"),
-                                        dcc.Input(
-                                            type="number",
-                                            value=50,
-                                            max=100,
-                                            min=0,
-                                            id="setting_Emotion_gender_threshold",
-                                            style={"width": "100%"},
-                                        ),
-                                    ],
-                                    align="start",
-                                ),
-                                dbc.Col(
-                                    [
-                                        html.P(
-                                            "Disclosure acceptance environment variable"
-                                        ),
-                                        dcc.Input(
-                                            type="text",
-                                            value="DISCLOSURE_AMMICO",
-                                            id="setting_Emotion_env_var",
-                                            style={"width": "100%"},
-                                        ),
-                                    ],
-                                    align="start",
-                                ),
-                            ],
-                            style={"width": "100%"},
-                        ),
-                    ],
-                ),  # end emotion detector
                 html.Div(
                     id="settings_ColorDetector",
                     style={"display": "none"},
@@ -355,7 +281,6 @@ class AnalysisExplorer:
                             dcc.Dropdown(
                                 options=[
                                     "TextDetector",
-                                    "EmotionDetector",
                                     "ColorDetector",
                                     "VQA",
                                 ],
@@ -430,7 +355,7 @@ class AnalysisExplorer:
             return None
 
     def _update_detector_setting(self, setting_input):
-        # return settings_TextDetector -> style, settings_EmotionDetector -> style
+        # return settings_TextDetector -> style,
         display_none = {"display": "none"}
         display_flex = {
             "display": "flex",
@@ -441,9 +366,6 @@ class AnalysisExplorer:
 
         if setting_input == "TextDetector":
             return display_flex, display_none, display_none, display_none
-
-        if setting_input == "EmotionDetector":
-            return display_none, display_flex, display_none, display_none
         if setting_input == "ColorDetector":
             return display_none, display_none, display_flex, display_none
         if setting_input == "VQA":
@@ -466,10 +388,6 @@ class AnalysisExplorer:
         analysis_type_value: str,
         textarea_questions_value: str,
         setting_privacy_env_var: str,
-        setting_emotion_emotion_threshold: int,
-        setting_emotion_race_threshold: int,
-        setting_emotion_gender_threshold: int,
-        setting_emotion_env_var: str,
         setting_color_delta_e_method: str,
     ) -> dict:
         """Callback function to perform analysis on the selected image and return the output.
@@ -482,7 +400,6 @@ class AnalysisExplorer:
             dict: The analysis output for the selected image.
         """
         identify_dict = {
-            "EmotionDetector": faces.EmotionDetector,
             "TextDetector": text.TextDetector,
             "ColorDetector": colors.ColorDetector,
             "VQA": image_summary.ImageSummaryDetector,
@@ -525,18 +442,6 @@ class AnalysisExplorer:
                         setting_privacy_env_var
                         if setting_privacy_env_var
                         else "PRIVACY_AMMICO"
-                    ),
-                )
-            elif detector_value == "EmotionDetector":
-                detector_class = identify_function(
-                    image_copy,
-                    emotion_threshold=setting_emotion_emotion_threshold,
-                    race_threshold=setting_emotion_race_threshold,
-                    gender_threshold=setting_emotion_gender_threshold,
-                    accept_disclosure=(
-                        setting_emotion_env_var
-                        if setting_emotion_env_var
-                        else "DISCLOSURE_AMMICO"
                     ),
                 )
             elif detector_value == "ColorDetector":
