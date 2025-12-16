@@ -150,3 +150,20 @@ def test_get_color_table():
         ],
         "HEX": ["#FFC0CB", "#FFB6C1", "#FF69B4", "#FF1493", "#DB7093", "#C71585"],
     }
+
+
+def test_categorize_outputs():
+    collected = [
+        (0.0, "Summary: A cat is sitting on a mat. \n\nVQA Answers: 1. A cat."),
+        (5.0, "Summary: A dog is playing with a ball.\n\nVQA Answers: 1. A ball."),
+    ]
+
+    bullets_summary, bullets_vqa = ut._categorize_outputs(
+        collected, include_questions=True
+    )
+    assert len(bullets_summary) == 2
+    assert len(bullets_vqa) == 2
+    assert "- [0.000s] A cat is sitting on a mat." in bullets_summary[0]
+    assert "- [0.000s] 1. A cat." in bullets_vqa[0]
+    assert "- [5.000s] A dog is playing with a ball." in bullets_summary[1]
+    assert "- [5.000s] 1. A ball." in bullets_vqa[1]

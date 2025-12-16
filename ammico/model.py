@@ -1,5 +1,12 @@
+from ammico.utils import (
+    resolve_model_device,
+    resolve_model_size,
+    get_supported_whisperx_languages,
+)
+
 import torch
 import warnings
+import whisperx
 from transformers import (
     Qwen2_5_VLForConditionalGeneration,
     AutoProcessor,
@@ -26,7 +33,7 @@ class MultimodalSummaryModel:
             device: "cuda" or "cpu" (auto-detected when None).
             cache_dir: huggingface cache dir (optional).
         """
-        self.device = self._resolve_device(device)
+        self.device = resolve_model_device(device)
 
         if model_id is not None and model_id not in (
             self.DEFAULT_CUDA_MODEL,
@@ -49,21 +56,6 @@ class MultimodalSummaryModel:
         self.tokenizer = None
 
         self._load_model_and_processor()
-
-    @staticmethod
-    def _resolve_device(device: Optional[str]) -> str:
-        if device is None:
-            return "cuda" if torch.cuda.is_available() else "cpu"
-        if device.lower() not in ("cuda", "cpu"):
-            raise ValueError("device must be 'cuda' or 'cpu'")
-        if device.lower() == "cuda" and not torch.cuda.is_available():
-            warnings.warn(
-                "Although 'cuda' was requested, no CUDA device is available. Using CPU instead.",
-                RuntimeWarning,
-                stacklevel=2,
-            )
-            return "cpu"
-        return device.lower()
 
     def _load_model_and_processor(self):
         load_kwargs = {"trust_remote_code": self._trust_remote_code, "use_cache": True}
@@ -109,6 +101,102 @@ class MultimodalSummaryModel:
             if self.tokenizer is not None:
                 del self.tokenizer
                 self.tokenizer = None
+        finally:
+            try:
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except Exception as e:
+                warnings.warn(
+                    "Failed to empty CUDA cache. This is not critical, but may lead to memory lingering: "
+                    f"{e!r}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+
+
+class AudioToTextModel:
+    def __init__(
+        self,
+        model_size: str = "large",
+        device: Optional[str] = None,
+        language: Optional[str] = None,
+    ) -> None:
+        """
+        Class for WhisperX model loading and inference.
+        Args:
+            model_size: Size of Whisper model to load (small, base, large).
+            device: "cuda" or "cpu" (auto-detected when None).
+            language: ISO-639-1 language code (e.g., "en", "fr", "de").
+                     If None, language will be detected automatically.
+                     Set this to avoid unreliable detection on small clips.
+        """
+        self.device = resolve_model_device(device)
+
+        self.model_size = resolve_model_size(model_size)
+
+        self.model = None
+
+        self.language = self._validate_language(language)
+
+        self._load_model()
+
+    def _validate_language(self, language: Optional[str]) -> Optional[str]:
+        """
+
+        Validate the provided language code against whisperx's supported languages.
+        Args:
+            language: ISO-639-1 language code (e.g., "en", "fr", "de").
+        Returns:
+            Validated language code or None.
+        Raises:
+            ValueError: If the language code is invalid or unsupported.
+        """
+
+        if not language:
+            return None
+
+        language = language.strip().lower()
+        supported_languages = get_supported_whisperx_languages()
+
+        if len(language) != 2:
+            raise ValueError(
+                f"Invalid language code: '{language}'. Language codes must be 2 letters."
+            )
+
+        if not language.isalpha():
+            raise ValueError(
+                f"Invalid language code: '{language}'. Language codes must contain only alphabetic characters."
+            )
+
+        if language not in supported_languages:
+            raise ValueError(
+                f"Unsupported language code: '{language}'. Supported: {sorted(supported_languages)}"
+            )
+
+        return language
+
+    def _load_model(self):
+        if self.device == "cuda":
+            self.model = whisperx.load_model(
+                self.model_size,
+                device=self.device,
+                compute_type="float16",
+                language=self.language,
+            )
+        else:
+            self.model = whisperx.load_model(
+                self.model_size,
+                device=self.device,
+                compute_type="int8",
+                language=self.language,
+            )
+
+    def close(self) -> None:
+        """Free model resources (helpful in long-running processes)."""
+        try:
+            if self.model is not None:
+                del self.model
+                self.model = None
         finally:
             try:
                 if torch.cuda.is_available():

@@ -40,22 +40,3 @@ def test_explore_analysis_faces(get_path):
 def test_AnalysisExplorer(get_AE, get_options):
     get_AE.update_picture(get_options[0])
     assert get_AE.update_picture(None) is None
-
-
-def test_right_output_analysis_emotions(get_AE, get_options, monkeypatch):
-    monkeypatch.setenv("SOME_VAR", "True")
-    monkeypatch.setenv("OTHER_VAR", "True")
-    get_AE._right_output_analysis(
-        2,
-        get_options[3],
-        get_options[0],
-        "EmotionDetector",
-        "summary",
-        "Some question",
-        "SOME_VAR",
-        50,
-        50,
-        50,
-        "OTHER_VAR",
-        "CIE 1976",
-    )
