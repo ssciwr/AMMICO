@@ -71,20 +71,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#summary-module">summary module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#multimodal-search-module">multimodal search module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-faces">faces module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#faces.EmotionDetector"><code class="docutils literal notranslate"><span class="pre">EmotionDetector</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#faces.EmotionDetector.analyse_image"><code class="docutils literal notranslate"><span class="pre">EmotionDetector.analyse_image()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#faces.EmotionDetector.analyze_single_face"><code class="docutils literal notranslate"><span class="pre">EmotionDetector.analyze_single_face()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#faces.EmotionDetector.clean_subdict"><code class="docutils literal notranslate"><span class="pre">EmotionDetector.clean_subdict()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#faces.EmotionDetector.facial_expression_analysis"><code class="docutils literal notranslate"><span class="pre">EmotionDetector.facial_expression_analysis()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#faces.EmotionDetector.set_keys"><code class="docutils literal notranslate"><span class="pre">EmotionDetector.set_keys()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#faces.EmotionDetector.wears_mask"><code class="docutils literal notranslate"><span class="pre">EmotionDetector.wears_mask()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#faces.deepface_symlink_processor"><code class="docutils literal notranslate"><span class="pre">deepface_symlink_processor()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#faces.ethical_disclosure"><code class="docutils literal notranslate"><span class="pre">ethical_disclosure()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#faces-module">faces module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-colors">color_analysis module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#colors.ColorDetector"><code class="docutils literal notranslate"><span class="pre">ColorDetector</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#colors.ColorDetector.analyse_image"><code class="docutils literal notranslate"><span class="pre">ColorDetector.analyse_image()</span></code></a></li>
@@ -116,11 +103,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#utils.append_data_to_dict"><code class="docutils literal notranslate"><span class="pre">append_data_to_dict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.dump_df"><code class="docutils literal notranslate"><span class="pre">dump_df()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.find_files"><code class="docutils literal notranslate"><span class="pre">find_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utils.find_videos"><code class="docutils literal notranslate"><span class="pre">find_videos()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.get_color_table"><code class="docutils literal notranslate"><span class="pre">get_color_table()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.get_dataframe"><code class="docutils literal notranslate"><span class="pre">get_dataframe()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utils.get_supported_whisperx_languages"><code class="docutils literal notranslate"><span class="pre">get_supported_whisperx_languages()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.initialize_dict"><code class="docutils literal notranslate"><span class="pre">initialize_dict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.is_interactive"><code class="docutils literal notranslate"><span class="pre">is_interactive()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utils.iterable"><code class="docutils literal notranslate"><span class="pre">iterable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utils.resolve_model_device"><code class="docutils literal notranslate"><span class="pre">resolve_model_device()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utils.resolve_model_size"><code class="docutils literal notranslate"><span class="pre">resolve_model_size()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-display">display module</a><ul>
@@ -245,105 +236,8 @@
 <section id="multimodal-search-module">
 <h1>multimodal search module<a class="headerlink" href="#multimodal-search-module" title="Link to this heading"></a></h1>
 </section>
-<section id="module-faces">
-<span id="faces-module"></span><h1>faces module<a class="headerlink" href="#module-faces" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="faces.EmotionDetector">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">faces.</span></span><span class="sig-name descname"><span class="pre">EmotionDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subdict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emotion_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">race_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gender_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accept_disclosure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'DISCLOSURE_AMMICO'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#faces.EmotionDetector" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisMethod</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="faces.EmotionDetector.analyse_image">
-<span class="sig-name descname"><span class="pre">analyse_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#faces.EmotionDetector.analyse_image" title="Link to this definition"></a></dt>
-<dd><p>Performs facial expression analysis on the image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dict</strong> – The updated subdict dictionary with analysis results.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="faces.EmotionDetector.analyze_single_face">
-<span class="sig-name descname"><span class="pre">analyze_single_face</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">face</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#faces.EmotionDetector.analyze_single_face" title="Link to this definition"></a></dt>
-<dd><p>Analyzes the features of a single face on the image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>face</strong> (<em>np.ndarray</em>) – The face image array.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>dict</strong> – The analysis results for the face.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="faces.EmotionDetector.clean_subdict">
-<span class="sig-name descname"><span class="pre">clean_subdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#faces.EmotionDetector.clean_subdict" title="Link to this definition"></a></dt>
-<dd><p>Cleans the subdict dictionary by converting results into appropriate formats.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>result</strong> (<em>dict</em>) – The analysis results.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>dict</strong> – The updated subdict dictionary.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="faces.EmotionDetector.facial_expression_analysis">
-<span class="sig-name descname"><span class="pre">facial_expression_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#faces.EmotionDetector.facial_expression_analysis" title="Link to this definition"></a></dt>
-<dd><p>Performs facial expression analysis on the image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dict</strong> – The updated subdict dictionary with analysis results.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="faces.EmotionDetector.set_keys">
-<span class="sig-name descname"><span class="pre">set_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#faces.EmotionDetector.set_keys" title="Link to this definition"></a></dt>
-<dd><p>Sets the initial parameters for the analysis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dict</strong> – The dictionary with initial parameter values.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="faces.EmotionDetector.wears_mask">
-<span class="sig-name descname"><span class="pre">wears_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">face</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#faces.EmotionDetector.wears_mask" title="Link to this definition"></a></dt>
-<dd><p>Determines whether a face wears a mask.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>face</strong> (<em>np.ndarray</em>) – The face image array.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>bool</strong> – True if the face wears a mask, False otherwise.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="faces.deepface_symlink_processor">
-<span class="sig-prename descclassname"><span class="pre">faces.</span></span><span class="sig-name descname"><span class="pre">deepface_symlink_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#faces.deepface_symlink_processor" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="faces.ethical_disclosure">
-<span class="sig-prename descclassname"><span class="pre">faces.</span></span><span class="sig-name descname"><span class="pre">ethical_disclosure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accept_disclosure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'DISCLOSURE_AMMICO'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#faces.ethical_disclosure" title="Link to this definition"></a></dt>
-<dd><p>Asks the user to accept the ethical disclosure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>accept_disclosure</strong> (<em>str</em>) – The name of the disclosure variable (default: “DISCLOSURE_AMMICO”).</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="faces-module">
+<h1>faces module<a class="headerlink" href="#faces-module" title="Link to this heading"></a></h1>
 </section>
 <section id="module-colors">
 <span id="color-analysis-module"></span><h1>color_analysis module<a class="headerlink" href="#module-colors" title="Link to this heading"></a></h1>
@@ -504,6 +398,12 @@ If None is provided the data will not be shuffeled. Defaults to None.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="utils.find_videos">
+<span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">find_videos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['mp4',</span> <span class="pre">'mov',</span> <span class="pre">'avi',</span> <span class="pre">'mkv',</span> <span class="pre">'webm']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#utils.find_videos" title="Link to this definition"></a></dt>
+<dd><p>Find video files on the file system.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="utils.get_color_table">
 <span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">get_color_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#utils.get_color_table" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -512,6 +412,12 @@ If None is provided the data will not be shuffeled. Defaults to None.</p></li>
 <dt class="sig sig-object py" id="utils.get_dataframe">
 <span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">get_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mydict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#utils.get_dataframe" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.get_supported_whisperx_languages">
+<span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">get_supported_whisperx_languages</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#utils.get_supported_whisperx_languages" title="Link to this definition"></a></dt>
+<dd><p>Get the list of supported whisperx languages.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.initialize_dict">
@@ -536,6 +442,16 @@ If None is provided the data will not be shuffeled. Defaults to None.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.iterable">
 <span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">iterable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#utils.iterable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.resolve_model_device">
+<span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">resolve_model_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#utils.resolve_model_device" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.resolve_model_size">
+<span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">resolve_model_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'small'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#utils.resolve_model_size" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
