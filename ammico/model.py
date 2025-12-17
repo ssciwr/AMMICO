@@ -231,7 +231,7 @@ class MultimodalEmbeddingsModel:
             model_id,
             device=self.device,
             trust_remote_code=True,
-            model_kwargs={"dtype": "auto"},
+            model_kwargs={"torch_dtype": "auto"},
         )
 
         self.model.eval()
