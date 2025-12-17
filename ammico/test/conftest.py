@@ -1,8 +1,10 @@
 import os
 import pytest
-from ammico.model import MultimodalSummaryModel
+from ammico.model import MultimodalSummaryModel, MultimodalEmbeddingsModel
 from ammico.video_summary import VideoSummaryDetector
-
+from ammico.multimodal_search import MultimodalSearch
+from unittest.mock import MagicMock
+import numpy as np
 import torch
 
 
@@ -136,3 +138,35 @@ def video_summary_model(model):
         yield vsm
     finally:
         vsm.summary_model.close()
+
+
+@pytest.fixture(scope="session")
+def multimodal_embeddings_model_cpu():
+    mem = MultimodalEmbeddingsModel(device="cpu")
+    try:
+        yield mem
+    finally:
+        mem.close()
+
+
+@pytest.fixture(scope="session")
+def multimodal_embeddings_model_cuda():
+    mem = MultimodalEmbeddingsModel(device="cuda")
+    try:
+        yield mem
+    finally:
+        mem.close()
+
+
+@pytest.fixture
+def mock_multimodal_cpu_model():
+    model = MagicMock(spec=MultimodalEmbeddingsModel)
+    model.device = "cpu"
+    model.encode_image.return_value = np.random.rand(10, 128)
+    model.encode_text.return_value = np.random.rand(1, 128)
+    return model
+
+
+@pytest.fixture
+def multimodal_search_mock(mock_multimodal_cpu_model):
+    return MultimodalSearch(model=mock_multimodal_cpu_model)
