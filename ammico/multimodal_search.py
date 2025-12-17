@@ -40,7 +40,7 @@ class MultimodalSearch(AnalysisMethod):
     def _prepare_images(
         self,
         images: Union[str, Path, List[Union[str, Path]]],
-    ) -> tuple[List[Image.Image], List[str]]:
+    ) -> Tuple[List[Image.Image], List[str]]:
         """
         Load and prepare images from file paths or directory.
         Args:
@@ -217,11 +217,8 @@ class MultimodalSearch(AnalysisMethod):
             batch_size: Batch size for encoding images.
             truncate_dim: Dimension to truncate embeddings to.
             save_embeddings_and_indexes: Whether to save embeddings to disk.
-            save_path: Path to save embeddings and index.
+            save_path: Path to save embeddings and index. Will be created if it doesn't exist.
         """
-        if save_path and not Path(save_path).exists():
-            raise FileNotFoundError(f"Save path does not exist: {save_path}")
-
         if not images:
             if not self.subdict:
                 raise ValueError("No images provided and subdict is empty")
@@ -389,7 +386,12 @@ class MultimodalSearch(AnalysisMethod):
         Tuple[List[str], List[float]],
     ]:
         """
-        Given query embeddings  find top_k matches in dataset embeddings.
+        Given query embeddings, find top_k matches in dataset using Faiss index.
+        Args:
+            query_embeddings: Query embeddings as torch.Tensor or numpy.ndarray.
+            top_k: Number of top matches to return.
+            score_threshold: Minimum score threshold for matches.
+            return_paths: Whether to return image paths instead of indices.
         Returns (indices_per_query, scores_per_query)
         """
 
@@ -523,7 +525,6 @@ class MultimodalSearch(AnalysisMethod):
         Perform multimodal search for a batch of queries.
         Args:
             queries: List of text strings or image file paths or PIL Images.
-            query_type: "text" or "image".
             top_k: Number of top matches to return.
             batch_size: Batch size for encoding the queries.
             score_threshold: Minimum score threshold for matches.
