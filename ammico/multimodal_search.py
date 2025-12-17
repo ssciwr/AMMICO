@@ -560,8 +560,9 @@ class MultimodalSearch(AnalysisMethod):
                 final_embeddings[pos] = text_emb[i]
 
         if image_queries:
+            prepared_images = [self._prepare_query_image(img) for img in image_queries]
             image_emb = self.model.encode_image(
-                images=image_queries,
+                images=prepared_images,
                 batch_size=batch_size,
             )
             for i, pos in enumerate(image_positions):

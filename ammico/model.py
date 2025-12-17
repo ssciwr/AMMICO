@@ -298,3 +298,21 @@ class MultimodalEmbeddingsModel:
             embeddings = embeddings[:, :truncate_dim]
 
         return embeddings
+
+    def close(self) -> None:
+        """Free model resources (helpful in long-running processes)."""
+        try:
+            if self.model is not None:
+                del self.model
+                self.model = None
+        finally:
+            try:
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except Exception as e:
+                warnings.warn(
+                    "Failed to empty CUDA cache. This is not critical, but may lead to memory lingering: "
+                    f"{e!r}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
