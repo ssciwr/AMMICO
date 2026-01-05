@@ -1,32 +1,33 @@
-name: Pages
-
+name: build-and-deploy-pages 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
-  
+permissions:
+  contents: write
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
-    - uses: actions/checkout@v4
-    - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-    - uses: actions/cache@v4
-      with:
-        key: mkdocs-material-${{ env.cache_id }}
-        path: .cache
-        restore-keys: |
-          mkdocs-material-
-    - run: pip install mkdocs-material mkdocstrings[python]
-    - name: Build main site
-      run: mkdocs build
-    - name: Deploy to gh-pages
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: oprypin/push-to-gh-pages@v3
-      with:
-        publish_dir: site
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: |
+          echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+          echo "content_hash=$(sha256sum requirements.txt mkdocs.yml | sha256sum | cut -d' ' -f1)" >> $GITHUB_ENV
+      - uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}-${{ env.content_hash }}
+          path: .cache 
+          restore-keys: |
+            mkdocs-material-${{ env.cache_id }}-
+      - run: pip install -r requirements-dev.txt
+      - run: mkdocs gh-deploy --force
 
 
