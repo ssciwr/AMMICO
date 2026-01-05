@@ -32,3 +32,42 @@ results = detector.analyse_image()
 ## Output
 
 Returns a dictionary with color names as keys and their percentage presence in the image as values (rounded to 2 decimal places).
+
+## Workflow
+
+```mermaid
+flowchart TD
+    Start([Start]) --> Init[Initialize ColorDetector]
+    Init --> CheckDelta{Valid Delta-E Method?}
+    
+    CheckDelta -- No --> Error[Raise ValueError]
+    CheckDelta -- Yes --> Analyse[analyse_image]
+    
+    Analyse --> Extract[colorgram.extract]
+    Extract --> TopColors[Get N most common colors]
+    
+    TopColors --> LoopStart{For each color}
+    LoopStart --> Convert[rgb2name]
+    
+    Convert --> Hex[Convert to Hex]
+    Hex --> ExactMatch{Exact match CSS3?}
+    
+    ExactMatch -- Yes --> MatchedName[Get Name]
+    
+    ExactMatch -- No --> CalcDelta[Calculate Delta-E]
+    CalcDelta --> MinDelta[Find Minimum Delta-E]
+    MinDelta --> MatchedName
+    
+    MatchedName --> Merge{Merge Colors?}
+    
+    Merge -- No --> SaveProp[Save Proportion]
+    Merge -- Yes --> Reduce[Map to 12 Basic Colors]
+    Reduce --> SaveProp
+    
+    SaveProp --> LoopEnd{More Colors?}
+    LoopEnd -- Yes --> LoopStart
+    LoopEnd -- No --> Round[Round Proportions]
+    
+    Round --> Return[Return Dictionary]
+    Return --> End([End])
+```

@@ -50,3 +50,38 @@ Returns dictionary with:
 - Google Cloud Vision API credentials
 - Privacy disclosure acceptance (via environment variable or interactive prompt)
 - spaCy English model (`en_core_web_md`)
+
+## Workflow
+
+```mermaid
+flowchart TD
+    Start([Start]) --> Init[Initialize TextDetector]
+    Init --> CheckPrivacy{Privacy Accepted?}
+    
+    CheckPrivacy -- No --> Error[Raise ValueError]
+    CheckPrivacy -- Yes --> CheckSkip{Skip Extraction?}
+    
+    CheckSkip -- No --> GetText[get_text_from_image]
+    GetText --> CloudVision[Call Google Cloud Vision API]
+    CloudVision --> CheckResp{Response?}
+    CheckResp -- Error --> LogError[Log Error]
+    CheckResp -- Success --> Extract[Extract Text]
+    
+    CheckSkip -- Yes --> ReadDict[Read text from subdict]
+    
+    Extract --> HasText{Text Found?}
+    ReadDict --> HasText
+    
+    HasText -- No --> End([End])
+    HasText -- Yes --> Preprocess[Preprocess Text]
+    
+    Preprocess --> AddSpc[_check_add_space_after_full_stop]
+    AddSpc --> Trunc[_truncate_text]
+    Trunc --> Trans[translate_text]
+    Trans --> GTrans[Call Google Translate]
+    GTrans --> Clean[remove_linebreaks]
+    
+    Clean --> RunSpacy[_run_spacy]
+    RunSpacy --> RetDict[Return Updated Dictionary]
+    RetDict --> End
+```

@@ -112,3 +112,61 @@ Returns dictionaries with:
 - ffmpeg and ffprobe for video processing
 - CUDA support recommended for performance
 - WhisperX models for audio transcription
+
+## Workflow
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initialize_Detector
+    Initialize_Detector --> Check_Audio_Model
+
+    state Check_Audio_Model {
+        [*] --> Decisions
+        Decisions --> Extract_Audio : Has Audio Model
+        Decisions --> Visual_Processing_Only : No Audio Model
+    }
+
+    Extract_Audio --> Transcribe_WhisperX
+    Transcribe_WhisperX --> Audio_Segments
+
+    state Visual_Processing {
+        [*] --> Scene_Cut_Detection
+        Scene_Cut_Detection --> Calculate_Timestamps
+        Calculate_Timestamps --> Extract_Frames_ffmpeg
+    }
+
+    Visual_Processing_Only --> Visual_Processing
+    Audio_Segments --> Visual_Processing
+    Extract_Frames_ffmpeg --> Merge_Audio_Visual_Segments
+
+    state Analysis_Levels {
+        [*] --> Frame_Level
+        Frame_Level --> Clip_Level
+        Clip_Level --> Video_Level
+    }
+
+    Merge_Audio_Visual_Segments --> Analysis_Levels
+
+    state MultimodalSummaryModel {
+        [*] --> Model_Inference
+    }
+    
+    state PromptBuilder {
+        [*] --> Build_Prompts
+        Build_Prompts --> Frame_Prompt
+        Build_Prompts --> Clip_Prompt
+        Build_Prompts --> Video_Prompt
+    }
+
+    Frame_Level --> Frame_Prompt
+    Frame_Prompt --> Model_Inference
+    
+    Clip_Level --> Clip_Prompt
+    Clip_Prompt --> Model_Inference
+    
+    Video_Level --> Video_Prompt
+    Video_Prompt --> Model_Inference
+
+    Model_Inference --> Final_Result
+    Final_Result --> [*]
+```

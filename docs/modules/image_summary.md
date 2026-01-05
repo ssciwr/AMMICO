@@ -80,6 +80,43 @@ results = detector.analyse_images_from_dict(
 
 ## Output
 
-Returns dictionaries with:
-- `caption`: Generated image caption (if summary requested)
 - `vqa`: List of answers corresponding to questions (if questions requested)
+
+## Workflow
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initialize_Detector
+    Initialize_Detector --> Check_Analysis_Type
+
+    state Check_Analysis_Type {
+        [*] --> Decide
+        Decide --> Summary : Type=Summary
+        Decide --> Questions : Type=Questions
+        Decide --> Both : Type=Summary+Questions
+    }
+
+    Summary --> Generate_Caption
+    Questions --> Answer_Questions
+    Both --> Generate_Caption
+    Both --> Answer_Questions
+
+    Generate_Caption --> Prepare_Inputs
+    Answer_Questions --> Clean_Questions
+    Clean_Questions --> Prepare_Inputs
+
+    state MultimodalSummaryModel {
+        [*] --> Initialize_Model
+        Initialize_Model --> Load_Qwen2.5_VL
+        Load_Qwen2.5_VL --> Quantize_4bit
+        Quantize_4bit --> Processor
+        Processor --> Model_Inference
+        Model_Inference --> Tokenizer_Decode
+    }
+
+    Prepare_Inputs --> Processor
+    Tokenizer_Decode --> Return_Result
+    Return_Result --> [*]
+
+    note right of Processor : Uses PromptBuilder
+```

@@ -37,3 +37,37 @@ explorer.run_server(port=8050)
 ## Output
 
 Displays analysis results in an interactive table format, showing all extracted features and metadata for the selected image.
+
+## Workflow
+
+```mermaid
+flowchart TD
+    Start([Initialize AnalysisExplorer]) --> RunServer[Explorer.run_server]
+    RunServer --> Dashboard[Dash Dashboard Loaded]
+    
+    subgraph Dashboard Interaction
+        Dashboard --> SelectImg{Select Image}
+        SelectImg --> UpdatePic[Update Picture View]
+        
+        Dashboard --> SelectDet{Select Detector}
+        SelectDet --> UpdateSet[Update Settings Panel]
+        
+        UpdateSet --> Settings{Adjust Settings}
+        
+        Settings --> ClickRun{Click Run Detector}
+        ClickRun --> CheckDet[Check Selected Detector]
+    end
+    
+    CheckDet -- TextDetector --> TextDet[Init TextDetector]
+    CheckDet -- ColorDetector --> ColorDet[Init ColorDetector]
+    CheckDet -- VQA --> VQADet[Init ImageSummaryDetector]
+    
+    TextDet --> RunMeasure[Run analyse_image]
+    ColorDet --> RunMeasure
+    VQADet --> RunMeasure
+    
+    RunMeasure --> Format[Format Output as Table]
+    Format --> UpdateTable[Update JSON Viewer]
+    
+    UpdateTable --> Dashboard
+```
