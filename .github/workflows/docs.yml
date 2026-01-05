@@ -20,14 +20,14 @@ jobs:
           python-version: '3.13'
       - run: |
           echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-          echo "content_hash=$(sha256sum requirements.txt mkdocs.yml | sha256sum | cut -d' ' -f1)" >> $GITHUB_ENV
+          echo "content_hash=$(sha256sum pyproject.toml mkdocs.yml | sha256sum | cut -d' ' -f1)" >> $GITHUB_ENV
       - uses: actions/cache@v4
         with:
           key: mkdocs-material-${{ env.cache_id }}-${{ env.content_hash }}
           path: .cache 
           restore-keys: |
             mkdocs-material-${{ env.cache_id }}-
-      - run: pip install -r requirements-dev.txt
+      - run: pip install -e .[dev]
       - run: mkdocs gh-deploy --force
 
 
