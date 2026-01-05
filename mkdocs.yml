@@ -25,6 +25,9 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
+extra_css:
+  - stylesheets/extra.css
+
 plugins:
   - search
   - mkdocstrings:
@@ -36,6 +39,20 @@ plugins:
 
 nav:
   - Home: index.md
-  - FAQ: faq.md
-  - Setup Credentials: set_up_credentials.md
+  - Tutorials:
+    - Getting started: tutorials/getting_started.md
+    - Image summary and VQA: tutorials/image_summary.md
+    - Video summary and VQA: tutorials/video_summary.md
+    - Text analysis: tutorials/text.md
+    - Color analysis: tutorials/colors.md
+    - Interactive display: tutorials/display.md
+  - Modules:
+    - Text analysis: modules/text.md
+    - Image summary and VQA: modules/image_summary.md
+    - Video summary and VQA: modules/video_summary.md
+    - Color analysis: modules/colors.md
+    - Interactive display: modules/display.md
+  - More information:
+    - Set up credentials for Google Cloud API: set_up_credentials.md
+    - FAQ: faq.md
   - API Reference: api.md

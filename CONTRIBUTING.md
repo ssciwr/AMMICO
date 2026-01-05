@@ -10,7 +10,7 @@ The tests are located in `ammico/tests`. Unit tests are named `test` following a
 
 To report bugs and issues, please [open an issue](https://github.com/ssciwr/ammico/issues) describing what you did, what you expected to happen, and what actually happened. Please provide information about the environment as well as OS.
 
-For any questions and comments, feel free to post to our [Discussions forum]((https://github.com/ssciwr/AMMICO/discussions/151)).
+For any questions and comments, feel free to post to our [Discussions forum](https://github.com/ssciwr/AMMICO/discussions/151).
 
 **Thank you for contributing to `ammico`!**
 

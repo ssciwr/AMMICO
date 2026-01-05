@@ -121,10 +121,7 @@ class TextDetector(AnalysisMethod):
     def _check_add_space_after_full_stop(self):
         """Add a space after a full stop. Required by googletrans."""
         # we have found text, now we check for full stops
-        index_stop = [
-            i.start()
-            for i in re.finditer("\.", self.subdict["text"])  # noqa
-        ]
+        index_stop = [i.start() for i in re.finditer(r"\.", self.subdict["text"])]
         if not index_stop:  # no full stops found
             return
         # check if this includes the last string item

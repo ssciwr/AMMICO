@@ -337,7 +337,7 @@ class AnalysisExplorer:
         self.app.run(debug=True, port=port)
 
     # Dash callbacks
-    def update_picture(self, img_path: str):
+    def update_picture(self, img_path: str) -> Optional[Image.Image]:
         """Callback function to update the displayed image.
 
         Args:

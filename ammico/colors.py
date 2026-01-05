@@ -65,7 +65,7 @@ class ColorDetector(AnalysisMethod):
         }
         return colors
 
-    def analyse_image(self):
+    def analyse_image(self) -> dict:
         """
         Uses the colorgram library to extract the n most common colors from the images.
         One problem is, that the most common colors are taken before beeing categorized,
