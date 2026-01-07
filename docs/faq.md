@@ -93,9 +93,11 @@ According to [google Translate](https://cloud.google.com/translate/data-usage), 
 Some features of ammico require internet access; a general answer to this question is not possible, some services require an internet connection, others can be used offline:
 
 - Text extraction: To extract text from images, and translate the text, the data needs to be processed by google Cloud Vision and google Translate, which run in the cloud. Without internet access, text extraction and translation is not possible.
-- Image summary and query: After an initial download of the models, the `summary` module does not require an internet connection.
+- Image summary and query: After initial loading and caching of the model, image summarization and VQA can work fully offline.
+- Video summary and query: After initial loading and caching of the model, video summarization and VQA can work fully offline.
+- Video summary and query with audio: After the WhisperX model (and optional language assets) is downloaded, audio transcription and combined video+audio summarization also work offline.
 - Facial expressions: After an initial download of the models, the `faces` module does not require an internet connection.
-- Multimodal search: After an initial download of the models, the `multimodal_search` module does not require an internet connection.
+- Multimodal search:  After initial loading and caching of the model, multimodal search can work fully offline.
 - Color analysis: The `color` module does not require an internet connection.
 
 ## Why don't I get probabilistic assessments of age, gender and race when running the Emotion Detector?
