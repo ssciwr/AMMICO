@@ -1,16 +1,19 @@
 ### Video summary and VQA module
-Also the `MultimodalSummaryDetector` can be used to generate video captions (`summary`) as well as visual question answering (`VQA`) for visual part of video file. 
+
+[![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_video_summary.ipynb#scrollTo=2)
+
+Also the `MultimodalSummaryDetector` can be used to generate video captions (`summary`) as well as visual question answering (`VQA`) for visual part of video file. This again uses the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl)
 
 ```
 model = ammico.MultimodalSummaryModel(model_id=model_id)
 ```
-For more accurate results for videos, you can take the audio part into account for your tasks. The `AudioToTextModel` model is responsible for this in `ammico`. By default, it loads a small model on the GPU (if your device supports CUDA), also you can specify size of the audio model ("small", "base", "large"), or device ("cuda" or "cpu") if you want. Increasing the model size can improve the result of converting an audio track to text, but consumes more RAM or VRAM.
+To analyze the audio content from the video, `ammico` uses the [WhisperX model family](https://github.com/m-bain/whisperX) for audio transcription as [developed by OpenAI](https://arxiv.org/abs/2303.00747). This will lead to higher accuracy. The `AudioToTextModel` model is responsible for this in `ammico`. By default, it loads a small model on the GPU (if your device supports CUDA), also you can specify size of the audio model ("small", "base", "large"), or device ("cuda" or "cpu") if you want. Increasing the model size can improve the result of converting an audio track to text, but consumes more RAM or VRAM.
 ```
 audio_model = ammico.AudioToTextModel(model_size="small", device="cuda")
 ```
 
 #### Read your video data into AMMICO
-The ammico package reads in one or several input video files given in a folder for processing. The user can select to read in all videos in a folder, to include subfolders via the `recursive` option, and can select the file extension that should be considered (i.e. "mp4"). For reading in the files, the ammico function `find_videos` is used, with supported extentions supported:
+The ammico package reads in one or several input video files given in a folder for processing. The user can select to read in all videos in a folder, to include subfolders via the `recursive` option, and can select the file extensions that should be considered (i.e. "mp4"). For reading in the files, the ammico function `find_videos` is used, with supported extentions supported:
 
 | input key | input type | possible input values |
 | --------- | ---------- | --------------------- |

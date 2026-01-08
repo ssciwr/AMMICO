@@ -1,6 +1,8 @@
-### Multimodal Summary Model
+### Multimodal Summary and Visual Question Anwering
 
-This module is built on the Qwen2.5-VL model family. In this project, two model variants are supported: 
+[![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb)
+
+This module is built on the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl). In this project, two model variants are supported: 
 
 1. `Qwen2.5-VL-3B-Instruct`, which requires approximately 3 GB of video memory to load.
 2. `Qwen2.5-VL-7B-Instruct`, which requires up to 8 GB of VRAM for initialization.

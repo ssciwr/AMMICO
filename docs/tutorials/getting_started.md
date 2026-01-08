@@ -2,6 +2,8 @@
 
 This tutorial demonstrates how to use AMMICO to analyze text on images and image content.
 
+[![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb)
+
 ## Installation
 
 First, install the package using pip:
@@ -10,7 +12,7 @@ First, install the package using pip:
 pip install ammico
 ```
 
-Or install the development version from GitHub:
+Or install the development version from GitHub (currently recommended for the new features):
 
 ```bash
 pip install git+https://github.com/ssciwr/AMMICO.git
@@ -72,9 +74,6 @@ for key in image_dict:
     image_dict[key] = ammico.ColorDetector(
         image_dict[key],
     ).analyse_image()
-    image_dict[key] = image_summary_detector(
-        image_dict[key],
-    ).analyse_image()
 ```
 Note that for the image summary detector, you need to initialize the model first and create an instance of the detector class:
 ```
@@ -87,10 +86,17 @@ image_summary_detector = ammico.ImageSummaryDetector(
     summary_model=model
 )
 ```
+Now you can run the inference task:
+```
+summary = image_summary_detector.analyse_images_from_dict(
+    analysis_type="summary", is_concise_summary=True
+)
+```
+For more information, consult the demonstration notebook [![on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb) or the more in-depth sections about each analysis tool.
 
 ### Privacy Disclosure
 
-The text detector requires you to accept a disclosure statement, since it sends data to Google for processing.
+The text detector requires you to accept a disclosure statement, since it sends data to Google for processing. You will be prompted for this automatically when you invoke the detector, or you may run it separately using
 
 ```python
 # For TextDetector (uses Google Cloud)
