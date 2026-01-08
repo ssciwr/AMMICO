@@ -1,8 +1,8 @@
-### Multimodal Summary and Visual Question Anwering
+# Multimodal Summary and Visual Question Anwering
 
 [![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb)
 
-This module is built on the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl). In this project, two model variants are supported: 
+This detector is built on the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl). In this project, two model variants are supported: 
 
 1. `Qwen2.5-VL-3B-Instruct`, which requires approximately 3 GB of video memory to load.
 2. `Qwen2.5-VL-7B-Instruct`, which requires up to 8 GB of VRAM for initialization.
@@ -31,8 +31,9 @@ To instantiate class it is required to provide `MultimodalSummaryModel` and dict
 ```
 image_summary_vqa = ammico.ImageSummaryDetector(summary_model=model, subdict=image_dict)
 ```
-To perform image analysis, use the analyse_images_from_dict() method.
+To perform image analysis, use the `analyse_images_from_dict()` method.
 This function provides flexible options for generating summaries and performing visual question answering. 
+
 1. `analysis_type` – defines the type of analysis to perform. Setting it to `summary` will generate a caption (summary), `questions` will prepare answers (VQA) to a list of questions as set by the user, `summary_and_questions` will do both.
 2. `list_of_questions` a list of text questions to be answered by the model. This parameter is required when analysis_type is set to "questions" or "summary_and_questions".
 3. `keys_batch_size` controls the number of images processed per batch. Increasing this value may slightly improve performance, depending on your system.
@@ -42,7 +43,22 @@ The default is `16`, which provides a good balance between speed and stability o
     * `False` → produces longer, more descriptive captions that may include additional context or atmosphere, but take more time to compute.
 5. `is_concise_answer`– similar to the previous flag, but for controlling the level of detail in question answering responses.
 
-**Example Usage**
+## Read your image data into `ammico`
+
+`ammico` reads in files from a directory. You can iterate through directories in a recursive manner and filter by extensions. Note that the order of the files may vary on different OS. Reading in these files creates a dictionary `image_dict`, with one entry per image file, containing the file path and filename. This dictionary is the main data structure that ammico operates on and is extended successively with each detector run as explained below.
+
+For reading in the files, the ammico function `find_files` is used, with optional keywords:
+
+| input key | input type | possible input values |
+| --------- | ---------- | --------------------- |
+`path` | `str` | the directory containing the image files (defaults to the location set by environment variable `AMMICO_DATA_HOME`) |
+| `pattern` | `str\|list` | the file extensions to consider (defaults to "png", "jpg", "jpeg", "gif", "webp", "avif", "tiff") |
+| `recursive` | `bool` | include subdirectories recursively (defaults to `True`) |
+| `limit` | `int` | maximum number of files to read (defaults to `20`, for all images set to `None` or `-1`) |
+| `random_seed` | `int` | the random seed for shuffling the images; applies when only a few images are read and the selection should be preserved (defaults to `None`) |
+
+## Example usage
+
 To generate a concise image summary only:
 ```
 summary = image_summary_vqa.analyse_images_from_dict(

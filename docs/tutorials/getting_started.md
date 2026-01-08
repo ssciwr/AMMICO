@@ -92,11 +92,11 @@ summary = image_summary_detector.analyse_images_from_dict(
     analysis_type="summary", is_concise_summary=True
 )
 ```
-For more information, consult the demonstration notebook [![on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb) or the more in-depth sections about each analysis tool.
+For more information, consult the [demonstration notebook](ammico_demo_getting_started.ipynb) [![on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb) or the more in-depth sections about each analysis tool.
 
 ### Privacy Disclosure
 
-The text detector requires you to accept a disclosure statement, since it sends data to Google for processing. You will be prompted for this automatically when you invoke the detector, or you may run it separately using
+The text detector requires you to accept a disclosure statement, since it sends data to the Google Cloud for processing. You will be prompted for this automatically when you invoke the detector, or you may run it separately using
 
 ```python
 # For TextDetector (uses Google Cloud)

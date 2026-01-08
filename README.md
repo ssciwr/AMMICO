@@ -16,11 +16,11 @@ Use pre-processed image files such as social media posts with comments and proce
     1. Language detection
     1. Translation into English or other languages
 1. Content extraction from the images
-    1. Textual summary of the image content ("image caption") that can be analyzed further using the above tools
+    1. Textual summary of the image content ("image caption") 
     1. Feature extraction from the images: User inputs query and images are matched to that query (both text and image query)
     1. Question answering about image content
-1. Content extractioni from the videos
-    1. Textual summary of the video content that can be analyzed further
+1. Content extraction from videos
+    1. Textual summary of the video content 
     1. Question answering about video content
 1. Color analysis
     1. Analyse hue and percentage of color on image
@@ -34,11 +34,19 @@ The `AMMICO` package can be installed using pip:
 ```
 pip install ammico 
 ```
-This will install the package and its dependencies locally. If after installation you get some errors when running some modules, please follow the instructions in the [FAQ](https://ssciwr.github.io/AMMICO/build/html/faq_link.html). 
+
+Or install the development version from GitHub (currently recommended for the new features):
+
+```bash
+pip install git+https://github.com/ssciwr/AMMICO.git
+```
+This will install the package and its dependencies locally.
 
 ## Usage
 
-Demonstration notebooks can be found in the `docs/tutorials` folder and also on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb)
+Demonstration notebooks can be found in the `docs/tutorials` folder and also on google colab: 
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb)
 
 ## Features
 ### Text extraction
@@ -63,7 +71,7 @@ Color detection is carried out using [colorgram.py](https://github.com/obskyr/co
 
 ## Contributing
 
-We welcome contributions to the ammico project! If you'd like to help improve the tool, add new features, or report and fix bugs, please follow [these guidelines](CONTRIBUTING.md).
+We welcome contributions to the ammico project! If you'd like to help improve the tool, add new features, or report or fix bugs, please follow [these guidelines](CONTRIBUTING.md).
 
 ## Reporting Issues
 

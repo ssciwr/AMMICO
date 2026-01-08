@@ -16,12 +16,11 @@ Use pre-processed image files such as social media posts with comments and proce
 1. Text extraction from the images
     - Language detection
     - Translation into English or other languages
-    - Cleaning of the text, spell-check
 2. Content extraction from the images
-    - Textual summary of the image content ("image caption") that can be analyzed further using the above tools
+    - Textual summary of the image content ("image caption")
     - Question answering about image content
-3. Content extraction from the videos
-    - Textual summary of the video content that can be analyzed further
+3. Content extraction from videos
+    - Textual summary of the video content 
     - Question answering about video content
     - Extraction and translation of audio from the video
 4. Color analysis
@@ -36,15 +35,24 @@ The `AMMICO` package can be installed using pip:
 ```
 pip install ammico
 ```
-This will install the package and its dependencies locally. If after installation you get some errors when running some modules, please follow the instructions in the [FAQ](faq.md). 
+
+Or install the development version from GitHub (currently recommended for the new features):
+
+```bash
+pip install git+https://github.com/ssciwr/AMMICO.git
+```
+This will install the package and its dependencies locally. 
+
 
 ## Usage
 
-The main demonstration notebook can be found in the `notebooks` folder and also on google colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb).
+The main demonstration notebook can be found in the `notebooks` folder and also on google colab: 
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb)
 
 ## Contributing
 
-We welcome contributions to the ammico project! If you'd like to help improve the tool, add new features, or report and fix bugs, please follow [these guidelines](CONTRIBUTING.md).
+We welcome contributions to the ammico project! If you'd like to help improve the tool, add new features, or report or fix bugs, please follow [these guidelines](CONTRIBUTING.md).
 
 ## Reporting Issues
 

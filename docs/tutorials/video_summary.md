@@ -1,4 +1,4 @@
-### Video summary and VQA module
+# Video summary and VQA module
 
 [![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_video_summary.ipynb#scrollTo=2)
 
@@ -12,7 +12,8 @@ To analyze the audio content from the video, `ammico` uses the [WhisperX model f
 audio_model = ammico.AudioToTextModel(model_size="small", device="cuda")
 ```
 
-#### Read your video data into AMMICO
+## Read your video data into AMMICO
+
 The ammico package reads in one or several input video files given in a folder for processing. The user can select to read in all videos in a folder, to include subfolders via the `recursive` option, and can select the file extensions that should be considered (i.e. "mp4"). For reading in the files, the ammico function `find_videos` is used, with supported extentions supported:
 
 | input key | input type | possible input values |
@@ -31,24 +32,24 @@ video_dict = ammico.find_videos(
     pattern="mp4",  # file extensions to look for
 )
 ```
-#### Video summary and VQA
+## Example usage
 
 To instantiate class it is required to provide `MultimodalSummaryModel` and `video_dict`. Optionally you may provide `AudioToTextModel` for more precise results.
 ```
-vid_summary_model = ammico.VideoSummaryDetector(
+vid_summary_vqa = ammico.VideoSummaryDetector(
     summary_model=model, audio_model=audio_model, subdict=video_dict
 )
 ```
 To perform video analysis, use the `analyse_videos_from_dict()` method.
 This function provides flexible options for generating summaries and performing visual question answering. 
+
 1. `analysis_type` – defines the type of analysis to perform. Setting it to `summary` will generate a caption (summary), `questions` will prepare answers (VQA) to a list of questions as set by the user, `summary_and_questions` will do both.
 2. `list_of_questions` a list of text questions to be answered by the model. This parameter is required when analysis_type is set to "questions" or "summary_and_questions".
 
-**Example Usage**
 To generate a concise video summary only:
 
 ```
-summary_dict = vid_summary_model.analyse_videos_from_dict(analysis_type="summary")
+summary_dict = vid_summary_vqa.analyse_videos_from_dict(analysis_type="summary")
 ```
 To generate detailed summaries and answer multiple questions:
 
@@ -59,14 +60,14 @@ questions = ["What did people in the frame say?"]
 
 Then call the function:
 ```
-vqa_results = vid_summary_model.analyse_videos_from_dict(
+vqa_results = vid_summary_vqa.analyse_videos_from_dict(
     analysis_type="questions",
     list_of_questions=questions,
 )
 ```
 or, in case of both summary and VQA:
 ```
-vqa_results = vid_summary_model.analyse_videos_from_dict(
+vqa_results = vid_summary_vqa.analyse_videos_from_dict(
     analysis_type="summary_and_questions",
     list_of_questions=questions,
 )
