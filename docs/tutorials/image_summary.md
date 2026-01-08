@@ -1,6 +1,8 @@
-# Multimodal Summary and Visual Question Anwering
+# Multimodal Summary and Visual Question Answering
 
-[![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_getting_started.ipynb)
+[![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/docs/tutorials/ammico_demo_getting_started.ipynb)
+
+[Tutorial notebook](ammico_demo_getting_started.ipynb)
 
 This detector is built on the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl). In this project, two model variants are supported: 
 

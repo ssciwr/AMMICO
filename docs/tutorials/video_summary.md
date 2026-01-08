@@ -1,6 +1,8 @@
 # Video summary and VQA module
 
-[![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/docs/migrate-to-mkdocs/docs/tutorials/ammico_demo_video_summary.ipynb#scrollTo=2)
+[![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/docs/tutorials/ammico_demo_video_summary.ipynb)
+
+[Tutorial notebook](ammico_demo_video_summary.ipynb)
 
 Also the `MultimodalSummaryDetector` can be used to generate video captions (`summary`) as well as visual question answering (`VQA`) for visual part of video file. This again uses the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl)
 
@@ -14,7 +16,7 @@ audio_model = ammico.AudioToTextModel(model_size="small", device="cuda")
 
 ## Read your video data into AMMICO
 
-The ammico package reads in one or several input video files given in a folder for processing. The user can select to read in all videos in a folder, to include subfolders via the `recursive` option, and can select the file extensions that should be considered (i.e. "mp4"). For reading in the files, the ammico function `find_videos` is used, with supported extentions supported:
+The ammico package reads in one or several input video files given in a folder for processing. The user can select to read in all videos in a folder, to include subfolders via the `recursive` option, and can select the file extensions that should be considered (i.e. "mp4"). For reading in the files, the ammico function `find_videos` is used, with supported extensions supported:
 
 | input key | input type | possible input values |
 | --------- | ---------- | --------------------- |
