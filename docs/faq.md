@@ -62,10 +62,6 @@ Be careful, it requires around 7 GB of disk space.
 
 ![Screenshot 2023-06-01 165712](https://github.com/ssciwr/AMMICO/assets/8105097/3dfb302f-c390-46a7-a700-4e044f56c30f)
 
-### Version clashes between tensorflow and numpy
-
-Due to the `faces` module, the tensorflow version is currently fixed to at most `2.14.0`. This requires that `numpy` is restricted to `numpy==1.23.5`. If you experience issues with compatibility between tensorflow and numpy, you can try fixing the numpy version to this version.
-
 ## What happens to the images that are sent to google Cloud Vision?
 
 You have to accept the privacy statement of ammico to run this type of analyis.
@@ -96,17 +92,6 @@ Some features of ammico require internet access; a general answer to this questi
 - Image summary and query: After initial loading and caching of the model, image summarization and VQA can work fully offline.
 - Video summary and query: After initial loading and caching of the model, video summarization and VQA can work fully offline.
 - Video summary and query with audio: After the WhisperX model (and optional language assets) is downloaded, audio transcription and combined video+audio summarization also work offline.
-- Facial expressions: After an initial download of the models, the `faces` module does not require an internet connection.
 - Multimodal search:  After initial loading and caching of the model, multimodal search can work fully offline.
 - Color analysis: The `color` module does not require an internet connection.
 
-## Why don't I get probabilistic assessments of age, gender and race when running the Emotion Detector?
-Due to well documented biases in the detection of minorities with computer vision tools, and to the ethical implications of such detection, these parts of the tool are not directly made available to users. To access these capabilities, users must first agree with a ethical disclosure statement that reads: 
-
-"DeepFace and RetinaFace provide wrappers to trained models in face recognition and emotion detection. Age, gender and race/ethnicity models were trained on the backbone of VGG-Face with transfer learning.
-  
-ETHICAL DISCLOSURE STATEMENT:  
-  
-The Emotion Detector uses DeepFace and RetinaFace to probabilistically assess the gender, age and race of the detected faces. Such assessments may not reflect how the individuals identify. Additionally, the classification is carried out in simplistic categories and contains only the most basic classes (for example, “male” and “female” for gender, and seven non-overlapping categories for ethnicity). To access these probabilistic assessments, you must therefore agree with the following statement: “I understand the ethical and privacy implications such assessments have for the interpretation of the results and that this analysis may result in personal and possibly sensitive data, and I wish to proceed.” 
-
-This disclosure statement is included as a separate line of code early in the flow of the Emotion Detector. Once the user has agreed with the statement, further data analyses will also include these assessments. 

@@ -1,6 +1,6 @@
 # Image detector: Summary and VQA
 
-The Image Summary module provides advanced image analysis capabilities using the Qwen2.5-VL multimodal model. Qwen2.5-VL is a multimodal large language model capable of understanding and generating content from both images and videos. With its help, AMMMICO supports tasks such as image/video summarization and image/video visual question answering, where the model answers users' questions about the context of a media file. It combines functionality from the `model.py` and `prompt_builder.py` modules to offer comprehensive image understanding.
+The `image_summary` module provides advanced image analysis capabilities using the Qwen2.5-VL multimodal model. Qwen2.5-VL is a multimodal large language model capable of understanding and generating content from both images and videos. With its help, `ammico` supports tasks such as image/video summarization and image/video visual question answering, where the model answers users' questions about the context of a media file. It combines functionality from the `model.py` and `prompt_builder.py` modules to offer comprehensive image understanding.
 
 ## Core Components
 

@@ -21,6 +21,6 @@ For reading in the files, the ammico function `find_files` is used, with optiona
 ## Example usage
 
 ```python
-explorer = AnalysisExplorer(mydict=image_dict)
+explorer = ammico.AnalysisExplorer(mydict=image_dict)
 explorer.run_server(port=8050)
 ```

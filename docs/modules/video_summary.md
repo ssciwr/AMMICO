@@ -102,6 +102,7 @@ results = detector.analyse_videos_from_dict(
 ## Output
 
 Returns dictionaries with:
+
 - `summary`: Final video summary (if summary requested)
 - `vqa_answers`: List of answers to questions (if questions requested)
 - `audio_descriptions`: Timestamped audio transcription segments

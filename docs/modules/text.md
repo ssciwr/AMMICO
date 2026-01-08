@@ -27,19 +27,30 @@ The English text is cleaned from numbers and unrecognized words (`text_clean`).
 ## Usage
 
 ```python
-from ammico.text import TextDetector
-
-detector = TextDetector(
+detector = ammico.TextDetector(
     subdict={"filename": "image.jpg"},
     skip_extraction=False,  # Set True if text already provided
     accept_privacy="PRIVACY_AMMICO"
 )
 results = detector.analyse_image()
 ```
+It is also possible to read in a csv file for translation and processing:
+```
+detector = ammico.TextDetector(
+    csv_path="./text_input.csv",
+    column_key="Text column",
+    csv_encoding="utf-8",
+    skip_extraction=True,  
+    accept_privacy="PRIVACY_AMMICO"
+)
+results = detector.analyse_image()
+```
+In this case, the extraction of the text from the image is skipped and the text is translated directly (no Google Cloud Vision API key required).
 
 ## Output
 
 Returns dictionary with:
+
 - `text`: Original extracted text
 - `text_language`: Detected source language code
 - `text_english`: Translated English text
