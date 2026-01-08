@@ -61,11 +61,8 @@ dev = [
     "pytest",
     "pytest-cov",
     "ruff",
-    "sphinx",
-    "myst-parser",
-    "sphinx_rtd_theme",
-    "sphinxcontrib-napoleon",
-    "nbsphinx",
+    "mkdocs-material",
+    "mkdocstrings[python]",
 ]
 
 nb = [
