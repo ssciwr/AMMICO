@@ -14,7 +14,7 @@ The ammico package reads in one or several input video files given in a folder f
 
 | input key | input type | possible input values |
 | --------- | ---------- | --------------------- |
-`path` | `str` | the directory containing the video files (defaults to the location set by environment variable `AMMICO_DATA_HOME`) |
+| `path` | `str` | the directory containing the video files (defaults to the location set by environment variable `AMMICO_DATA_HOME`) |
 | `pattern` | `str\|list` | the file extensions to consider (defaults to "mp4", "mov", "avi", "mkv", "webm") |
 | `recursive` | `bool` | include subdirectories recursively (defaults to `True`) |
 | `limit` | `int` | maximum number of files to read (defaults to `5`, for all videos set to `None` or `-1`) |
