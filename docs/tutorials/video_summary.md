@@ -2,7 +2,7 @@
 
 [![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/docs/tutorials/ammico_demo_video_summary.ipynb)
 
-[Tutorial notebook](ammico_demo_video_summary.ipynb)
+[Tutorial notebook](https://github.com/ssciwr/AMMICO/tree/main/docs/tutorials/ammico_demo_video_summary.ipynb)
 
 Also the `MultimodalSummaryDetector` can be used to generate video captions (`summary`) as well as visual question answering (`VQA`) for visual part of video file. This again uses the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl)
 

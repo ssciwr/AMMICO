@@ -4,7 +4,7 @@ This tutorial demonstrates how to use AMMICO to analyze text on images and image
 
 [![Open this tutorial on Google colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/docs/tutorials/ammico_demo_getting_started.ipynb)
 
-[Tutorial notebook](ammico_demo_getting_started.ipynb)
+[Tutorial notebook](https://github.com/ssciwr/AMMICO/tree/main/docs/tutorials/ammico_demo_getting_started.ipynb)
 
 ## Installation
 

@@ -5,7 +5,7 @@
 ![codecov](https://img.shields.io/codecov/c/github/ssciwr/AMMICO)
 ![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ssciwr_ammico&metric=alert_status)
 ![Language](https://img.shields.io/github/languages/top/ssciwr/AMMICO)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/docs/tutorials/ammico_demo_getting_started.ipynb)
 
 This package extracts data from images such as social media posts that contain an image part and a text part. The analysis can generate a very large number of features, depending on the user input. See [our paper](https://dx.doi.org/10.31235/osf.io/v8txj) for a more in-depth description.
 
@@ -46,9 +46,9 @@ This will install the package and its dependencies locally.
 
 ## Usage
 
-The main demonstration notebook can be found in the `notebooks` folder and also on google colab: 
+The main demonstration notebook can be found in the `docs/tutorials` folder and also on google colab: 
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/ammico/notebooks/DemoNotebook_ammico.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ssciwr/ammico/blob/main/docs/tutorials/ammico_demo_getting_started.ipynb)
 
 ## Contributing
 
