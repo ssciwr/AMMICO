@@ -7,7 +7,9 @@ import importlib_resources
 import collections
 import random
 from enum import Enum
-from typing import List, Tuple, Optional, Union
+from pathlib import Path
+from PIL import Image
+from typing import List, Tuple, Optional, Union, Iterable
 import re
 import warnings
 from whisperx.alignment import DEFAULT_ALIGN_MODELS_HF, DEFAULT_ALIGN_MODELS_TORCH
@@ -314,12 +316,13 @@ def find_videos(
 
 
 def find_files(
-    path: str = None,
-    pattern=["png", "jpg", "jpeg", "gif", "webp", "avif", "tiff"],
+    path: Optional[Union[str, Path, None]] = None,
+    pattern: Optional[Iterable[str]] = None,
     recursive: bool = True,
     limit=20,
     random_seed: int = None,
-) -> dict:
+    return_as_list: bool = False,
+) -> Union[dict, list]:
     """Find image files on the file system.
 
     Args:
@@ -336,12 +339,18 @@ def find_files(
             Defaults to 20. To return all images, set to None or -1.
         random_seed (int, optional): The random seed to use for shuffling the images.
             If None is provided the data will not be shuffeled. Defaults to None.
+        return_as_list (bool, optional): Whether to return the list of files instead of a dict.
+            Defaults to False.
     Returns:
         dict: A nested dictionary with file ids and all filenames including the path.
+        Or
+        list: A list of file paths if return_as_list is set to True.
     """
 
     if path is None:
         path = os.environ.get("AMMICO_DATA_HOME", ".")
+    if pattern is None:
+        pattern = ["png", "jpg", "jpeg", "gif", "webp", "avif", "tiff"]
 
     if isinstance(pattern, str):
         pattern = [pattern]
@@ -357,6 +366,9 @@ def find_files(
         random.shuffle(results)
 
     images = _limit_results(results, limit)
+
+    if return_as_list:
+        return images
 
     return initialize_dict(images)
 
@@ -401,6 +413,26 @@ def _check_for_missing_keys(mydict: dict) -> dict:
             if mkey not in mydict[key].keys():
                 mydict[key][mkey] = None
     return mydict
+
+
+def _resolve_embedding_path(path: Path, device: str) -> Path:
+    """
+    Resolve the actual embedding file path.
+    Handles both directory and direct file inputs.
+    """
+    if path.is_dir():
+        np_path = path / "image_embeddings.npy"
+        pt_path = path / "image_embeddings.pt"
+
+        if device == "cpu" and np_path.exists():
+            return np_path
+        if device == "cuda" and pt_path.exists():
+            return pt_path
+
+        raise FileNotFoundError(
+            f"No suitable embeddings file found in directory: {path}"
+        )
+    return path
 
 
 def append_data_to_dict(mydict: dict) -> dict:
@@ -454,3 +486,39 @@ def get_supported_whisperx_languages() -> List[str]:
         DEFAULT_ALIGN_MODELS_HF.keys()
     )
     return sorted(supported_languages)
+
+
+def load_image(image_path: Union[str, Path, Image.Image]) -> Image.Image:
+    """Load image from file path or return if already PIL Image."""
+    if isinstance(image_path, Image.Image):
+        return image_path
+
+    image_path = Path(image_path)
+    if not image_path.exists():
+        raise FileNotFoundError(f"Image file not found: {image_path}")
+
+    return Image.open(image_path).convert("RGB")
+
+
+def prepare_image(
+    image: Image.Image,
+    target_size: Tuple[int, int] = (512, 512),
+    resize_mode: str = "resize",
+) -> Image.Image:
+    """Prepare image for model input with optimal resolution."""
+    width, height = image.size
+    target_w, target_h = target_size
+
+    if resize_mode == "center_crop":
+        scale = max(target_w / width, target_h / height)
+        new_width = int(width * scale)
+        new_height = int(height * scale)
+        image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        left = (new_width - target_w) // 2
+        top = (new_height - target_h) // 2
+        image = image.crop((left, top, left + target_w, top + target_h))
+    else:
+        image = image.resize(target_size, Image.Resampling.LANCZOS)
+
+    return image
