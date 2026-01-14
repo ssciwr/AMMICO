@@ -17,7 +17,3 @@ ENV JUPYTER_ENABLE_LAB=yes
 
 # Export where the data is located
 ENV XDG_DATA_HOME=/opt/ammico/data
-
-# Copy notebooks into the home directory
-RUN rm -rf "$HOME"/work && \
-	cp /opt/ammico/notebooks/*.ipynb "$HOME" 
