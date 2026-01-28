@@ -51,6 +51,7 @@ nav:
     - Image summary and VQA: tutorials/image_summary.md
     - Video summary and VQA: tutorials/video_summary.md
     - Text analysis: tutorials/text.md
+    - Multimodal analysis: tutorials/ammico_demo_multimodal_analysis.md
     - Color analysis: tutorials/colors.md
     - Interactive display: tutorials/display.md
   - Modules:
