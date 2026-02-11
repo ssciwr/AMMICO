@@ -195,6 +195,7 @@ class ImageSummaryDetector(AnalysisMethod):
         Analyse a single image entry. Returns dict with keys depending on analysis_type:
             - 'caption' (str) if summary requested
             - 'vqa' (dict) if questions requested
+            - 'vqa_person' (dict) if person requested
         """
         self.subdict = entry
         analysis_type, list_of_questions, list_of_person_questions, is_summary, is_questions, is_person = (
@@ -225,8 +226,8 @@ class ImageSummaryDetector(AnalysisMethod):
 
         if is_person:
             try:
-                vqa_map = self.answer_questions(list_of_person_questions, entry, is_concise_answer)
-                self.subdict["vqa"] = vqa_map
+                vqa_person_map = self.answer_questions(list_of_person_questions, entry, is_concise_answer)
+                self.subdict["vqa_person"] = vqa_person_map
             except Exception as e:
                 warnings.warn(f"VQA failed: {e}")
 
