@@ -291,10 +291,10 @@ class ImageSummaryDetector(AnalysisMethod):
 
                 if is_person:
                     try:
-                        vqa_map = self.answer_questions(
+                        vqa_person_map = self.answer_questions(
                             list_of_person_questions, entry, is_concise_answer
                         )
-                        entry["vqa"] = vqa_map
+                        entry["vqa_person"] = vqa_person_map
                     except Exception as e:
                         warnings.warn(f"VQA failed: {e}")
 
