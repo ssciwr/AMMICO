@@ -438,7 +438,7 @@ requires-dist = [
     { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "pytorch-lightning", specifier = "<=2.6.0" },
+    { name = "pytorch-lightning", specifier = "<2.6.0" },
     { name = "qwen-vl-utils" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "safetensors" },
