@@ -53,6 +53,7 @@ dependencies = [
     "torchcodec",
     "webcolors",
     "whisperx",
+    "pip>=26.0.1",
 ]
 
 [project.optional-dependencies]
