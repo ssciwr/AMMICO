@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Documentation / site
+site/
+docs/
+!docs/tutorials/
+!docs/tutorials/*.ipynb
+
+# Large data directories
+data/
+!data/in/
+!data/in/*.jpeg
+
+# Dev/test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+temp/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
