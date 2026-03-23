@@ -96,30 +96,41 @@ def test_validate_analysis_type(mock_model):
     """Test analysis type validation."""
     detector = ImageSummaryDetector(summary_model=mock_model)
     # Test valid types
-    _, _, is_summary, is_questions = detector._validate_analysis_type(
-        "summary", None, 10
+    _, _, _, is_summary, is_questions, is_person = detector._validate_analysis_type(
+        "summary", None, None, 10
     )
     assert is_summary is True
     assert is_questions is False
+    assert is_person is False
 
-    _, _, is_summary, is_questions = detector._validate_analysis_type(
-        "questions", ["What is this?"], 10
+    _, _, _, is_summary, is_questions, is_person = detector._validate_analysis_type(
+        "questions", ["What is this?"], None, 10
     )
     assert is_summary is False
     assert is_questions is True
+    assert is_person is False
 
-    _, _, is_summary, is_questions = detector._validate_analysis_type(
-        "summary_and_questions", ["What is this?"], 10
+    _, _, _, is_summary, is_questions, is_person = detector._validate_analysis_type(
+        "summary_and_questions", ["What is this?"], None, 10
     )
     assert is_summary is True
     assert is_questions is True
+    assert is_person is False
+
+    _, _, _, is_summary, is_questions, is_person = detector._validate_analysis_type(
+        "person", None, ["What is this?"], 10
+    )
+
+    assert is_summary is False
+    assert is_questions is False
+    assert is_person is True
 
     # Test invalid type
     with pytest.raises(ValueError):
-        detector._validate_analysis_type("invalid", None, 10)
+        detector._validate_analysis_type("invalid", None, None, 10)
 
     # Test too many questions
     with pytest.raises(ValueError):
         detector._validate_analysis_type(
-            "questions", ["Q" + str(i) for i in range(33)], 32
+            "questions", ["Q" + str(i) for i in range(33)], None, 32
         )
