@@ -12,7 +12,7 @@ USER $NB_USER
 COPY --chown=${NB_UID} . /opt/ammico
 
 # Install the Python dependencies
-RUN pip install uv && uv pip install --system .[nb] /opt/ammico --no-cache-dir
+RUN pip install uv && uv pip install --system --no-cache-dir "/opt/ammico[nb]"
 
 # Make JupyterLab the default for this application
 ENV JUPYTER_ENABLE_LAB=yes
