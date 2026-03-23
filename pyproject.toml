@@ -44,7 +44,7 @@ dependencies = [
     "spacy",
     "tf-keras",
     "torch<2.9",
-    "pytorch-lightning<=2.5.6",
+    "pytorch-lightning<=2.6.0",
     "sentence-transformers<5.2",
     "timm",
     "torchvision",
