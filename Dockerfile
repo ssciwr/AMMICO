@@ -23,5 +23,5 @@ COPY --chown=${NB_UID} ./docs/tutorials/*.ipynb /home/jovyan/notebooks/.
 COPY --chown=${NB_UID} ./data/in/*.jpeg /opt/ammico/data
 
 # Export where the data is located
-ENV XDG_DATA_HOME=/opt/ammico/data
+ENV AMMICO_DATA_HOME=/opt/ammico/data
   
