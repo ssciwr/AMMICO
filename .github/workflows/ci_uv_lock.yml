@@ -1,0 +1,34 @@
+name: CI Check for uv lockfile
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  test-uv-lock:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.13"]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Check lockfile is up to date
+        run: uv lock --check
+
+      - name: Install locked environment
+        env:
+          BLIS_ARCH: generic
+        run: uv sync --locked --extra dev
+
+      - name: Run tests
+        run: uv run pytest -svv 
