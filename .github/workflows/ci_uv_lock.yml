@@ -30,7 +30,9 @@ jobs:
       - name: Install locked environment
         env:
           BLIS_ARCH: generic
-        run: uv sync --locked --extra dev
+        run: |
+            uv sync --locked --extra dev
+            uv run --with spacy spacy download en_core_web_md
 
       - name: Run tests
         run: uv run pytest -svv -m "not gcv and not long"

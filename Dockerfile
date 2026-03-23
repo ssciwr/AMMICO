@@ -1,4 +1,4 @@
-FROM jupyter/minimal-notebook AS builder
+FROM quay.io/jupyter/base-notebook:python-3.13
 
 # Install system dependencies for audio decoding
 USER root
