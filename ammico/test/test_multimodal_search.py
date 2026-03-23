@@ -82,7 +82,7 @@ def test_multimodal_search_image_query(multimodal_search_mock, tmp_path):
 
 @pytest.mark.long
 def test_multimodal_search_combined_query(get_path):
-    model = MultimodalEmbeddingsModel()
+    model = MultimodalEmbeddingsModel(device="cpu")
     mms = MultimodalSearch(model=model)
     mms.index_images(images=get_path, save_embeddings_and_indexes=False)
     queries = [
