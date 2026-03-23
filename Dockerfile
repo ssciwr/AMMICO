@@ -1,19 +1,22 @@
-FROM jupyter/base-notebook
+FROM jupyter/minimal-notebook AS builder
 
-# Install system dependencies for computer vision packages
+# Install system dependencies for audio decoding
 USER root
-RUN apt update && apt install -y build-essential libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 \
-	&& rm -rf /var/lib/apt/lists/*
-USER $NB_USER
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
+USER $NB_USER
 # Copy the repository into the container
 COPY --chown=${NB_UID} . /opt/ammico
 
-# Install the Python package
-RUN python -m pip install /opt/ammico
+# Install the Python dependencies
+RUN pip install uv && uv pip install --system .[nb] /opt/ammico --no-cache-dir
 
 # Make JupyterLab the default for this application
 ENV JUPYTER_ENABLE_LAB=yes
 
 # Export where the data is located
 ENV XDG_DATA_HOME=/opt/ammico/data
+  
