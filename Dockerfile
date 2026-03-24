@@ -20,7 +20,7 @@ ENV JUPYTER_ENABLE_LAB=yes
 # copy the notebooks into the container
 COPY --chown=${NB_UID} ./docs/tutorials/*.ipynb /home/jovyan/notebooks/.
 # Copy sample data into the container
-COPY --chown=${NB_UID} ./data/in/*.jpeg /opt/ammico/data
+# COPY --chown=${NB_UID} ./data/in/*.jpeg /opt/ammico/data
 
 # Export where the data is located
 ENV AMMICO_DATA_HOME=/opt/ammico/data
