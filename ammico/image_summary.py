@@ -30,6 +30,15 @@ class ImageSummaryDetector(AnalysisMethod):
     }
     MAX_QUESTIONS_PER_IMAGE = 32
     KEYS_BATCH_SIZE = 16
+    EMOTION_TO_SENTIMENT = {
+        "angry": "Negative",
+        "disgust": "Negative",
+        "fear": "Negative",
+        "sad": "Negative",
+        "happy": "Positive",
+        "surprise": "Neutral",
+        "neutral": "Neutral"
+    }
 
     def __init__(
         self,
@@ -159,10 +168,11 @@ class ImageSummaryDetector(AnalysisMethod):
             ]
 
         if list_of_person_questions is None:
+            emotion_list = list(self.EMOTION_TO_SENTIMENT.keys())
             list_of_person_questions = [
                 "Are there multiple people in the image?",
                 "Is the persons face visible?",
-                "How many faces are visible?",
+                f"What emotion is in the picture? Choose one of the following {emotion_list}"
             ]
 
         if analysis_type in ("questions", "summary_and_questions", "person"):
@@ -241,9 +251,14 @@ class ImageSummaryDetector(AnalysisMethod):
 
         if is_person:
             try:
+                emotion_list = list(self.EMOTION_TO_SENTIMENT.keys())
+                list_of_person_questions.append(f"What emotion is in the picture? Choose one of the following {emotion_list}")
                 vqa_person_map = self.answer_questions(
                     list_of_person_questions, entry, is_concise_answer
                 )
+                raw_emotion = vqa_person_map[-1].strip().lower()
+                mapped = self.EMOTION_TO_SENTIMENT.get(raw_emotion)
+                vqa_person_map[-1] = f"Overall sentiment: {mapped}"
                 self.subdict["vqa_person"] = vqa_person_map
             except Exception as e:
                 warnings.warn(f"VQA failed: {e}")
@@ -266,6 +281,7 @@ class ImageSummaryDetector(AnalysisMethod):
         Args:
             analysis_type (str): type of the analysis.
             list_of_questions (list[str]): list of questions.
+            list_of_person_questions (list[str]): list of person questions
             max_questions_per_image (int): maximum number of questions per image.
                 We recommend to keep it low to avoid long processing times and high memory usage.
             keys_batch_size (int): number of images to process in a batch.
@@ -288,6 +304,10 @@ class ImageSummaryDetector(AnalysisMethod):
             list_of_person_questions,
             max_questions_per_image,
         )
+
+        if list_of_person_questions is not None:
+            emotion_list = list(self.EMOTION_TO_SENTIMENT.keys())
+            list_of_person_questions.append(f"What emotion is in the picture? Choose one of the following {emotion_list}")
 
         keys = list(self.subdict.keys())
         for batch_start in range(0, len(keys), keys_batch_size):
@@ -319,6 +339,9 @@ class ImageSummaryDetector(AnalysisMethod):
                         vqa_person_map = self.answer_questions(
                             list_of_person_questions, entry, is_concise_answer
                         )
+                        raw_emotion = vqa_person_map[-1].strip().lower()
+                        mapped = self.EMOTION_TO_SENTIMENT.get(raw_emotion)
+                        vqa_person_map[-1] = f"Overall sentiment: {mapped}"
                         entry["vqa_person"] = vqa_person_map
                     except Exception as e:
                         warnings.warn(f"VQA failed: {e}")
