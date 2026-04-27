@@ -1,3 +1,4 @@
+import gc
 import os
 import pytest
 from ammico.model import MultimodalSummaryModel, MultimodalEmbeddingsModel
@@ -6,6 +7,15 @@ from ammico.multimodal_search import MultimodalSearch
 from unittest.mock import MagicMock
 import numpy as np
 import torch
+
+
+def _release_torch_memory() -> None:
+    gc.collect(2)
+    if torch.cuda.is_available():
+        try:
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
 
 
 @pytest.fixture
@@ -62,13 +72,16 @@ def get_test_my_dict(get_path):
     return test_my_dict
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def model():
+    # module scope: one Qwen load per test file (not per test). Keep embedding-only tests in a
+    # separate module so this file never holds Qwen + Jina together via fixtures.
     m = MultimodalSummaryModel(device="cpu")
     try:
         yield m
     finally:
         m.close()
+        _release_torch_memory()
 
 
 @pytest.fixture
@@ -131,7 +144,7 @@ def mock_model():
     return MockMultimodalSummaryModel()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def video_summary_model(model):
     vsm = VideoSummaryDetector(summary_model=model)
     try:
@@ -140,22 +153,26 @@ def video_summary_model(model):
         vsm.summary_model.close()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def multimodal_embeddings_model_cpu():
     mem = MultimodalEmbeddingsModel(device="cpu")
     try:
         yield mem
     finally:
         mem.close()
+        _release_torch_memory()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def multimodal_embeddings_model_cuda():
+    if not torch.cuda.is_available():
+        pytest.skip("CUDA is not available for multimodal embeddings tests")
     mem = MultimodalEmbeddingsModel(device="cuda")
     try:
         yield mem
     finally:
         mem.close()
+        _release_torch_memory()
 
 
 @pytest.fixture
