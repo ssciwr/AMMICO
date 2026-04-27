@@ -83,19 +83,22 @@ def test_multimodal_search_image_query(multimodal_search_mock, tmp_path):
 @pytest.mark.long
 def test_multimodal_search_combined_query(get_path):
     model = MultimodalEmbeddingsModel(device="cpu")
-    mms = MultimodalSearch(model=model)
-    mms.index_images(images=get_path, save_embeddings_and_indexes=False)
-    queries = [
-        {"text": "A person wearing a mask"},
-        {"image": Path(get_path) / "IMG_2809.png"},
-    ]
-    results = mms.multimodal_batch_search(queries=queries, top_k=3)
+    try:
+        mms = MultimodalSearch(model=model)
+        mms.index_images(images=get_path, save_embeddings_and_indexes=False)
+        queries = [
+            {"text": "A person wearing a mask"},
+            {"image": Path(get_path) / "IMG_2809.png"},
+        ]
+        results = mms.multimodal_batch_search(queries=queries, top_k=3)
 
-    assert len(results) == 2
-    for query_idx, (items, scores) in enumerate(results):
-        assert len(items) > 0
-        assert len(items) == len(scores)
+        assert len(results) == 2
+        for items, scores in results:
+            assert len(items) > 0
+            assert len(items) == len(scores)
 
-    assert any("pexels-maksgelatin-4750169.jpg" in item for item in results[0][0])
-    assert any("IMG_2809.png" in item for item in results[1][0])
-    assert any("IMG_3758.png" in item for item in results[1][0])
+        assert any("pexels-maksgelatin-4750169.jpg" in item for item in results[0][0])
+        assert any("IMG_2809.png" in item for item in results[1][0])
+        assert any("IMG_3758.png" in item for item in results[1][0])
+    finally:
+        model.close()

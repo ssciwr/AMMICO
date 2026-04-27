@@ -58,7 +58,8 @@ def test_analyse_videos_from_dict_summary_and_questions(
     video_summary_model, get_video_testdict
 ):
     video_summary_model.subdict = get_video_testdict
-    video_summary_model.audio_model = AudioToTextModel(model_size="large", device="cpu")
+    # "small" keeps RAM down alongside Qwen on CPU; "large" can OOM on typical dev machines.
+    video_summary_model.audio_model = AudioToTextModel(model_size="small", device="cpu")
     questions = ["When and where the video was recorded?"]
     results = video_summary_model.analyse_videos_from_dict(
         analysis_type="summary_and_questions", list_of_questions=questions

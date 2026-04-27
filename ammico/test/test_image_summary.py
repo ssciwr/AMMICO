@@ -5,7 +5,8 @@ import pytest
 
 
 @pytest.mark.long
-def test_image_summary_detector(model, get_testdict):
+def test_image_summary_detector_summary_and_questions(model, get_testdict):
+    """One Qwen load for summary + VQA (avoids loading the VL model twice in this module)."""
     detector = ImageSummaryDetector(summary_model=model, subdict=get_testdict)
     results = detector.analyse_images_from_dict(analysis_type="summary")
     assert len(results) == 2
@@ -15,14 +16,10 @@ def test_image_summary_detector(model, get_testdict):
         assert isinstance(results[key]["caption"], str)
         assert len(results[key]["caption"]) > 0
 
-
-@pytest.mark.long
-def test_image_summary_detector_questions(model, get_testdict):
     list_of_questions = [
         "What is happening in the image?",
         "How many cars are in the image in total?",
     ]
-    detector = ImageSummaryDetector(summary_model=model, subdict=get_testdict)
     results = detector.analyse_images_from_dict(
         analysis_type="questions", list_of_questions=list_of_questions
     )
