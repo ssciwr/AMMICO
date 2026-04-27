@@ -93,7 +93,7 @@ def test_multimodal_search_combined_query(get_path):
         results = mms.multimodal_batch_search(queries=queries, top_k=3)
 
         assert len(results) == 2
-        for query_idx, (items, scores) in enumerate(results):
+        for items, scores in results:
             assert len(items) > 0
             assert len(items) == len(scores)
 
