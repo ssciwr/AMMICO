@@ -437,7 +437,7 @@ class VideoSummaryDetector(AnalysisMethod):
             start_time = seg["start_time"]
             end_time = seg["end_time"]
             sample_times = torch.linspace(
-                start_time, end_time, steps=frame_rate_per_clip, dtype=torch.float32
+                start_time, end_time, steps=int(frame_rate_per_clip), dtype=torch.float32
             )
             seg["frame_timestamps"] = sample_times.tolist()
 
