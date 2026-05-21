@@ -419,22 +419,25 @@ class VideoSummaryDetector(AnalysisMethod):
             List of segments with 'start_time', 'end_time', and 'frame_timestamps'
         """
         base_frames_per_clip = 4.0
+        max_seconds_between_frames = 30.0
         result = self._detect_scene_cuts(filename)
         segments = result["segments"]
         video_meta = result["video_meta"]
         for seg in segments:
             if seg["duration"] < 2.0:
                 frame_rate_per_clip = 2.0
-            elif seg["duration"] > 20.0:
-                frame_rate_per_clip = 6.0
+            elif seg["duration"] > max_seconds_between_frames:
+                frame_rate_per_clip = max(
+                1,
+                int(math.ceil(seg["duration"] / max_seconds_between_frames)),
+            )
             else:
                 frame_rate_per_clip = base_frames_per_clip
 
             start_time = seg["start_time"]
             end_time = seg["end_time"]
-            n_samples = max(1, int(frame_rate_per_clip))
             sample_times = torch.linspace(
-                start_time, end_time, steps=n_samples, dtype=torch.float32
+                start_time, end_time, steps=int(frame_rate_per_clip), dtype=torch.float32
             )
             seg["frame_timestamps"] = sample_times.tolist()
 
