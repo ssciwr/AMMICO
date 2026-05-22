@@ -983,8 +983,17 @@ class VideoSummaryDetector(AnalysisMethod):
                 [prompt_text],
                 self.summary_model.tokenizer,
             )
-            for t, c in zip(frame_timestamps, final_outputs):
-                collected.append((float(t), c))
+            clip_text = final_outputs[0].strip() if final_outputs else ""
+
+            if frame_timestamps:
+                clip_timestamp = float(frame_timestamps[0])
+            else:
+                clip_timestamp = (
+                    float(seg["start_time"]) + float(seg["end_time"])
+                ) / 2.0
+
+            if clip_text:
+                collected.append((clip_timestamp, clip_text))
 
             collected.sort(key=lambda x: x[0])
             bullets_summary, bullets_vqa = _categorize_outputs(
