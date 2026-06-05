@@ -428,16 +428,19 @@ class VideoSummaryDetector(AnalysisMethod):
                 frame_rate_per_clip = 2.0
             elif seg["duration"] > max_seconds_between_frames:
                 frame_rate_per_clip = max(
-                1,
-                int(math.ceil(seg["duration"] / max_seconds_between_frames)),
-            )
+                    1,
+                    int(math.ceil(seg["duration"] / max_seconds_between_frames)),
+                )
             else:
                 frame_rate_per_clip = base_frames_per_clip
 
             start_time = seg["start_time"]
             end_time = seg["end_time"]
             sample_times = torch.linspace(
-                start_time, end_time, steps=int(frame_rate_per_clip), dtype=torch.float32
+                start_time,
+                end_time,
+                steps=int(frame_rate_per_clip),
+                dtype=torch.float32,
             )
             seg["frame_timestamps"] = sample_times.tolist()
 
@@ -460,32 +463,54 @@ class VideoSummaryDetector(AnalysisMethod):
             None
         """
 
-        boundary_margin = 0.5
         eps = 1e-6
-
         video_list = list(video_segs)
+
         for seg in segments:
             seg_start = seg["start_time"]
             seg_end = seg["end_time"]
 
             merged_timestamps: List[float] = []
+            fallback_candidates: List[Tuple[float, float]] = []
             for vscene in video_list:
                 if "frame_timestamps" not in vscene:
                     raise ValueError("Video scene missing 'frame_timestamps' key.")
 
+                v_start = float(vscene["start_time"])
+                v_end = float(vscene["end_time"])
+
+                overlap_start = max(seg_start, v_start)
+                overlap_end = min(seg_end, v_end)
+
+                has_overlap = overlap_end + eps >= overlap_start
+
+                if has_overlap:
+                    fallback_candidates.append((overlap_start, overlap_end))
+
                 contrib = [
                     float(t)
                     for t in vscene["frame_timestamps"]
-                    if (t + eps) >= (seg_start - boundary_margin)
-                    and (t - eps) <= (seg_end + boundary_margin)
-                    and (t + eps) >= seg_start
-                    and (t - eps) <= seg_end
+                    if (t + eps) >= seg_start and (t - eps) <= seg_end
                 ]
+
                 if contrib:
                     merged_timestamps.extend(contrib)
 
-            # dedupe & sort
-            seg["video_frame_timestamps"] = sorted(set(merged_timestamps))
+            if not merged_timestamps and fallback_candidates:
+                best_start, best_end = max(
+                    fallback_candidates,
+                    key=lambda bounds: bounds[1] - bounds[0],
+                )
+                fallback_ts = (best_start + best_end) / 2.0
+                merged_timestamps.append(fallback_ts)
+
+            seg["video_frame_timestamps"] = sorted(
+                {
+                    round(float(t), 6)
+                    for t in merged_timestamps
+                    if math.isfinite(float(t))
+                }
+            )
 
     def _combine_visual_frames_by_time(
         self,
