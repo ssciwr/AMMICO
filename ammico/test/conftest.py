@@ -97,14 +97,18 @@ def mock_model():
         def apply_chat_template(self, messages, **kwargs):
             return "processed_text"
 
-        def __call__(self, text, images, **kwargs):
+        def __call__(self, text=None, images=None, **kwargs):
             """Mock processing that returns tensor-like inputs."""
             batch_size = len(text) if isinstance(text, list) else 1
-            return {
+            result = {
                 "input_ids": torch.randint(0, 1000, (batch_size, 10)),
-                "pixel_values": torch.randn(batch_size, 3, 224, 224),
                 "attention_mask": torch.ones(batch_size, 10),
             }
+
+            if images is not None:
+                result["pixel_values"] = torch.randn(batch_size, 3, 224, 224)
+
+            return result
 
     class MockTokenizer:
         """Mock tokenizer that mimics AutoTokenizer behavior."""
