@@ -429,7 +429,7 @@ class VideoSummaryDetector(AnalysisMethod):
             elif seg["duration"] > max_seconds_between_frames:
                 frame_rate_per_clip = max(
                     1,
-                    int(math.ceil(seg["duration"] / max_seconds_between_frames)),
+                    int(math.ceil(seg["duration"] / max_seconds_between_frames)) + 1,
                 )
             else:
                 frame_rate_per_clip = base_frames_per_clip
