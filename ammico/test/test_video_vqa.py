@@ -132,7 +132,10 @@ def test_extract_frame_timestamps_from_clip(mock_model, get_video_testdict):
         assert "frame_timestamps" in seg
         assert isinstance(seg["frame_timestamps"], list)
         assert all(isinstance(t, float) for t in seg["frame_timestamps"])
-        assert seg["end_time"] - seg["start_time"] <= 20.0
+        assert len(seg["frame_timestamps"]) >= 1
+        eps = 1e-5
+        for timestamp in seg["frame_timestamps"]:
+            assert seg["start_time"] - eps <= timestamp <= seg["end_time"] + eps
 
 
 def test_merge_audio_visual_boundaries_type_and_size(mock_model):
@@ -268,3 +271,85 @@ def test_combine_visual_frames_by_time(mock_model):
     assert combined[2]["end_time"] == 60.0
     assert combined[3]["start_time"] == 60.0
     assert combined[3]["end_time"] == 80.0
+
+
+def test_extract_frame_timestamps_long_scene(
+    mock_model,
+    monkeypatch,
+):
+    video_summ = VideoSummaryDetector(summary_model=mock_model)
+
+    def fake_detect_scene_cuts(filename):
+        return {
+            "segments": [
+                {
+                    "type": "video_scene",
+                    "start_time": 0.0,
+                    "end_time": 300.0,
+                    "duration": 300.0,
+                }
+            ],
+            "video_meta": {
+                "width": 1920,
+                "height": 1080,
+            },
+        }
+
+    monkeypatch.setattr(
+        video_summ,
+        "_detect_scene_cuts",
+        fake_detect_scene_cuts,
+    )
+
+    result = video_summ._extract_frame_timestamps_from_clip("fake.mp4")
+
+    timestamps = result["segments"][0]["frame_timestamps"]
+
+    assert len(timestamps) == 11
+    assert timestamps[0] == pytest.approx(0.0)
+    assert timestamps[-1] == pytest.approx(300.0)
+
+    gaps = [right - left for left, right in zip(timestamps, timestamps[1:])]
+
+    assert all(gap <= 30.0 for gap in gaps)
+
+
+def test_extract_frame_timestamps_short_scene_keeps_existing_behavior(
+    mock_model,
+    monkeypatch,
+):
+    video_summ = VideoSummaryDetector(summary_model=mock_model)
+
+    def fake_detect_scene_cuts(filename):
+        return {
+            "segments": [
+                {
+                    "type": "video_scene",
+                    "start_time": 10.0,
+                    "end_time": 20.0,
+                    "duration": 10.0,
+                }
+            ],
+            "video_meta": {
+                "width": 1280,
+                "height": 720,
+            },
+        }
+
+    monkeypatch.setattr(
+        video_summ,
+        "_detect_scene_cuts",
+        fake_detect_scene_cuts,
+    )
+
+    result = video_summ._extract_frame_timestamps_from_clip("fake.mp4")
+
+    timestamps = result["segments"][0]["frame_timestamps"]
+
+    assert len(timestamps) == 4
+    assert timestamps[0] == pytest.approx(10.0)
+    assert timestamps[-1] == pytest.approx(20.0)
+    assert result["video_meta"] == {
+        "width": 1280,
+        "height": 720,
+    }
