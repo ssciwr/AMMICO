@@ -353,3 +353,70 @@ def test_extract_frame_timestamps_short_scene_keeps_existing_behavior(
         "width": 1280,
         "height": 720,
     }
+
+
+def test_reassign_video_timestamps_segment_has_no_sampled_frame(
+    mock_model,
+):
+    """This tests the case where a segment overlaps with a video scene, but the scene's frame timestamps do not include any frames that fall within the segment's time range. In this case, the method should add a fallback timestamp at the midpoint of the segment."""
+    video_summ = VideoSummaryDetector(summary_model=mock_model)
+
+    segments = [
+        {
+            "start_time": 5.0,
+            "end_time": 7.0,
+            "duration": 2.0,
+            "audio_phrases": [
+                {
+                    "start_time": 5.2,
+                    "end_time": 6.8,
+                    "text": "Short phrase.",
+                    "duration": 1.6,
+                }
+            ],
+            "video_scenes": [],
+        }
+    ]
+
+    video_segs = [
+        {
+            "start_time": 0.0,
+            "end_time": 60.0,
+            "duration": 60.0,
+            "frame_timestamps": [0.0, 30.0, 60.0],
+        }
+    ]
+
+    video_summ._reassign_video_timestamps_to_segments(segments, video_segs)
+
+    assert segments[0]["video_frame_timestamps"] == [6.0]
+
+
+def test_reassign_video_timestamps_segment_does_not_overlap_video(
+    mock_model,
+):
+    """This tests the case where a segment does not overlap with any video scenes at all. In this case, the method should leave the "video_frame_timestamps" list empty, since there are no relevant frames to assign to the segment."""
+    video_summ = VideoSummaryDetector(summary_model=mock_model)
+
+    segments = [
+        {
+            "start_time": 70.0,
+            "end_time": 75.0,
+            "duration": 5.0,
+            "audio_phrases": [],
+            "video_scenes": [],
+        }
+    ]
+
+    video_segs = [
+        {
+            "start_time": 0.0,
+            "end_time": 60.0,
+            "duration": 60.0,
+            "frame_timestamps": [0.0, 30.0, 60.0],
+        }
+    ]
+
+    video_summ._reassign_video_timestamps_to_segments(segments, video_segs)
+
+    assert segments[0]["video_frame_timestamps"] == []
