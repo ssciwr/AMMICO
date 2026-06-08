@@ -420,3 +420,210 @@ def test_reassign_video_timestamps_segment_does_not_overlap_video(
     video_summ._reassign_video_timestamps_to_segments(segments, video_segs)
 
     assert segments[0]["video_frame_timestamps"] == []
+
+
+def test_make_captions_for_subclips_with_frame_timestamp(
+    mock_model,
+    monkeypatch,
+    tmp_path,
+):
+    """This tests the case where the segment has frame timestamps that fall within its time range.
+    In this case, the method should use those frame timestamps to generate captions for the segment, and the resulting summary bullets should reference the specific timestamps of the frames."""
+
+    video_file = tmp_path / "video.mp4"
+    video_file.write_bytes(b"fake video content")
+
+    video_summ = VideoSummaryDetector(
+        summary_model=mock_model,
+        audio_model=None,
+        subdict={},
+    )
+
+    def fake_extract_frame_timestamps_from_clip(filename):
+        return {
+            "segments": [
+                {
+                    "type": "video_scene",
+                    "start_time": 10.0,
+                    "end_time": 18.0,
+                    "duration": 8.0,
+                    "frame_timestamps": [10.0, 14.0, 18.0],
+                }
+            ],
+            "video_meta": {
+                "width": 1920,
+                "height": 1080,
+            },
+        }
+
+    def fake_merge_audio_visual_boundaries(audio_segs, video_segs):
+        return [
+            {
+                "start_time": 10.0,
+                "end_time": 18.0,
+                "duration": 8.0,
+                "audio_phrases": [],
+                "video_scenes": video_segs,
+                "video_frame_timestamps": [10.0, 14.0, 18.0],
+                "summary_bullets": [
+                    "- [10.000s] A presenter is visible.",
+                ],
+                "vqa_bullets": [],
+            }
+        ]
+
+    def fake_make_captions_from_extracted_frames(
+        filename,
+        merged_segments,
+        video_meta,
+        list_of_questions=None,
+    ):
+        merged_segments[0]["summary_bullets"] = [
+            "- [10.000s] A presenter is visible.",
+        ]
+        merged_segments[0]["vqa_bullets"] = []
+
+    def fake_generate_from_processor_inputs(*args, **kwargs):
+        return [
+            "A presenter explains the project timeline.",
+        ]
+
+    monkeypatch.setattr(
+        video_summ,
+        "_extract_frame_timestamps_from_clip",
+        fake_extract_frame_timestamps_from_clip,
+    )
+    monkeypatch.setattr(
+        video_summ,
+        "merge_audio_visual_boundaries",
+        fake_merge_audio_visual_boundaries,
+    )
+    monkeypatch.setattr(
+        video_summ,
+        "_make_captions_from_extracted_frames",
+        fake_make_captions_from_extracted_frames,
+    )
+    monkeypatch.setattr(
+        video_summ,
+        "_generate_from_processor_inputs",
+        fake_generate_from_processor_inputs,
+    )
+
+    result = video_summ.make_captions_for_subclips(
+        {"filename": str(video_file)},
+    )
+
+    assert result == [
+        {
+            "start_time": 10.0,
+            "end_time": 18.0,
+            "summary_bullets": [
+                "- [10.000s] A presenter explains the project timeline.",
+            ],
+            "vqa_bullets": [],
+        }
+    ]
+
+
+def test_make_captions_for_subclips_without_frame_timestamp(
+    mock_model,
+    monkeypatch,
+    tmp_path,
+):
+    """This tests the case where the segment does not have any visual timestamps that fall within its time range.
+    In this case, the method should not fail, but it should still generate captions based on the audio content."""
+    video_file = tmp_path / "video.mp4"
+    video_file.write_bytes(b"fake video content")
+
+    video_summ = VideoSummaryDetector(
+        summary_model=mock_model,
+        audio_model=None,
+        subdict={},
+    )
+
+    def fake_extract_frame_timestamps_from_clip(filename):
+        return {
+            "segments": [
+                {
+                    "type": "video_scene",
+                    "start_time": 35.0,
+                    "end_time": 38.0,
+                    "duration": 3.0,
+                    "frame_timestamps": [],
+                }
+            ],
+            "video_meta": {
+                "width": 1920,
+                "height": 1080,
+            },
+        }
+
+    def fake_merge_audio_visual_boundaries(audio_segs, video_segs):
+        return [
+            {
+                "start_time": 35.0,
+                "end_time": 38.0,
+                "duration": 3.0,
+                "audio_phrases": [
+                    {
+                        "start_time": 35.2,
+                        "end_time": 37.7,
+                        "text": "All stages of the project timeline are shown in a chart.",
+                        "duration": 2.5,
+                    }
+                ],
+                "video_scenes": video_segs,
+                "video_frame_timestamps": [],
+                "summary_bullets": [],
+                "vqa_bullets": [],
+            }
+        ]
+
+    def fake_make_captions_from_extracted_frames(
+        filename,
+        merged_segments,
+        video_meta,
+        list_of_questions=None,
+    ):
+        return None
+
+    def fake_generate_from_processor_inputs(*args, **kwargs):
+        return [
+            "The presenter introduces a chart about the project timeline.",
+        ]
+
+    monkeypatch.setattr(
+        video_summ,
+        "_extract_frame_timestamps_from_clip",
+        fake_extract_frame_timestamps_from_clip,
+    )
+    monkeypatch.setattr(
+        video_summ,
+        "merge_audio_visual_boundaries",
+        fake_merge_audio_visual_boundaries,
+    )
+    monkeypatch.setattr(
+        video_summ,
+        "_make_captions_from_extracted_frames",
+        fake_make_captions_from_extracted_frames,
+    )
+    monkeypatch.setattr(
+        video_summ,
+        "_generate_from_processor_inputs",
+        fake_generate_from_processor_inputs,
+    )
+
+    result = video_summ.make_captions_for_subclips(
+        {"filename": str(video_file)},
+    )
+
+    assert result == [
+        {
+            "start_time": 35.0,
+            "end_time": 38.0,
+            "summary_bullets": [
+                "- [36.500s] The presenter introduces a chart about the project timeline.",
+            ],
+            "vqa_bullets": [],
+        }
+    ]
