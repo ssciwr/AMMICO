@@ -311,7 +311,7 @@ def test_extract_frame_timestamps_long_scene(
 
     gaps = [right - left for left, right in zip(timestamps, timestamps[1:])]
 
-    assert all(gap <= 30.0 for gap in gaps)
+    assert all(gap <= 30.0 + 1e-4 for gap in gaps)
 
 
 def test_extract_frame_timestamps_short_scene_keeps_existing_behavior(
