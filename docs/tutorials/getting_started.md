@@ -77,10 +77,19 @@ for key in image_dict:
         image_dict[key],
     ).analyse_image()
 ```
-Note that for the image summary detector, you need to initialize the model first and create an instance of the detector class:
+Note that for the image summary detector, you connect to an externally hosted vision-language
+model over an OpenAI-compatible HTTP API and create an instance of the detector class. The
+endpoint is configured via the `AMMICO_API_BASE_URL`, `AMMICO_API_KEY` and `AMMICO_MODEL_ID`
+environment variables (a self-hosted vLLM server, the OpenAI API, or Google Gemini via its
+OpenAI-compatibility endpoint). Install the client with `pip install ammico[api]`.
 ```
-# Initialize the model once
-model = ammico.MultimodalSummaryModel(device="cuda") # Use "cpu" if no GPU available
+import os
+os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"
+os.environ["AMMICO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+
+# Initialize the inference client once
+model = ammico.InferenceModel()
 
 # Initialize the detector
 image_summary_detector = ammico.ImageSummaryDetector(

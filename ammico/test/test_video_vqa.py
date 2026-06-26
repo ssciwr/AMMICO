@@ -1,5 +1,5 @@
 from ammico.video_summary import VideoSummaryDetector
-from ammico.model import AudioToTextModel
+from ammico.inference import AudioTranscriptionModel
 
 import pytest
 
@@ -58,8 +58,7 @@ def test_analyse_videos_from_dict_summary_and_questions(
     video_summary_model, get_video_testdict
 ):
     video_summary_model.subdict = get_video_testdict
-    # "small" keeps RAM down alongside Qwen on CPU; "large" can OOM on typical dev machines.
-    video_summary_model.audio_model = AudioToTextModel(model_size="small", device="cpu")
+    video_summary_model.audio_model = AudioTranscriptionModel()
     questions = ["When and where the video was recorded?"]
     results = video_summary_model.analyse_videos_from_dict(
         analysis_type="summary_and_questions", list_of_questions=questions
@@ -101,9 +100,12 @@ def test_make_captions_for_subclips_valid_output(
         assert isinstance(segment["vqa_bullets"], list)
 
 
-def test_extract_transcribe_audio_part(mock_model, get_video_testdict):
-    audio_model = AudioToTextModel(model_size="small", device="cpu")
-    video_summ = VideoSummaryDetector(summary_model=mock_model, audio_model=audio_model)
+def test_extract_transcribe_audio_part(
+    mock_model, mock_audio_model, get_video_testdict
+):
+    video_summ = VideoSummaryDetector(
+        summary_model=mock_model, audio_model=mock_audio_model
+    )
     filename = get_video_testdict["video1"]["filename"]
 
     audio_captions = video_summ._extract_transcribe_audio_part(filename)
@@ -483,7 +485,7 @@ def test_make_captions_for_subclips_with_frame_timestamp(
         ]
         merged_segments[0]["vqa_bullets"] = []
 
-    def fake_generate_from_processor_inputs(*args, **kwargs):
+    def fake_chat(messages, max_new_tokens=256, n=1):
         return [
             "A presenter explains the project timeline.",
         ]
@@ -503,11 +505,7 @@ def test_make_captions_for_subclips_with_frame_timestamp(
         "_make_captions_from_extracted_frames",
         fake_make_captions_from_extracted_frames,
     )
-    monkeypatch.setattr(
-        video_summ,
-        "_generate_from_processor_inputs",
-        fake_generate_from_processor_inputs,
-    )
+    monkeypatch.setattr(video_summ.summary_model, "chat", fake_chat)
 
     result = video_summ.make_captions_for_subclips(
         {"filename": str(video_file)},
@@ -587,7 +585,7 @@ def test_make_captions_for_subclips_without_frame_timestamp(
     ):
         return None
 
-    def fake_generate_from_processor_inputs(*args, **kwargs):
+    def fake_chat(messages, max_new_tokens=256, n=1):
         return [
             "The presenter introduces a chart about the project timeline.",
         ]
@@ -607,11 +605,7 @@ def test_make_captions_for_subclips_without_frame_timestamp(
         "_make_captions_from_extracted_frames",
         fake_make_captions_from_extracted_frames,
     )
-    monkeypatch.setattr(
-        video_summ,
-        "_generate_from_processor_inputs",
-        fake_generate_from_processor_inputs,
-    )
+    monkeypatch.setattr(video_summ.summary_model, "chat", fake_chat)
 
     result = video_summ.make_captions_for_subclips(
         {"filename": str(video_file)},

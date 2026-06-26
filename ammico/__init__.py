@@ -1,9 +1,6 @@
 from ammico.display import AnalysisExplorer
-from ammico.model import (
-    MultimodalSummaryModel,
-    AudioToTextModel,
-    MultimodalEmbeddingsModel,
-)
+from ammico.model import MultimodalEmbeddingsModel
+from ammico.inference import InferenceModel, AudioTranscriptionModel
 from ammico.text import TextDetector, TextAnalyzer, privacy_disclosure
 from ammico.image_summary import ImageSummaryDetector
 from ammico.utils import find_files, get_dataframe, AnalysisType, find_videos
@@ -21,9 +18,9 @@ except ImportError:
 __all__ = [
     "AnalysisType",
     "AnalysisExplorer",
-    "MultimodalSummaryModel",
+    "InferenceModel",
+    "AudioTranscriptionModel",
     "MultimodalEmbeddingsModel",
-    "AudioToTextModel",
     "MultimodalSearch",
     "TextDetector",
     "TextAnalyzer",

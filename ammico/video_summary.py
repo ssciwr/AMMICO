@@ -1,9 +1,8 @@
-from ammico.model import MultimodalSummaryModel, AudioToTextModel
+from ammico.inference import InferenceModel, AudioTranscriptionModel
 from ammico.utils import (
     AnalysisMethod,
     AnalysisType,
     _categorize_outputs,
-    _strip_prompt_prefix_literal,
     _validate_subdict,
 )
 from ammico.prompt_builder import PromptBuilder
@@ -17,7 +16,6 @@ import subprocess
 import tempfile
 import torch
 import warnings
-import whisperx
 
 from scipy import signal
 from io import BytesIO
@@ -31,22 +29,21 @@ from typing import (
     Union,
     Optional,
 )
-from transformers import GenerationConfig
 
 
 class VideoSummaryDetector(AnalysisMethod):
     def __init__(
         self,
-        summary_model: MultimodalSummaryModel = None,
-        audio_model: Optional[AudioToTextModel] = None,
+        summary_model: InferenceModel = None,
+        audio_model: Optional[AudioTranscriptionModel] = None,
         subdict: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
-        Class for analysing videos using QWEN-2.5-VL model.
+        Class for analysing videos using an externally hosted vision-language model.
         It provides methods for generating captions and answering questions about videos.
 
         Args:
-            summary_model ([type], optional): An instance of MultimodalSummaryModel to be used for analysis.
+            summary_model (InferenceModel): An InferenceModel instance used for analysis.
             subdict (dict, optional): Dictionary containing the video to be analysed. Defaults to {}.
 
         Returns:
@@ -61,172 +58,15 @@ class VideoSummaryDetector(AnalysisMethod):
         self.audio_model = audio_model
         self.prompt_builder = PromptBuilder()
 
-    def _decode_trimmed_outputs(
-        self,
-        generated_ids: torch.Tensor,
-        inputs: Dict[str, torch.Tensor],
-        tokenizer,
-        prompt_texts: List[str],
-    ) -> List[str]:
-        """
-        Trim prompt tokens using attention_mask/input_ids when available and decode to strings.
-        Then remove any literal prompt prefix using prompt_texts (one per batch element).
-        Args:
-            generated_ids (torch.Tensor): Generated token IDs from the model.
-            inputs (Dict[str, torch.Tensor]): Original input tensors used for generation.
-            tokenizer: Tokenizer used for decoding the generated outputs.
-            prompt_texts (List[str]): List of prompt texts corresponding to each input in the batch.
-        Returns:
-            List[str]: Decoded generated texts after trimming and cleaning.
-        """
-
-        batch_size = generated_ids.shape[0]
-
-        if "input_ids" in inputs:
-            token_for_padding = (
-                tokenizer.pad_token_id
-                if getattr(tokenizer, "pad_token_id", None) is not None
-                else getattr(tokenizer, "eos_token_id", None)
-            )
-            if token_for_padding is None:
-                lengths = [int(inputs["input_ids"].shape[1])] * batch_size
-            else:
-                lengths = inputs["input_ids"].ne(token_for_padding).sum(dim=1).tolist()
-        else:
-            lengths = [0] * batch_size
-
-        trimmed_ids = []
-        for i in range(batch_size):
-            out_ids = generated_ids[i]
-            in_len = int(lengths[i]) if i < len(lengths) else 0
-            if out_ids.size(0) > in_len:
-                t = out_ids[in_len:]
-            else:
-                t = out_ids.new_empty((0,), dtype=out_ids.dtype)
-            t_cpu = t.to("cpu")
-            trimmed_ids.append(t_cpu.tolist())
-
-        decoded = tokenizer.batch_decode(
-            trimmed_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True
-        )
-        decoded_results = []
-        for ptext, raw in zip(prompt_texts, decoded):
-            cleaned = _strip_prompt_prefix_literal(raw, ptext)
-            decoded_results.append(cleaned)
-        return decoded_results
-
-    def _generate_from_processor_inputs(
-        self,
-        processor_inputs: Dict[str, torch.Tensor],
-        prompt_texts: List[str],
-        tokenizer,
-        len_objects: Optional[int] = None,
-    ) -> List[str]:
-        """
-        Run model.generate on already-processed processor_inputs (tensors moved to device),
-        then decode and trim prompt tokens & remove literal prompt prefixes using prompt_texts.
-        Args:
-            processor_inputs (Dict[str, torch.Tensor]): Inputs prepared by the processor.
-            prompt_texts (List[str]): List of prompt texts corresponding to each input in the batch.
-            tokenizer: Tokenizer used for decoding the generated outputs.
-            len_objects (Optional[int], optional): Number of objects/frames to adjust max_new_tokens. Defaults to None.
-        Returns:
-            List[str]: Decoded generated texts after trimming and cleaning.
-        """
-        # In case of many frames, allow more max_new_tokens # TODO recheck the logic
-        if len_objects is not None:
-            max_new_tokens = len_objects * 128
-        else:
-            max_new_tokens = 128
-        gen_conf = GenerationConfig(
-            max_new_tokens=max_new_tokens,
-            do_sample=False,
-            num_return_sequences=1,
-        )
-
-        for k, v in processor_inputs.items():
-            if isinstance(v, torch.Tensor):
-                processor_inputs[k] = v.to(self.summary_model.device)
-
-        with torch.inference_mode():
-            try:
-                if self.summary_model.device == "cuda":
-                    with torch.amp.autocast("cuda", enabled=True):
-                        generated_ids = self.summary_model.model.generate(
-                            **processor_inputs, generation_config=gen_conf
-                        )
-                else:
-                    generated_ids = self.summary_model.model.generate(
-                        **processor_inputs, generation_config=gen_conf
-                    )
-            except RuntimeError as e:
-                warnings.warn(
-                    f"Generation failed with error: {e}. Retrying with cuDNN disabled.",
-                    RuntimeWarning,
-                )
-                cudnn_was_enabled = (
-                    torch.backends.cudnn.is_available() and torch.backends.cudnn.enabled
-                )
-                if cudnn_was_enabled:
-                    torch.backends.cudnn.enabled = False
-                try:
-                    generated_ids = self.summary_model.model.generate(
-                        **processor_inputs, generation_config=gen_conf
-                    )
-                except Exception as retry_error:
-                    raise RuntimeError(
-                        f"Failed to generate ids after retry: {retry_error}"
-                    ) from retry_error
-                finally:
-                    if cudnn_was_enabled:
-                        torch.backends.cudnn.enabled = True
-
-        decoded = self._decode_trimmed_outputs(
-            generated_ids, processor_inputs, tokenizer, prompt_texts
-        )
-        return decoded
-
     def _audio_to_text(self, audio_path: str) -> List[Dict[str, Any]]:
         """
-        Convert audio file to text using an whisper model.
+        Convert audio file to text using the externally hosted transcription model.
         Args:
             audio_path (str): Path to the audio file.
         Returns:
             List[Dict[str, Any]]: List of transcribed audio segments with start_time, end_time, text, and duration.
         """
-
-        if not os.path.exists(audio_path):
-            raise ValueError(f"Audio file {audio_path} does not exist.")
-
-        try:
-            torch.backends.cuda.matmul.allow_tf32 = True
-            torch.backends.cudnn.allow_tf32 = True
-            audio = whisperx.load_audio(audio_path)
-            transcribe_result = self.audio_model.model.transcribe(audio)
-            model_a, metadata = whisperx.load_align_model(
-                language_code=transcribe_result["language"],
-                device=self.audio_model.device,
-            )
-            aligned_result = whisperx.align(
-                transcribe_result["segments"],
-                model_a,
-                metadata,
-                audio,
-                self.audio_model.device,
-            )
-            audio_descriptions = []
-            for segment in aligned_result["segments"]:
-                audio_descriptions.append(
-                    {
-                        "start_time": segment["start"],
-                        "end_time": segment["end"],
-                        "text": segment["text"].strip(),
-                        "duration": segment["end"] - segment["start"],
-                    }
-                )
-            return audio_descriptions
-        except Exception as e:
-            raise RuntimeError(f"Failed to transcribe audio: {e}")
+        return self.audio_model.transcribe(audio_path)
 
     def _check_audio_stream(self, filename: str) -> bool:
         """
@@ -266,7 +106,7 @@ class VideoSummaryDetector(AnalysisMethod):
         filename: str,
     ) -> List[Dict[str, Any]]:
         """
-        Extract audio part from the video file and generate captions using an audio whisperx model.
+        Extract audio part from the video file and transcribe it using the external audio model.
         Args:
             filename (str): Path to the video file.
         Returns:
@@ -831,8 +671,6 @@ class VideoSummaryDetector(AnalysisMethod):
         Returns:
             None. Modifies merged_segments in place to add 'summary_bullets' and 'vqa_bullets'.
         """
-        proc = self.summary_model.processor
-
         img_width = video_meta.get("width")
         img_height = video_meta.get("height")
         if img_width is None or img_height is None:
@@ -859,39 +697,15 @@ class VideoSummaryDetector(AnalysisMethod):
                 original_h=img_height,
                 workers=min(8, (os.cpu_count() or 1) // 2),
             )
-            prompt_texts = []
-
-            for ts, img in pairs:
-                messages = [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "image", "image": img},
-                            {"type": "text", "text": caption_instruction},
-                        ],
-                    }
-                ]
-
-                prompt_text = proc.apply_chat_template(
-                    messages, tokenize=False, add_generation_prompt=True
-                )
-
-                prompt_texts.append(prompt_text)
-
-            processor_inputs = proc(
-                text=prompt_texts,
-                images=[img for _, img in pairs],
-                return_tensors="pt",
-                padding=True,
-            )
-            len_objects = len(pairs)
-            if include_questions:
-                len_objects *= 2  # because we expect two outputs per input when questions are included
-            captions = self._generate_from_processor_inputs(
-                processor_inputs,
-                prompt_texts,
-                self.summary_model.tokenizer,
-                len_objects=len_objects,
+            # one request per frame (single image + caption instruction), fanned out
+            messages_batch = [
+                self.summary_model.build_messages(img, caption_instruction)
+                for _, img in pairs
+            ]
+            # questions yield both a summary and VQA answers, so allow more tokens
+            max_new_tokens = 256 if include_questions else 128
+            captions = self.summary_model.chat_batch(
+                messages_batch, max_new_tokens=max_new_tokens
             )
             for t, c in zip(frame_timestamps, captions):
                 collected.append((float(t), c))
@@ -945,7 +759,6 @@ class VideoSummaryDetector(AnalysisMethod):
             list_of_questions=list_of_questions,
         )
         results = []
-        proc = self.summary_model.processor
         for seg in merged_segments:
             frame_timestamps = seg.get("video_frame_timestamps", [])
 
@@ -964,25 +777,8 @@ class VideoSummaryDetector(AnalysisMethod):
                 questions=list_of_questions,
                 vqa_bullets=seg.get("vqa_bullets", []),
             )
-            messages = [
-                {
-                    "role": "user",
-                    "content": [{"type": "text", "text": caption_instruction}],
-                }
-            ]
-            prompt_text = proc.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
-            )
-            processor_inputs = proc(
-                text=[prompt_text],
-                return_tensors="pt",
-                padding=True,
-            )
-            final_outputs = self._generate_from_processor_inputs(
-                processor_inputs,
-                [prompt_text],
-                self.summary_model.tokenizer,
-            )
+            messages = self.summary_model.build_messages(None, caption_instruction)
+            final_outputs = self.summary_model.chat(messages, max_new_tokens=512)
             clip_text = final_outputs[0].strip() if final_outputs else ""
 
             if frame_timestamps:
@@ -1019,8 +815,6 @@ class VideoSummaryDetector(AnalysisMethod):
         Returns:
             Dict[str, Any]: A dictionary containing the list of captions with timestamps and the final summary.
         """
-        proc = self.summary_model.processor
-
         bullets = []
         for seg in summary_dict:
             seg_bullets = seg.get("summary_bullets", [])
@@ -1032,30 +826,8 @@ class VideoSummaryDetector(AnalysisMethod):
             include_vqa=False,
             clip_summaries=bullets,
         )
-        messages = [
-            {
-                "role": "user",
-                "content": [{"type": "text", "text": summary_user_prompt}],
-            }
-        ]
-
-        summary_prompt_text = proc.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
-
-        summary_inputs = proc(
-            text=[summary_prompt_text], return_tensors="pt", padding=True
-        )
-
-        summary_inputs = {
-            k: v.to(self.summary_model.device) if isinstance(v, torch.Tensor) else v
-            for k, v in summary_inputs.items()
-        }
-        final_summary_list = self._generate_from_processor_inputs(
-            summary_inputs,
-            [summary_prompt_text],
-            self.summary_model.tokenizer,
-        )
+        messages = self.summary_model.build_messages(None, summary_user_prompt)
+        final_summary_list = self.summary_model.chat(messages, max_new_tokens=512)
         final_summary = final_summary_list[0].strip() if final_summary_list else ""
 
         return {
@@ -1099,30 +871,8 @@ class VideoSummaryDetector(AnalysisMethod):
                 "list_of_questions must be provided for making final answers."
             )
 
-        proc = self.summary_model.processor
-        messages = [
-            {
-                "role": "user",
-                "content": [{"type": "text", "text": prompt}],
-            }
-        ]
-        final_vqa_prompt_text = proc.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
-        final_vqa_inputs = proc(
-            text=[final_vqa_prompt_text], return_tensors="pt", padding=True
-        )
-        final_vqa_inputs = {
-            k: v.to(self.summary_model.device) if isinstance(v, torch.Tensor) else v
-            for k, v in final_vqa_inputs.items()
-        }
-
-        final_vqa_list = self._generate_from_processor_inputs(
-            final_vqa_inputs,
-            [final_vqa_prompt_text],
-            self.summary_model.tokenizer,
-        )
-
+        messages = self.summary_model.build_messages(None, prompt)
+        final_vqa_list = self.summary_model.chat(messages, max_new_tokens=512)
         final_vqa_output = final_vqa_list[0].strip() if final_vqa_list else ""
         vqa_answers = []
         answer_matches = re.findall(

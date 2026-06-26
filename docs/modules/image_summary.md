@@ -1,20 +1,23 @@
 # Image detector: Summary and VQA
 
-The `image_summary` module provides advanced image analysis capabilities using the Qwen2.5-VL multimodal model. Qwen2.5-VL is a multimodal large language model capable of understanding and generating content from both images and videos. With its help, `ammico` supports tasks such as image/video summarization and image/video visual question answering, where the model answers users' questions about the context of a media file. It combines functionality from the `model.py` and `prompt_builder.py` modules to offer comprehensive image understanding.
+The `image_summary` module provides advanced image analysis capabilities using a vision-language model (such as Qwen2.5-VL) hosted externally and reached over an OpenAI-compatible HTTP API. The model answers users' questions about the context of a media file and produces summaries. It combines functionality from the `inference.py` and `prompt_builder.py` modules to offer comprehensive image understanding.
 
 ## Core Components
 
-### MultimodalSummaryModel (`model.py`)
+### InferenceModel (`inference.py`)
 
-The underlying model wrapper that handles Qwen2.5-VL model loading and inference:
+A thin OpenAI-compatible client that handles vision-language inference against an externally hosted model:
 
-- **Model Selection**: 
-  - CUDA: `Qwen/Qwen2.5-VL-7B-Instruct` (default for GPU)
-  - CPU: `Qwen/Qwen2.5-VL-3B-Instruct` (default for CPU)
-- **Automatic Device Detection**: Auto-detects CUDA availability and falls back to CPU
-- **Quantization**: Automatic 4-bit quantization for CUDA devices using BitsAndBytesConfig
-- **Memory Management**: Resource cleanup methods for long-running processes
-- **Model Components**: Provides processor, tokenizer, and model objects
+- **Endpoint configuration**: `base_url`, `api_key` and `model_id`, read from the
+  `AMMICO_API_BASE_URL`, `AMMICO_API_KEY` and `AMMICO_MODEL_ID` environment variables (or passed
+  to the constructor).
+- **Provider-agnostic**: the same client targets a self-hosted vLLM server, the OpenAI API, or
+  Google Gemini (via its OpenAI-compatibility endpoint) — only configuration changes.
+- **Message building**: `build_messages(images, text)` encodes PIL images as base64 blocks for
+  the chat API.
+- **Inference**: `chat(messages, max_new_tokens, n)` and `chat_batch(...)` (concurrent requests
+  via a bounded thread pool, replacing in-GPU batching).
+- **Optional dependency**: the `openai` client is installed with `pip install ammico[api]`.
 
 ### PromptBuilder (`prompt_builder.py`)
 
@@ -43,10 +46,10 @@ Modular prompt construction system for multi-level analysis:
 
 ```python
 from ammico.image_summary import ImageSummaryDetector
-from ammico.model import MultimodalSummaryModel
+from ammico.inference import InferenceModel
 
-# Initialize model
-model = MultimodalSummaryModel(device="cpu")
+# Initialize the inference client (reads AMMICO_API_* env vars, or pass base_url/api_key/model_id)
+model = InferenceModel()
 
 # Create detector
 detector = ImageSummaryDetector(summary_model=model, subdict={})
@@ -101,22 +104,20 @@ stateDiagram-v2
     Both --> Generate_Caption
     Both --> Answer_Questions
 
-    Generate_Caption --> Prepare_Inputs
+    Generate_Caption --> Build_Messages
     Answer_Questions --> Clean_Questions
-    Clean_Questions --> Prepare_Inputs
+    Clean_Questions --> Build_Messages
 
-    state MultimodalSummaryModel {
-        [*] --> Initialize_Model
-        Initialize_Model --> Load_Qwen2.5_VL
-        Load_Qwen2.5_VL --> Quantize_4bit
-        Quantize_4bit --> Processor
-        Processor --> Model_Inference
-        Model_Inference --> Tokenizer_Decode
+    state InferenceModel {
+        [*] --> Configure_Endpoint
+        Configure_Endpoint --> Build_Chat_Request
+        Build_Chat_Request --> HTTP_Call
+        HTTP_Call --> Parse_Response
     }
 
-    Prepare_Inputs --> Processor
-    Tokenizer_Decode --> Return_Result
+    Build_Messages --> Build_Chat_Request
+    Parse_Response --> Return_Result
     Return_Result --> [*]
 
-    note right of Processor : Uses PromptBuilder
+    note right of Build_Chat_Request : Uses PromptBuilder + base64 image blocks
 ```

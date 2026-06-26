@@ -1,15 +1,12 @@
 from ammico.utils import AnalysisMethod, AnalysisType
-from ammico.model import MultimodalSummaryModel
+from ammico.inference import InferenceModel
 
 import os
-import torch
 from PIL import Image
 import warnings
 
 from typing import List, Optional, Union, Dict, Any, Tuple
 from collections.abc import Sequence as _Sequence
-from transformers import GenerationConfig
-from qwen_vl_utils import process_vision_info
 
 
 class ImageSummaryDetector(AnalysisMethod):
@@ -31,15 +28,15 @@ class ImageSummaryDetector(AnalysisMethod):
 
     def __init__(
         self,
-        summary_model: MultimodalSummaryModel,
+        summary_model: InferenceModel,
         subdict: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
-        Class for analysing images using QWEN-2.5-VL model.
+        Class for analysing images using an externally hosted vision-language model.
         It provides methods for generating captions and answering questions about images.
 
         Args:
-            summary_model ([type], optional): An instance of MultimodalSummaryModel to be used for analysis.
+            summary_model (InferenceModel): An InferenceModel instance used for analysis.
             subdict (dict, optional): Dictionary containing the image to be analysed. Defaults to {}.
 
         Returns:
@@ -68,73 +65,22 @@ class ImageSummaryDetector(AnalysisMethod):
             obj, (str, bytes, Image.Image)
         )
 
-    def _prepare_inputs(
-        self, list_of_questions: list[str], entry: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, torch.Tensor]:
-        filename = entry.get("filename")
+    def _load_images(
+        self, entry: Optional[Dict[str, Any]] = None
+    ) -> Union[Image.Image, List[Image.Image]]:
+        """Load the image(s) for an entry as a PIL image or list of PIL images."""
+        filename = entry.get("filename") if entry else None
         if filename is None:
             raise ValueError("entry must contain key 'filename'")
 
         if isinstance(filename, (str, os.PathLike, Image.Image)):
-            images_context = self._load_pil_if_needed(filename)
+            return self._load_pil_if_needed(filename)
         elif self._is_sequence_but_not_str(filename):
-            images_context = [self._load_pil_if_needed(i) for i in filename]
+            return [self._load_pil_if_needed(i) for i in filename]
         else:
             raise ValueError(
                 "Unsupported 'filename' entry: expected path, PIL.Image, or sequence."
             )
-
-        images_only_messages = [
-            {
-                "role": "user",
-                "content": [
-                    *(
-                        [{"type": "image", "image": img} for img in images_context]
-                        if isinstance(images_context, list)
-                        else [{"type": "image", "image": images_context}]
-                    )
-                ],
-            }
-        ]
-
-        try:
-            image_inputs, _ = process_vision_info(images_only_messages)
-        except Exception as e:
-            raise RuntimeError(f"Image processing failed: {e}")
-
-        texts: List[str] = []
-        for q in list_of_questions:
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        *(
-                            [
-                                {"type": "image", "image": image}
-                                for image in images_context
-                            ]
-                            if isinstance(images_context, list)
-                            else [{"type": "image", "image": images_context}]
-                        ),
-                        {"type": "text", "text": q},
-                    ],
-                }
-            ]
-            text = self.summary_model.processor.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
-            )
-            texts.append(text)
-
-        images_batch = [image_inputs] * len(texts)
-        inputs = self.summary_model.processor(
-            text=texts,
-            images=images_batch,
-            padding=True,
-            return_tensors="pt",
-        )
-        inputs = {k: v.to(self.summary_model.device) for k, v in inputs.items()}
-
-        return inputs
 
     def _validate_analysis_type(
         self,
@@ -290,65 +236,12 @@ class ImageSummaryDetector(AnalysisMethod):
         max_new_tokens = self.token_prompt_config[
             "concise" if is_concise_summary else "default"
         ]["summary"]["max_new_tokens"]
-        inputs = self._prepare_inputs([prompt], entry)
 
-        gen_conf = GenerationConfig(
-            max_new_tokens=max_new_tokens,
-            do_sample=False,
-            num_return_sequences=num_return_sequences,
+        images = self._load_images(entry)
+        messages = self.summary_model.build_messages(images, prompt)
+        return self.summary_model.chat(
+            messages, max_new_tokens=max_new_tokens, n=num_return_sequences
         )
-
-        with torch.inference_mode():
-            try:
-                if self.summary_model.device == "cuda":
-                    with torch.amp.autocast("cuda", enabled=True):
-                        generated_ids = self.summary_model.model.generate(
-                            **inputs, generation_config=gen_conf
-                        )
-                else:
-                    generated_ids = self.summary_model.model.generate(
-                        **inputs, generation_config=gen_conf
-                    )
-            except RuntimeError as e:
-                warnings.warn(
-                    f"Retry without autocast failed: {e}. Attempting cudnn-disabled retry."
-                )
-                cudnn_was_enabled = (
-                    torch.backends.cudnn.is_available() and torch.backends.cudnn.enabled
-                )
-                if cudnn_was_enabled:
-                    torch.backends.cudnn.enabled = False
-                try:
-                    generated_ids = self.summary_model.model.generate(
-                        **inputs, generation_config=gen_conf
-                    )
-                except Exception as retry_error:
-                    raise RuntimeError(
-                        f"Failed to generate ids after retry: {retry_error}"
-                    ) from retry_error
-                finally:
-                    if cudnn_was_enabled:
-                        torch.backends.cudnn.enabled = True
-
-        decoded = None
-        if "input_ids" in inputs:
-            in_ids = inputs["input_ids"]
-            trimmed = [
-                out_ids[len(inp_ids) :]
-                for inp_ids, out_ids in zip(in_ids, generated_ids)
-            ]
-            decoded = self.summary_model.tokenizer.batch_decode(
-                trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-            )
-        else:
-            decoded = self.summary_model.tokenizer.batch_decode(
-                generated_ids,
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=False,
-            )
-
-        results = [d.strip() for d in decoded]
-        return results
 
     def _clean_list_of_questions(
         self, list_of_questions: list[str], prompt: str
@@ -391,43 +284,14 @@ class ImageSummaryDetector(AnalysisMethod):
         ]["questions"]["max_new_tokens"]
 
         list_of_questions = self._clean_list_of_questions(list_of_questions, prompt)
-        gen_conf = GenerationConfig(max_new_tokens=max_new_tokens, do_sample=False)
 
-        question_chunk_size = 8
-        answers: List[str] = []
-        n = len(list_of_questions)
-        for i in range(0, n, question_chunk_size):
-            chunk = list_of_questions[i : i + question_chunk_size]
-            inputs = self._prepare_inputs(chunk, entry)
-            with torch.inference_mode():
-                if self.summary_model.device == "cuda":
-                    with torch.amp.autocast("cuda", enabled=True):
-                        out_ids = self.summary_model.model.generate(
-                            **inputs, generation_config=gen_conf
-                        )
-                else:
-                    out_ids = self.summary_model.model.generate(
-                        **inputs, generation_config=gen_conf
-                    )
-
-            if "input_ids" in inputs:
-                in_ids = inputs["input_ids"]
-                trimmed_batch = [
-                    out_row[len(inp_row) :] for inp_row, out_row in zip(in_ids, out_ids)
-                ]
-                decoded = self.summary_model.tokenizer.batch_decode(
-                    trimmed_batch,
-                    skip_special_tokens=True,
-                    clean_up_tokenization_spaces=False,
-                )
-            else:
-                decoded = self.summary_model.tokenizer.batch_decode(
-                    out_ids,
-                    skip_special_tokens=True,
-                    clean_up_tokenization_spaces=False,
-                )
-
-            answers.extend([d.strip() for d in decoded])
+        images = self._load_images(entry)
+        messages_batch = [
+            self.summary_model.build_messages(images, q) for q in list_of_questions
+        ]
+        answers = self.summary_model.chat_batch(
+            messages_batch, max_new_tokens=max_new_tokens
+        )
 
         if len(answers) != len(list_of_questions):
             raise ValueError(

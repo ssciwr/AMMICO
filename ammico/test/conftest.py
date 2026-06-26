@@ -1,12 +1,21 @@
 import gc
 import os
 import pytest
-from ammico.model import MultimodalSummaryModel, MultimodalEmbeddingsModel
+from ammico.model import MultimodalEmbeddingsModel
+from ammico.inference import InferenceModel
 from ammico.video_summary import VideoSummaryDetector
 from ammico.multimodal_search import MultimodalSearch
 from unittest.mock import MagicMock
 import numpy as np
 import torch
+
+
+def _api_env_configured() -> bool:
+    """True if the live inference endpoint is configured via environment."""
+    return all(
+        os.environ.get(var)
+        for var in ("AMMICO_API_BASE_URL", "AMMICO_API_KEY", "AMMICO_MODEL_ID")
+    )
 
 
 def _release_torch_memory() -> None:
@@ -74,78 +83,64 @@ def get_test_my_dict(get_path):
 
 @pytest.fixture(scope="module")
 def model():
-    # module scope: one Qwen load per test file (not per test). Keep embedding-only tests in a
-    # separate module so this file never holds Qwen + Jina together via fixtures.
-    m = MultimodalSummaryModel(device="cpu")
+    # Live inference endpoint (vLLM/OpenAI/Gemini), used by @pytest.mark.long tests.
+    # Skipped unless AMMICO_API_* environment variables are configured.
+    if not _api_env_configured():
+        pytest.skip("AMMICO_API_* env vars not set; skipping live inference tests")
+    m = InferenceModel()
     try:
         yield m
     finally:
         m.close()
-        _release_torch_memory()
+
+
+class MockInferenceModel:
+    """Mock InferenceModel that returns canned text without any network call."""
+
+    def __init__(self, chat_return="mock caption"):
+        self.model_id = "mock-model"
+        self.chat_return = chat_return
+
+    def build_messages(self, images, text):
+        content = []
+        if images is not None:
+            image_list = images if isinstance(images, (list, tuple)) else [images]
+            content.extend({"type": "image_url"} for _ in image_list)
+        content.append({"type": "text", "text": text})
+        return [{"role": "user", "content": content}]
+
+    def chat(self, messages, max_new_tokens=256, n=1):
+        return [self.chat_return for _ in range(n)]
+
+    def chat_batch(self, messages_batch, max_new_tokens=256):
+        return [self.chat_return for _ in messages_batch]
+
+    def close(self):
+        pass
 
 
 @pytest.fixture
 def mock_model():
-    """
-    Mock model fixture that doesn't load the actual model.
-    Useful for faster unit tests that don't need actual model inference.
-    """
+    """Mock inference model for fast unit tests (no network, no weights)."""
+    return MockInferenceModel()
 
-    class MockProcessor:
-        """Mock processor that mimics AutoProcessor behavior."""
 
-        def apply_chat_template(self, messages, **kwargs):
-            return "processed_text"
+class MockAudioTranscriptionModel:
+    """Mock audio transcription model returning a fixed segment."""
 
-        def __call__(self, text=None, images=None, **kwargs):
-            """Mock processing that returns tensor-like inputs."""
-            batch_size = len(text) if isinstance(text, list) else 1
-            result = {
-                "input_ids": torch.randint(0, 1000, (batch_size, 10)),
-                "attention_mask": torch.ones(batch_size, 10),
-            }
+    def __init__(self):
+        self.closed = False
 
-            if images is not None:
-                result["pixel_values"] = torch.randn(batch_size, 3, 224, 224)
+    def transcribe(self, audio_path, language=None):
+        return [{"start_time": 0.0, "end_time": 1.0, "text": "hello", "duration": 1.0}]
 
-            return result
+    def close(self):
+        self.closed = True
 
-    class MockTokenizer:
-        """Mock tokenizer that mimics AutoTokenizer behavior."""
 
-        def batch_decode(self, ids, **kwargs):
-            """Return mock captions for the given batch size."""
-            batch_size = ids.shape[0] if hasattr(ids, "shape") else len(ids)
-            return ["mock caption" for _ in range(batch_size)]
-
-    class MockModelObj:
-        """Mock model object that mimics the model.generate behavior."""
-
-        def __init__(self):
-            self.device = "cpu"
-
-        def eval(self):
-            return self
-
-        def generate(self, input_ids=None, **kwargs):
-            """Generate mock token IDs."""
-            batch_size = input_ids.shape[0] if hasattr(input_ids, "shape") else 1
-            return torch.randint(0, 1000, (batch_size, 20))
-
-    class MockMultimodalSummaryModel:
-        """Mock MultimodalSummaryModel that doesn't load actual models."""
-
-        def __init__(self):
-            self.model = MockModelObj()
-            self.processor = MockProcessor()
-            self.tokenizer = MockTokenizer()
-            self.device = "cpu"
-
-        def close(self):
-            """Mock close method - no actual cleanup needed."""
-            pass
-
-    return MockMultimodalSummaryModel()
+@pytest.fixture
+def mock_audio_model():
+    return MockAudioTranscriptionModel()
 
 
 @pytest.fixture(scope="module")

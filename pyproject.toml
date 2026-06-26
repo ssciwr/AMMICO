@@ -21,10 +21,8 @@ classifiers = [
  
 dependencies = [
     "accelerate",
-    "bitsandbytes",
     "colorgram.py",
     "colour-science",
-    "ctranslate2",
     "dash",
     "dash-bootstrap-components",
     "faiss-gpu-cu11<=1.13.0",
@@ -38,7 +36,6 @@ dependencies = [
     "pandas",
     "pooch",
     "Pillow",
-    "qwen-vl-utils",
     "safetensors",
     "scipy",
     "spacy",
@@ -52,11 +49,15 @@ dependencies = [
     "transformers<4.58",
     "torchcodec",
     "webcolors",
-    "whisperx",
     "pip>=26.0.1",
 ]
 
 [project.optional-dependencies]
+api = [
+    "openai>=1.0",
+    "python-dotenv",
+]
+
 dev = [
     "pre-commit",
     "pytest",

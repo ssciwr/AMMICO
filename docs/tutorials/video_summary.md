@@ -4,14 +4,23 @@
 
 [Tutorial notebook](https://github.com/ssciwr/AMMICO/tree/main/docs/tutorials/ammico_demo_video_summary.ipynb)
 
-Also the `MultimodalSummaryDetector` can be used to generate video captions (`summary`) as well as visual question answering (`VQA`) for visual part of video file. This again uses the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl)
+The `VideoSummaryDetector` can be used to generate video captions (`summary`) as well as visual question answering (`VQA`) for the visual part of a video file. This runs inference against an externally hosted vision-language model (for example the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl)) over an **OpenAI-compatible HTTP API** — a self-hosted [vLLM](https://docs.vllm.ai/) server, the OpenAI API, or Google Gemini via its OpenAI-compatibility endpoint. Configure the endpoint via the `AMMICO_API_BASE_URL`, `AMMICO_API_KEY` and `AMMICO_MODEL_ID` environment variables (or pass them to `InferenceModel(...)`), and install the client with `pip install ammico[api]`.
 
 ```
-model = ammico.MultimodalSummaryModel(model_id=model_id)
+import os
+os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"
+os.environ["AMMICO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+
+model = ammico.InferenceModel()
 ```
-To analyze the audio content from the video, `ammico` uses the [WhisperX model family](https://github.com/m-bain/whisperX) for audio transcription as [developed by OpenAI](https://arxiv.org/abs/2303.00747). This will lead to higher accuracy. The `AudioToTextModel` model is responsible for this in `ammico`. By default, it loads a small model on the GPU (if your device supports CUDA), also you can specify size of the audio model ("small", "base", "large"), or device ("cuda" or "cpu") if you want. Increasing the model size can improve the result of converting an audio track to text, but consumes more RAM or VRAM.
+To analyze the audio content from the video, `ammico` transcribes it with an externally hosted Whisper model reached over an OpenAI-compatible `/v1/audio/transcriptions` endpoint (a self-hosted Whisper server such as [Speaches](https://github.com/speaches-ai/speaches), or the OpenAI API). The `AudioTranscriptionModel` is responsible for this and is configured independently via `AMMICO_AUDIO_BASE_URL`, `AMMICO_AUDIO_API_KEY` and `AMMICO_AUDIO_MODEL_ID` (these fall back to the `AMMICO_API_*` values if not set). You can optionally pin the language, otherwise it is auto-detected.
 ```
-audio_model = ammico.AudioToTextModel(model_size="small", device="cuda")
+os.environ["AMMICO_AUDIO_BASE_URL"] = "http://localhost:9000/v1"
+os.environ["AMMICO_AUDIO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_AUDIO_MODEL_ID"] = "Systran/faster-whisper-large-v3"
+
+audio_model = ammico.AudioTranscriptionModel()  # optionally language="en"
 ```
 
 ## Read your video data into AMMICO
@@ -36,7 +45,7 @@ video_dict = ammico.find_videos(
 ```
 ## Example usage
 
-To instantiate class it is required to provide `MultimodalSummaryModel` and `video_dict`. Optionally you may provide `AudioToTextModel` for more precise results.
+To instantiate the class it is required to provide an `InferenceModel` and `video_dict`. Optionally you may provide an `AudioTranscriptionModel` for more precise results.
 ```
 vid_summary_vqa = ammico.VideoSummaryDetector(
     summary_model=model, audio_model=audio_model, subdict=video_dict
