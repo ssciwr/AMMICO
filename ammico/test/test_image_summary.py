@@ -1,4 +1,5 @@
 from ammico.image_summary import ImageSummaryDetector
+from ammico.test.conftest import MockInferenceModel
 import os
 from PIL import Image
 import pytest
@@ -120,3 +121,52 @@ def test_validate_analysis_type(mock_model):
         detector._validate_analysis_type(
             "questions", ["Q" + str(i) for i in range(33)], 32
         )
+
+
+class _RaisingInferenceModel(MockInferenceModel):
+    """Mock whose chat/chat_batch always raise, to simulate a broken endpoint."""
+
+    def chat(self, messages, max_new_tokens=256, n=1):
+        raise RuntimeError("model 'mock-model' not found")
+
+    def chat_batch(self, messages_batch, max_new_tokens=256):
+        raise RuntimeError("model 'mock-model' not found")
+
+
+def test_caption_failure_continues_and_warns(get_testdict):
+    """A failing endpoint yields empty captions, a clear warning, and no abort."""
+    detector = ImageSummaryDetector(
+        summary_model=_RaisingInferenceModel(), subdict=get_testdict
+    )
+    with pytest.warns(UserWarning, match="Caption generation failed for .*mock-model"):
+        results = detector.analyse_images_from_dict(analysis_type="summary")
+
+    # every image is still processed and carries a (empty) caption key
+    assert len(results) == len(get_testdict)
+    for key in get_testdict:
+        assert results[key]["caption"] == ""
+
+
+def test_empty_caption_warns(get_testdict):
+    """An endpoint returning blank content warns about an empty caption."""
+    detector = ImageSummaryDetector(
+        summary_model=MockInferenceModel(chat_return="   "), subdict=get_testdict
+    )
+    with pytest.warns(UserWarning, match="No caption produced for"):
+        results = detector.analyse_images_from_dict(analysis_type="summary")
+    for key in get_testdict:
+        assert results[key]["caption"] == ""
+
+
+def test_vqa_failure_continues_and_warns(get_testdict):
+    """A failing endpoint yields empty vqa lists, a clear warning, and no abort."""
+    detector = ImageSummaryDetector(
+        summary_model=_RaisingInferenceModel(), subdict=get_testdict
+    )
+    with pytest.warns(UserWarning, match="VQA failed for .*mock-model"):
+        results = detector.analyse_images_from_dict(
+            analysis_type="questions", list_of_questions=["What is this?"]
+        )
+    assert len(results) == len(get_testdict)
+    for key in get_testdict:
+        assert results[key]["vqa"] == []

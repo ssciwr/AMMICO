@@ -112,6 +112,15 @@ class ImageSummaryDetector(AnalysisMethod):
 
         return analysis_type, list_of_questions, is_summary, is_questions
 
+    @staticmethod
+    def _entry_label(entry: Optional[Dict[str, Any]]) -> str:
+        """Human-readable identifier for an image entry, for log/warning messages."""
+        if entry:
+            filename = entry.get("filename")
+            if filename:
+                return str(filename)
+        return "<unknown image>"
+
     def analyse_image(
         self,
         entry: dict,
@@ -134,26 +143,71 @@ class ImageSummaryDetector(AnalysisMethod):
         )
 
         if is_summary:
-            try:
-                caps = self.generate_caption(
-                    entry,
-                    num_return_sequences=1,
-                    is_concise_summary=is_concise_summary,
-                )
-                self.subdict["caption"] = caps[0] if caps else ""
-            except Exception as e:
-                warnings.warn(f"Caption generation failed: {e}")
+            self.subdict["caption"] = self._safe_generate_caption(
+                entry, is_concise_summary
+            )
 
         if is_questions:
-            try:
-                vqa_map = self.answer_questions(
-                    list_of_questions, entry, is_concise_answer
-                )
-                self.subdict["vqa"] = vqa_map
-            except Exception as e:
-                warnings.warn(f"VQA failed: {e}")
+            self.subdict["vqa"] = self._safe_answer_questions(
+                list_of_questions, entry, is_concise_answer
+            )
 
         return self.subdict
+
+    def _safe_generate_caption(
+        self, entry: Dict[str, Any], is_concise_summary: bool
+    ) -> str:
+        """Generate a caption for one entry, never raising.
+
+        Returns an empty string on failure and emits an actionable warning so a
+        single problematic image does not abort a whole batch.
+        """
+        label = self._entry_label(entry)
+        try:
+            caps = self.generate_caption(
+                entry,
+                num_return_sequences=1,
+                is_concise_summary=is_concise_summary,
+            )
+        except Exception as e:
+            warnings.warn(
+                f"Caption generation failed for {label}: {e}. "
+                "Skipping this image and continuing. Check that the inference "
+                "endpoint is reachable and the configured model id "
+                f"('{getattr(self.summary_model, 'model_id', 'unknown')}') is "
+                "available there."
+            )
+            return ""
+        caption = (caps[0] if caps else "").strip()
+        if not caption:
+            warnings.warn(
+                f"No caption produced for {label}: the model returned an empty "
+                "response. Continuing with an empty caption."
+            )
+        return caption
+
+    def _safe_answer_questions(
+        self,
+        list_of_questions: List[str],
+        entry: Dict[str, Any],
+        is_concise_answer: bool,
+    ) -> List[str]:
+        """Answer VQA questions for one entry, never raising.
+
+        Returns an empty list on failure and emits an actionable warning so a
+        single problematic image does not abort a whole batch.
+        """
+        label = self._entry_label(entry)
+        try:
+            return self.answer_questions(list_of_questions, entry, is_concise_answer)
+        except Exception as e:
+            warnings.warn(
+                f"VQA failed for {label}: {e}. Skipping this image and continuing. "
+                "Check that the inference endpoint is reachable and the configured "
+                f"model id ('{getattr(self.summary_model, 'model_id', 'unknown')}') "
+                "is available there."
+            )
+            return []
 
     def analyse_images_from_dict(
         self,
@@ -191,24 +245,14 @@ class ImageSummaryDetector(AnalysisMethod):
             for key in batch_keys:
                 entry = self.subdict[key]
                 if is_summary:
-                    try:
-                        caps = self.generate_caption(
-                            entry,
-                            num_return_sequences=1,
-                            is_concise_summary=is_concise_summary,
-                        )
-                        entry["caption"] = caps[0] if caps else ""
-                    except Exception as e:
-                        warnings.warn(f"Caption generation failed: {e}")
+                    entry["caption"] = self._safe_generate_caption(
+                        entry, is_concise_summary
+                    )
 
                 if is_questions:
-                    try:
-                        vqa_map = self.answer_questions(
-                            list_of_questions, entry, is_concise_answer
-                        )
-                        entry["vqa"] = vqa_map
-                    except Exception as e:
-                        warnings.warn(f"VQA failed: {e}")
+                    entry["vqa"] = self._safe_answer_questions(
+                        list_of_questions, entry, is_concise_answer
+                    )
 
                 self.subdict[key] = entry
         return self.subdict

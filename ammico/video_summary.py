@@ -58,6 +58,15 @@ class VideoSummaryDetector(AnalysisMethod):
         self.audio_model = audio_model
         self.prompt_builder = PromptBuilder()
 
+    @staticmethod
+    def _entry_label(entry: Optional[Dict[str, Any]]) -> str:
+        """Human-readable identifier for a video entry, for log/warning messages."""
+        if entry:
+            filename = entry.get("filename")
+            if filename:
+                return str(filename)
+        return "<unknown video>"
+
     def _audio_to_text(self, audio_path: str) -> List[Dict[str, Any]]:
         """
         Convert audio file to text using the externally hosted transcription model.
@@ -741,7 +750,24 @@ class VideoSummaryDetector(AnalysisMethod):
 
         audio_generated_captions = []
         if self.audio_model is not None:
-            audio_generated_captions = self._extract_transcribe_audio_part(filename)
+            try:
+                audio_generated_captions = self._extract_transcribe_audio_part(filename)
+            except Exception as e:
+                warnings.warn(
+                    f"Audio transcription failed for {self._entry_label(entry)}: {e}. "
+                    "Continuing with visual-only analysis. Check that the audio "
+                    "endpoint is reachable and the configured model id "
+                    f"('{getattr(self.audio_model, 'model_id', 'unknown')}') is "
+                    "available there.",
+                    RuntimeWarning,
+                )
+                audio_generated_captions = []
+                # the audio model is consumed once per video; release it on failure too
+                try:
+                    self.audio_model.close()
+                except Exception:
+                    pass
+                self.audio_model = None
             entry["audio_descriptions"] = audio_generated_captions
 
         video_result_segments = self._extract_frame_timestamps_from_clip(filename)
@@ -907,16 +933,31 @@ class VideoSummaryDetector(AnalysisMethod):
         )
 
         for video_key, entry in self.subdict.items():
-            answers_dict = self.make_captions_for_subclips(
-                entry,
-                list_of_questions=list_of_questions,
-            )
-            if is_summary:
-                answer = self.final_summary(answers_dict)
-                entry["summary"] = answer["summary"]
-            if is_questions:
-                answer = self.final_answers(answers_dict, list_of_questions)
-                entry["vqa_answers"] = answer["vqa_answers"]
+            try:
+                answers_dict = self.make_captions_for_subclips(
+                    entry,
+                    list_of_questions=list_of_questions,
+                )
+                if is_summary:
+                    answer = self.final_summary(answers_dict)
+                    entry["summary"] = answer["summary"]
+                if is_questions:
+                    answer = self.final_answers(answers_dict, list_of_questions)
+                    entry["vqa_answers"] = answer["vqa_answers"]
+            except Exception as e:
+                warnings.warn(
+                    f"Video analysis failed for {self._entry_label(entry)}: {e}. "
+                    "Skipping this video and continuing. Check that the inference "
+                    "endpoint is reachable and the configured model id "
+                    f"('{getattr(self.summary_model, 'model_id', 'unknown')}') is "
+                    "available there.",
+                    RuntimeWarning,
+                )
+                # guarantee the requested keys exist so downstream stays consistent
+                if is_summary:
+                    entry.setdefault("summary", "")
+                if is_questions:
+                    entry.setdefault("vqa_answers", [])
 
             self.subdict[video_key] = entry
 

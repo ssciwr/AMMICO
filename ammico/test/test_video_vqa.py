@@ -80,6 +80,103 @@ def test_make_captions_for_subclips_invalid_dict(mock_model):
         )
 
 
+def test_analyse_videos_from_dict_continues_on_failure(mock_model):
+    """A video whose processing raises does not abort the rest of the batch."""
+
+    class _FailingDetector(VideoSummaryDetector):
+        def make_captions_for_subclips(self, entry, list_of_questions=None):
+            raise RuntimeError("model 'mock-model' not found")
+
+    detector = _FailingDetector(
+        summary_model=mock_model,
+        subdict={
+            "video1": {"filename": "a.mp4"},
+            "video2": {"filename": "b.mp4"},
+        },
+    )
+    with pytest.warns(RuntimeWarning, match="Video analysis failed for .*mock-model"):
+        results = detector.analyse_videos_from_dict(
+            analysis_type="summary_and_questions",
+            list_of_questions=["What happens?"],
+        )
+
+    # both videos processed; requested keys present with empty fallbacks
+    assert len(results) == 2
+    for key in ("video1", "video2"):
+        assert results[key]["summary"] == ""
+        assert results[key]["vqa_answers"] == []
+
+
+class _FailingAudioModel:
+    """Audio model stub whose transcribe always fails."""
+
+    model_id = "broken-whisper"
+
+    def transcribe(self, audio_path, language=None):
+        raise RuntimeError("model 'broken-whisper' not found")
+
+    def close(self):
+        pass
+
+
+def test_audio_failure_degrades_to_visual_only(mock_model, monkeypatch, tmp_path):
+    """A failing audio endpoint warns and continues with visual-only analysis."""
+    video_file = tmp_path / "v.mp4"
+    video_file.write_bytes(b"not a real video")
+
+    detector = VideoSummaryDetector(
+        summary_model=mock_model, audio_model=_FailingAudioModel()
+    )
+
+    # force the audio path to fail without invoking ffmpeg
+    def _raise_audio(filename):
+        raise RuntimeError("model 'broken-whisper' not found")
+
+    monkeypatch.setattr(detector, "_extract_transcribe_audio_part", _raise_audio)
+
+    # stub the local visual pipeline so no ffmpeg/opencv is needed
+    monkeypatch.setattr(
+        detector,
+        "_extract_frame_timestamps_from_clip",
+        lambda filename: {
+            "segments": [{"start_time": 0.0, "end_time": 1.0, "duration": 1.0}],
+            "video_meta": {"width": 10, "height": 10},
+        },
+    )
+
+    def _fake_merge(audio_segs, video_segs, **kwargs):
+        return [
+            {
+                "start_time": 0.0,
+                "end_time": 1.0,
+                "audio_phrases": [],
+                "video_frame_timestamps": [0.0],
+            }
+        ]
+
+    monkeypatch.setattr(detector, "merge_audio_visual_boundaries", _fake_merge)
+
+    def _fake_captions(filename, merged_segments, video_meta, list_of_questions=None):
+        for seg in merged_segments:
+            seg["summary_bullets"] = []
+            seg["vqa_bullets"] = []
+
+    monkeypatch.setattr(
+        detector, "_make_captions_from_extracted_frames", _fake_captions
+    )
+
+    entry = {"filename": str(video_file)}
+    with pytest.warns(
+        RuntimeWarning, match="Audio transcription failed.*broken-whisper"
+    ):
+        results = detector.make_captions_for_subclips(entry)
+
+    assert isinstance(results, list)
+    assert entry["audio_descriptions"] == []
+    # audio model released after the failure
+    assert detector.audio_model is None
+
+
 @pytest.mark.long
 def test_make_captions_for_subclips_valid_output(
     video_summary_model, get_video_testdict
