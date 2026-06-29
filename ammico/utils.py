@@ -428,7 +428,7 @@ def append_data_to_dict(mydict: dict) -> dict:
     """Append entries from nested dictionaries to keys in a global dict."""
 
     # first initialize empty list for each key that is present
-    outdict = {key: [] for key in next(iter(mydict.values()))[0].keys()}
+    outdict = {key: [] for key in next(iter(mydict.values())).keys()}
     # now append the values to each key in a list
     for subdict in mydict.values():
         for key in subdict.keys():
