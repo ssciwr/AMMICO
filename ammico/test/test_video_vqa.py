@@ -2,6 +2,7 @@ from ammico.video_summary import VideoSummaryDetector
 from ammico.inference import AudioTranscriptionModel
 
 import pytest
+from PIL import Image
 
 
 def test_analyse_videos_from_dict_invalid_call():
@@ -115,9 +116,6 @@ class _FailingAudioModel:
     def transcribe(self, audio_path, language=None):
         raise RuntimeError("model 'broken-whisper' not found")
 
-    def close(self):
-        pass
-
 
 def test_audio_failure_degrades_to_visual_only(mock_model, monkeypatch, tmp_path):
     """A failing audio endpoint warns and continues with visual-only analysis."""
@@ -173,8 +171,105 @@ def test_audio_failure_degrades_to_visual_only(mock_model, monkeypatch, tmp_path
 
     assert isinstance(results, list)
     assert entry["audio_descriptions"] == []
-    # audio model released after the failure
-    assert detector.audio_model is None
+    # audio model stays alive so later videos in a batch can still use it
+    assert detector.audio_model is not None
+
+
+def test_audio_model_used_for_every_video_in_batch(
+    mock_model, mock_audio_model, monkeypatch, tmp_path
+):
+    """The shared audio model is reused for every video, not consumed after the first.
+
+    Regression test: previously the audio model was closed and set to None after
+    the first video, so every subsequent video in the batch silently skipped audio.
+    """
+    v1 = tmp_path / "v1.mp4"
+    v2 = tmp_path / "v2.mp4"
+    v1.write_bytes(b"not a real video")
+    v2.write_bytes(b"not a real video")
+
+    detector = VideoSummaryDetector(
+        summary_model=mock_model,
+        audio_model=mock_audio_model,
+        subdict={
+            "video1": {"filename": str(v1)},
+            "video2": {"filename": str(v2)},
+        },
+    )
+
+    transcribe_calls = []
+
+    def _fake_audio(filename):
+        transcribe_calls.append(filename)
+        return mock_audio_model.transcribe(filename)
+
+    monkeypatch.setattr(detector, "_extract_transcribe_audio_part", _fake_audio)
+
+    # stub the visual pipeline so no ffmpeg/opencv is needed
+    monkeypatch.setattr(
+        detector,
+        "_extract_frame_timestamps_from_clip",
+        lambda filename: {
+            "segments": [{"start_time": 0.0, "end_time": 1.0, "duration": 1.0}],
+            "video_meta": {"width": 10, "height": 10},
+        },
+    )
+    monkeypatch.setattr(
+        detector,
+        "merge_audio_visual_boundaries",
+        lambda audio_segs, video_segs, **kwargs: [
+            {
+                "start_time": 0.0,
+                "end_time": 1.0,
+                "audio_phrases": list(audio_segs),
+                "video_frame_timestamps": [0.0],
+            }
+        ],
+    )
+
+    def _fake_captions(filename, merged_segments, video_meta, list_of_questions=None):
+        for seg in merged_segments:
+            seg["summary_bullets"] = ["a bullet"]
+            seg["vqa_bullets"] = []
+
+    monkeypatch.setattr(
+        detector, "_make_captions_from_extracted_frames", _fake_captions
+    )
+
+    detector.analyse_videos_from_dict(analysis_type="summary")
+
+    # audio transcription attempted for BOTH videos (regression: was only the first)
+    assert transcribe_calls == [str(v1), str(v2)]
+    # the shared audio model survives the whole batch
+    assert detector.audio_model is mock_audio_model
+
+
+def test_frame_extraction_workers_at_least_one_on_single_core(mock_model, monkeypatch):
+    """Frame extraction must not request a zero-sized thread pool on a 1-core host.
+
+    Regression test: ``min(8, cpu_count() // 2)`` is 0 on a single-core machine,
+    which made ThreadPoolExecutor raise ``max_workers must be greater than 0``.
+    """
+    detector = VideoSummaryDetector(summary_model=mock_model)
+
+    monkeypatch.setattr("ammico.video_summary.os.cpu_count", lambda: 1)
+
+    captured = {}
+
+    def _fake_extract(filename, frame_timestamps, original_w, original_h, workers):
+        captured["workers"] = workers
+        return [(t, Image.new("RGB", (4, 4))) for t in frame_timestamps]
+
+    monkeypatch.setattr(detector, "_extract_frames_ffmpeg", _fake_extract)
+
+    merged_segments = [
+        {"start_time": 0.0, "end_time": 1.0, "video_frame_timestamps": [0.0, 0.5]}
+    ]
+    detector._make_captions_from_extracted_frames(
+        "x.mp4", merged_segments, {"width": 10, "height": 10}
+    )
+
+    assert captured["workers"] >= 1
 
 
 @pytest.mark.long
@@ -212,7 +307,8 @@ def test_extract_transcribe_audio_part(
         assert "end_time" in caption
         assert "text" in caption
         assert "duration" in caption
-    assert video_summ.audio_model is None
+    # the shared audio model is not consumed/closed by a single transcription
+    assert video_summ.audio_model is mock_audio_model
 
 
 def test_extract_frame_timestamps_from_clip(mock_model, get_video_testdict):

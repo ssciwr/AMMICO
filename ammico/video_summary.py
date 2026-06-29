@@ -123,8 +123,6 @@ class VideoSummaryDetector(AnalysisMethod):
         """
 
         if not self._check_audio_stream(filename):
-            self.audio_model.close()
-            self.audio_model = None
             return []
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -153,10 +151,6 @@ class VideoSummaryDetector(AnalysisMethod):
                 raise RuntimeError(f"Failed to extract audio from video: {e}")
 
             audio_descriptions = self._audio_to_text(audio_output_path)
-
-        # and close the audio model to free up resources
-        self.audio_model.close()
-        self.audio_model = None
 
         return audio_descriptions
 
@@ -704,7 +698,7 @@ class VideoSummaryDetector(AnalysisMethod):
                 frame_timestamps,
                 original_w=img_width,
                 original_h=img_height,
-                workers=min(8, (os.cpu_count() or 1) // 2),
+                workers=max(1, min(8, (os.cpu_count() or 1) // 2)),
             )
             # one request per frame (single image + caption instruction), fanned out
             messages_batch = [
@@ -762,12 +756,6 @@ class VideoSummaryDetector(AnalysisMethod):
                     RuntimeWarning,
                 )
                 audio_generated_captions = []
-                # the audio model is consumed once per video; release it on failure too
-                try:
-                    self.audio_model.close()
-                except Exception:
-                    pass
-                self.audio_model = None
             entry["audio_descriptions"] = audio_generated_captions
 
         video_result_segments = self._extract_frame_timestamps_from_clip(filename)

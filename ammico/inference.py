@@ -382,13 +382,24 @@ class AudioTranscriptionModel:
         if not segments:
             return []
 
+        def _field(seg: Any, name: str) -> Any:
+            if isinstance(seg, dict):
+                return seg.get(name)
+            return getattr(seg, name, None)
+
         descriptions: List[Dict[str, Any]] = []
         for seg in segments:
-            start = seg.get("start") if isinstance(seg, dict) else getattr(seg, "start")
-            end = seg.get("end") if isinstance(seg, dict) else getattr(seg, "end")
-            text = seg.get("text") if isinstance(seg, dict) else getattr(seg, "text")
+            start = _field(seg, "start")
+            end = _field(seg, "end")
+            if start is None or end is None:
+                warnings.warn(
+                    "Skipping transcription segment without start/end timestamps.",
+                    RuntimeWarning,
+                )
+                continue
             start = float(start)
             end = float(end)
+            text = _field(seg, "text")
             descriptions.append(
                 {
                     "start_time": start,

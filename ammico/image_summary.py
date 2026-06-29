@@ -7,6 +7,7 @@ import warnings
 
 from typing import List, Optional, Union, Dict, Any, Tuple
 from collections.abc import Sequence as _Sequence
+from concurrent.futures import ThreadPoolExecutor
 
 
 class ImageSummaryDetector(AnalysisMethod):
@@ -226,7 +227,9 @@ class ImageSummaryDetector(AnalysisMethod):
             list_of_questions (list[str]): list of questions.
             max_questions_per_image (int): maximum number of questions per image.
                 We recommend to keep it low to avoid long processing times and high memory usage.
-            keys_batch_size (int): number of images to process in a batch.
+            keys_batch_size (int): maximum number of images processed concurrently.
+                External inference is I/O-bound, so images are fanned out over a
+                bounded thread pool. Keep it low to limit load on the endpoint.
             is_concise_summary (bool): whether to generate concise summary.
             is_concise_answer (bool): whether to generate concise answers.
         Returns:
@@ -240,21 +243,24 @@ class ImageSummaryDetector(AnalysisMethod):
         )
 
         keys = list(self.subdict.keys())
-        for batch_start in range(0, len(keys), keys_batch_size):
-            batch_keys = keys[batch_start : batch_start + keys_batch_size]
-            for key in batch_keys:
-                entry = self.subdict[key]
-                if is_summary:
-                    entry["caption"] = self._safe_generate_caption(
-                        entry, is_concise_summary
-                    )
+        if not keys:
+            return self.subdict
 
-                if is_questions:
-                    entry["vqa"] = self._safe_answer_questions(
-                        list_of_questions, entry, is_concise_answer
-                    )
+        def _process(key: str) -> None:
+            entry = self.subdict[key]
+            if is_summary:
+                entry["caption"] = self._safe_generate_caption(
+                    entry, is_concise_summary
+                )
+            if is_questions:
+                entry["vqa"] = self._safe_answer_questions(
+                    list_of_questions, entry, is_concise_answer
+                )
+            self.subdict[key] = entry
 
-                self.subdict[key] = entry
+        workers = max(1, min(keys_batch_size, len(keys)))
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            list(ex.map(_process, keys))
         return self.subdict
 
     def generate_caption(

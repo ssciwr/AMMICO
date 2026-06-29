@@ -281,11 +281,11 @@ def resolve_model_device(
 
 
 def find_videos(
-    path: str | None = None,
+    path: Optional[str] = None,
     pattern=["mp4", "mov", "avi", "mkv", "webm"],
     recursive: bool = True,
     limit=5,
-    random_seed: int | None = None,
+    random_seed: Optional[int] = None,
 ) -> dict:
     """Find video files on the file system."""
     if path is None:
@@ -309,7 +309,7 @@ def find_files(
     pattern: Optional[Iterable[str]] = None,
     recursive: bool = True,
     limit=20,
-    random_seed: int | None = None,
+    random_seed: Optional[int] = None,
     return_as_list: bool = False,
 ) -> Union[dict, list]:
     """Find image files on the file system.

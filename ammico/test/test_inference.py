@@ -258,6 +258,25 @@ def test_audio_map_segments_empty():
     )
 
 
+def test_audio_map_segments_skips_missing_timestamps():
+    """Segments lacking start/end are skipped with a warning, not a crash.
+
+    Regression test: ``getattr(seg, "start")`` with no default raised
+    AttributeError (and ``float(None)`` raised TypeError) on nonconforming
+    responses.
+    """
+    good = types.SimpleNamespace(start=1.0, end=2.0, text="ok")
+    missing_attr = types.SimpleNamespace(text="no timestamps")
+    missing_key = {"text": "also no timestamps"}
+    none_value = {"start": None, "end": 3.0, "text": "null start"}
+    resp = types.SimpleNamespace(segments=[good, missing_attr, missing_key, none_value])
+
+    with pytest.warns(RuntimeWarning, match="without start/end timestamps"):
+        out = AudioTranscriptionModel._map_segments(resp)
+
+    assert out == [{"start_time": 1.0, "end_time": 2.0, "text": "ok", "duration": 1.0}]
+
+
 def test_audio_transcribe(monkeypatch, tmp_path):
     model = _make_audio_model(monkeypatch)
     audio_file = tmp_path / "a.wav"

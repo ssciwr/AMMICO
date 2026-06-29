@@ -158,6 +158,20 @@ def test_empty_caption_warns(get_testdict):
         assert results[key]["caption"] == ""
 
 
+def test_analyse_images_processes_all_keys_with_small_batch(get_testdict):
+    """Every image is processed regardless of keys_batch_size (incl. 1)."""
+    detector = ImageSummaryDetector(
+        summary_model=MockInferenceModel(chat_return="a caption"),
+        subdict=get_testdict,
+    )
+    results = detector.analyse_images_from_dict(
+        analysis_type="summary", keys_batch_size=1
+    )
+    assert len(results) == len(get_testdict)
+    for key in get_testdict:
+        assert results[key]["caption"] == "a caption"
+
+
 def test_vqa_failure_continues_and_warns(get_testdict):
     """A failing endpoint yields empty vqa lists, a clear warning, and no abort."""
     detector = ImageSummaryDetector(
