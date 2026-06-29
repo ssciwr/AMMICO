@@ -31,7 +31,7 @@ jobs:
         env:
           BLIS_ARCH: generic
         run: |
-            uv sync --locked --extra dev
+            uv sync --locked --extra dev,api
             uv run --with spacy spacy download en_core_web_md
 
       - name: Run tests

@@ -115,9 +115,6 @@ class MockInferenceModel:
     def chat_batch(self, messages_batch, max_new_tokens=256):
         return [self.chat_return for _ in messages_batch]
 
-    def close(self):
-        pass
-
 
 @pytest.fixture
 def mock_model():
@@ -178,7 +175,7 @@ def multimodal_embeddings_model_cuda():
 def mock_multimodal_cpu_model():
     model = MagicMock(spec=MultimodalEmbeddingsModel)
     model.device = "cpu"
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed=42)
     model.encode_image.return_value = rng.random((10, 128))
     model.encode_text.return_value = rng.random((1, 128))
     return model
