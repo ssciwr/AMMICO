@@ -14,7 +14,6 @@ import math
 import numpy as np
 import subprocess
 import tempfile
-import torch
 import warnings
 
 from scipy import signal
@@ -279,11 +278,11 @@ class VideoSummaryDetector(AnalysisMethod):
 
             start_time = seg["start_time"]
             end_time = seg["end_time"]
-            sample_times = torch.linspace(
+            sample_times = np.linspace(
                 start_time,
                 end_time,
-                steps=int(frame_rate_per_clip),
-                dtype=torch.float32,
+                num=int(frame_rate_per_clip),
+                dtype=np.float32,
             )
             seg["frame_timestamps"] = sample_times.tolist()
 
