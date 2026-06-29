@@ -80,7 +80,6 @@ class AnalysisExplorer:
                     ]
                 ),
             ],
-            # style={"width": "95%", "display": "inline-block"},
         )
         self.app.layout = app_layout
 
