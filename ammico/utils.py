@@ -281,11 +281,11 @@ def resolve_model_device(
 
 
 def find_videos(
-    path: str = None,
+    path: str | None = None,
     pattern=["mp4", "mov", "avi", "mkv", "webm"],
     recursive: bool = True,
     limit=5,
-    random_seed: int = None,
+    random_seed: int | None = None,
 ) -> dict:
     """Find video files on the file system."""
     if path is None:
@@ -309,7 +309,7 @@ def find_files(
     pattern: Optional[Iterable[str]] = None,
     recursive: bool = True,
     limit=20,
-    random_seed: int = None,
+    random_seed: int | None = None,
     return_as_list: bool = False,
 ) -> Union[dict, list]:
     """Find image files on the file system.
@@ -428,7 +428,7 @@ def append_data_to_dict(mydict: dict) -> dict:
     """Append entries from nested dictionaries to keys in a global dict."""
 
     # first initialize empty list for each key that is present
-    outdict = {key: [] for key in list(mydict.values())[0].keys()}
+    outdict = {key: [] for key in next(iter(mydict.values()))[0].keys()}
     # now append the values to each key in a list
     for subdict in mydict.values():
         for key in subdict.keys():

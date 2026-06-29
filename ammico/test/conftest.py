@@ -178,8 +178,9 @@ def multimodal_embeddings_model_cuda():
 def mock_multimodal_cpu_model():
     model = MagicMock(spec=MultimodalEmbeddingsModel)
     model.device = "cpu"
-    model.encode_image.return_value = np.random.rand(10, 128)
-    model.encode_text.return_value = np.random.rand(1, 128)
+    rng = np.random.default_rng()
+    model.encode_image.return_value = rng.random((10, 128))
+    model.encode_text.return_value = rng.random((1, 128))
     return model
 
 

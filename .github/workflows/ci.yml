@@ -34,7 +34,7 @@ jobs:
         sudo apt-get update && sudo apt-get install -y ffmpeg
         pip install spacy --no-binary blis # do not compile blis from source
         pip install uv
-        uv pip install --system --no-cache-dir -e .[dev]
+        uv pip install --system --no-cache-dir -e .[dev,api]
     - name: Run pytest 
       run: |
         cd ammico
