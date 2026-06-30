@@ -47,7 +47,7 @@ dependencies = [
     "timm",
     "torchvision",
     "tqdm",
-    "transformers<4.58",
+    "transformers<5.13",
     "torchcodec",
     "webcolors",
     "pip>=26.0.1",
