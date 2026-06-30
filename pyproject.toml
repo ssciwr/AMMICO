@@ -26,7 +26,7 @@ dependencies = [
     "dash",
     "dash-bootstrap-components",
     "einops",
-    "faiss-gpu-cu11<=1.13.0",
+    "faiss-gpu-cu11<=1.14.1.post1",
     "google-cloud-vision",
     "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",
