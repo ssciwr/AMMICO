@@ -41,7 +41,7 @@ dependencies = [
     "scipy",
     "spacy",
     "tf-keras",
-    "torch<2.9",
+    "torch<2.13",
     "pytorch-lightning<2.7.0",
     "sentence-transformers<5.2",
     "timm",
