@@ -4,32 +4,37 @@
 
 [Tutorial notebook](https://github.com/ssciwr/AMMICO/tree/main/docs/tutorials/ammico_demo_getting_started.ipynb)
 
-This detector is built on the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl). In this project, two model variants are supported: 
+This detector runs inference against an externally hosted vision-language model (for example a
+model from the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl))
+reached over an **OpenAI-compatible HTTP API**. The model is no longer loaded into your own
+process; instead you point `ammico` at:
 
-1. `Qwen2.5-VL-3B-Instruct`, which requires approximately 3 GB of video memory to load.
-2. `Qwen2.5-VL-7B-Instruct`, which requires up to 8 GB of VRAM for initialization.
+* a self-hosted server such as [vLLM](https://docs.vllm.ai/) serving `Qwen/Qwen2.5-VL-7B-Instruct`,
+* the OpenAI API (`https://api.openai.com/v1`), or
+* Google Gemini via its OpenAI-compatibility endpoint (`https://generativelanguage.googleapis.com/v1beta/openai/`).
 
-Each version can be run on the CPU, but this will significantly increase the operating time, so we cannot recommend it, but we retain this option. 
-The model type can be specified when initializing the `MultimodalSummaryModel` class:
+The `openai` client is an optional dependency — install it with `pip install ammico[api]`.
+
+The endpoint is configured with three settings: the base URL, the API key and the model id.
+They are read from the environment variables `AMMICO_API_BASE_URL`, `AMMICO_API_KEY` and
+`AMMICO_MODEL_ID`, or passed directly to `InferenceModel(...)`:
 ```
-model_id = (
-    "Qwen/Qwen2.5-VL-7B-Instruct"  # or "Qwen/Qwen2.5-VL-3B-Instruct" respectively
+import os
+os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"
+os.environ["AMMICO_API_KEY"] = "your-api-key"  # for vLLM, the value of `--api-key`
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+
+model = ammico.InferenceModel()
+```
+Equivalently, pass the configuration explicitly:
+```
+model = ammico.InferenceModel(
+    base_url="http://localhost:8000/v1",
+    api_key="your-api-key",
+    model_id="Qwen/Qwen2.5-VL-7B-Instruct",
 )
-model = ammico.MultimodalSummaryModel(model_id=model_id)
 ```
-You can also define the preferred device type ("cpu" or "cuda") explicitly during initialization:
-```
-model = ammico.MultimodalSummaryModel(model_id=model_id, device="cuda")
-```
-By default, the initialization follows this logic:
-
-If a GPU is available, it is automatically detected and the model defaults to Qwen2.5-VL-7B-Instruct on "cuda".
-
-If no GPU is detected, the system falls back to the Qwen2.5-VL-3B-Instruct model on the "cpu" device.
-```
-model = ammico.MultimodalSummaryModel()
-```
-To instantiate class it is required to provide `MultimodalSummaryModel` and dictionary
+To instantiate the detector class it is required to provide an `InferenceModel` and a dictionary
 ```
 image_summary_vqa = ammico.ImageSummaryDetector(summary_model=model, subdict=image_dict)
 ```

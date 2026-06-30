@@ -167,7 +167,14 @@ First, the model needs to be specified and loaded into memory. This will take se
 
 ```python
 # CELL #10
-model = ammico.MultimodalSummaryModel()  # load the default model
+import os
+
+# Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
+os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+os.environ["AMMICO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+
+model = ammico.InferenceModel()  # reads the AMMICO_API_* environment variables
 ```
 
 Then, we create an instance of the Python class that handles the image summary and visual question answering tasks:
@@ -333,21 +340,26 @@ First, the model needs to be specified and loaded into memory. This will take se
 
 ```python
 # CELL #22
-model = ammico.MultimodalSummaryModel()  # load the default model
+import os
+
+# Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
+os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+os.environ["AMMICO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+
+model = ammico.InferenceModel()  # reads the AMMICO_API_* environment variables
 ```
 
-To analyze the audio content from the video, `ammico` uses the [WhisperX model family](https://github.com/m-bain/whisperX) for audio transcription as [developed by OpenAI](https://arxiv.org/abs/2303.00747). The available flavors available are:
-
-1. `small`
-2. `base`
-2. `large`
-
-These models can also detect many languages and provide translations, however are more accurate for longer videos.
+To analyze the audio content from the video, `ammico` transcribes it with an externally hosted Whisper model reached over an OpenAI-compatible `/v1/audio/transcriptions` endpoint (a self-hosted Whisper server such as [Speaches](https://github.com/speaches-ai/speaches), or the OpenAI API). The audio endpoint is configured independently via `AMMICO_AUDIO_BASE_URL`, `AMMICO_AUDIO_API_KEY` and `AMMICO_AUDIO_MODEL_ID` (these fall back to the `AMMICO_API_*` values if not set). You can optionally pin the language, otherwise it is auto-detected.
 
 
 ```python
 # CELL #23
-audio_model = ammico.model.AudioToTextModel(model_size="small", device="cuda")
+os.environ["AMMICO_AUDIO_BASE_URL"] = "http://localhost:9000/v1"  # Whisper endpoint
+os.environ["AMMICO_AUDIO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_AUDIO_MODEL_ID"] = "Systran/faster-whisper-large-v3"  # or whisper-1
+
+audio_model = ammico.AudioTranscriptionModel()  # optionally language="en"
 ```
 
 Then, we create an instance of the Python class that handles the image summary and visual question answering tasks:

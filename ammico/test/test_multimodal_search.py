@@ -30,7 +30,8 @@ def test_index_images(multimodal_search_mock, tmp_path):
 
 
 def test_save_embeddings(multimodal_search_mock, tmp_path):
-    embeddings = np.random.rand(10, 128).astype("float32")
+    rng = np.random.default_rng(seed=42)
+    embeddings = rng.random((10, 128)).astype("float32")
     multimodal_search_mock._save_embeddings(embeddings, save_path=tmp_path)
 
     saved_file = tmp_path / "image_embeddings.npy"
@@ -38,7 +39,8 @@ def test_save_embeddings(multimodal_search_mock, tmp_path):
 
 
 def test_save_faiss_index(multimodal_search_mock, tmp_path):
-    embeddings = np.random.rand(10, 128).astype("float32")
+    rng = np.random.default_rng(seed=42)
+    embeddings = rng.random((10, 128)).astype("float32")
     multimodal_search_mock._build_faiss_index(embeddings)
     multimodal_search_mock._save_faiss_index(save_path=tmp_path)
 
@@ -48,7 +50,8 @@ def test_save_faiss_index(multimodal_search_mock, tmp_path):
 
 def test_multimodal_search_text_query(multimodal_search_mock):
     query = "example text query"
-    embeddings = np.random.rand(10, 128).astype("float32")
+    rng = np.random.default_rng(seed=42)
+    embeddings = rng.random((10, 128)).astype("float32")
     multimodal_search_mock._build_faiss_index(embeddings)
     items, scores = multimodal_search_mock.multimodal_search(
         query=query, query_type="text", return_paths=False
@@ -60,7 +63,8 @@ def test_multimodal_search_text_query(multimodal_search_mock):
 
 def test_multimodal_search_image_query(multimodal_search_mock, tmp_path):
     # Mock image preparation
-    embeddings = np.random.rand(10, 128).astype("float32")
+    rng = np.random.default_rng(seed=42)
+    embeddings = rng.random((10, 128)).astype("float32")
     multimodal_search_mock._build_faiss_index(embeddings)
     with (
         patch("ammico.multimodal_search.prepare_image") as mock_prepare_image,
@@ -97,8 +101,16 @@ def test_multimodal_search_combined_query(get_path):
             assert len(items) > 0
             assert len(items) == len(scores)
 
-        assert any("pexels-maksgelatin-4750169.jpg" in item for item in results[0][0])
-        assert any("IMG_2809.png" in item for item in results[1][0])
-        assert any("IMG_3758.png" in item for item in results[1][0])
+        assert any(
+            "pexels-maksgelatin-4750169.jpg" in item
+            for item in results[0][0]
+            if isinstance(item, str)
+        )
+        assert any(
+            "IMG_2809.png" in item for item in results[1][0] if isinstance(item, str)
+        )
+        assert any(
+            "IMG_3758.png" in item for item in results[1][0] if isinstance(item, str)
+        )
     finally:
         model.close()

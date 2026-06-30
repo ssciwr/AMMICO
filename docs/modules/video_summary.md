@@ -7,7 +7,7 @@ The Video Summary module provides comprehensive video analysis combining visual 
 - **Multi-Modal Analysis**: Combines visual frames and audio transcription
 - **Scene Detection**: Automatically detects scene cuts using frame differencing
 - **Frame Extraction**: Extracts keyframes at optimal timestamps using ffmpeg
-- **Audio Transcription**: Transcribes audio using WhisperX models with word-level alignment
+- **Audio Transcription**: Transcribes audio via an externally hosted Whisper model (OpenAI-compatible `/v1/audio/transcriptions` endpoint) with segment timestamps
 - **Segment Merging**: Intelligently merges audio phrases and video scenes into coherent segments
 - **Hierarchical Processing**: Three-level analysis pipeline:
   1. **Frame Level**: Individual frame analysis with captions and VQA
@@ -21,9 +21,9 @@ The Video Summary module provides comprehensive video analysis combining visual 
 
 - **Automatic Audio Detection**: Checks for audio streams in video files
 - **Audio Extraction**: Extracts audio using ffmpeg (16kHz mono WAV)
-- **Transcription**: Uses WhisperX for accurate transcription with timestamps
-- **Word Alignment**: Provides precise timing for each transcribed segment
-- **Language Support**: Supports all WhisperX languages with optional language specification
+- **Transcription**: Uses an externally hosted Whisper model for accurate transcription with segment timestamps
+- **Segment Timing**: Provides start/end timing for each transcribed segment
+- **Language Support**: Optional language specification (auto-detected otherwise)
 
 ## Visual Features
 
@@ -40,11 +40,12 @@ The Video Summary module provides comprehensive video analysis combining visual 
 
 ```python
 from ammico.video_summary import VideoSummaryDetector
-from ammico.model import MultimodalSummaryModel, AudioToTextModel
+from ammico.inference import InferenceModel, AudioTranscriptionModel
 
-# Initialize models
-video_model = MultimodalSummaryModel(device="cuda")
-audio_model = AudioToTextModel(model_size="large", device="cuda")
+# Initialize the external clients (read AMMICO_API_* / AMMICO_AUDIO_* env vars,
+# or pass base_url/api_key/model_id explicitly)
+video_model = InferenceModel()
+audio_model = AudioTranscriptionModel()
 
 # Create detector
 detector = VideoSummaryDetector(
@@ -111,8 +112,8 @@ Returns dictionaries with:
 ## Requirements
 
 - ffmpeg and ffprobe for video processing
-- CUDA support recommended for performance
-- WhisperX models for audio transcription
+- An externally hosted vision-language model (OpenAI-compatible `/v1/chat/completions` endpoint)
+- An externally hosted Whisper model (OpenAI-compatible `/v1/audio/transcriptions` endpoint)
 
 ## Workflow
 
@@ -127,8 +128,8 @@ stateDiagram-v2
         Decisions --> Visual_Processing_Only : No Audio Model
     }
 
-    Extract_Audio --> Transcribe_WhisperX
-    Transcribe_WhisperX --> Audio_Segments
+    Extract_Audio --> Transcribe_Whisper_API
+    Transcribe_Whisper_API --> Audio_Segments
 
     state Visual_Processing {
         [*] --> Scene_Cut_Detection
@@ -148,8 +149,8 @@ stateDiagram-v2
 
     Merge_Audio_Visual_Segments --> Analysis_Levels
 
-    state MultimodalSummaryModel {
-        [*] --> Model_Inference
+    state InferenceModel {
+        [*] --> Model_Inference_API
     }
     
     state PromptBuilder {

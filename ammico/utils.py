@@ -12,7 +12,6 @@ from PIL import Image
 from typing import List, Tuple, Optional, Union, Iterable
 import re
 import warnings
-from whisperx.alignment import DEFAULT_ALIGN_MODELS_HF, DEFAULT_ALIGN_MODELS_TORCH
 
 pkg = importlib_resources.files("ammico")
 
@@ -281,22 +280,12 @@ def resolve_model_device(
     return device.lower()
 
 
-def resolve_model_size(
-    model_size: str = "small",
-) -> str:
-    allowed_sizes = ("small", "base", "large")
-    if model_size not in allowed_sizes:
-        raise ValueError(f"model_size must be one of {allowed_sizes}")
-    model_size = "large-v3" if model_size == "large" else model_size
-    return model_size
-
-
 def find_videos(
-    path: str = None,
+    path: Optional[str] = None,
     pattern=["mp4", "mov", "avi", "mkv", "webm"],
     recursive: bool = True,
     limit=5,
-    random_seed: int = None,
+    random_seed: Optional[int] = None,
 ) -> dict:
     """Find video files on the file system."""
     if path is None:
@@ -320,7 +309,7 @@ def find_files(
     pattern: Optional[Iterable[str]] = None,
     recursive: bool = True,
     limit=20,
-    random_seed: int = None,
+    random_seed: Optional[int] = None,
     return_as_list: bool = False,
 ) -> Union[dict, list]:
     """Find image files on the file system.
@@ -439,7 +428,7 @@ def append_data_to_dict(mydict: dict) -> dict:
     """Append entries from nested dictionaries to keys in a global dict."""
 
     # first initialize empty list for each key that is present
-    outdict = {key: [] for key in list(mydict.values())[0].keys()}
+    outdict = {key: [] for key in next(iter(mydict.values())).keys()}
     # now append the values to each key in a list
     for subdict in mydict.values():
         for key in subdict.keys():
@@ -478,14 +467,6 @@ def get_color_table():
         col_key: df_colors[col_key].dropna().to_dict("list")
         for col_key in df_colors.columns.levels[0]
     }
-
-
-def get_supported_whisperx_languages() -> List[str]:
-    """Get the list of supported whisperx languages."""
-    supported_languages = set(DEFAULT_ALIGN_MODELS_TORCH.keys()) | set(
-        DEFAULT_ALIGN_MODELS_HF.keys()
-    )
-    return sorted(supported_languages)
 
 
 def load_image(image_path: Union[str, Path, Image.Image]) -> Image.Image:

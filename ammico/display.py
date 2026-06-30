@@ -1,7 +1,7 @@
 import ammico.text as text
 import ammico.colors as colors
 import ammico.image_summary as image_summary
-from ammico.model import MultimodalSummaryModel
+from ammico.inference import InferenceModel
 import pandas as pd
 from dash import html, Input, Output, dcc, State, Dash
 from PIL import Image
@@ -80,7 +80,6 @@ class AnalysisExplorer:
                     ]
                 ),
             ],
-            # style={"width": "95%", "display": "inline-block"},
         )
         self.app.layout = app_layout
 
@@ -414,11 +413,11 @@ class AnalysisExplorer:
         analysis_dict: Dict[str, Any] = {}
         if detector_value == "VQA":
             try:
-                qwen_model = MultimodalSummaryModel(
-                    model_id="Qwen/Qwen2.5-VL-3B-Instruct"
-                )  # TODO: allow user to specify model
+                inference_model = (
+                    InferenceModel()
+                )  # configured via AMMICO_API_* environment variables
                 vqa_cls = identify_dict.get("VQA")
-                vqa_detector = vqa_cls(qwen_model, subdict={})
+                vqa_detector = vqa_cls(inference_model, subdict={})
                 questions_list = self._parse_questions(textarea_questions_value)
                 analysis_result = vqa_detector.analyse_image(
                     image_copy,
