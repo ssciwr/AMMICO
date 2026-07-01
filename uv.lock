@@ -363,7 +363,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "safetensors" },
     { name = "scipy" },
-    { name = "sentence-transformers", specifier = "<5.2" },
+    { name = "sentence-transformers", specifier = "<5.7" },
     { name = "spacy" },
     { name = "tf-keras" },
     { name = "timm" },
