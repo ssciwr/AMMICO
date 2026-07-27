@@ -170,9 +170,19 @@ First, the model needs to be specified and loaded into memory. This will take se
 import os
 
 # Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
-os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
-os.environ["AMMICO_API_KEY"] = "your-api-key"
-os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+# For a self-hosted vLLM server, AMMICO_API_KEY is the value passed to `vllm serve --api-key`.
+os.environ["AMMICO_API_BASE_URL"] = (
+    # "http://localhost:8000/v1"  # using vllm
+    # OpenAI endpoint
+    # Geminit endpoint
+    # "http://localhost:11434/v1"  # using ollama
+    "http://ammico.outpost.svc:80/v1"  # using Jupyter4NFDI
+)
+# os.environ["AMMICO_API_KEY"] = "ollama"  # using ollama
+os.environ["AMMICO_API_KEY"] = "EMPTY"  # using Jupyter4NFDI
+# os.environ["AMMICO_MODEL_ID"] = "qwen2.5vl:3b"  # using ollama
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-3B-Instruct"  # using Jupyter4NFDI
+# os.environ["AMMICO_PRIVACY_ACK"] = "True"  # using ollama
 
 model = ammico.InferenceModel()  # reads the AMMICO_API_* environment variables
 ```
@@ -224,9 +234,9 @@ You can also ask questions about the images in the dataset. For this, you need t
 ```python
 # CELL #14
 list_of_questions = [
-    "Who is in the picture?",
-    "Does the image show a man, a woman, both, none, or you can't tell?",
-    "Does the picture show a flag, and if yes, what colors does it have, and to which country or group does it belong?",
+    "Does the image show any politicians? If yes, can you identify them by name? Do not guess if you are not sure.",
+    "Does the image show a man, a woman, both, none, or you can't tell? Do not guess if you are not sure.",
+    "Do people in the image display any emotion, based on their faces and body language? If yes, which ones? Do not guess if you are not sure.",
 ]  # add or replace with your own questions
 ```
 
@@ -324,7 +334,7 @@ video_dict = ammico.find_videos(
 )
 ```
 
-# 4.2. Obtain the video summary
+# 5.2. Obtain the video summary
 
 We begin by creating a video caption ("Summary") using the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl). Two variants are supported:
 
@@ -343,9 +353,19 @@ First, the model needs to be specified and loaded into memory. This will take se
 import os
 
 # Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
-os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
-os.environ["AMMICO_API_KEY"] = "your-api-key"
-os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+# For a self-hosted vLLM server, AMMICO_API_KEY is the value passed to `vllm serve --api-key`.
+os.environ["AMMICO_API_BASE_URL"] = (
+    # "http://localhost:8000/v1"  # using vllm
+    # OpenAI endpoint
+    # Geminit endpoint
+    # "http://localhost:11434/v1"  # using ollama
+    "http://ammico.outpost.svc:80/v1"  # using Jupyter4NFDI
+)
+# os.environ["AMMICO_API_KEY"] = "ollama"  # using ollama
+os.environ["AMMICO_API_KEY"] = "sk-speaches"  # using Jupyter4NFDI
+# os.environ["AMMICO_MODEL_ID"] = "qwen2.5vl:3b"  # using ollama
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-3B-Instruct"  # using Jupyter4NFDI
+# os.environ["AMMICO_PRIVACY_ACK"] = "True"  # using ollama
 
 model = ammico.InferenceModel()  # reads the AMMICO_API_* environment variables
 ```
@@ -355,8 +375,10 @@ To analyze the audio content from the video, `ammico` transcribes it with an ext
 
 ```python
 # CELL #23
-os.environ["AMMICO_AUDIO_BASE_URL"] = "http://localhost:9000/v1"  # Whisper endpoint
-os.environ["AMMICO_AUDIO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_AUDIO_BASE_URL"] = (
+    "http://ammico.outpost.svc:8081/v1"  # Whisper endpoint
+)
+os.environ["AMMICO_AUDIO_API_KEY"] = "sk-speaches"
 os.environ["AMMICO_AUDIO_MODEL_ID"] = "Systran/faster-whisper-large-v3"  # or whisper-1
 
 audio_model = ammico.AudioTranscriptionModel()  # optionally language="en"
@@ -420,9 +442,9 @@ You may also ask questions about the videos. For this, provide a list of questio
 ```python
 # CELL #27
 list_of_questions = [
-    "Who are the people in the video?",
-    "Is Donald Trump in the video, answer with only yes or no?",
-    "Are people in the video displaying any emotion? If yes, which ones?",
+    "Does this video show any politicians? If yes, can you identify them by name? Do not guess if you are not sure.",
+    "Does the video show a man, a woman, none, both or you can't tell? Do not guess if you are not sure.",
+    "Are people in the video displaying any emotion, based on their faces and body language? If yes, which ones? Do not guess if you are not sure.",
 ]  # add or replace with your own questions
 ```
 
