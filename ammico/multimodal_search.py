@@ -1,27 +1,31 @@
+from __future__ import annotations
+
+import json
+import warnings
+from pathlib import Path
+from typing import Any
+
+import faiss
+import faiss.contrib.torch_utils
+import numpy as np
+import torch
+from PIL import Image
+
 from ammico.model import MultimodalEmbeddingsModel
 from ammico.utils import (
     AnalysisMethod,
+    _resolve_embedding_path,
+    find_files,
     load_image,
     prepare_image,
-    find_files,
-    _resolve_embedding_path,
 )
-import torch
-import faiss
-import faiss.contrib.torch_utils
-from typing import Optional, List, Union, Tuple, Any, Dict
-from PIL import Image
-import numpy as np
-from pathlib import Path
-import json
-import warnings
 
 
 class MultimodalSearch(AnalysisMethod):
     def __init__(
         self,
         model: MultimodalEmbeddingsModel,
-        subdict: Optional[Dict[str, Any]] = None,
+        subdict: dict[str, Any] | None = None,
     ) -> None:
         """
         Class for multimodal search using embeddings.
@@ -32,15 +36,15 @@ class MultimodalSearch(AnalysisMethod):
         super().__init__(subdict)
 
         self.model = model
-        self.image_paths: List[str] = []
-        self.image_embeddings: Optional[Union[torch.Tensor, np.ndarray]] = None
+        self.image_paths: list[str] = []
+        self.image_embeddings: torch.Tensor | np.ndarray | None = None
         self.faiss_index = None
-        self._default_save_dir: Optional[Path] = None
+        self._default_save_dir: Path | None = None
 
     def _prepare_images(
         self,
-        images: Union[str, Path, List[Union[str, Path]]],
-    ) -> Tuple[List[Image.Image], List[str]]:
+        images: str | Path | list[str | Path],
+    ) -> tuple[list[Image.Image], list[str]]:
         """
         Load and prepare images from file paths or directory.
         Args:
@@ -63,7 +67,7 @@ class MultimodalSearch(AnalysisMethod):
 
     def _prepare_query_image(
         self,
-        query_image: Union[str, Path, Image.Image],
+        query_image: str | Path | Image.Image,
     ) -> Image.Image:
         """
         Load and prepare a single query image.
@@ -80,8 +84,8 @@ class MultimodalSearch(AnalysisMethod):
 
     def _save_embeddings(
         self,
-        embeddings: Union[torch.Tensor, np.ndarray],
-        save_path: Optional[Union[str, Path]] = None,
+        embeddings: torch.Tensor | np.ndarray,
+        save_path: str | Path | None = None,
         overwrite: bool = False,
     ) -> None:
         """
@@ -111,13 +115,13 @@ class MultimodalSearch(AnalysisMethod):
                 )
             np.save(str(out_path), embeddings)
         else:
-            raise ValueError(
+            raise TypeError(
                 "Embeddings must be either a torch.Tensor or a numpy.ndarray."
             )
 
     def _save_faiss_index(
         self,
-        save_path: Optional[Union[str, Path]] = None,
+        save_path: str | Path | None = None,
         filename: str = "faiss_index.index",
         overwrite: bool = False,
     ) -> None:
@@ -150,7 +154,7 @@ class MultimodalSearch(AnalysisMethod):
 
     def _save_image_paths(
         self,
-        save_path: Optional[Union[str, Path]] = None,
+        save_path: str | Path | None = None,
         filename: str = "image_paths.json",
         overwrite: bool = False,
     ) -> None:
@@ -175,7 +179,7 @@ class MultimodalSearch(AnalysisMethod):
         with open(out_path, "w") as f:
             json.dump({"image_paths": self.image_paths}, f, indent=2)
 
-    def _build_faiss_index(self, embeddings: Union[torch.Tensor, np.ndarray]) -> None:
+    def _build_faiss_index(self, embeddings: torch.Tensor | np.ndarray) -> None:
         """Build a Faiss index from image embeddings."""
 
         if self.model.device == "cuda":
@@ -201,11 +205,11 @@ class MultimodalSearch(AnalysisMethod):
 
     def index_images(
         self,
-        images: Optional[Union[str, Path, List[Union[str, Path]]]] = None,
+        images: str | Path | list[str | Path] | None = None,
         batch_size: int = 32,
-        truncate_dim: Optional[int] = None,
+        truncate_dim: int | None = None,
         save_embeddings_and_indexes: bool = False,
-        save_path: Optional[Union[str, Path]] = None,
+        save_path: str | Path | None = None,
         overwrite: bool = False,
     ) -> None:
         """
@@ -249,7 +253,7 @@ class MultimodalSearch(AnalysisMethod):
             self._save_faiss_index(self._default_save_dir, overwrite=overwrite)
             self._save_image_paths(self._default_save_dir, overwrite=overwrite)
 
-    def _load_image_paths(self, load_path: Union[str, Path]) -> None:
+    def _load_image_paths(self, load_path: str | Path) -> None:
         """Load image paths mapping."""
 
         path = Path(load_path)
@@ -264,8 +268,8 @@ class MultimodalSearch(AnalysisMethod):
 
     def _load_embeddings(
         self,
-        embedding_path: Union[str, Path],
-    ) -> Union[torch.Tensor, np.ndarray]:
+        embedding_path: str | Path,
+    ) -> torch.Tensor | np.ndarray:
         """
         Load precomputed image embeddings from a .npy or .pt file.
         Returns a 2D numpy array or torch tensor.
@@ -298,7 +302,7 @@ class MultimodalSearch(AnalysisMethod):
 
     def _load_faiss_index(
         self,
-        index_path: Union[str, Path],
+        index_path: str | Path,
         filename: str = "faiss_index.index",
     ) -> None:
         """
@@ -331,7 +335,7 @@ class MultimodalSearch(AnalysisMethod):
 
     def _load_indexes(
         self,
-        load_path: Union[str, Path],
+        load_path: str | Path,
     ) -> None:
         """
         Load precomputed image embeddings and Faiss index from disk.
@@ -353,10 +357,10 @@ class MultimodalSearch(AnalysisMethod):
 
     def _encode_query(
         self,
-        query: Union[str, Path, Image.Image],
+        query: str | Path | Image.Image,
         query_type: str = "text",
         batch_size: int = 64,
-    ) -> Union[torch.Tensor, np.ndarray]:
+    ) -> torch.Tensor | np.ndarray:
         """
         Encode a text or image query into an embedding.
         Args:
@@ -377,14 +381,11 @@ class MultimodalSearch(AnalysisMethod):
 
     def _search_embeddings(
         self,
-        query_embeddings: Union[torch.Tensor, np.ndarray],
+        query_embeddings: torch.Tensor | np.ndarray,
         top_k: int = 10,
-        score_threshold: Optional[float] = None,
+        score_threshold: float | None = None,
         return_paths: bool = True,
-    ) -> Union[
-        Tuple[List[int], List[float]],
-        Tuple[List[str], List[float]],
-    ]:
+    ) -> tuple[list[int], list[float]] | tuple[list[str], list[float]]:
         """
         Given query embeddings, find top_k matches in dataset using Faiss index.
         Args:
@@ -426,18 +427,15 @@ class MultimodalSearch(AnalysisMethod):
 
     def multimodal_search(
         self,
-        query: Union[str, Path, Image.Image],
+        query: str | Path | Image.Image,
         query_type: str = "text",
         top_k: int = 10,
         batch_size: int = 64,
-        score_threshold: Optional[float] = None,
+        score_threshold: float | None = None,
         load_indexes: bool = False,
-        load_path: Optional[Union[str, Path]] = None,
+        load_path: str | Path | None = None,
         return_paths: bool = True,
-    ) -> Union[
-        Tuple[List[int], List[float]],
-        Tuple[List[str], List[float]],
-    ]:
+    ) -> tuple[list[int], list[float]] | tuple[list[str], list[float]]:
         """
         Perform multimodal search given a query.
         Args:
@@ -482,20 +480,20 @@ class MultimodalSearch(AnalysisMethod):
 
     def _split_queries(
         self,
-        queries: List[Dict[str, Union[str, Path, Image.Image]]],
-    ) -> Tuple[List[str], List[int], List[Union[str, Path, Image.Image]], List[int]]:
+        queries: list[dict[str, str | Path | Image.Image]],
+    ) -> tuple[list[str], list[int], list[str | Path | Image.Image], list[int]]:
         """
         Parse queries and return:
         (text_queries, text_positions, image_queries, image_positions)
         """
-        text_queries: List[str] = []
-        text_positions: List[int] = []
-        image_queries: List[Union[str, Path, Image.Image]] = []
-        image_positions: List[int] = []
+        text_queries: list[str] = []
+        text_positions: list[int] = []
+        image_queries: list[str | Path | Image.Image] = []
+        image_positions: list[int] = []
 
         for idx, qdict in enumerate(queries):
             if not isinstance(qdict, dict):
-                raise ValueError(
+                raise TypeError(
                     "Each query must be a dict with a single key 'text' or 'image'"
                 )
             if "text" in qdict:
@@ -513,14 +511,14 @@ class MultimodalSearch(AnalysisMethod):
 
     def multimodal_batch_search(
         self,
-        queries: List[Dict[str, Union[str, Path, Image.Image]]],
+        queries: list[dict[str, str | Path | Image.Image]],
         top_k: int = 10,
         batch_size: int = 64,
-        score_threshold: Optional[float] = None,
+        score_threshold: float | None = None,
         load_indexes: bool = False,
-        load_path: Optional[Union[str, Path]] = None,
+        load_path: str | Path | None = None,
         return_paths: bool = True,
-    ) -> List[Union[Tuple[List[int], List[float]], Tuple[List[str], List[float]]]]:
+    ) -> list[tuple[list[int], list[float]] | tuple[list[str], list[float]]]:
         """
         Perform multimodal search for a batch of queries.
         Args:

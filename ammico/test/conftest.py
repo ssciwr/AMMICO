@@ -1,13 +1,16 @@
 import gc
 import os
-import pytest
-from ammico.model import MultimodalEmbeddingsModel
-from ammico.inference import InferenceModel
-from ammico.video_summary import VideoSummaryDetector
-from ammico.multimodal_search import MultimodalSearch
+import warnings
 from unittest.mock import MagicMock
+
 import numpy as np
+import pytest
 import torch
+
+from ammico.inference import InferenceModel
+from ammico.model import MultimodalEmbeddingsModel
+from ammico.multimodal_search import MultimodalSearch
+from ammico.video_summary import VideoSummaryDetector
 
 
 def _api_env_configured() -> bool:
@@ -23,8 +26,8 @@ def _release_torch_memory() -> None:
     if torch.cuda.is_available():
         try:
             torch.cuda.empty_cache()
-        except Exception:
-            pass
+        except Exception as exc:  # best-effort cleanup, never fatal
+            warnings.warn(f"Failed to empty CUDA cache during test teardown: {exc}")
 
 
 @pytest.fixture

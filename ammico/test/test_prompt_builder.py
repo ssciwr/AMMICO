@@ -1,5 +1,6 @@
-from ammico import prompt_builder as pb
 import pytest
+
+from ammico import prompt_builder as pb
 
 
 @pytest.fixture

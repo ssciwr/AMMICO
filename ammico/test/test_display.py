@@ -1,6 +1,8 @@
 import json
-import ammico.display as ammico_display
+
 import pytest
+
+import ammico.display as ammico_display
 
 
 @pytest.fixture
@@ -31,9 +33,8 @@ def test_explore_analysis_faces(get_path):
     with open(get_path + "example_faces.json", "r") as file:
         outs = json.load(file)
     mydict["IMG_2746"].pop("filename", None)
-    for im_key in mydict.keys():
-        sub_dict = mydict[im_key]
-        for key in sub_dict.keys():
+    for sub_dict in mydict.values():
+        for key in sub_dict:
             assert sub_dict[key] == outs[key]
 
 

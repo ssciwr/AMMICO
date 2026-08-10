@@ -1,17 +1,19 @@
-from ammico.utils import resolve_model_device
+from __future__ import annotations
 
-import torch
 import warnings
-from typing import Optional, List, Union
+
+import numpy as np
+import torch
 from PIL import Image
 from sentence_transformers import SentenceTransformer
-import numpy as np
+
+from ammico.utils import resolve_model_device
 
 
 class MultimodalEmbeddingsModel:
     def __init__(
         self,
-        device: Optional[str] = None,
+        device: str | None = None,
     ) -> None:
         """
         Class for Multimodal Embeddings model loading and inference. Uses Jina CLIP-V2 model.
@@ -36,10 +38,10 @@ class MultimodalEmbeddingsModel:
     @torch.inference_mode()
     def encode_text(
         self,
-        texts: Union[str, List[str]],
+        texts: str | list[str],
         batch_size: int = 64,
-        truncate_dim: Optional[int] = None,
-    ) -> Union[torch.Tensor, np.ndarray]:
+        truncate_dim: int | None = None,
+    ) -> torch.Tensor | np.ndarray:
         if isinstance(texts, str):
             texts = [texts]
 
@@ -65,12 +67,12 @@ class MultimodalEmbeddingsModel:
     @torch.inference_mode()
     def encode_image(
         self,
-        images: Union[Image.Image, List[Image.Image]],
+        images: Image.Image | list[Image.Image],
         batch_size: int = 32,
-        truncate_dim: Optional[int] = None,
-    ) -> Union[torch.Tensor, np.ndarray]:
+        truncate_dim: int | None = None,
+    ) -> torch.Tensor | np.ndarray:
         if not isinstance(images, (Image.Image, list)):
-            raise ValueError(
+            raise TypeError(
                 "images must be a PIL.Image or a list of PIL.Image objects. Please load images properly."
             )
 

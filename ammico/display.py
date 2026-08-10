@@ -1,14 +1,15 @@
-import ammico.text as text
-import ammico.colors as colors
-import ammico.image_summary as image_summary
-from ammico.inference import InferenceModel
-import pandas as pd
-from dash import html, Input, Output, dcc, State, Dash
-from PIL import Image
-import dash_bootstrap_components as dbc
-import warnings
-from typing import Dict, Any, List, Optional
+from __future__ import annotations
 
+import warnings
+from typing import Any
+
+import dash_bootstrap_components as dbc
+import pandas as pd
+from dash import Dash, Input, Output, State, dcc, html
+from PIL import Image
+
+from ammico import colors, image_summary, text
+from ammico.inference import InferenceModel
 
 COLOR_SCHEMES = [
     "CIE 1976",
@@ -336,7 +337,7 @@ class AnalysisExplorer:
         self.app.run(debug=True, port=port)
 
     # Dash callbacks
-    def update_picture(self, img_path: str) -> Optional[Image.Image]:
+    def update_picture(self, img_path: str) -> Image.Image | None:
         """Callback function to update the displayed image.
 
         Args:
@@ -372,7 +373,7 @@ class AnalysisExplorer:
         else:
             return display_none, display_none, display_none, display_none
 
-    def _parse_questions(self, text: Optional[str]) -> Optional[List[str]]:
+    def _parse_questions(self, text: str | None) -> list[str] | None:
         if not text:
             return None
         qs = [q.strip() for q in text.splitlines() if q.strip()]
@@ -410,7 +411,7 @@ class AnalysisExplorer:
         image_id = all_img_options[current_img_value]
         image_copy = self.mydict.get(image_id, {}).copy()
 
-        analysis_dict: Dict[str, Any] = {}
+        analysis_dict: dict[str, Any] = {}
         if detector_value == "VQA":
             try:
                 inference_model = (
@@ -453,7 +454,7 @@ class AnalysisExplorer:
 
             analysis_dict = detector_class.analyse_image()
 
-        new_analysis_dict: Dict[str, Any] = {}
+        new_analysis_dict: dict[str, Any] = {}
 
         # Iterate over the items in the original dictionary
         for k, v in analysis_dict.items():

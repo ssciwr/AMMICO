@@ -1,7 +1,7 @@
-import pytest
-from PIL import Image
 import numpy as np
+import pytest
 import torch
+from PIL import Image
 
 
 def test_multimodal_embeddings_model_init(multimodal_embeddings_model_cpu):
@@ -102,5 +102,5 @@ def test_multimodal_embeddings_model_encode_image_invalid_truncate(
 def test_multimodal_embeddings_model_encode_image_invalid_input(
     multimodal_embeddings_model_cpu,
 ):
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         multimodal_embeddings_model_cpu.encode_image("not_an_image")

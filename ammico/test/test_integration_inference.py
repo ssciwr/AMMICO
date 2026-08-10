@@ -9,10 +9,11 @@ server for audio) and point the variables at it, then::
 """
 
 import os
+
 import pytest
 
-from ammico.inference import InferenceModel, AudioTranscriptionModel
 from ammico.image_summary import ImageSummaryDetector
+from ammico.inference import AudioTranscriptionModel, InferenceModel
 
 
 def _vl_configured() -> bool:
