@@ -15,12 +15,15 @@ The ``openai`` SDK is an optional dependency; install it with
 ``pip install ammico[api]``.
 """
 
+from __future__ import annotations
+
 import base64
 import os
 import warnings
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any
 
 from PIL import Image
 
@@ -31,7 +34,7 @@ from PIL import Image
 def _require_openai():
     """Import and return the openai module, with an actionable error message."""
     try:
-        import openai  # noqa: F401
+        import openai
 
         return openai
     except ImportError as e:
@@ -52,7 +55,7 @@ def _maybe_load_dotenv() -> None:
         pass
 
 
-def _first_env(*names: str) -> Optional[str]:
+def _first_env(*names: str) -> str | None:
     """Return the first set, non-empty environment variable among names."""
     for name in names:
         value = os.environ.get(name)
@@ -110,9 +113,9 @@ class InferenceModel:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        model_id: Optional[str] = None,
+        base_url: str | None = None,
+        api_key: str | None = None,
+        model_id: str | None = None,
         timeout: float = 120.0,
         max_concurrency: int = 8,
         image_format: str = "JPEG",
@@ -160,9 +163,9 @@ class InferenceModel:
 
     def build_messages(
         self,
-        images: Union[Image.Image, Sequence[Image.Image], None],
+        images: Image.Image | Sequence[Image.Image] | None,
         text: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Build a single-turn OpenAI chat message from images and a text prompt.
 
         Args:
@@ -173,13 +176,13 @@ class InferenceModel:
             A messages list with one user message; images precede the text block.
         """
         if images is None:
-            image_list: List[Image.Image] = []
+            image_list: list[Image.Image] = []
         elif isinstance(images, Image.Image):
             image_list = [images]
         else:
             image_list = list(images)
 
-        content: List[Dict[str, Any]] = []
+        content: list[dict[str, Any]] = []
         for img in image_list:
             content.append(
                 {
@@ -194,10 +197,10 @@ class InferenceModel:
 
     def chat(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         max_new_tokens: int = 256,
         n: int = 1,
-    ) -> List[str]:
+    ) -> list[str]:
         """Run one chat completion and return the text of each choice.
 
         ``temperature=0`` reproduces the previous greedy (``do_sample=False``)
@@ -222,9 +225,9 @@ class InferenceModel:
 
     def chat_batch(
         self,
-        messages_batch: Sequence[List[Dict[str, Any]]],
+        messages_batch: Sequence[list[dict[str, Any]]],
         max_new_tokens: int = 256,
-    ) -> List[str]:
+    ) -> list[str]:
         """Run many independent chat completions concurrently (one choice each).
 
         API calls are I/O-bound, so requests are fanned out over a bounded thread
@@ -273,10 +276,10 @@ class AudioTranscriptionModel:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        model_id: Optional[str] = None,
-        language: Optional[str] = None,
+        base_url: str | None = None,
+        api_key: str | None = None,
+        model_id: str | None = None,
+        language: str | None = None,
         timeout: float = 300.0,
     ) -> None:
         """
@@ -324,7 +327,7 @@ class AudioTranscriptionModel:
         )
 
     @staticmethod
-    def _validate_language(language: Optional[str]) -> Optional[str]:
+    def _validate_language(language: str | None) -> str | None:
         """Lightly validate an ISO-639-1 code (no whisperx dependency)."""
         if not language:
             return None
@@ -336,8 +339,8 @@ class AudioTranscriptionModel:
         return language
 
     def transcribe(
-        self, audio_path: str, language: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        self, audio_path: str, language: str | None = None
+    ) -> list[dict[str, Any]]:
         """Transcribe an audio file into timestamped segments.
 
         Returns the same contract the video pipeline consumed from WhisperX:
@@ -355,7 +358,7 @@ class AudioTranscriptionModel:
 
         lang = self._validate_language(language) if language else self.language
 
-        request_kwargs: Dict[str, Any] = {
+        request_kwargs: dict[str, Any] = {
             "model": self.model_id,
             "response_format": "verbose_json",
             "timestamp_granularities": ["segment"],
@@ -374,7 +377,7 @@ class AudioTranscriptionModel:
         return self._map_segments(response)
 
     @staticmethod
-    def _map_segments(response: Any) -> List[Dict[str, Any]]:
+    def _map_segments(response: Any) -> list[dict[str, Any]]:
         """Map a verbose_json transcription response to the segment contract."""
         segments = getattr(response, "segments", None)
         if segments is None and isinstance(response, dict):
@@ -387,7 +390,7 @@ class AudioTranscriptionModel:
                 return seg.get(name)
             return getattr(seg, name, None)
 
-        descriptions: List[Dict[str, Any]] = []
+        descriptions: list[dict[str, Any]] = []
         for seg in segments:
             start = _field(seg, "start")
             end = _field(seg, "end")

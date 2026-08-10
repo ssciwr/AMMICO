@@ -1,13 +1,16 @@
-from google.cloud import vision
-from google.auth.exceptions import DefaultCredentialsError
-from googletrans import Translator
-import spacy
-import io
+from __future__ import annotations
+
 import os
 import re
-from ammico.utils import AnalysisMethod
+
 import grpc
 import pandas as pd
+import spacy
+from google.auth.exceptions import DefaultCredentialsError
+from google.cloud import vision
+from googletrans import Translator
+
+from ammico.utils import AnalysisMethod
 
 PRIVACY_STATEMENT = """The Text Detector uses Google Cloud Vision
     and Google Translate. Detailed information about how information
@@ -95,7 +98,7 @@ class TextDetector(AnalysisMethod):
         self.translator = Translator(raise_exception=True)
         self.skip_extraction = skip_extraction
         if not isinstance(skip_extraction, bool):
-            raise ValueError("skip_extraction needs to be set to true or false")
+            raise TypeError("skip_extraction needs to be set to true or false")
         if self.skip_extraction:
             print("Skipping text extraction from image.")
             print("Reading text directly from provided dictionary.")
@@ -152,7 +155,7 @@ class TextDetector(AnalysisMethod):
     def _truncate_text(self, max_length: int = 5000) -> str:
         """Truncate the text if it is too long for googletrans."""
         if self.subdict["text"] and len(self.subdict["text"]) > max_length:
-            print("Text is too long - truncating to {} characters.".format(max_length))
+            print(f"Text is too long - truncating to {max_length} characters.")
             self.subdict["text_truncated"] = self.subdict["text"][:max_length]
 
     def analyse_image(self) -> dict:
@@ -190,7 +193,7 @@ class TextDetector(AnalysisMethod):
             raise DefaultCredentialsError(
                 "Please provide credentials for google cloud vision API, see https://cloud.google.com/docs/authentication/application-default-credentials."
             )
-        with io.open(path, "rb") as image_file:
+        with open(path, "rb") as image_file:
             content = image_file.read()
         image = vision.Image(content=content)
         # check for usual connection errors and retry if necessary
@@ -198,8 +201,8 @@ class TextDetector(AnalysisMethod):
             response = client.text_detection(image=image)
         except grpc.RpcError as exc:
             print("Cloud vision API connection failed")
-            print("Skipping this image ..{}".format(path))
-            print("Connection failed with code {}: {}".format(exc.code(), exc))
+            print(f"Skipping this image ..{path}")
+            print(f"Connection failed with code {exc.code()}: {exc}")
         # here check if text was found on image
         if response:
             texts = response.text_annotations[0].description
@@ -210,10 +213,8 @@ class TextDetector(AnalysisMethod):
         if response.error.message:
             print("Google Cloud Vision Error")
             raise ValueError(
-                "{}\nFor more info on error messages, check: "
-                "https://cloud.google.com/apis/design/errors".format(
-                    response.error.message
-                )
+                f"{response.error.message}\nFor more info on error messages, check: "
+                "https://cloud.google.com/apis/design/errors"
             )
 
     def translate_text(self):
@@ -230,7 +231,7 @@ class TextDetector(AnalysisMethod):
         try:
             translated = self.translator.translate(text_to_translate)
         except Exception:
-            print("Could not translate the text with error {}.".format(Exception))
+            print(f"Could not translate the text with error {Exception}.")
             translated = None
             print("Skipping translation for this text.")
         self.subdict["text_language"] = translated.src if translated else None
@@ -253,7 +254,7 @@ class TextAnalyzer:
     """Used to get text from a csv and then run the TextDetector on it."""
 
     def __init__(
-        self, csv_path: str, column_key: str = None, csv_encoding: str = "utf-8"
+        self, csv_path: str, column_key: str | None = None, csv_encoding: str = "utf-8"
     ) -> None:
         """Init the TextTranslator class.
 
@@ -275,13 +276,13 @@ class TextAnalyzer:
             print("No encoding provided - using 'utf-8' as default.")
             self.csv_encoding = "utf-8"
         if not isinstance(self.column_key, str):
-            raise ValueError("The provided column key is not a string.")
+            raise TypeError("The provided column key is not a string.")
         if not isinstance(self.csv_encoding, str):
-            raise ValueError("The provided encoding is not a string.")
+            raise TypeError("The provided encoding is not a string.")
 
     def _check_valid_csv_path(self):
         if not isinstance(self.csv_path, str):
-            raise ValueError("The provided path to the CSV file is not a string.")
+            raise TypeError("The provided path to the CSV file is not a string.")
         if not self.csv_path.endswith(".csv"):
             raise ValueError("The provided file is not a CSV file.")
 

@@ -1,17 +1,21 @@
+from __future__ import annotations
+
+import collections
 import glob
 import os
-from pandas import DataFrame, read_csv
-import pooch
-import torch
-import importlib_resources
-import collections
 import random
-from enum import Enum
-from pathlib import Path
-from PIL import Image
-from typing import List, Tuple, Optional, Union, Iterable
 import re
 import warnings
+from collections.abc import Iterable
+from enum import Enum
+from pathlib import Path
+from typing import ClassVar
+
+import importlib_resources
+import pooch
+import torch
+from pandas import DataFrame, read_csv
+from PIL import Image
 
 pkg = importlib_resources.files("ammico")
 
@@ -30,7 +34,7 @@ class DownloadResource:
 
     # We store a list of defined resouces in a class variable, allowing
     # us prefetching from a CLI e.g. to bundle into a Docker image
-    resources = []
+    resources: ClassVar[list] = []
 
     def __init__(self, **kwargs):
         DownloadResource.resources.append(self)
@@ -54,9 +58,9 @@ class AnalysisType(str, Enum):
     @classmethod
     def _validate_analysis_type(
         cls,
-        analysis_type: Union["AnalysisType", str],
-        list_of_questions: Optional[List[str]],
-    ) -> Tuple[str, bool, bool]:
+        analysis_type: AnalysisType | str,
+        list_of_questions: list[str] | None,
+    ) -> tuple[str, bool, bool]:
         max_questions_per_image = 15  # safety cap to avoid too many questions
         if isinstance(analysis_type, AnalysisType):
             analysis_type = analysis_type.value
@@ -108,12 +112,10 @@ def _validate_subdict(mydict: dict) -> None:
             f"Please provide a nested dictionary - you provided {type(mydict)}"
         )
     # check that we actually got a nested dict with filenames
-    for key in mydict.keys():
-        if not isinstance(mydict[key], dict):
-            raise ValueError(
-                "Please provide a nested dictionary - you provided {}".format(key)
-            )
-        if "filename" not in mydict[key].keys():
+    for key, value in mydict.items():
+        if not isinstance(value, dict):
+            raise TypeError(f"Please provide a nested dictionary - you provided {key}")
+        if "filename" not in value:
             raise ValueError(
                 f"Each sub-dictionary must contain a 'filename' key - missing in {key}"
             )
@@ -123,8 +125,7 @@ def _match_pattern(path, pattern, recursive):
     # helper function for find_files
     # find all matches for a single pattern.
 
-    if pattern.startswith("."):
-        pattern = pattern[1:]
+    pattern = pattern.removeprefix(".")
     if recursive:
         search_path = f"{path}/**/*.{pattern}"
     else:
@@ -159,7 +160,7 @@ def _limit_results(results, limit):
     return results
 
 
-def _extract_summary_vqa(content: str, pattern: re.Pattern) -> Tuple[str, str]:
+def _extract_summary_vqa(content: str, pattern: re.Pattern) -> tuple[str, str]:
     m = pattern.search(content)
     if not m:
         raise ValueError(
@@ -178,9 +179,9 @@ def _extract_summary_vqa(content: str, pattern: re.Pattern) -> Tuple[str, str]:
 
 
 def _categorize_outputs(
-    collected: List[Tuple[float, str]],
+    collected: list[tuple[float, str]],
     include_questions: bool = False,
-) -> Tuple[List[str], List[str]]:
+) -> tuple[list[str], list[str]]:
     """
     Categorize collected outputs into summary bullets and VQA bullets.
     Args:
@@ -264,7 +265,7 @@ def _strip_prompt_prefix_literal(decoded: str, prompt: str) -> str:
 
 
 def resolve_model_device(
-    device: Optional[str] = None,
+    device: str | None = None,
 ) -> str:
     if device is None:
         return "cuda" if torch.cuda.is_available() else "cpu"
@@ -281,13 +282,15 @@ def resolve_model_device(
 
 
 def find_videos(
-    path: Optional[str] = None,
-    pattern=["mp4", "mov", "avi", "mkv", "webm"],
+    path: str | None = None,
+    pattern=None,
     recursive: bool = True,
     limit=5,
-    random_seed: Optional[int] = None,
+    random_seed: int | None = None,
 ) -> dict:
     """Find video files on the file system."""
+    if pattern is None:
+        pattern = ["mp4", "mov", "avi", "mkv", "webm"]
     if path is None:
         path = os.environ.get("AMMICO_DATA_HOME", ".")
     if isinstance(pattern, str):
@@ -305,13 +308,13 @@ def find_videos(
 
 
 def find_files(
-    path: Optional[Union[str, Path, None]] = None,
-    pattern: Optional[Iterable[str]] = None,
+    path: None | str | Path = None,
+    pattern: Iterable[str] | None = None,
     recursive: bool = True,
     limit=20,
-    random_seed: Optional[int] = None,
+    random_seed: int | None = None,
     return_as_list: bool = False,
-) -> Union[dict, list]:
+) -> dict | list:
     """Find image files on the file system.
 
     Args:
@@ -388,19 +391,17 @@ def _check_for_missing_keys(mydict: dict) -> dict:
     # currently we go through the whole dictionary twice
     # however, compared to the rest of the code this is negligible
     keylist = []
-    for key in mydict.keys():
-        if not isinstance(mydict[key], dict):
-            raise ValueError(
-                "Please provide a nested dictionary - you provided {}".format(key)
-            )
-        keylist.append(list(mydict[key].keys()))
+    for key, value in mydict.items():
+        if not isinstance(value, dict):
+            raise TypeError(f"Please provide a nested dictionary - you provided {key}")
+        keylist.append(list(value.keys()))
     # find the longest list of keys
     max_keys = max(keylist, key=len)
     # now generate missing keys
-    for key in mydict.keys():
+    for value in mydict.values():
         for mkey in max_keys:
-            if mkey not in mydict[key].keys():
-                mydict[key][mkey] = None
+            if mkey not in value:
+                value[mkey] = None
     return mydict
 
 
@@ -428,10 +429,10 @@ def append_data_to_dict(mydict: dict) -> dict:
     """Append entries from nested dictionaries to keys in a global dict."""
 
     # first initialize empty list for each key that is present
-    outdict = {key: [] for key in next(iter(mydict.values())).keys()}
+    outdict = {key: [] for key in next(iter(mydict.values()))}
     # now append the values to each key in a list
     for subdict in mydict.values():
-        for key in subdict.keys():
+        for key in subdict:
             outdict[key].append(subdict[key])
     return outdict
 
@@ -469,7 +470,7 @@ def get_color_table():
     }
 
 
-def load_image(image_path: Union[str, Path, Image.Image]) -> Image.Image:
+def load_image(image_path: str | Path | Image.Image) -> Image.Image:
     """Load image from file path or return if already PIL Image."""
     if isinstance(image_path, Image.Image):
         return image_path
@@ -483,7 +484,7 @@ def load_image(image_path: Union[str, Path, Image.Image]) -> Image.Image:
 
 def prepare_image(
     image: Image.Image,
-    target_size: Tuple[int, int] = (512, 512),
+    target_size: tuple[int, int] = (512, 512),
     resize_mode: str = "resize",
 ) -> Image.Image:
     """Prepare image for model input with optimal resolution."""

@@ -1,17 +1,19 @@
-from ammico.utils import AnalysisMethod, AnalysisType
-from ammico.inference import InferenceModel
+from __future__ import annotations
 
 import os
-from PIL import Image
 import warnings
-
-from typing import List, Optional, Union, Dict, Any, Tuple
 from collections.abc import Sequence as _Sequence
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, ClassVar
+
+from PIL import Image
+
+from ammico.inference import InferenceModel
+from ammico.utils import AnalysisMethod, AnalysisType
 
 
 class ImageSummaryDetector(AnalysisMethod):
-    token_prompt_config = {
+    token_prompt_config: ClassVar[dict[str, Any]] = {
         "default": {
             "summary": {"prompt": "Describe this image.", "max_new_tokens": 256},
             "questions": {"prompt": "", "max_new_tokens": 128},
@@ -30,7 +32,7 @@ class ImageSummaryDetector(AnalysisMethod):
     def __init__(
         self,
         summary_model: InferenceModel,
-        subdict: Optional[Dict[str, Any]] = None,
+        subdict: dict[str, Any] | None = None,
     ) -> None:
         """
         Class for analysing images using an externally hosted vision-language model.
@@ -50,14 +52,14 @@ class ImageSummaryDetector(AnalysisMethod):
         self.summary_model = summary_model
 
     def _load_pil_if_needed(
-        self, filename: Union[str, os.PathLike, Image.Image]
+        self, filename: str | os.PathLike | Image.Image
     ) -> Image.Image:
         if isinstance(filename, (str, os.PathLike)):
             return Image.open(filename).convert("RGB")
         elif isinstance(filename, Image.Image):
             return filename.convert("RGB")
         else:
-            raise ValueError("filename must be a path or PIL.Image")
+            raise TypeError("filename must be a path or PIL.Image")
 
     @staticmethod
     def _is_sequence_but_not_str(obj: Any) -> bool:
@@ -67,8 +69,8 @@ class ImageSummaryDetector(AnalysisMethod):
         )
 
     def _load_images(
-        self, entry: Optional[Dict[str, Any]] = None
-    ) -> Union[Image.Image, List[Image.Image]]:
+        self, entry: dict[str, Any] | None = None
+    ) -> Image.Image | list[Image.Image]:
         """Load the image(s) for an entry as a PIL image or list of PIL images."""
         filename = entry.get("filename") if entry else None
         if filename is None:
@@ -85,10 +87,10 @@ class ImageSummaryDetector(AnalysisMethod):
 
     def _validate_analysis_type(
         self,
-        analysis_type: Union["AnalysisType", str],
-        list_of_questions: Optional[List[str]],
+        analysis_type: AnalysisType | str,
+        list_of_questions: list[str] | None,
         max_questions_per_image: int,
-    ) -> Tuple[str, List[str], bool, bool]:
+    ) -> tuple[str, list[str], bool, bool]:
         if isinstance(analysis_type, AnalysisType):
             analysis_type = analysis_type.value
 
@@ -102,11 +104,13 @@ class ImageSummaryDetector(AnalysisMethod):
                 "What is this picture about?",
             ]
 
-        if analysis_type in ("questions", "summary_and_questions"):
-            if len(list_of_questions) > max_questions_per_image:
-                raise ValueError(
-                    f"Number of questions per image ({len(list_of_questions)}) exceeds safety cap ({max_questions_per_image}). Reduce questions or increase max_questions_per_image."
-                )
+        if (
+            analysis_type in ("questions", "summary_and_questions")
+            and len(list_of_questions) > max_questions_per_image
+        ):
+            raise ValueError(
+                f"Number of questions per image ({len(list_of_questions)}) exceeds safety cap ({max_questions_per_image}). Reduce questions or increase max_questions_per_image."
+            )
 
         is_summary = analysis_type in ("summary", "summary_and_questions")
         is_questions = analysis_type in ("questions", "summary_and_questions")
@@ -114,7 +118,7 @@ class ImageSummaryDetector(AnalysisMethod):
         return analysis_type, list_of_questions, is_summary, is_questions
 
     @staticmethod
-    def _entry_label(entry: Optional[Dict[str, Any]]) -> str:
+    def _entry_label(entry: dict[str, Any] | None) -> str:
         """Human-readable identifier for an image entry, for log/warning messages."""
         if entry:
             filename = entry.get("filename")
@@ -125,12 +129,12 @@ class ImageSummaryDetector(AnalysisMethod):
     def analyse_image(
         self,
         entry: dict,
-        analysis_type: Union[str, AnalysisType] = AnalysisType.SUMMARY_AND_QUESTIONS,
-        list_of_questions: Optional[List[str]] = None,
+        analysis_type: str | AnalysisType = AnalysisType.SUMMARY_AND_QUESTIONS,
+        list_of_questions: list[str] | None = None,
         max_questions_per_image: int = MAX_QUESTIONS_PER_IMAGE,
         is_concise_summary: bool = True,
         is_concise_answer: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Analyse a single image entry. Returns dict with keys depending on analysis_type:
             - 'caption' (str) if summary requested
@@ -156,7 +160,7 @@ class ImageSummaryDetector(AnalysisMethod):
         return self.subdict
 
     def _safe_generate_caption(
-        self, entry: Dict[str, Any], is_concise_summary: bool
+        self, entry: dict[str, Any], is_concise_summary: bool
     ) -> str:
         """Generate a caption for one entry, never raising.
 
@@ -189,10 +193,10 @@ class ImageSummaryDetector(AnalysisMethod):
 
     def _safe_answer_questions(
         self,
-        list_of_questions: List[str],
-        entry: Dict[str, Any],
+        list_of_questions: list[str],
+        entry: dict[str, Any],
         is_concise_answer: bool,
-    ) -> List[str]:
+    ) -> list[str]:
         """Answer VQA questions for one entry, never raising.
 
         Returns an empty list on failure and emits an actionable warning so a
@@ -212,13 +216,13 @@ class ImageSummaryDetector(AnalysisMethod):
 
     def analyse_images_from_dict(
         self,
-        analysis_type: Union[AnalysisType, str] = AnalysisType.SUMMARY_AND_QUESTIONS,
-        list_of_questions: Optional[List[str]] = None,
+        analysis_type: AnalysisType | str = AnalysisType.SUMMARY_AND_QUESTIONS,
+        list_of_questions: list[str] | None = None,
         max_questions_per_image: int = MAX_QUESTIONS_PER_IMAGE,
         keys_batch_size: int = KEYS_BATCH_SIZE,
         is_concise_summary: bool = True,
         is_concise_answer: bool = True,
-    ) -> Dict[str, dict]:
+    ) -> dict[str, dict]:
         """
         Analyse image with  model.
 
@@ -265,10 +269,10 @@ class ImageSummaryDetector(AnalysisMethod):
 
     def generate_caption(
         self,
-        entry: Optional[Dict[str, Any]] = None,
+        entry: dict[str, Any] | None = None,
         num_return_sequences: int = 1,
         is_concise_summary: bool = True,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Create caption for image. Depending on is_concise_summary it will be either concise or detailed.
 
@@ -314,9 +318,9 @@ class ImageSummaryDetector(AnalysisMethod):
     def answer_questions(
         self,
         list_of_questions: list[str],
-        entry: Optional[Dict[str, Any]] = None,
+        entry: dict[str, Any] | None = None,
         is_concise_answer: bool = True,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Create answers for list of questions about image.
         Args:

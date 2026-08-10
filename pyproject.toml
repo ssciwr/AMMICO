@@ -83,3 +83,17 @@ documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 
 [tool.setuptools]
 packages = ["ammico","ammico.data"]
+
+[tool.ruff.lint]
+ignore = [
+    # BLE001 (catch blind `Exception`): this package processes user-supplied
+    # image/video/audio batches through third-party and native tooling
+    # (ffmpeg subprocesses, opencv, torch/CUDA, spacy, the openai SDK). A
+    # single malformed input must not abort an entire batch job, so failures
+    # around these external calls are deliberately caught broadly and
+    # reported via `warnings.warn` with the original exception message,
+    # rather than the batch crashing outright. Narrowing each catch to a
+    # specific exception type would mean guessing at unstable third-party
+    # exception hierarchies without real benefit.
+    "BLE001",
+]

@@ -1,8 +1,8 @@
-from ammico.video_summary import VideoSummaryDetector
-from ammico.inference import AudioTranscriptionModel
-
 import pytest
 from PIL import Image
+
+from ammico.inference import AudioTranscriptionModel
+from ammico.video_summary import VideoSummaryDetector
 
 
 def test_analyse_videos_from_dict_invalid_call():

@@ -1,32 +1,29 @@
-from ammico.inference import InferenceModel, AudioTranscriptionModel
+from __future__ import annotations
+
+import math
+import os
+import re
+import subprocess
+import tempfile
+import warnings
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from io import BytesIO
+from typing import (
+    Any,
+)
+
+import cv2
+import numpy as np
+from PIL import Image
+from scipy import signal
+
+from ammico.inference import AudioTranscriptionModel, InferenceModel
+from ammico.prompt_builder import PromptBuilder
 from ammico.utils import (
     AnalysisMethod,
     AnalysisType,
     _categorize_outputs,
     _validate_subdict,
-)
-from ammico.prompt_builder import PromptBuilder
-
-import os
-import re
-import cv2
-import math
-import numpy as np
-import subprocess
-import tempfile
-import warnings
-
-from scipy import signal
-from io import BytesIO
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from PIL import Image
-from typing import (
-    List,
-    Dict,
-    Any,
-    Tuple,
-    Union,
-    Optional,
 )
 
 
@@ -34,8 +31,8 @@ class VideoSummaryDetector(AnalysisMethod):
     def __init__(
         self,
         summary_model: InferenceModel = None,
-        audio_model: Optional[AudioTranscriptionModel] = None,
-        subdict: Optional[Dict[str, Any]] = None,
+        audio_model: AudioTranscriptionModel | None = None,
+        subdict: dict[str, Any] | None = None,
     ) -> None:
         """
         Class for analysing videos using an externally hosted vision-language model.
@@ -58,7 +55,7 @@ class VideoSummaryDetector(AnalysisMethod):
         self.prompt_builder = PromptBuilder()
 
     @staticmethod
-    def _entry_label(entry: Optional[Dict[str, Any]]) -> str:
+    def _entry_label(entry: dict[str, Any] | None) -> str:
         """Human-readable identifier for a video entry, for log/warning messages."""
         if entry:
             filename = entry.get("filename")
@@ -66,7 +63,7 @@ class VideoSummaryDetector(AnalysisMethod):
                 return str(filename)
         return "<unknown video>"
 
-    def _audio_to_text(self, audio_path: str) -> List[Dict[str, Any]]:
+    def _audio_to_text(self, audio_path: str) -> list[dict[str, Any]]:
         """
         Convert audio file to text using the externally hosted transcription model.
         Args:
@@ -97,9 +94,7 @@ class VideoSummaryDetector(AnalysisMethod):
                 "default=noprint_wrappers=1:nokey=1",
                 filename,
             ]
-            result = subprocess.run(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
             output = result.stdout.strip()
             return bool(output)
         except Exception as e:
@@ -112,7 +107,7 @@ class VideoSummaryDetector(AnalysisMethod):
     def _extract_transcribe_audio_part(
         self,
         filename: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Extract audio part from the video file and transcribe it using the external audio model.
         Args:
@@ -156,7 +151,7 @@ class VideoSummaryDetector(AnalysisMethod):
     def _detect_scene_cuts(
         self,
         filename: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Detect scene cuts in the video using frame differencing method.
         Args:
@@ -238,8 +233,9 @@ class VideoSummaryDetector(AnalysisMethod):
         last_segment = video_segments[-1]
         last_segment["end_time"] -= 0.5
         # Ensure the end_time does not go below the start_time in case of very short last segment/video
-        if last_segment["end_time"] < last_segment["start_time"]:
-            last_segment["end_time"] = last_segment["start_time"]
+        last_segment["end_time"] = max(
+            last_segment["end_time"], last_segment["start_time"]
+        )
 
         return {
             "segments": video_segments,
@@ -252,7 +248,7 @@ class VideoSummaryDetector(AnalysisMethod):
     def _extract_frame_timestamps_from_clip(
         self,
         filename: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Extract frame timestamps for each detected video segment.
         Args:
@@ -271,7 +267,7 @@ class VideoSummaryDetector(AnalysisMethod):
             elif seg["duration"] > max_seconds_between_frames:
                 frame_rate_per_clip = max(
                     1,
-                    int(math.ceil(seg["duration"] / max_seconds_between_frames)) + 1,
+                    math.ceil(seg["duration"] / max_seconds_between_frames) + 1,
                 )
             else:
                 frame_rate_per_clip = base_frames_per_clip
@@ -293,8 +289,8 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def _reassign_video_timestamps_to_segments(
         self,
-        segments: List[Dict[str, Any]],
-        video_segs: List[Dict[str, Any]],
+        segments: list[dict[str, Any]],
+        video_segs: list[dict[str, Any]],
     ) -> None:
         """
         Reassign video frame timestamps to each new segment based on overlapping video scenes.
@@ -312,8 +308,8 @@ class VideoSummaryDetector(AnalysisMethod):
             seg_start = seg["start_time"]
             seg_end = seg["end_time"]
 
-            merged_timestamps: List[float] = []
-            fallback_candidates: List[Tuple[float, float]] = []
+            merged_timestamps: list[float] = []
+            fallback_candidates: list[tuple[float, float]] = []
             for vscene in video_list:
                 if "frame_timestamps" not in vscene:
                     raise ValueError("Video scene missing 'frame_timestamps' key.")
@@ -356,8 +352,8 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def _combine_visual_frames_by_time(
         self,
-        video_segs: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        video_segs: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """
         Split too-long video segments (>25s).
         Args:
@@ -376,7 +372,7 @@ class VideoSummaryDetector(AnalysisMethod):
                 float(vs["duration"]),
             )
             if dur > 25.0:
-                parts = int(math.ceil(dur / 25.0))
+                parts = math.ceil(dur / 25.0)
                 part_dur = dur / parts
                 for p in range(parts):
                     ps = st + p * part_dur
@@ -406,10 +402,10 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def merge_audio_visual_boundaries(
         self,
-        audio_segs: List[Dict[str, Any]],
-        video_segs: List[Dict[str, Any]],
+        audio_segs: list[dict[str, Any]],
+        video_segs: list[dict[str, Any]],
         segment_threshold_duration: int = 8,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Merge audio phrase boundaries and video scene cuts into coherent temporal segments for the model
         Args:
@@ -443,8 +439,7 @@ class VideoSummaryDetector(AnalysisMethod):
             if current_duration > segment_threshold_duration:
                 segment_end = start
 
-                if segment_end < current_segment_start:
-                    segment_end = current_segment_start
+                segment_end = max(segment_end, current_segment_start)
 
                 merged.append(
                     {
@@ -467,8 +462,7 @@ class VideoSummaryDetector(AnalysisMethod):
 
         if current_audio_phrases or current_video_scenes:
             final_end = max(global_last_end, events[-1][2], current_segment_start)
-            if final_end < current_segment_start:
-                final_end = current_segment_start
+            final_end = max(final_end, current_segment_start)
 
             merged.append(
                 {
@@ -484,7 +478,7 @@ class VideoSummaryDetector(AnalysisMethod):
         return merged
 
     def _run_ffmpeg(
-        self, cmd_args: List[str], timeout: Optional[float]
+        self, cmd_args: list[str], timeout: float | None
     ) -> subprocess.CompletedProcess:
         """
         Execute ffmpeg command and return the completed process.
@@ -496,13 +490,11 @@ class VideoSummaryDetector(AnalysisMethod):
         """
 
         cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error"] + cmd_args
-        return subprocess.run(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout
-        )
+        return subprocess.run(cmd, capture_output=True, timeout=timeout, check=False)
 
     def _build_extract_command(
         self, filename: str, timestamp: float, accurate: bool, codec: str = "png"
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Build ffmpeg command for frame extraction.
 
@@ -540,7 +532,7 @@ class VideoSummaryDetector(AnalysisMethod):
         timestamp: float,
         out_w: int,
         out_h: int,
-        timeout: Optional[float] = 30.0,
+        timeout: float | None = 30.0,
     ) -> Image.Image:
         """
         Extract a single frame at the specified timestamp.
@@ -595,7 +587,7 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def _calculate_output_dimensions(
         self, original_w: int, original_h: int
-    ) -> Tuple[int, int]:
+    ) -> tuple[int, int]:
         """
         Calculate output dimensions in a fully adaptive way, preserving aspect ratio, but decreasing size.
         It works both for landscape and portrait videos.
@@ -622,11 +614,11 @@ class VideoSummaryDetector(AnalysisMethod):
     def _extract_frames_ffmpeg(
         self,
         filename: str,
-        timestamps: List[float],
+        timestamps: list[float],
         original_w: int,
         original_h: int,
         workers: int = 4,
-    ) -> List[Tuple[float, Image.Image]]:
+    ) -> list[tuple[float, Image.Image]]:
         """
         Extract multiple frames using a thread pool (parallel ffmpeg processes).
         Args:
@@ -660,9 +652,9 @@ class VideoSummaryDetector(AnalysisMethod):
     def _make_captions_from_extracted_frames(
         self,
         filename: str,
-        merged_segments: List[Dict[str, Any]],
-        video_meta: Dict[str, Any],
-        list_of_questions: Optional[List[str]] = None,
+        merged_segments: list[dict[str, Any]],
+        video_meta: dict[str, Any],
+        list_of_questions: list[str] | None = None,
     ) -> None:
         """
         Generate captions for all extracted frames and then produce a concise summary of the video.
@@ -681,7 +673,7 @@ class VideoSummaryDetector(AnalysisMethod):
             )
 
         for seg in merged_segments:  # TODO might be generator faster, so changes to ffmpeg extraction may be needed
-            collected: List[Tuple[float, str]] = []
+            collected: list[tuple[float, str]] = []
             frame_timestamps = seg.get("video_frame_timestamps", [])
             if not frame_timestamps:
                 raise ValueError(
@@ -722,9 +714,9 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def make_captions_for_subclips(
         self,
-        entry: Dict[str, Any],
-        list_of_questions: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        entry: dict[str, Any],
+        list_of_questions: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """
         Generate captions for video subclips using both audio and visual information, for a further full video summary/VQA.
         Args:
@@ -775,7 +767,7 @@ class VideoSummaryDetector(AnalysisMethod):
         for seg in merged_segments:
             frame_timestamps = seg.get("video_frame_timestamps", [])
 
-            collected: List[Tuple[float, str]] = []
+            collected: list[tuple[float, str]] = []
             include_audio = False
             audio_lines = seg["audio_phrases"]
             if audio_lines:
@@ -820,7 +812,7 @@ class VideoSummaryDetector(AnalysisMethod):
 
         return results
 
-    def final_summary(self, summary_dict: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def final_summary(self, summary_dict: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Produce a concise summary of the video, based on generated captions for all extracted frames.
         Args:
@@ -849,9 +841,9 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def final_answers(
         self,
-        answers_dict: List[Dict[str, Any]],
-        list_of_questions: List[str],
-    ) -> Dict[str, Any]:
+        answers_dict: list[dict[str, Any]],
+        list_of_questions: list[str],
+    ) -> dict[str, Any]:
         """
         Answer the list of questions for the video based on the VQA bullets from the frames.
         Args:
@@ -899,9 +891,9 @@ class VideoSummaryDetector(AnalysisMethod):
 
     def analyse_videos_from_dict(
         self,
-        analysis_type: Union[AnalysisType, str] = AnalysisType.SUMMARY,
-        list_of_questions: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        analysis_type: AnalysisType | str = AnalysisType.SUMMARY,
+        list_of_questions: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         Analyse the video specified in self.subdict using frame extraction and captioning.
         Args:

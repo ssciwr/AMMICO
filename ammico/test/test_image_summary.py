@@ -1,8 +1,10 @@
+import os
+
+import pytest
+from PIL import Image
+
 from ammico.image_summary import ImageSummaryDetector
 from ammico.test.conftest import MockInferenceModel
-import os
-from PIL import Image
-import pytest
 
 
 @pytest.mark.long
@@ -11,7 +13,7 @@ def test_image_summary_detector_summary_and_questions(model, get_testdict):
     detector = ImageSummaryDetector(summary_model=model, subdict=get_testdict)
     results = detector.analyse_images_from_dict(analysis_type="summary")
     assert len(results) == 2
-    for key in get_testdict.keys():
+    for key in get_testdict:
         assert key in results
         assert "caption" in results[key]
         assert isinstance(results[key]["caption"], str)
@@ -25,7 +27,7 @@ def test_image_summary_detector_summary_and_questions(model, get_testdict):
         analysis_type="questions", list_of_questions=list_of_questions
     )
     assert len(results) == 2
-    for key in get_testdict.keys():
+    for key in get_testdict:
         assert "vqa" in results[key]
         if key == "IMG_2746":
             assert (

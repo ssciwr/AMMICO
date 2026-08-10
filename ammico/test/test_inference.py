@@ -1,12 +1,13 @@
 """Unit tests for the external inference backends (no network calls)."""
 
 import types
+
 import pytest
 from PIL import Image
 
 from ammico.inference import (
-    InferenceModel,
     AudioTranscriptionModel,
+    InferenceModel,
     encode_image_to_data_url,
 )
 
