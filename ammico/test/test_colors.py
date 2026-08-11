@@ -1,6 +1,7 @@
-from ammico.colors import ColorDetector
 import pytest
 from numpy import isclose
+
+from ammico.colors import ColorDetector
 
 
 def test_init():

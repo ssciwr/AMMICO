@@ -1,8 +1,10 @@
-import pytest
-import ammico.text as tt
-import spacy
 import json
 import sys
+
+import pytest
+import spacy
+
+import ammico.text as tt
 
 
 @pytest.fixture
@@ -56,7 +58,7 @@ def test_TextDetector(set_testdict, accepted):
         assert test_obj.subdict["filename"] == set_testdict[item]["filename"]
     test_obj = tt.TextDetector({}, skip_extraction=True, accept_privacy=accepted)
     assert test_obj.skip_extraction
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         tt.TextDetector({}, skip_extraction=1.0, accept_privacy=accepted)
 
 
@@ -157,15 +159,15 @@ def test_init_csv_option(get_path):
     )
     assert test_obj.column_key == "mytext"
     assert test_obj.csv_encoding == "utf-16"
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         tt.TextAnalyzer(csv_path=1.0)
     with pytest.raises(ValueError):
         tt.TextAnalyzer(csv_path="something")
     with pytest.raises(FileNotFoundError):
         tt.TextAnalyzer(csv_path=get_path + "test_no.csv")
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         tt.TextAnalyzer(csv_path=get_path + "test.csv", column_key=1.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         tt.TextAnalyzer(csv_path=get_path + "test.csv", csv_encoding=1.0)
 
 

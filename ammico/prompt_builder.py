@@ -1,5 +1,7 @@
-from typing import List, Dict, Optional, Any
+from __future__ import annotations
+
 from enum import Enum
+from typing import Any
 
 
 class ProcessingLevel(Enum):
@@ -42,7 +44,7 @@ class PromptBuilder:
         return str_to_return
 
     @staticmethod
-    def visual_captions_module(frame_bullets: List[str]) -> str:
+    def visual_captions_module(frame_bullets: list[str]) -> str:
         """For clip-level processing with frame summaries."""
         bullets_text = "\n".join(frame_bullets)
         str_to_return = f"""## Visual Information
@@ -55,7 +57,7 @@ class PromptBuilder:
         return str_to_return
 
     @staticmethod
-    def visual_captions_final_module(clip_summaries: List[str]) -> str:
+    def visual_captions_final_module(clip_summaries: list[str]) -> str:
         """For video-level processing with clip summaries."""
         str_to_return = f"""## Visual Information
 
@@ -67,7 +69,7 @@ class PromptBuilder:
         return str_to_return
 
     @staticmethod
-    def audio_module(audio_transcription: List[Dict[str, Any]]) -> str:
+    def audio_module(audio_transcription: list[dict[str, Any]]) -> str:
         """Audio transcription with timestamps."""
         audio_text = "\n".join(
             [
@@ -177,7 +179,7 @@ class PromptBuilder:
         return str_to_return
 
     @staticmethod
-    def questions_module(questions: List[str]) -> str:
+    def questions_module(questions: list[str]) -> str:
         """Format questions list."""
         questions_text = "\n".join(
             [f"{i + 1}. {q.strip()}" for i, q in enumerate(questions)]
@@ -189,7 +191,7 @@ class PromptBuilder:
         return str_to_return
 
     @staticmethod
-    def vqa_context_module(vqa_bullets: List[str], is_final: bool = False) -> str:
+    def vqa_context_module(vqa_bullets: list[str], is_final: bool = False) -> str:
         """VQA context (frame-level or clip-level answers)."""
         if is_final:
             header = """## SEGMENT-Level Answer Context (Reference Only)
@@ -208,7 +210,7 @@ class PromptBuilder:
 
     @classmethod
     def build_frame_prompt(
-        cls, include_vqa: bool = False, questions: Optional[List[str]] = None
+        cls, include_vqa: bool = False, questions: list[str] | None = None
     ) -> str:
         """Build prompt for frame-level analysis."""
         modules = [cls.ROLE_MODULE, cls.visual_frames_module()]
@@ -228,12 +230,12 @@ class PromptBuilder:
     @classmethod
     def build_clip_prompt(
         cls,
-        frame_bullets: List[str],
+        frame_bullets: list[str],
         include_audio: bool = False,
-        audio_transcription: Optional[List[Dict]] = None,
+        audio_transcription: list[dict] | None = None,
         include_vqa: bool = False,
-        questions: Optional[List[str]] = None,
-        vqa_bullets: Optional[List[str]] = None,
+        questions: list[str] | None = None,
+        vqa_bullets: list[str] | None = None,
     ) -> str:
         """Build prompt for clip-level analysis."""
         modules = [cls.ROLE_MODULE, cls.visual_captions_module(frame_bullets)]
@@ -261,9 +263,9 @@ class PromptBuilder:
     def build_video_prompt(
         cls,
         include_vqa: bool = False,
-        clip_summaries: Optional[List[str]] = None,
-        questions: Optional[List[str]] = None,
-        vqa_bullets: Optional[List[str]] = None,
+        clip_summaries: list[str] | None = None,
+        questions: list[str] | None = None,
+        vqa_bullets: list[str] | None = None,
     ) -> str:
         """Build prompt for video-level analysis."""
         modules = [cls.ROLE_MODULE]

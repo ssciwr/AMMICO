@@ -1,8 +1,9 @@
-import numpy as np
-import webcolors
 import colorgram
 import colour
-from ammico.utils import get_color_table, AnalysisMethod
+import numpy as np
+import webcolors
+
+from ammico.utils import AnalysisMethod, get_color_table
 
 COLOR_SCHEMES = [
     "CIE 1976",
@@ -42,9 +43,7 @@ class ColorDetector(AnalysisMethod):
         self.n_colors = 100
         if delta_e_method not in COLOR_SCHEMES:
             raise ValueError(
-                "Invalid selection for assigning the color name. Please select one of {}".format(
-                    COLOR_SCHEMES
-                )
+                f"Invalid selection for assigning the color name. Please select one of {COLOR_SCHEMES}"
             )
         self.delta_e_method = delta_e_method
 
@@ -92,7 +91,7 @@ class ColorDetector(AnalysisMethod):
             self.subdict[rgb_name] += color.proportion
 
         # ensure color rounding
-        for key in self.set_keys().keys():
+        for key in self.set_keys():
             if self.subdict[key]:
                 self.subdict[key] = round(self.subdict[key], 2)
 
@@ -112,7 +111,7 @@ class ColorDetector(AnalysisMethod):
         if len(c) != 3:
             raise ValueError("Input color must be a list or tuple of length 3 (RGB).")
 
-        h_color = "#{:02x}{:02x}{:02x}".format(int(c[0]), int(c[1]), int(c[2]))
+        h_color = f"#{int(c[0]):02x}{int(c[1]):02x}{int(c[2]):02x}"
         try:
             output_color = webcolors.hex_to_name(h_color, spec="css3")
             output_color = output_color.lower().replace("grey", "gray")
@@ -120,7 +119,7 @@ class ColorDetector(AnalysisMethod):
             delta_e_lst = []
             filtered_colors = webcolors._definitions._CSS3_NAMES_TO_HEX
 
-            for _, img_hex in filtered_colors.items():
+            for img_hex in filtered_colors.values():
                 cur_clr = webcolors.hex_to_rgb(img_hex)
                 # calculate color Delta-E
                 delta_e = colour.delta_E(c, cur_clr, method=delta_e_method)

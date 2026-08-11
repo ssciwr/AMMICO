@@ -1,11 +1,12 @@
-import pytest
-from unittest.mock import patch
-from ammico.multimodal_search import MultimodalSearch
-from ammico.model import MultimodalEmbeddingsModel
-
-from PIL import Image
-import numpy as np
 from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
+import pytest
+from PIL import Image
+
+from ammico.model import MultimodalEmbeddingsModel
+from ammico.multimodal_search import MultimodalSearch
 
 
 def test_index_images(multimodal_search_mock, tmp_path):
