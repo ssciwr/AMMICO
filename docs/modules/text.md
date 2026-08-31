@@ -30,7 +30,7 @@ The English text is cleaned from numbers and unrecognized words (`text_clean`).
 detector = ammico.TextDetector(
     subdict={"filename": "image.jpg"},
     skip_extraction=False,  # Set True if text already provided
-    accept_privacy="PRIVACY_AMMICO"
+    accept_privacy="PRIVACY_AMMICO",
 )
 results = detector.analyse_image()
 ```

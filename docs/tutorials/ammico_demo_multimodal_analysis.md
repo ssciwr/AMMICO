@@ -61,7 +61,8 @@ This imports all the functionality from `ammico`. To analyze images, you need to
 ```python
 # CELL #3
 from google.colab import drive
-drive.mount('/content/drive')
+
+drive.mount("/content/drive")
 ```
 
 # Step 2: Read your image data into AMMICO
@@ -100,7 +101,10 @@ In order to be able to extract the text, you will need a google cloud vision API
 ```python
 # CELL #5
 import os
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/content/drive/MyDrive/Test/[KEYNAME].json" # make sure you specify the correct file path of your cloud vision API key
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
+    "/content/drive/MyDrive/Test/[KEYNAME].json"  # make sure you specify the correct file path of your cloud vision API key
+)
 ```
 
 To extract the text from images, you will need to run the cell below, and answer "yes" when prompted to accept the privacy disclosure.
@@ -112,7 +116,6 @@ for key in image_dict.keys():
     image_dict[key] = ammico.TextDetector(
         image_dict[key],
     ).analyse_image()
-
 ```
 
     The Text Detector uses Google Cloud Vision
@@ -148,7 +151,9 @@ To save the data, run the cell below.
 
 ```python
 # CELL #9
-image_df.to_csv("/content/drive/MyDrive/Test/text_data_out.csv") # make sure you specify the correct file path of your output file
+image_df.to_csv(
+    "/content/drive/MyDrive/Test/text_data_out.csv"
+)  # make sure you specify the correct file path of your output file
 ```
 
 # Step 4. Perform image content analysis
@@ -170,7 +175,9 @@ First, the model needs to be specified and loaded into memory. This will take se
 import os
 
 # Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
-os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+os.environ["AMMICO_API_BASE_URL"] = (
+    "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+)
 os.environ["AMMICO_API_KEY"] = "your-api-key"
 os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
 
@@ -284,7 +291,9 @@ To save the data, run the cell below.
 
 ```python
 # CELL #19
-image_df.to_csv("/content/drive/MyDrive/Test/image_summary_questions_data_out.csv") # make sure you specify the correct file path of your output file
+image_df.to_csv(
+    "/content/drive/MyDrive/Test/image_summary_questions_data_out.csv"
+)  # make sure you specify the correct file path of your output file
 ```
 
 # Step 5: Perform video content analysis
@@ -343,7 +352,9 @@ First, the model needs to be specified and loaded into memory. This will take se
 import os
 
 # Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
-os.environ["AMMICO_API_BASE_URL"] = "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+os.environ["AMMICO_API_BASE_URL"] = (
+    "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+)
 os.environ["AMMICO_API_KEY"] = "your-api-key"
 os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
 
@@ -471,5 +482,7 @@ Export the dataframe to a csv file:
 
 ```python
 # CELL #32
-video_df.to_csv("/content/drive/MyDrive/Test/video_summary_questions_data_out.csv") # make sure you specify the correct file path of your output file
+video_df.to_csv(
+    "/content/drive/MyDrive/Test/video_summary_questions_data_out.csv"
+)  # make sure you specify the correct file path of your output file
 ```
