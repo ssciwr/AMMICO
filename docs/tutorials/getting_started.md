@@ -26,6 +26,7 @@ For text extraction using the Google Cloud Vision API, you need to set your API 
 
 ```python
 import os
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "path/to/your/key.json"
 ```
 How to obtain this key is described in [setting up credentials](../set_up_credentials.md). However, you only need this if you plan to extract text from images, not for image summary, VQA or video analysis.
@@ -43,7 +44,7 @@ data_path = "./data-test"
 # Find files and create the image dictionary
 image_dict = ammico.find_files(
     path=data_path,
-    limit=20, # Limit the number of files to process (optional)
+    limit=20,  # Limit the number of files to process (optional)
 )
 ```
 
@@ -112,7 +113,6 @@ The text detector requires you to accept a disclosure statement, since it sends 
 ```python
 # For TextDetector (uses Google Cloud)
 ammico.privacy_disclosure(accept_privacy="PRIVACY_AMMICO")
-
 ```
 
 ## Step 4: Export Results

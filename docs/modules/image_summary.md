@@ -60,15 +60,12 @@ results = detector.analyse_image(
     analysis_type="summary_and_questions",
     list_of_questions=["What is in this image?", "Are there people?"],
     is_concise_summary=True,
-    is_concise_answer=True
+    is_concise_answer=True,
 )
 
 # Batch processing
 detector.subdict = image_dict
-results = detector.analyse_images_from_dict(
-    analysis_type="summary",
-    keys_batch_size=16
-)
+results = detector.analyse_images_from_dict(analysis_type="summary", keys_batch_size=16)
 ```
 
 ## Configuration

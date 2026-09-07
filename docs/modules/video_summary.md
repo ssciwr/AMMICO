@@ -51,13 +51,13 @@ audio_model = AudioTranscriptionModel()
 detector = VideoSummaryDetector(
     summary_model=video_model,
     audio_model=audio_model,
-    subdict={"video1": {"filename": "video.mp4"}}
+    subdict={"video1": {"filename": "video.mp4"}},
 )
 
 # Analyze video
 results = detector.analyse_videos_from_dict(
     analysis_type="summary_and_questions",
-    list_of_questions=["What is happening?", "Who is speaking?"]
+    list_of_questions=["What is happening?", "Who is speaking?"],
 )
 ```
 
