@@ -1,0 +1,11 @@
+/* Highlight section headers in the left navigation bar */
+.md-nav__item--section > .md-nav__link {
+    color: #2196f3 !important;
+    font-weight: bold;
+}
+
+/* Also target the top-level labels if they aren't technically "sections" in the DOM yet but act as them */
+.md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link {
+    color: #2196f3;
+    font-weight: bold;
+}
