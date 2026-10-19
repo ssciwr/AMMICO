@@ -97,3 +97,7 @@ The output of the `analyse_images_from_dict()` method is a dictionary, where eac
 | ---------- | ----------- | ------------ |
 | `caption` | `str` | when `analysis_type="summary"` or `"summary_and_questions"`, constant image caption |
 | `vqa` | `list[str]` | when `analysis_type="questions"` or `summary_and_questions`, the answers to the user-defined input question |
+
+## Compare different models
+
+To run the same analysis with several vision-language models and compare their results side by side, see the [model comparison tutorial](model_comparison.md), which uses models available through [OpenRouter](https://openrouter.ai).

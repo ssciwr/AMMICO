@@ -112,28 +112,21 @@ To extract the text from images, you will need to run the cell below, and answer
 
 ```python
 # CELL #6
-for key in image_dict.keys():
+for key in image_dict:
     image_dict[key] = ammico.TextDetector(
         image_dict[key],
     ).analyse_image()
 ```
 
-    The Text Detector uses Google Cloud Vision
-        and Google Translate. Detailed information about how information
-        is being processed is provided here:
-        https://ssciwr.github.io/AMMICO/build/html/faq_link.html.
-        Google’s privacy policy can be read here: https://policies.google.com/privacy.
-        By continuing to use this Detector, you agree to send the data you want analyzed
-        to the Google servers for extraction and translation.
-    Do you accept the privacy disclosure? (yes/no): yes
-    You have accepted the privacy disclosure.
-    Text detection and translation will be performed.
-    
-
 
 ```python
 # CELL #7
 image_df = ammico.get_dataframe(image_dict)
+```
+
+
+```python
+
 ```
 
 # 3.1 Inspect and save the extracted text data
@@ -152,7 +145,7 @@ To save the data, run the cell below.
 ```python
 # CELL #9
 image_df.to_csv(
-    "/content/drive/MyDrive/Test/text_data_out.csv"
+    "text_data_out.csv"
 )  # make sure you specify the correct file path of your output file
 ```
 
@@ -175,11 +168,19 @@ First, the model needs to be specified and loaded into memory. This will take se
 import os
 
 # Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
+# For a self-hosted vLLM server, AMMICO_API_KEY is the value passed to `vllm serve --api-key`.
 os.environ["AMMICO_API_BASE_URL"] = (
-    "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+    # "http://localhost:8000/v1"  # using vllm
+    # OpenAI endpoint
+    # Geminit endpoint
+    # "http://localhost:11434/v1"  # using ollama
+    "http://ammico.ammico.svc:80/v1"  # using Jupyter4NFDI
 )
-os.environ["AMMICO_API_KEY"] = "your-api-key"
-os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+# os.environ["AMMICO_API_KEY"] = "ollama"  # using ollama
+os.environ["AMMICO_API_KEY"] = "sk-speaches"  # using Jupyter4NFDI
+# os.environ["AMMICO_MODEL_ID"] = "qwen2.5vl:3b"  # using ollama
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-3B-Instruct"  # using Jupyter4NFDI
+# os.environ["AMMICO_PRIVACY_ACK"] = "True"  # using ollama
 
 model = ammico.InferenceModel()  # reads the AMMICO_API_* environment variables
 ```
@@ -207,10 +208,10 @@ The results are provided in the updated dictionary. For your convenience, you ca
 
 ```python
 # CELL #13
-from PIL import Image
 import matplotlib.pyplot as plt
+from PIL import Image
 
-for key in summary.keys():
+for key in summary:
     # Load and display the image
     image_path = summary[key]["filename"]
     img = Image.open(image_path)
@@ -231,9 +232,9 @@ You can also ask questions about the images in the dataset. For this, you need t
 ```python
 # CELL #14
 list_of_questions = [
-    "Who is in the picture?",
-    "Does the image show a man, a woman, both, none, or you can't tell?",
-    "Does the picture show a flag, and if yes, what colors does it have, and to which country or group does it belong?",
+    "Does the image show any politicians? If yes, can you identify them by name? Do not guess if you are not sure.",
+    "Does the image show a man, a woman, both, none, or you can't tell? Do not guess if you are not sure.",
+    "Do people in the image display any emotion, based on their faces and body language? If yes, which ones? Do not guess if you are not sure.",
 ]  # add or replace with your own questions
 ```
 
@@ -255,7 +256,7 @@ For your convenience, the images and the answers to the questions can be display
 # CELL #16
 from pprint import pprint
 
-for key in summary_and_answers.keys():
+for key in summary_and_answers:
     # Load and display the image
     image_path = summary_and_answers[key]["filename"]
     img = Image.open(image_path)
@@ -292,7 +293,7 @@ To save the data, run the cell below.
 ```python
 # CELL #19
 image_df.to_csv(
-    "/content/drive/MyDrive/Test/image_summary_questions_data_out.csv"
+    "image_summary_questions_data_out.csv"
 )  # make sure you specify the correct file path of your output file
 ```
 
@@ -333,7 +334,7 @@ video_dict = ammico.find_videos(
 )
 ```
 
-# 4.2. Obtain the video summary
+# 5.2. Obtain the video summary
 
 We begin by creating a video caption ("Summary") using the [QWEN 2.5 Vision-Language model family](https://huggingface.co/collections/Qwen/qwen25-vl). Two variants are supported:
 
@@ -352,22 +353,32 @@ First, the model needs to be specified and loaded into memory. This will take se
 import os
 
 # Configure the externally hosted vision-language model (OpenAI-compatible endpoint).
+# For a self-hosted vLLM server, AMMICO_API_KEY is the value passed to `vllm serve --api-key`.
 os.environ["AMMICO_API_BASE_URL"] = (
-    "http://localhost:8000/v1"  # or OpenAI / Gemini endpoint
+    # "http://localhost:8000/v1"  # using vllm
+    # OpenAI endpoint
+    # Geminit endpoint
+    # "http://localhost:11434/v1"  # using ollama
+    "http://ammico.ammico.svc:80/v1"  # using Jupyter4NFDI
 )
-os.environ["AMMICO_API_KEY"] = "your-api-key"
-os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-7B-Instruct"
+# os.environ["AMMICO_API_KEY"] = "ollama"  # using ollama
+os.environ["AMMICO_API_KEY"] = "sk-speaches"  # using Jupyter4NFDI
+# os.environ["AMMICO_MODEL_ID"] = "qwen2.5vl:3b"  # using ollama
+os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen2.5-VL-3B-Instruct"  # using Jupyter4NFDI
+# os.environ["AMMICO_PRIVACY_ACK"] = "True"  # using ollama
 
 model = ammico.InferenceModel()  # reads the AMMICO_API_* environment variables
 ```
 
-To analyze the audio content from the video, `ammico` transcribes it with an externally hosted Whisper model reached over an OpenAI-compatible `/v1/audio/transcriptions` endpoint (a self-hosted Whisper server such as [Speaches](https://github.com/speaches-ai/speaches), or the OpenAI API). The audio endpoint is configured independently via `AMMICO_AUDIO_BASE_URL`, `AMMICO_AUDIO_API_KEY` and `AMMICO_AUDIO_MODEL_ID` (these fall back to the `AMMICO_API_*` values if not set). You can optionally pin the language, otherwise it is auto-detected.
+To analyze the audio content from the video, `ammico` transcribes it with an externally hosted Whisper model reached over an OpenAI-compatible `/v1/audio/transcriptions` endpoint (a self-hosted Whisper server such as [Speaches](https://github.com/speaches-ai/speaches), or the OpenAI API). The audio endpoint is configured independently from the vision-language model via the environment variables `AMMICO_AUDIO_BASE_URL`, `AMMICO_AUDIO_API_KEY` and `AMMICO_AUDIO_MODEL_ID` (these fall back to the `AMMICO_API_*` values if not set). You can optionally pin the language, otherwise it is auto-detected.
 
 
 ```python
 # CELL #23
-os.environ["AMMICO_AUDIO_BASE_URL"] = "http://localhost:9000/v1"  # Whisper endpoint
-os.environ["AMMICO_AUDIO_API_KEY"] = "your-api-key"
+os.environ["AMMICO_AUDIO_BASE_URL"] = (
+    "http://ammico.ammico.svc:8081/v1"  # Whisper endpoint
+)
+os.environ["AMMICO_AUDIO_API_KEY"] = "sk-speaches"
 os.environ["AMMICO_AUDIO_MODEL_ID"] = "Systran/faster-whisper-large-v3"  # or whisper-1
 
 audio_model = ammico.AudioTranscriptionModel()  # optionally language="en"
@@ -396,9 +407,10 @@ The results are provided in the updated dictionary. For your convenience, you ca
 
 ```python
 # CELL #26
+from pprint import pprint
+
 import cv2
 import matplotlib.pyplot as plt
-from pprint import pprint
 
 
 def display_first_frame(video_path):
@@ -416,7 +428,7 @@ def display_first_frame(video_path):
     plt.show()
 
 
-for key in summary.keys():
+for key in summary:
     # Load and display the image
     video_path = summary[key]["filename"]
     display_first_frame(video_path)
@@ -431,9 +443,9 @@ You may also ask questions about the videos. For this, provide a list of questio
 ```python
 # CELL #27
 list_of_questions = [
-    "Who are the people in the video?",
-    "Is Donald Trump in the video, answer with only yes or no?",
-    "Are people in the video displaying any emotion? If yes, which ones?",
+    "Does this video show any politicians? If yes, can you identify them by name? Do not guess if you are not sure.",
+    "Does the video show a man, a woman, none, both or you can't tell? Do not guess if you are not sure.",
+    "Are people in the video displaying any emotion, based on their faces and body language? If yes, which ones? Do not guess if you are not sure.",
 ]  # add or replace with your own questions
 ```
 
@@ -450,7 +462,7 @@ For your convenience, the first frame of the videos and the answers to the quest
 
 ```python
 # CELL #29
-for key in summary_and_answers.keys():
+for key in summary_and_answers:
     # Load and display the image
     video_path = summary_and_answers[key]["filename"]
     display_first_frame(video_path)
@@ -483,6 +495,6 @@ Export the dataframe to a csv file:
 ```python
 # CELL #32
 video_df.to_csv(
-    "/content/drive/MyDrive/Test/video_summary_questions_data_out.csv"
+    "video_summary_questions_data_out.csv"
 )  # make sure you specify the correct file path of your output file
 ```
