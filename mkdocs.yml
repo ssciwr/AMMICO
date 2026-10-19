@@ -49,6 +49,7 @@ nav:
   - Tutorials:
     - Getting started: tutorials/getting_started.md
     - Image summary and VQA: tutorials/image_summary.md
+    - Model comparison with OpenRouter: tutorials/model_comparison.md
     - Video summary and VQA: tutorials/video_summary.md
     - Text analysis: tutorials/text.md
     - Multimodal analysis: tutorials/ammico_demo_multimodal_analysis.md
