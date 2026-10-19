@@ -26,8 +26,8 @@ if USE_OLLAMA:
 # locally hosted qwen model
 USE_HGSMATHCOMP = True
 if USE_HGSMATHCOMP:
-    os.environ["AMMICO_API_BASE_URL"] = "http://hgscomp01.iwr.uni-heidelberg.de:9000/v1"
-    os.environ["AMMICO_API_KEY"] = "unused"
+    os.environ["AMMICO_API_BASE_URL"] = "http://************:9000/v1"
+    os.environ["AMMICO_API_KEY"] = "*************"
     os.environ["AMMICO_MODEL_ID"] = "Qwen/Qwen3.8-27B"
 
 # --- OpenRouter with a GPT model -------------------------------------------
