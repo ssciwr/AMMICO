@@ -169,3 +169,62 @@ def test_categorize_outputs():
     assert "- [0.000s] 1. A cat." in bullets_vqa[0]
     assert "- [5.000s] A dog is playing with a ball." in bullets_summary[1]
     assert "- [5.000s] 1. A ball." in bullets_vqa[1]
+
+
+@pytest.mark.parametrize(
+    "content, expected",
+    [
+        ("Summary: A cat.\n\nVQA Answers:\n1. Yes.", ("A cat.", "1. Yes.")),
+        ("**Summary:** A cat.\n\n**VQA Answers:**\n1. Yes.", ("A cat.", "1. Yes.")),
+        ("**Summary**: A cat.\n**VQA Answers**:\n1. Yes.", ("A cat.", "1. Yes.")),
+        ("## Summary\nA cat.\n## VQA Answers\n1. Yes.", ("A cat.", "1. Yes.")),
+        ("summary: A cat.\nAnswers: 1. Yes.", ("A cat.", "1. Yes.")),
+        # prose without labels is kept as summary
+        (
+            "A lens flare.\n\nIt is an artifact.",
+            ("A lens flare. It is an artifact.", None),
+        ),
+        # "answers" inside a sentence is not a label
+        ("Summary: The answers are unclear.", ("The answers are unclear.", None)),
+        # cut off before the VQA answers
+        ("Summary: A cat.\n\nVQA Answers:", ("A cat.", None)),
+        ("", (None, None)),
+        ("   \n", (None, None)),
+    ],
+)
+def test_parse_summary_vqa(content, expected):
+    assert ut._parse_summary_vqa(content) == expected
+
+
+def test_has_summary_and_vqa():
+    assert ut._has_summary_and_vqa("Summary: A cat.\nVQA Answers:\n1. Yes.")
+    assert not ut._has_summary_and_vqa("A cat.")
+    assert not ut._has_summary_and_vqa("")
+
+
+def test_categorize_outputs_skips_unusable_replies():
+    collected = [
+        (0.0, "Summary: A cat.\n\nVQA Answers: 1. A cat."),
+        (1.0, ""),
+        (2.0, "The bright light is likely a lens flare."),
+        (3.0, "**Summary:** A dog.\n\n**VQA Answers:** 1. A ball."),
+    ]
+    with pytest.warns(RuntimeWarning, match="1 of 4 model replies were empty"):
+        bullets_summary, bullets_vqa = ut._categorize_outputs(
+            collected, include_questions=True
+        )
+    assert bullets_summary == [
+        "- [0.000s] A cat.",
+        "- [2.000s] The bright light is likely a lens flare.",
+        "- [3.000s] A dog.",
+    ]
+    assert bullets_vqa == ["- [0.000s] 1. A cat.", "- [3.000s] 1. A ball."]
+
+
+def test_categorize_outputs_all_unusable():
+    with pytest.warns(RuntimeWarning, match="2 of 2 model replies were empty"):
+        bullets_summary, bullets_vqa = ut._categorize_outputs(
+            [(0.0, ""), (1.0, " ")], include_questions=True
+        )
+    assert bullets_summary == []
+    assert bullets_vqa == []

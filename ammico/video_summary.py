@@ -23,8 +23,22 @@ from ammico.utils import (
     AnalysisMethod,
     AnalysisType,
     _categorize_outputs,
+    _has_summary_and_vqa,
     _validate_subdict,
 )
+
+# appended to the prompt when a reply has to be re-requested because it did not
+# contain both a summary and VQA answers
+_FORMAT_REMINDER = """
+
+Your previous reply did not follow the required format. Reply ONLY in this format:
+
+Summary: <your summary here>
+
+VQA Answers:
+1. <answer to question 1>
+2. <answer to question 2>
+[etc.]"""
 
 
 class VideoSummaryDetector(AnalysisMethod):
@@ -649,6 +663,36 @@ class VideoSummaryDetector(AnalysisMethod):
 
         return [(timestamps[i], results[i]) for i in range(len(timestamps))]
 
+    def _retry_unparseable(
+        self,
+        outputs: list[str],
+        images: list[Any],
+        instruction: str,
+        max_new_tokens: int,
+    ) -> list[str]:
+        """Re-request, once and with a format reminder, every reply that lacks
+        either the summary or the VQA answers.
+
+        A retried reply replaces the original if it parses, or if the original
+        was empty. Otherwise the original is kept, since it may still carry a
+        usable summary.
+        """
+        bad = [i for i, out in enumerate(outputs) if not _has_summary_and_vqa(out)]
+        if not bad:
+            return outputs
+        messages_batch = [
+            self.summary_model.build_messages(images[i], instruction + _FORMAT_REMINDER)
+            for i in bad
+        ]
+        retried = self.summary_model.chat_batch(
+            messages_batch, max_new_tokens=max_new_tokens
+        )
+        outputs = list(outputs)
+        for i, out in zip(bad, retried):
+            if _has_summary_and_vqa(out) or not outputs[i].strip():
+                outputs[i] = out
+        return outputs
+
     def _make_captions_from_extracted_frames(
         self,
         filename: str,
@@ -696,11 +740,19 @@ class VideoSummaryDetector(AnalysisMethod):
                 self.summary_model.build_messages(img, caption_instruction)
                 for _, img in pairs
             ]
-            # questions yield both a summary and VQA answers, so allow more tokens
-            max_new_tokens = 256 if include_questions else 128
+            # questions yield both a summary and VQA answers, so allow more tokens;
+            # a reply cut off before the VQA answers cannot be used for them
+            max_new_tokens = 512 if include_questions else 128
             captions = self.summary_model.chat_batch(
                 messages_batch, max_new_tokens=max_new_tokens
             )
+            if include_questions:
+                captions = self._retry_unparseable(
+                    captions,
+                    [img for _, img in pairs],
+                    caption_instruction,
+                    max_new_tokens,
+                )
             for t, c in zip(frame_timestamps, captions):
                 collected.append((float(t), c))
 
@@ -785,6 +837,10 @@ class VideoSummaryDetector(AnalysisMethod):
             messages = self.summary_model.build_messages(None, caption_instruction)
             final_outputs = self.summary_model.chat(messages, max_new_tokens=512)
             clip_text = final_outputs[0].strip() if final_outputs else ""
+            if include_questions:
+                clip_text = self._retry_unparseable(
+                    [clip_text], [None], caption_instruction, 512
+                )[0].strip()
 
             if frame_timestamps:
                 clip_timestamp = float(frame_timestamps[0])
