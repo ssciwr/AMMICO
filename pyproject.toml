@@ -20,7 +20,6 @@ classifiers = [
 ]
  
 dependencies = [
-    "accelerate",
     "colorgram.py",
     "colour-science",
     "dash",
@@ -31,26 +30,21 @@ dependencies = [
     "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",
     "importlib_resources",
-    "matplotlib",
+    "matplotlib", # without it, colour-science stubs matplotlib in sys.modules, which breaks transformers import
     "numpy",
     "opencv-python",
     "pandas",
     "pooch",
     "Pillow",
-    "safetensors",
     "scipy",
     "spacy",
-    "tf-keras",
     "torch<2.9",
-    "pytorch-lightning<2.7.0",
     "sentence-transformers<5.2",
     "timm",
     "torchvision",
-    "tqdm",
     "transformers<4.58",
-    "torchcodec",
     "webcolors",
-    "pip>=26.0.1",
+    "pip>=26.0.1", # spacy.cli.download installs the spacy model via pip, uv venvs ship without pip
 ]
 
 [project.optional-dependencies]
@@ -63,6 +57,7 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-cov",
+    "psutil",
     "ruff",
     "mkdocs-material",
     "mkdocstrings[python]",
