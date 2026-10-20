@@ -24,6 +24,7 @@ def _clear_env(monkeypatch):
         "AMMICO_AUDIO_BASE_URL",
         "AMMICO_AUDIO_API_KEY",
         "AMMICO_AUDIO_MODEL_ID",
+        "AMMICO_PRIVACY_ACK",
     ):
         monkeypatch.delenv(var, raising=False)
     # Avoid picking up a developer .env during tests.
