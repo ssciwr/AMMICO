@@ -12,11 +12,11 @@ maintainers = [
     { name = "Dmitrii Kapitan", email = "ssc@iwr.uni-heidelberg.de" },
 ]
 requires-python = ">=3.9"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
-    "License :: OSI Approved :: MIT License",
 ]
  
 dependencies = [
@@ -83,6 +83,9 @@ documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 
 [tool.setuptools]
 packages = ["ammico","ammico.data"]
+
+[tool.setuptools.package-data]
+"ammico.data" = ["*.csv"]
 
 [tool.ruff.lint]
 ignore = [
