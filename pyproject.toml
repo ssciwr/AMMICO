@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
+requires = ["setuptools >= 77.0.3", "setuptools-scm >= 8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -12,15 +12,14 @@ maintainers = [
     { name = "Dmitrii Kapitan", email = "ssc@iwr.uni-heidelberg.de" },
 ]
 requires-python = ">=3.9"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
-    "License :: OSI Approved :: MIT License",
 ]
  
 dependencies = [
-    "accelerate",
     "colorgram.py",
     "colour-science",
     "dash",
@@ -31,26 +30,21 @@ dependencies = [
     "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",
     "importlib_resources",
-    "matplotlib",
+    "matplotlib", # without it, colour-science stubs matplotlib in sys.modules, which breaks transformers import
     "numpy",
     "opencv-python",
     "pandas",
     "pooch",
     "Pillow",
-    "safetensors",
     "scipy",
     "spacy",
-    "tf-keras",
     "torch<2.9",
-    "pytorch-lightning<2.7.0",
     "sentence-transformers<5.2",
     "timm",
     "torchvision",
-    "tqdm",
     "transformers<4.58",
-    "torchcodec",
     "webcolors",
-    "pip>=26.0.1",
+    "pip>=26.0.1", # spacy.cli.download installs the spacy model via pip, uv venvs ship without pip
 ]
 
 [project.optional-dependencies]
@@ -63,6 +57,7 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-cov",
+    "psutil",
     "ruff",
     "mkdocs-material",
     "mkdocstrings[python]",
@@ -83,6 +78,14 @@ documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 
 [tool.setuptools]
 packages = ["ammico","ammico.data"]
+# only ship the files listed in package-data, not every git-tracked file
+include-package-data = false
+
+# version is taken from the git tag (vX.Y.Z), see release workflow
+[tool.setuptools_scm]
+
+[tool.setuptools.package-data]
+"ammico.data" = ["*.csv"]
 
 [tool.ruff.lint]
 ignore = [

@@ -160,22 +160,42 @@ def _limit_results(results, limit):
     return results
 
 
-def _extract_summary_vqa(content: str, pattern: re.Pattern) -> tuple[str, str]:
-    m = pattern.search(content)
-    if not m:
-        raise ValueError(
-            f"Failed to parse summary and VQA answers from model output: {content}"
-        )
+# Section labels must start a line; the colon is optional, so markdown headings
+# such as "## Summary" or "**VQA Answers**" are accepted as well.
+_SUMMARY_LABEL = re.compile(
+    r"^[ \t]*summary[ \t]*(?::|$)", re.IGNORECASE | re.MULTILINE
+)
+_VQA_LABEL = re.compile(
+    r"^[ \t]*(?:vqa[ \t]+)?answers[ \t]*(?::|$)", re.IGNORECASE | re.MULTILINE
+)
 
-    summary_text = m.group(1).replace("\n", " ").strip() if m.group(1) else None
-    vqa_text = m.group(2).strip() if m.group(2) else None
 
-    if not summary_text or not vqa_text:
-        raise ValueError(
-            f"Model output is missing either summary or VQA answers: {content}"
-        )
+def _parse_summary_vqa(content: str) -> tuple[str | None, str | None]:
+    """Split a model reply into summary and VQA answers, never raising.
 
-    return summary_text, vqa_text
+    Without a summary label, the text before the VQA label (or the whole reply)
+    is used as the summary. Missing parts are returned as None.
+    """
+    # drop markdown emphasis and heading markers around the labels
+    cleaned = re.sub(r"\*\*|__", "", content or "")
+    cleaned = re.sub(r"^[ \t]*#+[ \t]*", "", cleaned, flags=re.MULTILINE).strip()
+
+    vqa_match = _VQA_LABEL.search(cleaned)
+    summary_part = cleaned[: vqa_match.start()] if vqa_match else cleaned
+    vqa_text = cleaned[vqa_match.end() :].strip() if vqa_match else ""
+
+    summary_match = _SUMMARY_LABEL.search(summary_part)
+    if summary_match:
+        summary_part = summary_part[summary_match.end() :]
+    summary_text = _normalize_whitespace(summary_part)
+
+    return summary_text or None, vqa_text or None
+
+
+def _has_summary_and_vqa(content: str) -> bool:
+    """True if a model reply contains both a summary and VQA answers."""
+    summary_text, vqa_text = _parse_summary_vqa(content)
+    return summary_text is not None and vqa_text is not None
 
 
 def _categorize_outputs(
@@ -199,15 +219,28 @@ def _categorize_outputs(
     bullets_vqa = []
 
     if include_questions:
-        pattern = re.compile(
-            r"Summary\s*:\s*(.*?)(?:\s*VQA\s+Answers\s*:\s*(.*))?$",
-            flags=re.IGNORECASE | re.DOTALL,
-        )
-
+        # skip unusable replies instead of failing the whole video: neighbouring
+        # frames overlap, so losing a few of them barely affects the result
+        n_unusable = 0
+        n_without_vqa = 0
         for t, c in caps_for_summary_vqa:
-            summary_text, vqa_text = _extract_summary_vqa(c.strip(), pattern)
+            summary_text, vqa_text = _parse_summary_vqa(c)
+            if summary_text is None:
+                n_unusable += 1
+                continue
             bullets_summary.append(f"- [{t:.3f}s] {summary_text}")
-            bullets_vqa.append(f"- [{t:.3f}s] {vqa_text}")
+            if vqa_text is None:
+                n_without_vqa += 1
+            else:
+                bullets_vqa.append(f"- [{t:.3f}s] {vqa_text}")
+        if n_unusable or n_without_vqa:
+            warnings.warn(
+                f"{n_unusable} of {len(caps_for_summary_vqa)} model replies were "
+                f"empty and skipped, {n_without_vqa} had no VQA answers. "
+                "The model may not follow the requested 'Summary: ... VQA Answers: ...' "
+                "format, or its replies were cut off.",
+                RuntimeWarning,
+            )
     else:
         for t, c in caps_for_summary_vqa:
             snippet = c.replace("\n", " ").strip()

@@ -814,3 +814,57 @@ def test_make_captions_for_subclips_without_frame_timestamp(
             "vqa_bullets": [],
         }
     ]
+
+
+class _ScriptedModel:
+    """Summary model stub returning queued replies and recording the prompts."""
+
+    def __init__(self, replies):
+        self.model_id = "scripted-model"
+        self.replies = list(replies)
+        self.prompts = []
+
+    def build_messages(self, images, text):
+        return [{"role": "user", "content": text}]
+
+    def chat_batch(self, messages_batch, max_new_tokens=256):
+        out = []
+        for messages in messages_batch:
+            self.prompts.append(messages[0]["content"])
+            out.append(self.replies.pop(0))
+        return out
+
+
+def test_retry_unparseable_replaces_bad_replies():
+    good = "Summary: A cat.\nVQA Answers:\n1. Yes."
+    model = _ScriptedModel(["Summary: A dog.\nVQA Answers:\n1. No.", ""])
+    video_summ = VideoSummaryDetector(summary_model=model)
+
+    outputs = video_summ._retry_unparseable(
+        [good, "A lens flare.", ""], [None, None, None], "PROMPT", 512
+    )
+
+    # only the two unparseable replies are re-requested, with a format reminder
+    assert len(model.prompts) == 2
+    assert all(p.startswith("PROMPT") and "Summary:" in p for p in model.prompts)
+    # parsed retry replaces the prose reply; failed retry keeps the prose fallback,
+    # and an empty original is replaced even by an empty retry
+    assert outputs == [good, "Summary: A dog.\nVQA Answers:\n1. No.", ""]
+
+
+def test_retry_unparseable_keeps_original_when_retry_fails():
+    model = _ScriptedModel(["still prose"])
+    video_summ = VideoSummaryDetector(summary_model=model)
+
+    outputs = video_summ._retry_unparseable(["A lens flare."], [None], "PROMPT", 512)
+
+    assert outputs == ["A lens flare."]
+
+
+def test_retry_unparseable_no_request_when_all_parse():
+    model = _ScriptedModel([])
+    video_summ = VideoSummaryDetector(summary_model=model)
+    good = ["Summary: A cat.\nVQA Answers:\n1. Yes."]
+
+    assert video_summ._retry_unparseable(good, [None], "PROMPT", 512) == good
+    assert model.prompts == []
