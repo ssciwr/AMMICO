@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
+requires = ["setuptools >= 77.0.3", "setuptools-scm >= 8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -78,6 +78,11 @@ documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
 
 [tool.setuptools]
 packages = ["ammico","ammico.data"]
+# only ship the files listed in package-data, not every git-tracked file
+include-package-data = false
+
+# version is taken from the git tag (vX.Y.Z), see release workflow
+[tool.setuptools_scm]
 
 [tool.setuptools.package-data]
 "ammico.data" = ["*.csv"]
