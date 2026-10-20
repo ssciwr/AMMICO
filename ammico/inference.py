@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import base64
 import os
+import threading
+import time
 import warnings
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
@@ -84,6 +86,38 @@ def _warn_if_external(base_url: str) -> None:
     )
 
 
+def _is_transient_error(error: Exception) -> bool:
+    """True for errors that may succeed on a later request (rate limit, timeout,
+    connection problem, server error), False for configuration errors such as a
+    wrong API key, an unknown model id or an invalid request."""
+    openai = _require_openai()
+    if isinstance(error, (openai.RateLimitError, openai.APIConnectionError)):
+        return True
+    return isinstance(error, openai.APIStatusError) and error.status_code >= 500
+
+
+class RateLimiter:
+    """Spaces out requests so that at most ``per_minute`` requests start per minute.
+
+    Thread-safe, so one limiter can be shared by all threads of a batch.
+    """
+
+    def __init__(self, per_minute: float) -> None:
+        if per_minute <= 0:
+            raise ValueError("requests_per_minute must be greater than 0")
+        self.interval = 60.0 / per_minute
+        self.next_request = 0.0
+        self.lock = threading.Lock()
+
+    def wait(self) -> None:
+        with self.lock:
+            now = time.monotonic()
+            delay = self.next_request - now
+            self.next_request = max(now, self.next_request) + self.interval
+        if delay > 0:
+            time.sleep(delay)
+
+
 def encode_image_to_data_url(image: Image.Image, image_format: str = "JPEG") -> str:
     """Encode a PIL image as a base64 ``data:`` URL for an OpenAI image block.
 
@@ -119,6 +153,9 @@ class InferenceModel:
         timeout: float = 120.0,
         max_concurrency: int = 8,
         image_format: str = "JPEG",
+        max_retries: int = 5,
+        requests_per_minute: float | None = None,
+        extra_body: dict[str, Any] | None = None,
     ) -> None:
         """
         Args:
@@ -128,6 +165,13 @@ class InferenceModel:
             timeout: Per-request timeout in seconds.
             max_concurrency: Maximum number of concurrent requests in :meth:`chat_batch`.
             image_format: Image encoding for inline blocks ("JPEG" or "PNG").
+            max_retries: How often a request is retried, with increasing waits, after
+                a rate limit, timeout, connection or server error.
+            requests_per_minute: If set, requests are spaced out so that at most this
+                many start per minute. Use it for endpoints with request limits.
+            extra_body: Additional provider-specific fields sent with every chat
+                request, e.g. ``{"chat_template_kwargs": {"enable_thinking": False}}``
+                to switch off reasoning on vLLM-based endpoints.
         """
         _maybe_load_dotenv()
         openai = _require_openai()
@@ -138,6 +182,10 @@ class InferenceModel:
         self.timeout = timeout
         self.max_concurrency = max(1, int(max_concurrency))
         self.image_format = image_format
+        self.extra_body = extra_body
+        self.rate_limiter = (
+            RateLimiter(requests_per_minute) if requests_per_minute else None
+        )
 
         if not self.base_url:
             raise ValueError(
@@ -158,7 +206,10 @@ class InferenceModel:
 
         _warn_if_external(self.base_url)
         self.client = openai.OpenAI(
-            base_url=self.base_url, api_key=self.api_key, timeout=timeout
+            base_url=self.base_url,
+            api_key=self.api_key,
+            timeout=timeout,
+            max_retries=max_retries,
         )
 
     def build_messages(
@@ -214,12 +265,18 @@ class InferenceModel:
         Returns:
             List of completion strings (length ``n``).
         """
+        if self.rate_limiter is not None:
+            self.rate_limiter.wait()
+        kwargs: dict[str, Any] = {}
+        if self.extra_body:
+            kwargs["extra_body"] = self.extra_body
         response = self.client.chat.completions.create(
             model=self.model_id,
             messages=messages,
             max_tokens=max_new_tokens,
             n=n,
             temperature=0,
+            **kwargs,
         )
         return [(choice.message.content or "").strip() for choice in response.choices]
 
@@ -233,6 +290,13 @@ class InferenceModel:
         API calls are I/O-bound, so requests are fanned out over a bounded thread
         pool. This replaces the in-GPU batching of the previous local backend.
 
+        A request that still fails with a transient error (rate limit, timeout,
+        connection or server error) after the client's retries yields an empty
+        string, so the other results of the batch are kept; a warning reports how
+        many failed. Configuration errors (wrong API key, unknown model id, invalid
+        request) are raised immediately, as is the last error if every request
+        failed.
+
         Args:
             messages_batch: A sequence of messages lists, one per request.
             max_new_tokens: Upper bound on generated tokens per request.
@@ -242,18 +306,31 @@ class InferenceModel:
         """
         if not messages_batch:
             return []
-        if len(messages_batch) == 1:
-            return [self.chat(messages_batch[0], max_new_tokens=max_new_tokens)[0]]
+
+        def _run(messages: list[dict[str, Any]]) -> str | Exception:
+            try:
+                return self.chat(messages, max_new_tokens=max_new_tokens)[0]
+            except Exception as e:
+                if not _is_transient_error(e):
+                    raise
+                return e
 
         workers = min(self.max_concurrency, len(messages_batch))
         with ThreadPoolExecutor(max_workers=workers) as ex:
-            results = list(
-                ex.map(
-                    lambda m: self.chat(m, max_new_tokens=max_new_tokens)[0],
-                    messages_batch,
-                )
+            outcomes = list(ex.map(_run, messages_batch))
+
+        errors = [o for o in outcomes if isinstance(o, Exception)]
+        if len(errors) == len(outcomes):
+            raise errors[-1]
+        if errors:
+            warnings.warn(
+                f"{len(errors)} of {len(outcomes)} requests to '{self.model_id}' "
+                f"failed and returned empty answers (last error: {errors[-1]!r}). "
+                "If the endpoint limits requests, set requests_per_minute or lower "
+                "max_concurrency.",
+                RuntimeWarning,
             )
-        return results
+        return ["" if isinstance(o, Exception) else o for o in outcomes]
 
     def close(self) -> None:
         """Close the underlying HTTP client (preserves the .close() contract)."""
