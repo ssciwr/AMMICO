@@ -9,9 +9,9 @@ from ammico.video_summary import VideoSummaryDetector
 
 # Export the version defined in project metadata
 try:
-    from importlib.metadata import version
+    from importlib.metadata import version as _version
 
-    __version__ = version("ammico")
+    __version__ = _version("ammico")
 except ImportError:
     __version__ = "unknown"
 

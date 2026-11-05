@@ -32,7 +32,7 @@ dependencies = [
     "importlib_resources",
     "matplotlib", # without it, colour-science stubs matplotlib in sys.modules, which breaks transformers import
     "numpy",
-    "opencv-python",
+    "opencv-python-headless", # no GUI needed; the GUI build requires libGL, which is missing in server and docker images
     "pandas",
     "pooch",
     "Pillow",
