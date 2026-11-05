@@ -1,0 +1,49 @@
+cff-version: 1.2.0
+title: >-
+  AMMICO, an AI-based Media and Misinformation Content
+  Analysis Tool
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+- family-names: "Dumitrescu"
+  given-names: "Delia"
+  orcid: "https://orcid.org/0000-0002-0065-3875"
+- family-names: "Ulusoy"
+  given-names: "Inga"
+  orcid: "https://orcid.org/0000-0001-7294-4148"
+- family-names: "Andriushchenko"
+  given-names: "Petr"
+  orcid: "https://orcid.org/0000-0002-4518-6588"
+- family-names: "Daskalakis"
+  given-names: "Gwydion"
+  orcid: "https://orcid.org/0000-0002-7557-1364"
+- family-names: "Kempf"
+  given-names: "Dominic"
+  orcid: "https://orcid.org/0000-0002-6140-2332"
+- family-names: "Ma"
+  given-names: "Xianghe"
+identifiers:
+  - type: doi
+    value: 10.5117/CCR2025.1.3.DUMI
+repository-code: 'https://github.com/ssciwr/AMMICO'
+url: 'https://ssciwr.github.io/AMMICO/build/html/index.html'
+abstract: >-
+  ammico (AI-based Media and Misinformation Content Analysis
+  Tool) is a publicly available software package written in
+  Python 3, whose purpose is the simultaneous evaluation of
+  the text and graphical content of image files. After
+  describing the software features, we provide an assessment
+  of its performance using a multi-country, multi-language
+  data set containing COVID-19 social media disinformation
+  posts. We conclude by highlighting the tool’s advantages
+  for communication research.
+keywords:
+  - nlp
+  - translation
+  - computer-vision
+  - text-extraction
+  - classification
+  - social media
+license: MIT
