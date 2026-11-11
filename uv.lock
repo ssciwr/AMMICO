@@ -1572,7 +1572,7 @@ wheels = [
 
 [[package]]
 name = "dash"
-version = "4.4.1"
+version = "4.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "comm" },
@@ -1590,9 +1590,9 @@ dependencies = [
     { name = "typing-extensions", version = "4.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5a/67/d5cea6dedfbfde4165436fb58154480ea6358a9e71a739d3366575b5b724/dash-4.4.1.tar.gz", hash = "sha256:9356ca7856bc496c12c5b6de5978aaf783e090d07450ee395ade1c0c2cbdf816", size = 8536482, upload-time = "2026-07-21T18:58:19.72Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/93/f4f8cbc5fb7f6fd16ce08d27bf9005b450a7b4b6c94357ae34708bdc7807/dash-4.5.0.tar.gz", hash = "sha256:950964e22c21485edc50c36d5c139d95316d94b11348ea3e77f99acc2456b43d", size = 8855952, upload-time = "2026-10-29T20:21:48.54Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/29/498125538103a11eab9cfbbde41bacf93e14ab3ac92ae9fb4ac0ac4dd61b/dash-4.4.1-py3-none-any.whl", hash = "sha256:72120a91b10ee4d73f9446efd5d6a4ec218086feed7b1b479d2259844d1f658f", size = 8945027, upload-time = "2026-07-21T18:58:11.405Z" },
+    { url = "https://files.pythonhosted.org/packages/b3/77/36799a6b840c0d6acf726ad06a9e10355827f9c84f506d0ba168238ba54c/dash-4.5.0-py3-none-any.whl", hash = "sha256:d50a0900c2ce9e5f43f484d6966acc3ecbddcfd54df727311e34a0b7d3da2129", size = 9278243, upload-time = "2026-10-29T20:21:34.717Z" },
 ]
 
 [[package]]
