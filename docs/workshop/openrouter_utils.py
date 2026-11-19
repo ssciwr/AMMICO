@@ -214,10 +214,16 @@ def show_summaries(results):
         print()
 
 
-def show_answers(results, list_of_questions):
-    """Display each image together with the answers of all models to each question."""
+def show_answers(results, list_of_questions, n_images=20):
+    """Display images together with the answers of all models to each question.
+
+    Only the first ``n_images`` images are shown (``None`` shows all), since
+    displaying many images at once puts a high load on the Jupyter server.
+    """
     first = next(iter(results.values()))
-    for key in first:
+    keys = list(first)[:n_images]
+    print(f"Showing {len(keys)} of {len(first)} images.\n")
+    for key in keys:
         _show_image(first[key]["filename"])
         for i, question in enumerate(list_of_questions):
             print(f"Q{i + 1}: {question}")
