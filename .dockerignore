@@ -16,6 +16,8 @@ site/
 docs/
 !docs/tutorials/
 !docs/tutorials/*.ipynb
+!docs/workshop/
+!docs/workshop/*
 
 # Large data directories
 data/
