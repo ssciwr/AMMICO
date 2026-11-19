@@ -29,13 +29,35 @@ RESULT_KEYS = {"summary": ["caption"], "questions": ["vqa"]}
 RESULT_KEYS["summary_and_questions"] = RESULT_KEYS["summary"] + RESULT_KEYS["questions"]
 
 
-def connect():
-    """Point ammico to OpenRouter; asks for the API key if it is not set."""
-    if not os.environ.get("OPENROUTER_API_KEY"):
-        os.environ["OPENROUTER_API_KEY"] = getpass("Enter your OpenRouter API key: ")
+def connect(new_key: bool = False):
+    """Point ammico to OpenRouter and check that the API key is accepted.
+
+    Asks for the API key if ``OPENROUTER_API_KEY`` is not set, or always if
+    ``new_key=True`` (use this to replace a key entered earlier in the session).
+    """
+    key = "" if new_key else os.environ.get("OPENROUTER_API_KEY", "")
+    if not key.strip():
+        key = getpass("Enter your OpenRouter API key: ")
+    key = key.strip().strip("'\"")
+    os.environ["OPENROUTER_API_KEY"] = key
     os.environ["AMMICO_API_BASE_URL"] = OPENROUTER_BASE_URL
-    os.environ["AMMICO_API_KEY"] = os.environ["OPENROUTER_API_KEY"]
+    os.environ["AMMICO_API_KEY"] = key
     os.environ["AMMICO_PRIVACY_ACK"] = "True"  # acknowledge sending data externally
+    _check_key(key)
+
+
+def _check_key(key: str):
+    """Fail early with a clear message if OpenRouter does not accept the key."""
+    client = openai.OpenAI(base_url=OPENROUTER_BASE_URL, api_key=key)
+    try:
+        client.get("/key", cast_to=object)  # key info; free, rejects unknown keys
+    except openai.AuthenticationError as error:
+        raise RuntimeError(
+            f"OpenRouter rejected the API key (starts with {key[:8]!r}, "
+            f"length {len(key)}): {error}. Create a new key at "
+            "https://openrouter.ai/keys and run OR.connect(new_key=True)."
+        ) from None
+    print(f"Connected to OpenRouter (key starts with {key[:8]!r}).")
 
 
 class OpenRouterModel(ammico.InferenceModel):
