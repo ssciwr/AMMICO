@@ -2,12 +2,15 @@
 
 import types
 
+import httpx
+import openai
 import pytest
 from PIL import Image
 
 from ammico.inference import (
     AudioTranscriptionModel,
     InferenceModel,
+    RateLimiter,
     encode_image_to_data_url,
 )
 
@@ -24,6 +27,7 @@ def _clear_env(monkeypatch):
         "AMMICO_AUDIO_BASE_URL",
         "AMMICO_AUDIO_API_KEY",
         "AMMICO_AUDIO_MODEL_ID",
+        "AMMICO_PRIVACY_ACK",
     ):
         monkeypatch.delenv(var, raising=False)
     # Avoid picking up a developer .env during tests.
@@ -137,6 +141,150 @@ def test_chat_batch_preserves_order(monkeypatch):
 def test_chat_batch_empty(monkeypatch):
     model = _make_model(monkeypatch)
     assert model.chat_batch([]) == []
+
+
+_REQUEST = httpx.Request("POST", "http://localhost:8000/v1/chat/completions")
+
+
+def _status_error(cls, status_code):
+    response = httpx.Response(status_code, request=_REQUEST)
+    return cls("error", response=response, body=None)
+
+
+def _failing_chat(failures):
+    """Fake chat raising the error mapped to a prompt, echoing it otherwise."""
+
+    def fake_chat(messages, max_new_tokens=256, n=1):
+        if messages in failures:
+            raise failures[messages]
+        return [messages]
+
+    return fake_chat
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        _status_error(openai.RateLimitError, 429),
+        _status_error(openai.InternalServerError, 503),
+        openai.APITimeoutError(request=_REQUEST),
+        openai.APIConnectionError(request=_REQUEST),
+    ],
+)
+def test_chat_batch_keeps_results_on_transient_error(monkeypatch, error):
+    model = _make_model(monkeypatch)
+    monkeypatch.setattr(model, "chat", _failing_chat({"q1": error}))
+    with pytest.warns(RuntimeWarning, match="1 of 3 requests"):
+        out = model.chat_batch(["q0", "q1", "q2"])
+    assert out == ["q0", "", "q2"]
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        _status_error(openai.AuthenticationError, 401),
+        _status_error(openai.NotFoundError, 404),
+        _status_error(openai.BadRequestError, 400),
+        ValueError("not an API error"),
+    ],
+)
+def test_chat_batch_raises_configuration_error(monkeypatch, error):
+    model = _make_model(monkeypatch)
+    monkeypatch.setattr(model, "chat", _failing_chat({"q1": error}))
+    with pytest.raises(type(error)):
+        model.chat_batch(["q0", "q1", "q2"])
+
+
+def test_chat_batch_raises_if_all_requests_fail(monkeypatch):
+    model = _make_model(monkeypatch)
+    error = _status_error(openai.RateLimitError, 429)
+    monkeypatch.setattr(model, "chat", _failing_chat({"q0": error, "q1": error}))
+    with pytest.raises(openai.RateLimitError):
+        model.chat_batch(["q0", "q1"])
+    # a single failing request is a batch where all requests fail
+    with pytest.raises(openai.RateLimitError):
+        model.chat_batch(["q0"])
+
+
+def test_chat_sends_extra_body(monkeypatch):
+    _clear_env(monkeypatch)
+    monkeypatch.setattr(
+        "openai.OpenAI", lambda **kwargs: types.SimpleNamespace(**kwargs)
+    )
+    extra_body = {"chat_template_kwargs": {"enable_thinking": False}}
+    model = InferenceModel(
+        base_url="http://localhost:8000/v1",
+        api_key="secret",
+        model_id="test-model",
+        extra_body=extra_body,
+    )
+    captured = []
+    model.client = _fake_chat_client(captured)
+    model.chat([{"role": "user", "content": "hi"}])
+    assert captured[0]["extra_body"] == extra_body
+
+
+def test_chat_without_extra_body(monkeypatch):
+    model = _make_model(monkeypatch)
+    captured = []
+    model.client = _fake_chat_client(captured)
+    model.chat([{"role": "user", "content": "hi"}])
+    assert "extra_body" not in captured[0]
+
+
+def test_max_retries_passed_to_client(monkeypatch):
+    model = _make_model(monkeypatch)
+    assert model.client.max_retries == 5
+    _clear_env(monkeypatch)
+    model = InferenceModel(
+        base_url="http://localhost:8000/v1",
+        api_key="secret",
+        model_id="test-model",
+        max_retries=1,
+    )
+    assert model.client.max_retries == 1
+
+
+def test_rate_limiter_spaces_requests(monkeypatch):
+    clock = {"now": 100.0}
+    sleeps = []
+
+    def fake_sleep(seconds):
+        sleeps.append(seconds)
+        clock["now"] += seconds
+
+    monkeypatch.setattr("ammico.inference.time.monotonic", lambda: clock["now"])
+    monkeypatch.setattr("ammico.inference.time.sleep", fake_sleep)
+
+    limiter = RateLimiter(per_minute=30)
+    for _ in range(3):
+        limiter.wait()
+    # first request starts at once, the others are 2 s apart
+    assert sleeps == [2.0, 2.0]
+
+
+def test_rate_limiter_invalid():
+    with pytest.raises(ValueError):
+        RateLimiter(per_minute=0)
+
+
+def test_chat_uses_rate_limiter(monkeypatch):
+    _clear_env(monkeypatch)
+    monkeypatch.setattr(
+        "openai.OpenAI", lambda **kwargs: types.SimpleNamespace(**kwargs)
+    )
+    model = InferenceModel(
+        base_url="http://localhost:8000/v1",
+        api_key="secret",
+        model_id="test-model",
+        requests_per_minute=10,
+    )
+    waits = []
+    monkeypatch.setattr(model.rate_limiter, "wait", lambda: waits.append(1))
+    model.client = _fake_chat_client([])
+    model.chat([{"role": "user", "content": "hi"}])
+    assert waits == [1]
+    assert _make_model(monkeypatch).rate_limiter is None
 
 
 # ---------------------------------------------------------------------------

@@ -7,14 +7,17 @@ import numpy as np
 import pytest
 import torch
 
-from ammico.inference import InferenceModel
+from ammico.inference import InferenceModel, _maybe_load_dotenv
 from ammico.model import MultimodalEmbeddingsModel
 from ammico.multimodal_search import MultimodalSearch
 from ammico.video_summary import VideoSummaryDetector
 
+# load .env before test modules are collected, so their skipif checks see it
+_maybe_load_dotenv()
+
 
 def _api_env_configured() -> bool:
-    """True if the live inference endpoint is configured via environment."""
+    """True if the live inference endpoint is configured via environment or .env."""
     return all(
         os.environ.get(var)
         for var in ("AMMICO_API_BASE_URL", "AMMICO_API_KEY", "AMMICO_MODEL_ID")

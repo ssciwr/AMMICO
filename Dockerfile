@@ -11,6 +11,11 @@ USER $NB_USER
 # Copy the repository into the container
 COPY --chown=${NB_UID} . /opt/ammico
 
+# .git is not part of the build context, so setuptools-scm cannot infer the
+# version; it is passed in from the workflow instead
+ARG AMMICO_VERSION=0.0.0
+ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AMMICO=${AMMICO_VERSION}
+
 # Install the Python dependencies
 RUN pip install uv && uv pip install --system --no-cache-dir "/opt/ammico[nb,api]"
 
