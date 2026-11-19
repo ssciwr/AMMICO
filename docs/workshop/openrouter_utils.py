@@ -203,10 +203,16 @@ def _print_indented(text):
     print(textwrap.indent(textwrap.fill(str(text), width=100), "    "))
 
 
-def show_summaries(results):
-    """Display each image together with the captions of all models."""
+def show_summaries(results, n_images=20):
+    """Display images together with the captions of all models.
+
+    Only the first ``n_images`` images are shown (``None`` shows all), since
+    displaying many images at once puts a high load on the Jupyter server.
+    """
     first = next(iter(results.values()))
-    for key in first:
+    keys = list(first)[:n_images]
+    print(f"Showing {len(keys)} of {len(first)} images.\n")
+    for key in keys:
         _show_image(first[key]["filename"])
         for model_id, model_dict in results.items():
             print(f"{model_id}:")
