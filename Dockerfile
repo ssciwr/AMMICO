@@ -32,7 +32,7 @@ ENV JUPYTER_ENABLE_LAB=yes
 # copy the notebooks into the container
 COPY --chown=${NB_UID} ./docs/tutorials/*.ipynb /home/jovyan/notebooks/.
 # copy the workshop files into the container
-COPY --chown=${NB_UID} ./docs/workshop/* /home/jovyan/notebooks/.
+COPY --chown=${NB_UID} ./docs/workshop/* /home/jovyan/workshop/.
 # Copy sample data into the container
 # COPY --chown=${NB_UID} ./data/in/*.jpeg /opt/ammico/data
 
