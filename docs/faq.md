@@ -46,6 +46,18 @@ Some ammico components require `tensorflow` (e.g. Emotion detector), some `pytor
 
 It is done.
     
+### CPU-only installation and GPU search
+
+On machines without GPU you can install CPU-only `torch`, which is much smaller since it does not ship the CUDA libraries. With `uv`:
+
+```uv pip install ammico --torch-backend=cpu```
+
+From a clone of the repository, the `cpu` extra does the same: ```uv sync --extra cpu``` or ```uv pip install ".[cpu]"```. With plain `pip`, install the CPU wheels first: ```python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu```, then ```python -m pip install ammico```.
+
+`ammico` installs `faiss-cpu` for the multimodal search, which runs on any machine. To run the search on the GPU, replace it with a GPU build of faiss, for example:
+
+```python -m pip uninstall faiss-cpu && python -m pip install faiss-gpu-cu12```
+
 ### Micromamba
 If you are using micromamba you can prepare environment with just one command: 
 

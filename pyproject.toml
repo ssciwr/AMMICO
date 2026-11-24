@@ -25,7 +25,7 @@ dependencies = [
     "dash",
     "dash-bootstrap-components",
     "einops",
-    "faiss-gpu-cu11<=1.13.0",
+    "faiss-cpu", # works on any machine; for GPU search install faiss-gpu yourself, see FAQ
     "google-cloud-vision",
     "googletrans-py", # instead of googletrans4.0.0rc1, for a temporary solution due to incompatibility with jupyterlab
     "grpcio",
@@ -63,6 +63,20 @@ dev = [
     "mkdocstrings[python]",
 ]
 
+# CPU-only torch (no CUDA libraries, much smaller), e.g. for the docker image or
+# machines without GPU; only takes effect with uv (uv sync / uv pip), see [tool.uv.sources]
+cpu = [
+    "torch<2.9",
+    "torchvision",
+]
+
+# CUDA torch from PyPI (the default without extras on linux); only needed to tell
+# uv that cpu and gpu are alternatives, see [tool.uv] conflicts
+gpu = [
+    "torch<2.9",
+    "torchvision",
+]
+
 nb = [
     "datasets",
     "huggingface-hub",
@@ -75,6 +89,18 @@ nb = [
 [project.urls]
 homepage = "https://github.com/ssciwr/AMMICO"  # FIXME not shown by pip
 documentation = "https://ssciwr.github.io/AMMICO/build/html/index.html"
+
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "gpu" }]]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", extra = "cpu" }]
+torchvision = [{ index = "pytorch-cpu", extra = "cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.setuptools]
 packages = ["ammico","ammico.data"]

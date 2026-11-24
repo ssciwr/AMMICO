@@ -2,20 +2,36 @@
 .git
 .gitignore
 
+# Secrets and local environments (never put these into the image)
+.env
+.env.*
+.venv/
+venv/
+
+# Local tool state
+.claude/
+.cursor/
+.ruff_cache/
+notes.md
+data_out.csv
+
 # Build outputs
 build/
 dist/
 *.egg-info/
-__pycache__/
-**/__pycache__/
-*.pyc
-*.pyo
 
 # Documentation / site
 site/
 docs/
 !docs/tutorials/
 !docs/tutorials/*.ipynb
+!docs/workshop/
+!docs/workshop/*
+
+# Python caches (after the docs re-includes above, which would otherwise re-add them)
+**/__pycache__/
+**/*.pyc
+**/*.pyo
 
 # Large data directories
 data/
